@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../modules/user/user.entity';
+import { Session } from '../modules/user/session.entity';
 import { MailConfig } from '../modules/mail/mail.config';
 
 @Module({
@@ -12,10 +13,10 @@ import { MailConfig } from '../modules/mail/mail.config';
       username: 'root',
       password: 'Jroot',
       database: 'fraxioned',
-      entities: [User],
-      synchronize: true,
+      entities: [User, Session],
+      synchronize: false,
     }),
-    TypeOrmModule.forFeature([User]), 
+    TypeOrmModule.forFeature([User, Session]), 
   ],
   providers: [MailConfig],
   exports: [TypeOrmModule], 

@@ -32,6 +32,9 @@ export class User {
   @Column({ name: 'invite_token', nullable: true })
   inviteToken: string;
 
+  @Column({ name : 'invite_token_expires', nullable: true })
+  inviteTokenExpires: Date;
+
   @Column({ name: 'last_login_time', type: 'timestamp', nullable: true })
   lastLoginTime: Date;
 
@@ -41,3 +44,5 @@ export class User {
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 }
+
+

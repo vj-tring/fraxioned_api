@@ -2,16 +2,23 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
+import { Session } from '../user/session.entity';
 import { InviteDTO } from './dto/invite.dto';
 import { RegisterDTO } from './dto/register.dto';
+import { LoginDTO } from './dto/login.dto';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthenticationService {
+  
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Session)
+    private readonly sessionRepository: Repository<Session>,
+
     private readonly mailService: MailService,
   ) {}
 
@@ -24,17 +31,14 @@ export class AuthenticationService {
     const user = new User();
     user.email = inviteDTO.email;
     user.roleId = inviteDTO.roleId;
-    user.inviteToken = Math.random().toString(36).substr(2, 10);
-
-    const randomPassword = Math.random().toString(36).slice(-8);
-    const saltRounds = 10;
-    user.password = await bcrypt.hash(randomPassword, saltRounds);
+    user.inviteToken = crypto.randomBytes(50).toString('hex').slice(0, 100);
+    user.isActive = true;
+    user.inviteTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await this.userRepository.save(user);
 
     const subject = 'Invitation to join our platform';
-    const text = `Hello! You have been invited to join our platform. Please click on the following link to complete your registration: http://your-website.com/register?inviteToken=${user.inviteToken}
-                  Your temporary password is: ${randomPassword}`;
+    const text = `Hello! You have been invited to join our platform. Please click on the following link to complete your registration: http://your-website.com/register?inviteToken=${user.inviteToken} NOTE: this token is valid for only 24Hours`;
 
     await this.mailService.sendMail(inviteDTO.email, subject, text);
   }
@@ -44,14 +48,55 @@ export class AuthenticationService {
     if (!user) {
       throw new HttpException('Invalid invite token', HttpStatus.BAD_REQUEST);
     }
-
+  
+    if (user.inviteTokenExpires < new Date()) {
+      throw new HttpException('Invite token has expired', HttpStatus.BAD_REQUEST);
+    }
+  
     user.username = registerDTO.username;
     user.phone = registerDTO.phone;
     user.password = await bcrypt.hash(registerDTO.password, 10);
     user.inviteToken = null;
-
+    user.inviteTokenExpires = null;
+  
     await this.userRepository.save(user);
-
+  
     return { message: 'User registered successfully' };
+  }
+
+  async login(loginDTO: LoginDTO) {
+    const user = await this.userRepository.findOne({ where: { email: loginDTO.email } });
+    if (!user) {
+      throw new HttpException('Invalid email or password', HttpStatus.UNAUTHORIZED);
+    }
+
+    const isPasswordValid = await bcrypt.compare(loginDTO.password, user.password);
+    if (!isPasswordValid) {
+      throw new HttpException('Invalid email or password', HttpStatus.UNAUTHORIZED);
+    }
+
+    const session = new Session();
+    session.userId = user.id;
+    session.token = crypto.randomBytes(50).toString('hex');
+    session.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); 
+
+    await this.sessionRepository.save(session);
+
+    return {
+      message: 'Login successful',
+      user: { id: user.id, email: user.email, username: user.username },
+      session: { token: session.token, expiresAt: session.expiresAt }
+    };
+  }
+
+  async logout(token: string) {
+    const session = await this.sessionRepository.findOne({ where: { token } });
+    if (!session) {
+      throw new HttpException('Invalid session token', HttpStatus.UNAUTHORIZED);
+    }
+
+    await this.sessionRepository.delete({ token });
+
+    return { message: 'Logout successful' };
   }
 }
