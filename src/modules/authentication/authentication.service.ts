@@ -38,7 +38,8 @@ export class AuthenticationService {
     await this.userRepository.save(user);
 
     const subject = 'Invitation to join our platform';
-    const text = `Hello! You have been invited to join our platform. Please click on the following link to complete your registration: http://localhost:3000/register?inviteToken=${user.inviteToken} NOTE: this token is valid for only 24Hours`;
+    const text = `Hello! You have been invited to join our platform. Please click on the following link to complete your registration: http://localhost:3000/register?inviteToken=${user.inviteToken}
+                  NOTE: this token is valid for only 24Hours`;
 
     await this.mailService.sendMail(inviteDTO.email, subject, text);
   }
