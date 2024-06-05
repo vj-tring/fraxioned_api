@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity({ name: 'users' })
 export class User {
@@ -32,7 +38,7 @@ export class User {
   @Column({ name: 'invite_token', nullable: true })
   inviteToken: string;
 
-  @Column({ name : 'invite_token_expires', nullable: true })
+  @Column({ name: 'invite_token_expires', nullable: true })
   inviteTokenExpires: Date;
 
   @Column({ name: 'last_login_time', type: 'timestamp', nullable: true })
@@ -44,5 +50,3 @@ export class User {
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 }
-
-

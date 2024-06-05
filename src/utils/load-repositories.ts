@@ -2,7 +2,9 @@ import { join } from 'path';
 import { glob } from 'glob';
 
 export function loadRepositories(): Function[] {
-  const entityFiles = glob.sync(join(__dirname, '..', 'modules', '**', '*.repository.{ts,js}'));
+  const entityFiles = glob.sync(
+    join(__dirname, '..', 'modules', '**', '*.repository.{ts,js}'),
+  );
 
   return entityFiles.map((file) => {
     const entityModule = require(file);

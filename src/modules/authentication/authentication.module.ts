@@ -7,10 +7,7 @@ import { Session } from '../user/session.entity';
 import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Session]),
-    MailModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User, Session]), MailModule],
   providers: [AuthenticationService],
   controllers: [AuthenticationController],
 })

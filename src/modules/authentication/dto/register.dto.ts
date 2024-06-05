@@ -1,7 +1,6 @@
 export class RegisterDTO {
-    username: string;
-    phone: string;
-    password: string;
-    inviteToken: string;
-  }
-  
+  username: string;
+  phone: string;
+  password: string;
+  inviteToken: string;
+}

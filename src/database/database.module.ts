@@ -16,9 +16,9 @@ import { MailConfig } from '../modules/mail/mail.config';
       entities: [User, Session],
       synchronize: false,
     }),
-    TypeOrmModule.forFeature([User, Session]), 
+    TypeOrmModule.forFeature([User, Session]),
   ],
   providers: [MailConfig],
-  exports: [TypeOrmModule], 
+  exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

@@ -1,4 +1,4 @@
 export class InviteDTO {
-    email: string;
-    roleId: number;
-  }
+  email: string;
+  roleId: number;
+}
