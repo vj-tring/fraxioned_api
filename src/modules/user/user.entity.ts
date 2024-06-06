@@ -35,6 +35,9 @@ export class User {
   @Column({ name: 'reset_token', nullable: true })
   resetToken: string;
 
+  @Column({ name: 'reset_token_expires', nullable: true })
+  resetTokenExpires: Date;
+
   @Column({ name: 'invite_token', nullable: true })
   inviteToken: string;
 

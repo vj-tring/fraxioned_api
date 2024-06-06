@@ -8,7 +8,7 @@ import { MailConfig } from '../modules/mail/mail.config';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '192.168.1.121',
+      host: '192.168.1.83',
       port: 3306,
       username: 'admin',
       password: 'root',

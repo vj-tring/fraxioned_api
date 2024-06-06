@@ -11,6 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // app.useGlobalFilters(new AllExceptionsFilter());
+  
   app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('Fraxioned API')

@@ -6,6 +6,8 @@ import { Session } from '../user/session.entity';
 import { InviteDTO } from './dto/invite.dto';
 import { RegisterDTO } from './dto/register.dto';
 import { LoginDTO } from './dto/login.dto';
+import { ForgotPasswordDTO } from './dto/forgot-password.dto';
+import { ResetPasswordDTO } from './dto/reset-password.dto';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -106,6 +108,45 @@ export class AuthenticationService {
       session: { token: session.token, expiresAt: session.expiresAt },
     };
   }
+
+
+
+
+  async forgotPassword(forgotPasswordDTO: ForgotPasswordDTO) {
+    const user = await this.userRepository.findOne({ where: { email: forgotPasswordDTO.email } });
+    if (!user) {
+      throw new HttpException('Email not found', HttpStatus.NOT_FOUND);
+    }
+
+    user.resetToken = crypto.randomBytes(50).toString('hex').slice(0, 100);
+    user.resetTokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour expiry
+
+    await this.userRepository.save(user);
+
+    const resetUrl = `http://localhost:3000/reset-password?resetToken=${user.resetToken}`;
+
+    const subject = 'Password Reset Request';
+    const text = `Hello! To reset your password, please click the following link: ${resetUrl}
+                  This link is valid for 1 hour.`;
+
+    await this.mailService.sendMail(user.email, subject, text);
+  }
+
+  async resetPassword(resetToken: string, resetPasswordDTO: ResetPasswordDTO) {
+    const user = await this.userRepository.findOne({ where: { resetToken } });
+    if (!user || user.resetTokenExpires < new Date()) {
+      throw new HttpException('Invalid or expired reset token', HttpStatus.BAD_REQUEST);
+    }
+
+    user.password = await bcrypt.hash(resetPasswordDTO.newPassword, 10);
+    user.resetToken = null;
+    user.resetTokenExpires = null;
+
+    await this.userRepository.save(user);
+
+    return { message: 'Password has been reset successfully' };
+  }
+  
 
   async logout(token: string) {
     const session = await this.sessionRepository.findOne({ where: { token } });
