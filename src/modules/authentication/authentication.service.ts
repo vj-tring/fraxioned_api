@@ -110,8 +110,6 @@ export class AuthenticationService {
   }
 
 
-
-
   async forgotPassword(forgotPasswordDTO: ForgotPasswordDTO) {
     const user = await this.userRepository.findOne({ where: { email: forgotPasswordDTO.email } });
     if (!user) {
@@ -119,7 +117,7 @@ export class AuthenticationService {
     }
 
     user.resetToken = crypto.randomBytes(50).toString('hex').slice(0, 100);
-    user.resetTokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour expiry
+    user.resetTokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000); 
 
     await this.userRepository.save(user);
 
