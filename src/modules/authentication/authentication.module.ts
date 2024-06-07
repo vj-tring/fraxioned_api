@@ -10,7 +10,10 @@ import { UserRole } from '../user-role/user-role.entity';
 import { InviteUser } from '../user/invite-user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Session, Role, UserRole, InviteUser]), MailModule],
+  imports: [
+    TypeOrmModule.forFeature([User, Session, Role, UserRole, InviteUser]),
+    MailModule,
+  ],
   providers: [AuthenticationService],
   controllers: [AuthenticationController],
 })

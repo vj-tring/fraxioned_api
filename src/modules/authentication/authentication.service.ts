@@ -44,7 +44,10 @@ export class AuthenticationService {
       where: { email: inviteDTO.email },
     });
     if (existingInvite) {
-      throw new HttpException('Invite already sent to this email', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Invite already sent to this email',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const role = await this.roleRepository.findOne({
@@ -58,7 +61,10 @@ export class AuthenticationService {
     const inviteUser = new InviteUser();
     inviteUser.email = inviteDTO.email;
     inviteUser.roleId = inviteDTO.roleId;
-    inviteUser.inviteToken = crypto.randomBytes(50).toString('hex').slice(0, 100);
+    inviteUser.inviteToken = crypto
+      .randomBytes(50)
+      .toString('hex')
+      .slice(0, 100);
     inviteUser.inviteTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     inviteUser.invitedBy = inviteDTO.invitedBy;
 
@@ -80,7 +86,10 @@ export class AuthenticationService {
     }
 
     if (inviteUser.inviteTokenExpires < new Date()) {
-      throw new HttpException('Invite token has expired', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Invite token has expired',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const user = new User();
@@ -97,9 +106,8 @@ export class AuthenticationService {
     user.imageUrl = registerDTO.imageUrl;
     user.password = await bcrypt.hash(registerDTO.password, 10);
     user.isActive = true;
-  
-    const savedUser = await this.userRepository.save(user);
 
+    const savedUser = await this.userRepository.save(user);
 
     const userRole = new UserRole();
     userRole.userId = savedUser.id;
@@ -155,13 +163,15 @@ export class AuthenticationService {
   }
 
   async forgotPassword(forgotPasswordDTO: ForgotPasswordDTO) {
-    const user = await this.userRepository.findOne({ where: { email: forgotPasswordDTO.email } });
+    const user = await this.userRepository.findOne({
+      where: { email: forgotPasswordDTO.email },
+    });
     if (!user) {
       throw new HttpException('Email not found', HttpStatus.NOT_FOUND);
     }
 
     user.resetToken = crypto.randomBytes(50).toString('hex').slice(0, 100);
-    user.resetTokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000); 
+    user.resetTokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000);
 
     await this.userRepository.save(user);
 
@@ -177,7 +187,10 @@ export class AuthenticationService {
   async resetPassword(resetToken: string, resetPasswordDTO: ResetPasswordDTO) {
     const user = await this.userRepository.findOne({ where: { resetToken } });
     if (!user || user.resetTokenExpires < new Date()) {
-      throw new HttpException('Invalid or expired reset token', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Invalid or expired reset token',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     user.password = await bcrypt.hash(resetPasswordDTO.newPassword, 10);

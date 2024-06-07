@@ -8,6 +8,14 @@ import { UserRoleModule } from './modules/user-role/user-role.module';
 import { RoleModule } from './modules/user-role/role/role.module';
 
 @Module({
-  imports: [DatabaseModule, AuthenticationModule, MailModule, UserModule, ContactUsModule, UserRoleModule, RoleModule],
+  imports: [
+    DatabaseModule,
+    AuthenticationModule,
+    MailModule,
+    UserModule,
+    ContactUsModule,
+    UserRoleModule,
+    RoleModule,
+  ],
 })
 export class AppModule {}

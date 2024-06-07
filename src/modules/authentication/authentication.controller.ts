@@ -30,7 +30,6 @@ export class AuthenticationController {
     return result;
   }
 
-
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDTO: ForgotPasswordDTO) {
     await this.authenticationService.forgotPassword(forgotPasswordDTO);

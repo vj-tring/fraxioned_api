@@ -42,5 +42,4 @@ export class RegisterDTO {
   @ApiProperty()
   @IsNotEmpty()
   inviteToken: string;
-   
 }

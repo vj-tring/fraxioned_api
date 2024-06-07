@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Param, Body, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Put,
+  Delete,
+} from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDTO } from '../dto/create-role.dto';
 import { UpdateRoleDTO } from '../dto/update-role.dto';
@@ -24,7 +32,10 @@ export class RoleController {
   }
 
   @Put('role/:id')
-  async updateRole(@Param('id') id: number, @Body() updateRoleDto: UpdateRoleDTO): Promise<Role> {
+  async updateRole(
+    @Param('id') id: number,
+    @Body() updateRoleDto: UpdateRoleDTO,
+  ): Promise<Role> {
     return this.roleService.updateRole(id, updateRoleDto);
   }
 

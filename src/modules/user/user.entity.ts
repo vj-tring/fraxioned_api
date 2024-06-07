@@ -47,13 +47,13 @@ export class User {
   @Column({ name: 'password' })
   password: string;
 
-  @Column({ name: 'is_active', default: true }) 
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
-  @Column({ name: 'reset_token', default:'' })
+  @Column({ name: 'reset_token', default: '' })
   resetToken: string;
 
-  @Column({ name: 'reset_token_expires', default:'' })
+  @Column({ name: 'reset_token_expires', default: '' })
   resetTokenExpires: Date;
 
   @Column({ name: 'last_login_time', type: 'timestamp', nullable: true })
@@ -62,10 +62,9 @@ export class User {
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @Column({ name: 'updated_by', default:'' })
+  @Column({ name: 'updated_by', default: '' })
   updatedBy: number;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
-
 }

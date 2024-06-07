@@ -6,7 +6,6 @@ import { UserController } from './user.controller';
 import { InviteUser } from './invite-user.entity';
 import Session from './session.entity';
 
-
 @Module({
   imports: [TypeOrmModule.forFeature([User, Session, InviteUser])],
   providers: [UserService],

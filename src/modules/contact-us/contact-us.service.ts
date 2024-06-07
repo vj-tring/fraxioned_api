@@ -12,7 +12,11 @@ export class ContactUsService {
     const text = `Name: ${name}\nEmail: ${email}\nMessage: ${message}`;
 
     // Send an email with the contact message
-    await this.mailService.sendMail('johnson.selvakumar@tringapps.net', subject, text);
+    await this.mailService.sendMail(
+      'johnson.selvakumar@tringapps.net',
+      subject,
+      text,
+    );
     return { message: 'Contact message sent successfully' };
   }
 }
