@@ -6,4 +6,7 @@ export class InviteDTO {
 
   @ApiProperty()
   roleId: number;
+
+  @ApiProperty()
+  invitedBy: number;
 }
