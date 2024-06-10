@@ -4,4 +4,4 @@ export const dbConfig = {
   username: 'admin',
   password: 'root',
   database: 'fraxioned',
-};  
+};

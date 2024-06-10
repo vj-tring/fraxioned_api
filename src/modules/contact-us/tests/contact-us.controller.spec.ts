@@ -47,7 +47,9 @@ describe('ContactUsController', () => {
       await controller.contactUs(contactUsDTO);
 
       // Assert
-      expect(contactUsService.handleContactUs).toHaveBeenCalledWith(contactUsDTO);
+      expect(contactUsService.handleContactUs).toHaveBeenCalledWith(
+        contactUsDTO,
+      );
     });
 
     it('should return the result from ContactUsService', async () => {

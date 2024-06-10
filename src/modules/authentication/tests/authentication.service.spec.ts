@@ -49,7 +49,10 @@ describe('AuthenticationService', () => {
         { provide: getRepositoryToken(Session), useValue: sessionRepository },
         { provide: getRepositoryToken(Role), useValue: roleRepository },
         { provide: getRepositoryToken(UserRole), useValue: userRoleRepository },
-        { provide: getRepositoryToken(InviteUser), useValue: inviteUserRepository },
+        {
+          provide: getRepositoryToken(InviteUser),
+          useValue: inviteUserRepository,
+        },
         { provide: MailService, useValue: mailService },
       ],
     }).compile();
@@ -63,7 +66,10 @@ describe('AuthenticationService', () => {
 
   describe('sendInvite', () => {
     it('should throw an error if email already exists', async () => {
-      userRepository.findOne.mockResolvedValue({ id: 1, email: 'test@test.com' });
+      userRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'test@test.com',
+      });
 
       await expect(
         service.sendInvite({ email: 'test@test.com', roleId: 1, invitedBy: 1 }),
@@ -72,7 +78,10 @@ describe('AuthenticationService', () => {
 
     it('should throw an error if invite already sent to email', async () => {
       userRepository.findOne.mockResolvedValue(null);
-      inviteUserRepository.findOne.mockResolvedValue({ id: 1, email: 'test@test.com' });
+      inviteUserRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'test@test.com',
+      });
 
       await expect(
         service.sendInvite({ email: 'test@test.com', roleId: 1, invitedBy: 1 }),
@@ -97,7 +106,11 @@ describe('AuthenticationService', () => {
       const saveSpy = jest.spyOn(inviteUserRepository, 'save');
       const sendMailSpy = jest.spyOn(mailService, 'sendMail');
 
-      await service.sendInvite({ email: 'test@test.com', roleId: 1, invitedBy: 1 });
+      await service.sendInvite({
+        email: 'test@test.com',
+        roleId: 1,
+        invitedBy: 1,
+      });
 
       expect(saveSpy).toBeCalled();
       expect(sendMailSpy).toBeCalled();
@@ -110,7 +123,9 @@ describe('AuthenticationService', () => {
 
       await expect(
         service.register({
-          inviteToken: 'invalid', username: 'test', password: 'pass',
+          inviteToken: 'invalid',
+          username: 'test',
+          password: 'pass',
           phone: '1234567890',
           secondaryPhone: '',
           secondaryEmail: '',
@@ -119,7 +134,7 @@ describe('AuthenticationService', () => {
           state: '',
           city: '',
           zip: '',
-          imageUrl: ''
+          imageUrl: '',
         }),
       ).rejects.toThrow(HttpException);
     });
@@ -129,7 +144,9 @@ describe('AuthenticationService', () => {
 
       await expect(
         service.register({
-          inviteToken: 'invalid', username: 'test', password: 'pass',
+          inviteToken: 'invalid',
+          username: 'test',
+          password: 'pass',
           phone: '',
           secondaryPhone: '',
           secondaryEmail: '',
@@ -138,17 +155,21 @@ describe('AuthenticationService', () => {
           state: '',
           city: '',
           zip: '',
-          imageUrl: ''
+          imageUrl: '',
         }),
       ).rejects.toThrow(HttpException);
     });
 
     it('should throw an error if invite token is expired', async () => {
-      inviteUserRepository.findOne.mockResolvedValue({ inviteTokenExpires: new Date(Date.now() - 1000) });
+      inviteUserRepository.findOne.mockResolvedValue({
+        inviteTokenExpires: new Date(Date.now() - 1000),
+      });
 
       await expect(
         service.register({
-          inviteToken: 'expired', username: 'test', password: 'pass',
+          inviteToken: 'expired',
+          username: 'test',
+          password: 'pass',
           phone: '',
           secondaryPhone: '',
           secondaryEmail: '',
@@ -157,7 +178,7 @@ describe('AuthenticationService', () => {
           state: '',
           city: '',
           zip: '',
-          imageUrl: ''
+          imageUrl: '',
         }),
       ).rejects.toThrow(HttpException);
     });
@@ -174,7 +195,9 @@ describe('AuthenticationService', () => {
       const removeInviteUserSpy = jest.spyOn(inviteUserRepository, 'remove');
 
       await service.register({
-        inviteToken: 'valid', username: 'test', password: 'pass',
+        inviteToken: 'valid',
+        username: 'test',
+        password: 'pass',
         phone: '',
         secondaryPhone: '',
         secondaryEmail: '',
@@ -183,7 +206,7 @@ describe('AuthenticationService', () => {
         state: '',
         city: '',
         zip: '',
-        imageUrl: ''
+        imageUrl: '',
       });
 
       expect(saveUserRoleSpy).toBeCalled();
@@ -210,13 +233,20 @@ describe('AuthenticationService', () => {
     });
 
     it('should login successfully', async () => {
-      userRepository.findOne.mockResolvedValue({ id: 1, email: 'test@test.com', password: 'hashedPassword' });
+      userRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'test@test.com',
+        password: 'hashedPassword',
+      });
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
       sessionRepository.findOne.mockResolvedValue(null);
 
       const saveSessionSpy = jest.spyOn(sessionRepository, 'save');
 
-      const result = await service.login({ email: 'test@test.com', password: 'pass' });
+      const result = await service.login({
+        email: 'test@test.com',
+        password: 'pass',
+      });
 
       expect(saveSessionSpy).toBeCalled();
       expect(result).toHaveProperty('message', 'Login successful');
@@ -233,7 +263,10 @@ describe('AuthenticationService', () => {
     });
 
     it('should send a reset password email', async () => {
-      userRepository.findOne.mockResolvedValue({ id: 1, email: 'test@test.com' });
+      userRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'test@test.com',
+      });
 
       const saveUserSpy = jest.spyOn(userRepository, 'save');
       const sendMailSpy = jest.spyOn(mailService, 'sendMail');
@@ -255,7 +288,9 @@ describe('AuthenticationService', () => {
     });
 
     it('should throw an error if reset token is expired', async () => {
-      userRepository.findOne.mockResolvedValue({ resetTokenExpires: new Date(Date.now() - 1000) });
+      userRepository.findOne.mockResolvedValue({
+        resetTokenExpires: new Date(Date.now() - 1000),
+      });
 
       await expect(
         service.resetPassword('expired', { newPassword: 'newpass' }),
@@ -263,14 +298,23 @@ describe('AuthenticationService', () => {
     });
 
     it('should reset password successfully', async () => {
-      userRepository.findOne.mockResolvedValue({ id: 1, email: 'test@test.com', resetTokenExpires: new Date(Date.now() + 1000) });
+      userRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'test@test.com',
+        resetTokenExpires: new Date(Date.now() + 1000),
+      });
 
       const saveUserSpy = jest.spyOn(userRepository, 'save');
 
-      const result = await service.resetPassword('valid', { newPassword: 'newpass' });
+      const result = await service.resetPassword('valid', {
+        newPassword: 'newpass',
+      });
 
       expect(saveUserSpy).toBeCalled();
-      expect(result).toHaveProperty('message', 'Password has been reset successfully');
+      expect(result).toHaveProperty(
+        'message',
+        'Password has been reset successfully',
+      );
     });
   });
 
@@ -278,13 +322,16 @@ describe('AuthenticationService', () => {
     it('should throw an error if session token is invalid', async () => {
       sessionRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.logout('invalidToken'),
-      ).rejects.toThrow(HttpException);
+      await expect(service.logout('invalidToken')).rejects.toThrow(
+        HttpException,
+      );
     });
 
     it('should logout successfully', async () => {
-      sessionRepository.findOne.mockResolvedValue({ id: 1, token: 'validToken' });
+      sessionRepository.findOne.mockResolvedValue({
+        id: 1,
+        token: 'validToken',
+      });
 
       const deleteSessionSpy = jest.spyOn(sessionRepository, 'delete');
 

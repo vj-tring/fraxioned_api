@@ -25,10 +25,7 @@ describe('MailService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        MailService,
-        { provide: MailConfig, useValue: mailConfig },
-      ],
+      providers: [MailService, { provide: MailConfig, useValue: mailConfig }],
     }).compile();
 
     service = module.get<MailService>(MailService);

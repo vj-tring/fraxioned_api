@@ -10,7 +10,7 @@ describe('UserController', () => {
   let userService: UserService;
 
   const mockUserService = {
-    create: jest.fn(dto => {
+    create: jest.fn((dto) => {
       return {
         id: Date.now(),
         ...dto,
@@ -22,13 +22,13 @@ describe('UserController', () => {
         { id: 2, name: 'Jane Doe', email: 'jane@example.com' },
       ];
     }),
-    findOne: jest.fn(id => {
+    findOne: jest.fn((id) => {
       return { id, name: 'John Doe', email: 'john@example.com' };
     }),
     update: jest.fn((id, dto) => {
       return { id, ...dto };
     }),
-    remove: jest.fn(id => {
+    remove: jest.fn((id) => {
       return { id };
     }),
   };
@@ -55,7 +55,8 @@ describe('UserController', () => {
   describe('create', () => {
     it('should create a user', async () => {
       const dto: CreateUserDTO = {
-        username: 'John Doe', email: 'john@example.com',
+        username: 'John Doe',
+        email: 'john@example.com',
         phone: '',
         secondaryPhone: '',
         secondaryEmail: '',
@@ -65,7 +66,7 @@ describe('UserController', () => {
         city: '',
         zip: '',
         imageUrl: '',
-        password: ''
+        password: '',
       };
       const result = await controller.create(dto);
       expect(result).toEqual({
@@ -91,7 +92,11 @@ describe('UserController', () => {
     it('should return a single user', async () => {
       const id = 1;
       const result = await controller.findOne(id);
-      expect(result).toEqual({ id, name: 'John Doe', email: 'john@example.com' });
+      expect(result).toEqual({
+        id,
+        name: 'John Doe',
+        email: 'john@example.com',
+      });
       expect(userService.findOne).toHaveBeenCalledWith(id);
     });
   });
@@ -100,7 +105,8 @@ describe('UserController', () => {
     it('should update a user', async () => {
       const id = 1;
       const dto: UpdateUserDTO = {
-        username: 'John Doe Updated', email: 'john_updated@example.com',
+        username: 'John Doe Updated',
+        email: 'john_updated@example.com',
         id: 0,
         phone: '',
         secondaryPhone: '',
@@ -111,7 +117,7 @@ describe('UserController', () => {
         city: '',
         zip: '',
         imageUrl: '',
-        password: ''
+        password: '',
       };
       const result = await controller.update(id, dto);
       expect(result).toEqual({ id, ...dto });

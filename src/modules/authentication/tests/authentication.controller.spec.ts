@@ -25,11 +25,9 @@ describe('AuthenticationController', () => {
               .fn()
               .mockResolvedValue({ message: 'User registered successfully' }),
             login: jest.fn().mockResolvedValue({ token: 'some-token' }),
-            forgotPassword: jest
-              .fn()
-              .mockResolvedValue({
-                message: 'Password reset email sent successfully',
-              }),
+            forgotPassword: jest.fn().mockResolvedValue({
+              message: 'Password reset email sent successfully',
+            }),
             resetPassword: jest
               .fn()
               .mockResolvedValue({ message: 'Password reset successfully' }),
@@ -52,8 +50,9 @@ describe('AuthenticationController', () => {
   describe('sendInvite', () => {
     it('should send an invite and return a success message', async () => {
       const inviteDTO: InviteDTO = {
-        email: 'test@example.com', roleId: 1,
-        invitedBy: 1
+        email: 'test@example.com',
+        roleId: 1,
+        invitedBy: 1,
       };
       const result = await controller.sendInvite(inviteDTO);
       expect(result).toEqual({ message: 'Invitation sent successfully' });
@@ -97,9 +96,13 @@ describe('AuthenticationController', () => {
 
   describe('forgotPassword', () => {
     it('should send a password reset email and return a success message', async () => {
-      const forgotPasswordDTO: ForgotPasswordDTO = { email: 'test@example.com' };
+      const forgotPasswordDTO: ForgotPasswordDTO = {
+        email: 'test@example.com',
+      };
       const result = await controller.forgotPassword(forgotPasswordDTO);
-      expect(result).toEqual({ message: 'Password reset email sent successfully' });
+      expect(result).toEqual({
+        message: 'Password reset email sent successfully',
+      });
       expect(service.forgotPassword).toHaveBeenCalledWith(forgotPasswordDTO);
     });
   });
@@ -110,9 +113,15 @@ describe('AuthenticationController', () => {
       const resetPasswordDTO: ResetPasswordDTO = {
         newPassword: 'newpassword',
       };
-      const result = await controller.resetPassword(resetToken, resetPasswordDTO);
+      const result = await controller.resetPassword(
+        resetToken,
+        resetPasswordDTO,
+      );
       expect(result).toEqual({ message: 'Password reset successfully' });
-      expect(service.resetPassword).toHaveBeenCalledWith(resetToken, resetPasswordDTO);
+      expect(service.resetPassword).toHaveBeenCalledWith(
+        resetToken,
+        resetPasswordDTO,
+      );
     });
   });
 

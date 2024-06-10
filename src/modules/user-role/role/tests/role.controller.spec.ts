@@ -27,15 +27,16 @@ describe('RoleController', () => {
     it('should create a role', async () => {
       const createRoleDto: CreateRoleDTO = {
         roleName: 'Admin',
-        createdBy: 0
+        createdBy: 0,
       };
       const createdRole: Role = {
-        id: 1, roleName: 'Admin',
+        id: 1,
+        roleName: 'Admin',
         description: '',
         createdBy: 0,
         createdAt: undefined,
         updatedBy: 0,
-        updatedAt: undefined
+        updatedAt: undefined,
       };
       jest.spyOn(roleService, 'createRole').mockResolvedValue(createdRole);
 
@@ -46,21 +47,26 @@ describe('RoleController', () => {
 
   describe('getRoles', () => {
     it('should get all roles', async () => {
-      const roles: Role[] = [{
-        id: 1, roleName: 'Admin',
-        description: '',
-        createdBy: 0,
-        createdAt: undefined,
-        updatedBy: 0,
-        updatedAt: undefined
-      }, {
-        id: 2, roleName: 'User',
-        description: '',
-        createdBy: 0,
-        createdAt: undefined,
-        updatedBy: 0,
-        updatedAt: undefined
-      }];
+      const roles: Role[] = [
+        {
+          id: 1,
+          roleName: 'Admin',
+          description: '',
+          createdBy: 0,
+          createdAt: undefined,
+          updatedBy: 0,
+          updatedAt: undefined,
+        },
+        {
+          id: 2,
+          roleName: 'User',
+          description: '',
+          createdBy: 0,
+          createdAt: undefined,
+          updatedBy: 0,
+          updatedAt: undefined,
+        },
+      ];
       jest.spyOn(roleService, 'getRoles').mockResolvedValue(roles);
 
       const result = await controller.getRoles();
@@ -72,12 +78,13 @@ describe('RoleController', () => {
     it('should get role by id', async () => {
       const roleId = 1;
       const role: Role = {
-        id: roleId, roleName: 'Admin',
+        id: roleId,
+        roleName: 'Admin',
         description: '',
         createdBy: 0,
         createdAt: undefined,
         updatedBy: 0,
-        updatedAt: undefined
+        updatedAt: undefined,
       };
       jest.spyOn(roleService, 'getRoleById').mockResolvedValue(role);
 
@@ -91,12 +98,13 @@ describe('RoleController', () => {
       const roleId = 1;
       const updateRoleDto: UpdateRoleDTO = { roleName: 'New Admin' };
       const updatedRole: Role = {
-        id: roleId, roleName: 'New Admin',
+        id: roleId,
+        roleName: 'New Admin',
         description: '',
         createdBy: 0,
         createdAt: undefined,
         updatedBy: 0,
-        updatedAt: undefined
+        updatedAt: undefined,
       };
       jest.spyOn(roleService, 'updateRole').mockResolvedValue(updatedRole);
 

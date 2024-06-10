@@ -79,25 +79,28 @@ export class AuthenticationService {
 
   async register(registerDTO: RegisterDTO) {
     const inviteUserPhone = await this.userRepository.findOne({
-        where: { phone: registerDTO.phone },
+      where: { phone: registerDTO.phone },
     });
 
     if (inviteUserPhone) {
-        throw new HttpException('Phone number already exists', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Phone number already exists',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const inviteUser = await this.inviteUserRepository.findOne({
-        where: { inviteToken: registerDTO.inviteToken },
+      where: { inviteToken: registerDTO.inviteToken },
     });
     if (!inviteUser) {
-        throw new HttpException('Invalid invite token', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Invalid invite token', HttpStatus.BAD_REQUEST);
     }
 
     if (inviteUser.inviteTokenExpires < new Date()) {
-        throw new HttpException(
-            'Invite token has expired',
-            HttpStatus.BAD_REQUEST,
-        );
+      throw new HttpException(
+        'Invite token has expired',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const user = new User();
@@ -125,7 +128,7 @@ export class AuthenticationService {
     await this.inviteUserRepository.remove(inviteUser);
 
     return { message: 'User registered successfully' };
-}
+  }
 
   async login(loginDTO: LoginDTO) {
     const user = await this.userRepository.findOne({

@@ -13,8 +13,8 @@ describe('UserService', () => {
   let repository: Repository<User>;
 
   const mockUserRepository = {
-    create: jest.fn().mockImplementation(dto => dto),
-    save: jest.fn().mockImplementation(user => ({
+    create: jest.fn().mockImplementation((dto) => dto),
+    save: jest.fn().mockImplementation((user) => ({
       id: Date.now(),
       ...user,
     })),
@@ -22,10 +22,14 @@ describe('UserService', () => {
       { id: 1, name: 'John Doe', email: 'john@example.com' },
       { id: 2, name: 'Jane Doe', email: 'jane@example.com' },
     ]),
-    findOneBy: jest.fn().mockImplementation(({ id }) =>
-      id === 1 ? { id: 1, name: 'John Doe', email: 'john@example.com' } : null,
-    ),
-    preload: jest.fn().mockImplementation(user => user),
+    findOneBy: jest
+      .fn()
+      .mockImplementation(({ id }) =>
+        id === 1
+          ? { id: 1, name: 'John Doe', email: 'john@example.com' }
+          : null,
+      ),
+    preload: jest.fn().mockImplementation((user) => user),
     remove: jest.fn(),
   };
 
@@ -62,7 +66,7 @@ describe('UserService', () => {
         state: '',
         city: '',
         zip: '',
-        imageUrl: ''
+        imageUrl: '',
       };
       jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword');
 
@@ -96,7 +100,11 @@ describe('UserService', () => {
   describe('findOne', () => {
     it('should return a single user', async () => {
       const result = await service.findOne(1);
-      expect(result).toEqual({ id: 1, name: 'John Doe', email: 'john@example.com' });
+      expect(result).toEqual({
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+      });
       expect(repository.findOneBy).toHaveBeenCalledWith({ id: 1 });
     });
 
@@ -120,34 +128,39 @@ describe('UserService', () => {
         city: '',
         zip: '',
         imageUrl: '',
-        password: ''
+        password: '',
       };
       mockUserRepository.preload.mockReturnValue({ id: 1, ...updateUserDTO });
 
       const result = await service.update(1, updateUserDTO);
 
-      expect(repository.preload).toHaveBeenCalledWith({ id: 1, ...updateUserDTO });
+      expect(repository.preload).toHaveBeenCalledWith({
+        id: 1,
+        ...updateUserDTO,
+      });
       expect(repository.save).toHaveBeenCalledWith({ id: 1, ...updateUserDTO });
       expect(result).toEqual({ id: 1, ...updateUserDTO });
     });
 
     it('should throw a NotFoundException', async () => {
       mockUserRepository.preload.mockReturnValue(null);
-      await expect(service.update(999, {
-        username: 'John Doe Updated',
-        id: 0,
-        phone: '',
-        secondaryPhone: '',
-        email: '',
-        secondaryEmail: '',
-        address1: '',
-        address2: '',
-        state: '',
-        city: '',
-        zip: '',
-        imageUrl: '',
-        password: ''
-      })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update(999, {
+          username: 'John Doe Updated',
+          id: 0,
+          phone: '',
+          secondaryPhone: '',
+          email: '',
+          secondaryEmail: '',
+          address1: '',
+          address2: '',
+          state: '',
+          city: '',
+          zip: '',
+          imageUrl: '',
+          password: '',
+        }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

@@ -113,7 +113,10 @@ describe('RoleService', () => {
   describe('updateRole', () => {
     it('should update role', async () => {
       const roleId = 1;
-      const updateRoleDto: UpdateRoleDTO = { roleName: 'New Admin', description: 'Updated description' };
+      const updateRoleDto: UpdateRoleDTO = {
+        roleName: 'New Admin',
+        description: 'Updated description',
+      };
       const existingRole: Role = {
         id: roleId,
         roleName: 'Admin',
@@ -143,14 +146,18 @@ describe('RoleService', () => {
   describe('deleteRole', () => {
     it('should delete role', async () => {
       const roleId = 1;
-      jest.spyOn(repository, 'delete').mockResolvedValue({ affected: 1, raw: {} });
+      jest
+        .spyOn(repository, 'delete')
+        .mockResolvedValue({ affected: 1, raw: {} });
 
       await expect(service.deleteRole(roleId)).resolves.toBeUndefined();
     });
 
     it('should throw NotFoundException if role not found', async () => {
       const roleId = 1;
-      jest.spyOn(repository, 'delete').mockResolvedValue({ affected: 0, raw: {} });
+      jest
+        .spyOn(repository, 'delete')
+        .mockResolvedValue({ affected: 0, raw: {} });
 
       await expect(service.deleteRole(roleId)).rejects.toThrowError(
         NotFoundException,
