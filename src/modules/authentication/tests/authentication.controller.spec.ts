@@ -4,6 +4,8 @@ import { AuthenticationService } from '../authentication.service';
 import { InviteDTO } from '../dto/invite.dto';
 import { RegisterDTO } from '../dto/register.dto';
 import { LoginDTO } from '../dto/login.dto';
+import { ForgotPasswordDTO } from '../dto/forgot-password.dto';
+import { ResetPasswordDTO } from '../dto/reset-password.dto';
 
 describe('AuthenticationController', () => {
   let controller: AuthenticationController;
@@ -23,6 +25,14 @@ describe('AuthenticationController', () => {
               .fn()
               .mockResolvedValue({ message: 'User registered successfully' }),
             login: jest.fn().mockResolvedValue({ token: 'some-token' }),
+            forgotPassword: jest
+              .fn()
+              .mockResolvedValue({
+                message: 'Password reset email sent successfully',
+              }),
+            resetPassword: jest
+              .fn()
+              .mockResolvedValue({ message: 'Password reset successfully' }),
             logout: jest
               .fn()
               .mockResolvedValue({ message: 'Logout successful' }),
@@ -41,7 +51,10 @@ describe('AuthenticationController', () => {
 
   describe('sendInvite', () => {
     it('should send an invite and return a success message', async () => {
-      const inviteDTO: InviteDTO = { email: 'test@example.com', roleId: 1 };
+      const inviteDTO: InviteDTO = {
+        email: 'test@example.com', roleId: 1,
+        invitedBy: 1
+      };
       const result = await controller.sendInvite(inviteDTO);
       expect(result).toEqual({ message: 'Invitation sent successfully' });
       expect(service.sendInvite).toHaveBeenCalledWith(inviteDTO);
@@ -54,6 +67,14 @@ describe('AuthenticationController', () => {
         inviteToken: 'some-token',
         username: 'testuser',
         phone: '1234567890',
+        secondaryPhone: '0987654321',
+        secondaryEmail: 'testuser_secondary@example.com',
+        address1: '123 Main St',
+        address2: 'Apt 4B',
+        state: 'CA',
+        city: 'Los Angeles',
+        zip: '90001',
+        imageUrl: 'http://example.com/images/testuser.jpg',
         password: 'password',
       };
       const result = await controller.register(registerDTO);
@@ -71,6 +92,27 @@ describe('AuthenticationController', () => {
       const result = await controller.login(loginDTO);
       expect(result).toEqual({ token: 'some-token' });
       expect(service.login).toHaveBeenCalledWith(loginDTO);
+    });
+  });
+
+  describe('forgotPassword', () => {
+    it('should send a password reset email and return a success message', async () => {
+      const forgotPasswordDTO: ForgotPasswordDTO = { email: 'test@example.com' };
+      const result = await controller.forgotPassword(forgotPasswordDTO);
+      expect(result).toEqual({ message: 'Password reset email sent successfully' });
+      expect(service.forgotPassword).toHaveBeenCalledWith(forgotPasswordDTO);
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should reset the password and return a success message', async () => {
+      const resetToken = 'some-reset-token';
+      const resetPasswordDTO: ResetPasswordDTO = {
+        newPassword: 'newpassword',
+      };
+      const result = await controller.resetPassword(resetToken, resetPasswordDTO);
+      expect(result).toEqual({ message: 'Password reset successfully' });
+      expect(service.resetPassword).toHaveBeenCalledWith(resetToken, resetPasswordDTO);
     });
   });
 

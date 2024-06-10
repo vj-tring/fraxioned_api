@@ -15,6 +15,9 @@ export class UpdateUserDTO extends PartialType(CreateUserDTO) {
   secondaryPhone: string;
 
   @ApiProperty()
+  email: string;
+
+  @ApiProperty()
   secondaryEmail: string;
 
   @ApiProperty()

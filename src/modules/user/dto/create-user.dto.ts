@@ -11,6 +11,9 @@ export class CreateUserDTO {
   secondaryPhone: string;
 
   @ApiProperty()
+  email: string;
+
+  @ApiProperty()
   secondaryEmail: string;
 
   @ApiProperty()
