@@ -3,9 +3,7 @@ import { ContactUsService } from '../contact-us.service';
 import { MailService } from '../../mail/mail.service';
 
 class MockMailService {
-  async sendMail() {
-    return true;
-  }
+  sendMail = jest.fn().mockResolvedValue(true);
 }
 
 describe('ContactUsService', () => {
@@ -48,7 +46,7 @@ describe('ContactUsService', () => {
       expect(mailService.sendMail).toHaveBeenCalledWith(
         'johnson.selvakumar@tringapps.net',
         'New Contact Us Message',
-        'Name: John Doe\nEmail: john@example.com\nMessage: This is a test message',
+        `Name: John Doe\nEmail: john@example.com\nMessage: This is a test message`,
       );
     });
   });

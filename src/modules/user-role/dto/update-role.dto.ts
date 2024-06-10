@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsInt, IsNotEmpty } from 'class-validator';
 
 export class UpdateRoleDTO {
   @IsString()
@@ -8,4 +8,8 @@ export class UpdateRoleDTO {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  updatedBy: number;
 }

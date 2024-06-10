@@ -1,29 +1,38 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoleService } from '../role.service';
-import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Role } from '../role.entity';
 import { CreateRoleDTO } from '../../dto/create-role.dto';
 import { UpdateRoleDTO } from '../../dto/update-role.dto';
 import { NotFoundException } from '@nestjs/common';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+
+const createMockRepository = <T = any>(): MockRepository<T> => ({
+  findOne: jest.fn(),
+  find: jest.fn(),
+  save: jest.fn(),
+  remove: jest.fn(),
+  delete: jest.fn(),
+  create: jest.fn(), // Add the create method to the mock repository
+});
 
 describe('RoleService', () => {
   let service: RoleService;
-  let repository: Repository<Role>;
+  let repository: MockRepository;
 
   beforeEach(async () => {
+    repository = createMockRepository();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RoleService,
-        {
-          provide: getRepositoryToken(Role),
-          useClass: Repository,
-        },
+        { provide: getRepositoryToken(Role), useValue: repository },
       ],
     }).compile();
 
     service = module.get<RoleService>(RoleService);
-    repository = module.get<Repository<Role>>(getRepositoryToken(Role));
   });
 
   it('should be defined', () => {
@@ -42,17 +51,21 @@ describe('RoleService', () => {
         roleName: 'Admin',
         createdBy: 0,
         description: 'Administrator role',
-        createdAt: undefined,
+        createdAt: new Date(),
         updatedBy: 0,
-        updatedAt: undefined,
+        updatedAt: new Date(),
       };
-      jest.spyOn(repository, 'create').mockReturnValue(createdRole);
-      jest.spyOn(repository, 'save').mockResolvedValue(createdRole);
+
+      repository.create.mockReturnValue(createdRole);
+      repository.save.mockResolvedValue(createdRole);
 
       const result = await service.createRole(createRoleDto);
       expect(result).toEqual(createdRole);
+      expect(repository.create).toHaveBeenCalledWith(createRoleDto);
+      expect(repository.save).toHaveBeenCalledWith(createdRole);
     });
   });
+
   describe('getRoles', () => {
     it('should get all roles', async () => {
       const roles: Role[] = [
@@ -61,24 +74,25 @@ describe('RoleService', () => {
           roleName: 'Admin',
           description: 'Administrator role',
           createdBy: 0,
-          createdAt: undefined,
+          createdAt: new Date(),
           updatedBy: 0,
-          updatedAt: undefined,
+          updatedAt: new Date(),
         },
         {
           id: 2,
           roleName: 'User',
           description: 'User role',
           createdBy: 0,
-          createdAt: undefined,
+          createdAt: new Date(),
           updatedBy: 0,
-          updatedAt: undefined,
+          updatedAt: new Date(),
         },
       ];
-      jest.spyOn(repository, 'find').mockResolvedValue(roles);
+      repository.find.mockResolvedValue(roles);
 
       const result = await service.getRoles();
       expect(result).toEqual(roles);
+      expect(repository.find).toHaveBeenCalled();
     });
   });
 
@@ -90,71 +104,70 @@ describe('RoleService', () => {
         roleName: 'Admin',
         description: 'Administrator role',
         createdBy: 0,
-        createdAt: undefined,
+        createdAt: new Date(),
         updatedBy: 0,
-        updatedAt: undefined,
+        updatedAt: new Date(),
       };
-      jest.spyOn(repository, 'findOne').mockResolvedValue(role);
+      repository.findOne.mockResolvedValue(role);
 
       const result = await service.getRoleById(roleId);
       expect(result).toEqual(role);
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { id: roleId } });
     });
 
     it('should throw NotFoundException if role not found', async () => {
       const roleId = 1;
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+      repository.findOne.mockResolvedValue(null);
 
-      await expect(service.getRoleById(roleId)).rejects.toThrowError(
-        NotFoundException,
-      );
+      await expect(service.getRoleById(roleId)).rejects.toThrowError(NotFoundException);
     });
   });
 
   describe('updateRole', () => {
     it('should update role', async () => {
       const roleId = 1;
-      const updateRoleDto: UpdateRoleDTO = { roleName: 'New Admin', description: 'Updated description' };
+      const updateRoleDto: UpdateRoleDTO = {
+        roleName: 'New Admin',
+        description: 'Updated description',
+        updatedBy: 0,
+      };
       const existingRole: Role = {
         id: roleId,
         roleName: 'Admin',
         description: 'Administrator role',
         createdBy: 0,
-        createdAt: undefined,
+        createdAt: new Date(),
         updatedBy: 0,
-        updatedAt: undefined,
+        updatedAt: new Date(),
       };
       const updatedRole: Role = {
-        id: roleId,
-        roleName: 'Admin',
-        description: 'Administrator role',
-        createdBy: 0,
-        createdAt: undefined,
-        updatedBy: 0,
-        updatedAt: undefined,
+        ...existingRole,
+        ...updateRoleDto,
       };
-      jest.spyOn(service, 'getRoleById').mockResolvedValue(existingRole);
-      jest.spyOn(repository, 'save').mockResolvedValue(updatedRole);
+      repository.findOne.mockResolvedValue(existingRole);
+      repository.save.mockResolvedValue(updatedRole);
 
       const result = await service.updateRole(roleId, updateRoleDto);
       expect(result).toEqual(updatedRole);
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { id: roleId } });
+      expect(repository.save).toHaveBeenCalledWith(updatedRole);
     });
   });
 
   describe('deleteRole', () => {
     it('should delete role', async () => {
       const roleId = 1;
-      jest.spyOn(repository, 'delete').mockResolvedValue({ affected: 1, raw: {} });
+      repository.delete.mockResolvedValue({ affected: 1, raw: {} });
 
       await expect(service.deleteRole(roleId)).resolves.toBeUndefined();
+      expect(repository.delete).toHaveBeenCalledWith(roleId);
     });
 
     it('should throw NotFoundException if role not found', async () => {
       const roleId = 1;
-      jest.spyOn(repository, 'delete').mockResolvedValue({ affected: 0, raw: {} });
+      repository.delete.mockResolvedValue({ affected: 0, raw: {} });
 
-      await expect(service.deleteRole(roleId)).rejects.toThrowError(
-        NotFoundException,
-      );
+      await expect(service.deleteRole(roleId)).rejects.toThrowError(NotFoundException);
     });
   });
 });
