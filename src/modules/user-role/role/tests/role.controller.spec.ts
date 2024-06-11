@@ -88,9 +88,9 @@ describe('RoleController', () => {
         roleName: 'Admin',
         description: '',
         createdBy: 0,
-        createdAt: undefined,
+        createdAt: expect.any(Date),
         updatedBy: 0,
-        updatedAt: undefined,
+        updatedAt: expect.any(Date),
 
       };
       const result = await controller.createRole(createRoleDto);
@@ -113,20 +113,20 @@ describe('RoleController', () => {
         {
           id: 1,
           roleName: 'Admin',
-          description: '',
+          description: 'Administrator role',
           createdBy: 0,
-          createdAt: undefined,
+          createdAt: expect.any(Date),
           updatedBy: 0,
-          updatedAt: undefined,
+          updatedAt: expect.any(Date),
         },
         {
           id: 2,
           roleName: 'User',
-          description: '',
+          description: 'User role',
           createdBy: 0,
-          createdAt: undefined,
+          createdAt: expect.any(Date),
           updatedBy: 0,
-          updatedAt: undefined,
+          updatedAt: expect.any(Date),
         },
       ];
       jest.spyOn(roleService, 'getRoles').mockResolvedValue(roles);
@@ -163,11 +163,11 @@ describe('RoleController', () => {
       const role: Role = {
         id: roleId,
         roleName: 'Admin',
-        description: '',
+        description: 'Administrator role',
         createdBy: 0,
-        createdAt: undefined,
+        createdAt: expect.any(Date),
         updatedBy: 0,
-        updatedAt: undefined,
+        updatedAt: expect.any(Date),
       };
       jest.spyOn(roleService, 'getRoleById').mockResolvedValue(role);
 
@@ -195,11 +195,11 @@ describe('RoleController', () => {
       const updatedRole: Role = {
         id: roleId,
         roleName: 'New Admin',
-        description: '',
+        description: 'Administrator role',
         createdBy: 0,
-        createdAt: undefined,
+        createdAt: expect.any(Date),
         updatedBy: 0,
-        updatedAt: undefined,
+        updatedAt: expect.any(Date),
 
       };
       const result = await controller.updateRole(roleId, updateRoleDto);
