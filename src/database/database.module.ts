@@ -10,7 +10,7 @@ import { MailConfig } from '../modules/mail/mail.config';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: 'Jroot',
+      password: 'root',
       database: 'fraxioned',
       entities: [User],
       synchronize: true,
