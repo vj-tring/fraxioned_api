@@ -5,10 +5,7 @@ import { ContactUsDTO } from '../contact-us.dto';
 
 // Mock ContactUsService
 class MockContactUsService {
-  async handleContactUs(contactUsDTO: ContactUsDTO) {
-    // Mock implementation
-    return { message: 'Contact message sent successfully' };
-  }
+  handleContactUs = jest.fn().mockResolvedValue({ message: 'Contact message sent successfully' });
 }
 
 describe('ContactUsController', () => {

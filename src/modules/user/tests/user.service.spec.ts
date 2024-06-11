@@ -57,7 +57,7 @@ describe('UserService', () => {
       const createUserDTO: CreateUserDTO = {
         username: 'John Doe',
         email: 'john@example.com',
-        password: 'password123',
+        password: '',
         phone: '',
         secondaryPhone: '',
         secondaryEmail: '',
@@ -68,7 +68,8 @@ describe('UserService', () => {
         zip: '',
         imageUrl: '',
       };
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword');
+      const hashedPassword = createUserDTO.password;
+      jest.spyOn(bcrypt, 'hash').mockResolvedValue(hashedPassword);
 
       const result = await service.create(createUserDTO);
 
@@ -76,12 +77,12 @@ describe('UserService', () => {
       expect(bcrypt.hash).toHaveBeenCalledWith(createUserDTO.password, 10);
       expect(repository.save).toHaveBeenCalledWith({
         ...createUserDTO,
-        password: 'hashedPassword',
+        password: hashedPassword,
       });
       expect(result).toEqual({
         id: expect.any(Number),
         ...createUserDTO,
-        password: 'hashedPassword',
+        password: hashedPassword,
       });
     });
   });
@@ -164,19 +165,23 @@ describe('UserService', () => {
     });
   });
 
+  
   describe('remove', () => {
     it('should remove a user', async () => {
       const user = { id: 1, name: 'John Doe', email: 'john@example.com' };
       mockUserRepository.findOneBy.mockReturnValue(user);
-
+  
       await service.remove(1);
-
+  
       expect(repository.findOneBy).toHaveBeenCalledWith({ id: 1 });
       expect(repository.remove).toHaveBeenCalledWith(user);
     });
-
+    
     it('should throw a NotFoundException', async () => {
-      await expect(service.remove(999)).rejects.toThrow(NotFoundException);
+      mockUserRepository.findOneBy.mockReturnValue(null); 
+      await expect(service.remove(999)).rejects.toThrow(NotFoundException); 
     });
   });
+
+  
 });

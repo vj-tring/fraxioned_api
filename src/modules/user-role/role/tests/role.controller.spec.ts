@@ -12,7 +12,61 @@ describe('RoleController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RoleController],
-      providers: [RoleService],
+      providers: [
+        {
+          provide: RoleService,
+          useValue: {
+            createRole: jest.fn().mockResolvedValue({
+              id: 1,
+              roleName: 'Admin',
+              description: 'Administrator role',
+              createdBy: 0,
+              createdAt: new Date(),
+              updatedBy: 0,
+              updatedAt: new Date(),
+            }),
+            getRoles: jest.fn().mockResolvedValue([
+              {
+                id: 1,
+                roleName: 'Admin',
+                description: 'Administrator role',
+                createdBy: 0,
+                createdAt: new Date(),
+                updatedBy: 0,
+                updatedAt: new Date(),
+              },
+              {
+                id: 2,
+                roleName: 'User',
+                description: 'User role',
+                createdBy: 0,
+                createdAt: new Date(),
+                updatedBy: 0,
+                updatedAt: new Date(),
+              },
+            ]),
+            getRoleById: jest.fn().mockResolvedValue({
+              id: 1,
+              roleName: 'Admin',
+              description: 'Administrator role',
+              createdBy: 0,
+              createdAt: new Date(),
+              updatedBy: 0,
+              updatedAt: new Date(),
+            }),
+            updateRole: jest.fn().mockResolvedValue({
+              id: 1,
+              roleName: 'New Admin',
+              description: 'Updated description',
+              createdBy: 0,
+              createdAt: new Date(),
+              updatedBy: 0,
+              updatedAt: new Date(),
+            }),
+            deleteRole: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<RoleController>(RoleController);
@@ -37,11 +91,19 @@ describe('RoleController', () => {
         createdAt: undefined,
         updatedBy: 0,
         updatedAt: undefined,
-      };
-      jest.spyOn(roleService, 'createRole').mockResolvedValue(createdRole);
 
+      };
       const result = await controller.createRole(createRoleDto);
-      expect(result).toEqual(createdRole);
+      expect(result).toEqual({
+        id: 1,
+        roleName: 'Admin',
+        description: 'Administrator role',
+        createdBy: 0,
+        createdAt: expect.any(Date),
+        updatedBy: 0,
+        updatedAt: expect.any(Date),
+      });
+      expect(roleService.createRole).toHaveBeenCalledWith(createRoleDto);
     });
   });
 
@@ -69,8 +131,29 @@ describe('RoleController', () => {
       ];
       jest.spyOn(roleService, 'getRoles').mockResolvedValue(roles);
 
+
       const result = await controller.getRoles();
-      expect(result).toEqual(roles);
+      expect(result).toEqual([
+        {
+          id: 1,
+          roleName: 'Admin',
+          description: 'Administrator role',
+          createdBy: 0,
+          createdAt: expect.any(Date),
+          updatedBy: 0,
+          updatedAt: expect.any(Date),
+        },
+        {
+          id: 2,
+          roleName: 'User',
+          description: 'User role',
+          createdBy: 0,
+          createdAt: expect.any(Date),
+          updatedBy: 0,
+          updatedAt: expect.any(Date),
+        },
+      ]);
+      expect(roleService.getRoles).toHaveBeenCalled();
     });
   });
 
@@ -89,14 +172,26 @@ describe('RoleController', () => {
       jest.spyOn(roleService, 'getRoleById').mockResolvedValue(role);
 
       const result = await controller.getRoleById(roleId);
-      expect(result).toEqual(role);
+      expect(result).toEqual({
+        id: roleId,
+        roleName: 'Admin',
+        description: 'Administrator role',
+        createdBy: 0,
+        createdAt: expect.any(Date),
+        updatedBy: 0,
+        updatedAt: expect.any(Date),
+      });
+      expect(roleService.getRoleById).toHaveBeenCalledWith(roleId);
     });
   });
 
   describe('updateRole', () => {
     it('should update role', async () => {
       const roleId = 1;
-      const updateRoleDto: UpdateRoleDTO = { roleName: 'New Admin' };
+      const updateRoleDto: UpdateRoleDTO = {
+        roleName: 'New Admin',
+        updatedBy: 0
+      };
       const updatedRole: Role = {
         id: roleId,
         roleName: 'New Admin',
@@ -105,21 +200,28 @@ describe('RoleController', () => {
         createdAt: undefined,
         updatedBy: 0,
         updatedAt: undefined,
-      };
-      jest.spyOn(roleService, 'updateRole').mockResolvedValue(updatedRole);
 
+      };
       const result = await controller.updateRole(roleId, updateRoleDto);
-      expect(result).toEqual(updatedRole);
+      expect(result).toEqual({
+        id: roleId,
+        roleName: 'New Admin',
+        description: 'Updated description',
+        createdBy: 0,
+        createdAt: expect.any(Date),
+        updatedBy: 0,
+        updatedAt: expect.any(Date),
+      });
+      expect(roleService.updateRole).toHaveBeenCalledWith(roleId, updateRoleDto);
     });
   });
 
   describe('deleteRole', () => {
     it('should delete role', async () => {
       const roleId = 1;
-      jest.spyOn(roleService, 'deleteRole').mockResolvedValue(undefined);
-
       const result = await controller.deleteRole(roleId);
       expect(result).toBeUndefined();
+      expect(roleService.deleteRole).toHaveBeenCalledWith(roleId);
     });
   });
 });
