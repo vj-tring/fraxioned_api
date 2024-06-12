@@ -15,7 +15,7 @@ const createMockRepository = <T = any>(): MockRepository<T> => ({
   save: jest.fn(),
   remove: jest.fn(),
   delete: jest.fn(),
-  create: jest.fn(), // Add the create method to the mock repository
+  create: jest.fn(), 
 });
 
 describe('RoleService', () => {

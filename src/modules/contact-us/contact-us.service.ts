@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { MailService } from '../mail/mail.service';
 import { ContactUsDTO } from './contact-us.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,19 +13,20 @@ export class ContactUsService {
     private readonly userRepository: Repository<User>
     
     async handleContactUs(contactUsDTO: ContactUsDTO) {
-      const { name, subject, message } = contactUsDTO;
-      const user = await this.userRepository.findOne({where: { id: contactUsDTO.userId },});
+      const user = await this.userRepository.findOne({ where: { id: contactUsDTO.userId } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
       const email = user.email;
-
-      const text = `Name: ${name}\nEmail: ${email}\nMessage: ${message}`;
-
-      await this.mailService.sendMailFromUser(
-        email,
+  
+      const text = `Name: ${contactUsDTO.name}\nEmail: ${email}\nMessage: ${contactUsDTO.message}`;
+  
+      await this.mailService.sendMail(
         'johnson.selvakumar@tringapps.net',
-        subject,
+        contactUsDTO.subject,
         text,
       );
-
-    return { message: 'Contact message sent successfully' };
-  }
+  
+      return { message: 'Contact message sent successfully' };
+    }
 }

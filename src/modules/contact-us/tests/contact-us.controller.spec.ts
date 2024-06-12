@@ -3,7 +3,6 @@ import { ContactUsController } from '../contact-us.controller';
 import { ContactUsService } from '../contact-us.service';
 import { ContactUsDTO } from '../contact-us.dto';
 
-// Mock ContactUsService
 class MockContactUsService {
   handleContactUs = jest.fn().mockResolvedValue({ message: 'Contact message sent successfully' });
 }
@@ -18,7 +17,7 @@ describe('ContactUsController', () => {
       providers: [
         {
           provide: ContactUsService,
-          useClass: MockContactUsService, // Use the mocked ContactUsService
+          useClass: MockContactUsService,
         },
       ],
     }).compile();
