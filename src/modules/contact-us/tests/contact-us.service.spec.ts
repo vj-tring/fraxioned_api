@@ -33,9 +33,10 @@ describe('ContactUsService', () => {
     it('should send an email with the contact message', async () => {
       // Arrange
       const contactUsDTO = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'This is a test message',
+        userId: 1,
+        name: "john",
+        subject: "error",
+        message: "error while booking"
       };
 
       // Act

@@ -35,9 +35,10 @@ describe('ContactUsController', () => {
     it('should call the handleContactUs method of ContactUsService with correct arguments', async () => {
       // Arrange
       const contactUsDTO: ContactUsDTO = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'This is a test message',
+        userId: 1,
+        name: "john",
+        subject: "error",
+        message: "error while booking"
       };
 
       // Act
@@ -52,9 +53,10 @@ describe('ContactUsController', () => {
     it('should return the result from ContactUsService', async () => {
       // Arrange
       const contactUsDTO: ContactUsDTO = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'This is a test message',
+        userId: 1,
+        name: "john",
+        subject: "error",
+        message: "error while booking"
       };
       const expectedResult = { message: 'Contact message sent successfully' };
 
