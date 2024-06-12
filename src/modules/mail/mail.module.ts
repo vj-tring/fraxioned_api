@@ -6,5 +6,6 @@ import { MailConfigModule } from './mail-config.module';
   imports: [MailConfigModule],
   providers: [MailService],
   exports: [MailService],
+
 })
 export class MailModule {}

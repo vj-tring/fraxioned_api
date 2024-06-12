@@ -28,4 +28,15 @@ export class MailService {
 
     return this.transporter.sendMail(mailOptions);
   }
+
+  async sendMailFromUser(from: string, to: string, subject: string, text: string) {
+    const mailOptions = {
+      from,
+      to,
+      subject,
+      text,
+    };
+
+    return this.transporter.sendMail(mailOptions);
+  }
 }
