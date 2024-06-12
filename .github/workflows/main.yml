@@ -43,4 +43,9 @@ jobs:
 
       - name: Run Jest Tests
         run: npm run test
-        # run: npm run test:cov
+
+      - name: Checks Test coverage
+        run: npm run test:cov
+
+      - name: Run Nest Build
+        run: npm run build
