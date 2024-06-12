@@ -10,23 +10,25 @@ export class ContactUsService {
   constructor(private readonly mailService: MailService) {}
 
   @InjectRepository(User)
-    private readonly userRepository: Repository<User>
-    
-    async handleContactUs(contactUsDTO: ContactUsDTO) {
-      const user = await this.userRepository.findOne({ where: { id: contactUsDTO.userId } });
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-      const email = user.email;
-  
-      const text = `Name: ${contactUsDTO.name}\nEmail: ${email}\nMessage: ${contactUsDTO.message}`;
-  
-      await this.mailService.sendMail(
-        'johnson.selvakumar@tringapps.net',
-        contactUsDTO.subject,
-        text,
-      );
-  
-      return { message: 'Contact message sent successfully' };
+  private readonly userRepository: Repository<User>;
+
+  async handleContactUs(contactUsDTO: ContactUsDTO) {
+    const user = await this.userRepository.findOne({
+      where: { id: contactUsDTO.userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+    const email = user.email;
+
+    const text = `Name: ${contactUsDTO.name}\nEmail: ${email}\nMessage: ${contactUsDTO.message}`;
+
+    await this.mailService.sendMail(
+      'johnson.selvakumar@tringapps.net',
+      contactUsDTO.subject,
+      text,
+    );
+
+    return { message: 'Contact message sent successfully' };
+  }
 }

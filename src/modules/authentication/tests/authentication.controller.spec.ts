@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationController } from '../authentication.controller';
-import { AuthenticationService } from '../authentication.service';
-import { InviteDTO } from '../dto/invite.dto';
-import { RegisterDTO } from '../dto/register.dto';
-import { LoginDTO } from '../dto/login.dto';
-import { ForgotPasswordDTO } from '../dto/forgot-password.dto';
-import { ResetPasswordDTO } from '../dto/reset-password.dto';
+import { AuthenticationController } from '@auth/authentication.controller';
+import { AuthenticationService } from '@auth/authentication.service';
+import { InviteDTO } from '@auth/dto/invite.dto';
+import { RegisterDTO } from '@auth/dto/register.dto';
+import { LoginDTO } from '@auth/dto/login.dto';
+import { ForgotPasswordDTO } from '@auth/dto/forgot-password.dto';
+import { ResetPasswordDTO } from '@auth/dto/reset-password.dto';
 
 describe('AuthenticationController', () => {
   let controller: AuthenticationController;

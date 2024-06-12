@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
 
 export class ContactUsDTO {
-
   @IsNotEmpty()
   @ApiProperty()
   userId: number;

@@ -74,6 +74,15 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@auth/(.*)$": "<rootDir>/modules/authentication/$1",
+      "^@contactUs/(.*)$": "<rootDir>/modules/contact-us/$1",
+      "^@user/(.*)$": "<rootDir>/modules/user/$1",
+      "^@mail/(.*)$": "<rootDir>/modules/mail/$1",
+      "^@user-role/(.*)$": "<rootDir>/modules/user-role/$1",
+      "^@role/(.*)$": "<rootDir>/modules/user-role/role/$1"
+    }
+
   }
 }

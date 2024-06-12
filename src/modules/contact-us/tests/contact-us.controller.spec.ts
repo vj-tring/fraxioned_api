@@ -4,7 +4,9 @@ import { ContactUsService } from '@contactUs/contact-us.service';
 import { ContactUsDTO } from '@contactUs/contact-us.dto';
 
 class MockContactUsService {
-  handleContactUs = jest.fn().mockResolvedValue({ message: 'Contact message sent successfully' });
+  handleContactUs = jest
+    .fn()
+    .mockResolvedValue({ message: 'Contact message sent successfully' });
 }
 
 describe('ContactUsController', () => {
@@ -34,9 +36,9 @@ describe('ContactUsController', () => {
     it('should call the handleContactUs method of ContactUsService with correct arguments', async () => {
       const contactUsDTO: ContactUsDTO = {
         userId: 1,
-        name: "john",
-        subject: "error",
-        message: "error while booking"
+        name: 'john',
+        subject: 'error',
+        message: 'error while booking',
       };
 
       await controller.contactUs(contactUsDTO);
@@ -49,9 +51,9 @@ describe('ContactUsController', () => {
     it('should return the result from ContactUsService', async () => {
       const contactUsDTO: ContactUsDTO = {
         userId: 1,
-        name: "john",
-        subject: "error",
-        message: "error while booking"
+        name: 'john',
+        subject: 'error',
+        message: 'error while booking',
       };
       const expectedResult = { message: 'Contact message sent successfully' };
 

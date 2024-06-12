@@ -50,11 +50,13 @@ describe('ContactUsService', () => {
 
     const result = await service.handleContactUs(contactUsDTO);
 
-    expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: contactUsDTO.userId } });
+    expect(userRepository.findOne).toHaveBeenCalledWith({
+      where: { id: contactUsDTO.userId },
+    });
     expect(mailService.sendMail).toHaveBeenCalledWith(
       'johnson.selvakumar@tringapps.net',
       contactUsDTO.subject,
-      `Name: ${contactUsDTO.name}\nEmail: ${user.email}\nMessage: ${contactUsDTO.message}`
+      `Name: ${contactUsDTO.name}\nEmail: ${user.email}\nMessage: ${contactUsDTO.message}`,
     );
     expect(result).toEqual({ message: 'Contact message sent successfully' });
   });
@@ -69,6 +71,8 @@ describe('ContactUsService', () => {
 
     jest.spyOn(userRepository, 'findOne').mockResolvedValue(undefined);
 
-    await expect(service.handleContactUs(contactUsDTO)).rejects.toThrow('User not found');
+    await expect(service.handleContactUs(contactUsDTO)).rejects.toThrow(
+      'User not found',
+    );
   });
 });
