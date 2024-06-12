@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MailService } from '../mail.service';
-import { MailConfig } from '../mail.config';
+import { MailService } from '@mail/mail.service';
+import { MailConfig } from '@mail/mail.config';
 import * as nodemailer from 'nodemailer';
 
 jest.mock('nodemailer');

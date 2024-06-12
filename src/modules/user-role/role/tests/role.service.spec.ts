@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RoleService } from '../role.service';
+import { RoleService } from '@role/role.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from '../role.entity';
-import { CreateRoleDTO } from '../../dto/create-role.dto';
-import { UpdateRoleDTO } from '../../dto/update-role.dto';
+import { Role } from '@role/role.entity';
+import { CreateRoleDTO } from '@user-role/dto/create-role.dto';
+import { UpdateRoleDTO } from '@user-role/dto/update-role.dto';
 import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 

@@ -16,6 +16,16 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@auth/*": ["src/modules/authentication/*"],
+      "@contactUs/*": ["src/modules/contact-us/*"],
+      "@user/*": ["src/modules/user/*"],
+      "@mail/*": ["src/modules/mail/*"],
+      "@user-role/*": ["src/modules/user-role/*"],
+      "@role/*": ["src/modules/user-role/role/*"]
+
+
+    }
   }
 }

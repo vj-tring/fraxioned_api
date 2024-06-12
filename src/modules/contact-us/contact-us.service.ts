@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { MailService } from '../mail/mail.service';
+import { MailService } from '@mail/mail.service';
 import { ContactUsDTO } from './contact-us.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../user/user.entity';
+import { User } from '@user/user.entity';
 
 @Injectable()
 export class ContactUsService {

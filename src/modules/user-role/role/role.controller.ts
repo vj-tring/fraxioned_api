@@ -8,8 +8,8 @@ import {
   Delete,
 } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { CreateRoleDTO } from '../dto/create-role.dto';
-import { UpdateRoleDTO } from '../dto/update-role.dto';
+import { CreateRoleDTO } from '@user-role/dto/create-role.dto';
+import { UpdateRoleDTO } from '@user-role/dto/update-role.dto';
 import { Role } from './role.entity';
 import { ApiTags } from '@nestjs/swagger';
 

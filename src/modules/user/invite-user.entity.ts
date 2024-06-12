@@ -6,7 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { Role } from '../user-role/role/role.entity';
+import { Role } from '@user-role/role/role.entity';
 
 @Entity({ name: 'invite_user' })
 export class InviteUser {

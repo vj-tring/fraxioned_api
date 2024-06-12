@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ContactUsService } from '../contact-us.service';
-import { MailService } from '../../mail/mail.service';
+import { ContactUsService } from '@contactUs/contact-us.service';
+import { MailService } from '@mail/mail.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../user/user.entity';
-import { ContactUsDTO } from '../contact-us.dto';
+import { User } from '@user/user.entity';
+import { ContactUsDTO } from '@contactUs/contact-us.dto';
 
 describe('ContactUsService', () => {
   let service: ContactUsService;
