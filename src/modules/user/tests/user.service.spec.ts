@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from '../user.service';
+import { UserService } from '@user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../user.entity';
+import { User } from '@user/user.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
-import { CreateUserDTO } from '../dto/create-user.dto';
-import { UpdateUserDTO } from '../dto/update-user.dto';
+import { CreateUserDTO } from '@user/dto/create-user.dto';
+import { UpdateUserDTO } from '@user/dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 
 describe('UserService', () => {
@@ -165,23 +165,20 @@ describe('UserService', () => {
     });
   });
 
-  
   describe('remove', () => {
     it('should remove a user', async () => {
       const user = { id: 1, name: 'John Doe', email: 'john@example.com' };
       mockUserRepository.findOneBy.mockReturnValue(user);
-  
+
       await service.remove(1);
-  
+
       expect(repository.findOneBy).toHaveBeenCalledWith({ id: 1 });
       expect(repository.remove).toHaveBeenCalledWith(user);
     });
-    
+
     it('should throw a NotFoundException', async () => {
-      mockUserRepository.findOneBy.mockReturnValue(null); 
-      await expect(service.remove(999)).rejects.toThrow(NotFoundException); 
+      mockUserRepository.findOneBy.mockReturnValue(null);
+      await expect(service.remove(999)).rejects.toThrow(NotFoundException);
     });
   });
-
-  
 });

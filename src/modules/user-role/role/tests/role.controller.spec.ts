@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RoleController } from '../role.controller';
-import { RoleService } from '../role.service';
-import { CreateRoleDTO } from '../../dto/create-role.dto';
-import { UpdateRoleDTO } from '../../dto/update-role.dto';
-import { Role } from '../role.entity';
+import { RoleController } from '@role/role.controller';
+import { RoleService } from '@role/role.service';
+import { CreateRoleDTO } from '@user-role/dto/create-role.dto';
+import { UpdateRoleDTO } from '@user-role/dto/update-role.dto';
+import { Role } from '@role/role.entity';
 
 describe('RoleController', () => {
   let controller: RoleController;
@@ -91,7 +91,6 @@ describe('RoleController', () => {
         createdAt: expect.any(Date),
         updatedBy: 0,
         updatedAt: expect.any(Date),
-
       };
       const result = await controller.createRole(createRoleDto);
       expect(result).toEqual({
@@ -130,7 +129,6 @@ describe('RoleController', () => {
         },
       ];
       jest.spyOn(roleService, 'getRoles').mockResolvedValue(roles);
-
 
       const result = await controller.getRoles();
       expect(result).toEqual([
@@ -190,7 +188,7 @@ describe('RoleController', () => {
       const roleId = 1;
       const updateRoleDto: UpdateRoleDTO = {
         roleName: 'New Admin',
-        updatedBy: 0
+        updatedBy: 0,
       };
       const updatedRole: Role = {
         id: roleId,
@@ -200,7 +198,6 @@ describe('RoleController', () => {
         createdAt: expect.any(Date),
         updatedBy: 0,
         updatedAt: expect.any(Date),
-
       };
       const result = await controller.updateRole(roleId, updateRoleDto);
       expect(result).toEqual({
@@ -212,7 +209,10 @@ describe('RoleController', () => {
         updatedBy: 0,
         updatedAt: expect.any(Date),
       });
-      expect(roleService.updateRole).toHaveBeenCalledWith(roleId, updateRoleDto);
+      expect(roleService.updateRole).toHaveBeenCalledWith(
+        roleId,
+        updateRoleDto,
+      );
     });
   });
 

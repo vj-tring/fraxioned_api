@@ -1,16 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationService } from '../authentication.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../../user/user.entity';
-import { Session } from '../../user/session.entity';
-import { Role } from '../../user-role/role/role.entity';
-import { UserRole } from '../../user-role/user-role.entity';
-import { InviteUser } from '../../user/invite-user.entity';
-import { MailService } from '../../mail/mail.service';
+import { User } from '@user/user.entity';
+import { Session } from '@user/session.entity';
+import { Role } from '@user-role/role/role.entity';
+import { UserRole } from '@user-role/user-role.entity';
+import { InviteUser } from '@user/invite-user.entity';
+import { MailService } from '@mail/mail.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 

@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ContactUsController } from '../contact-us.controller';
-import { ContactUsService } from '../contact-us.service';
-import { ContactUsDTO } from '../contact-us.dto';
+import { ContactUsController } from '@contactUs/contact-us.controller';
+import { ContactUsService } from '@contactUs/contact-us.service';
+import { ContactUsDTO } from '@contactUs/contact-us.dto';
 
-// Mock ContactUsService
 class MockContactUsService {
-  handleContactUs = jest.fn().mockResolvedValue({ message: 'Contact message sent successfully' });
+  handleContactUs = jest
+    .fn()
+    .mockResolvedValue({ message: 'Contact message sent successfully' });
 }
 
 describe('ContactUsController', () => {
@@ -18,13 +19,13 @@ describe('ContactUsController', () => {
       providers: [
         {
           provide: ContactUsService,
-          useClass: MockContactUsService, // Use the mocked ContactUsService
+          useClass: MockContactUsService,
         },
       ],
     }).compile();
 
     controller = module.get<ContactUsController>(ContactUsController);
-    contactUsService = module.get<ContactUsService>(ContactUsService); // Ensure correct service token here
+    contactUsService = module.get<ContactUsService>(ContactUsService);
   });
 
   it('should be defined', () => {
@@ -33,35 +34,31 @@ describe('ContactUsController', () => {
 
   describe('contactUs', () => {
     it('should call the handleContactUs method of ContactUsService with correct arguments', async () => {
-      // Arrange
       const contactUsDTO: ContactUsDTO = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'This is a test message',
+        userId: 1,
+        name: 'john',
+        subject: 'error',
+        message: 'error while booking',
       };
 
-      // Act
       await controller.contactUs(contactUsDTO);
 
-      // Assert
       expect(contactUsService.handleContactUs).toHaveBeenCalledWith(
         contactUsDTO,
       );
     });
 
     it('should return the result from ContactUsService', async () => {
-      // Arrange
       const contactUsDTO: ContactUsDTO = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        message: 'This is a test message',
+        userId: 1,
+        name: 'john',
+        subject: 'error',
+        message: 'error while booking',
       };
       const expectedResult = { message: 'Contact message sent successfully' };
 
-      // Act
       const result = await controller.contactUs(contactUsDTO);
 
-      // Assert
       expect(result).toEqual(expectedResult);
     });
   });

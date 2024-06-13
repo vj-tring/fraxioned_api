@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RoleService } from '../role.service';
+import { RoleService } from '@role/role.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from '../role.entity';
-import { CreateRoleDTO } from '../../dto/create-role.dto';
-import { UpdateRoleDTO } from '../../dto/update-role.dto';
+import { Role } from '@role/role.entity';
+import { CreateRoleDTO } from '@user-role/dto/create-role.dto';
+import { UpdateRoleDTO } from '@user-role/dto/update-role.dto';
 import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
@@ -15,7 +15,7 @@ const createMockRepository = <T = any>(): MockRepository<T> => ({
   save: jest.fn(),
   remove: jest.fn(),
   delete: jest.fn(),
-  create: jest.fn(), // Add the create method to the mock repository
+  create: jest.fn(),
 });
 
 describe('RoleService', () => {
@@ -112,14 +112,18 @@ describe('RoleService', () => {
 
       const result = await service.getRoleById(roleId);
       expect(result).toEqual(role);
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id: roleId } });
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { id: roleId },
+      });
     });
 
     it('should throw NotFoundException if role not found', async () => {
       const roleId = 1;
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.getRoleById(roleId)).rejects.toThrowError(NotFoundException);
+      await expect(service.getRoleById(roleId)).rejects.toThrowError(
+        NotFoundException,
+      );
     });
   });
 
@@ -129,7 +133,7 @@ describe('RoleService', () => {
       const updateRoleDto: UpdateRoleDTO = {
         roleName: 'New Admin',
         description: 'Updated description',
-        updatedBy: 0
+        updatedBy: 0,
       };
       const existingRole: Role = {
         id: roleId,
@@ -149,7 +153,9 @@ describe('RoleService', () => {
 
       const result = await service.updateRole(roleId, updateRoleDto);
       expect(result).toEqual(updatedRole);
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id: roleId } });
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { id: roleId },
+      });
       expect(repository.save).toHaveBeenCalledWith(updatedRole);
     });
   });
@@ -161,7 +167,6 @@ describe('RoleService', () => {
         .spyOn(repository, 'delete')
         .mockResolvedValue({ affected: 1, raw: {} });
 
-
       await expect(service.deleteRole(roleId)).resolves.toBeUndefined();
       expect(repository.delete).toHaveBeenCalledWith(roleId);
     });
@@ -171,7 +176,9 @@ describe('RoleService', () => {
       jest
         .spyOn(repository, 'delete')
         .mockResolvedValue({ affected: 0, raw: {} });
-      await expect(service.deleteRole(roleId)).rejects.toThrowError(NotFoundException);
+      await expect(service.deleteRole(roleId)).rejects.toThrowError(
+        NotFoundException,
+      );
     });
   });
 });

@@ -1,17 +1,17 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../user/user.entity';
-import { Session } from '../user/session.entity';
-import { Role } from '../user-role/role/role.entity';
-import { UserRole } from '../user-role/user-role.entity';
-import { InviteUser } from '../user/invite-user.entity';
+import { User } from '@user/user.entity';
+import { Session } from '@user/session.entity';
+import { Role } from '@user-role/role/role.entity';
+import { UserRole } from '@user-role/user-role.entity';
+import { InviteUser } from '@user/invite-user.entity';
 import { InviteDTO } from './dto/invite.dto';
 import { RegisterDTO } from './dto/register.dto';
 import { LoginDTO } from './dto/login.dto';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { ResetPasswordDTO } from './dto/reset-password.dto';
-import { MailService } from '../mail/mail.service';
+import { MailService } from '@mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
