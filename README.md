@@ -1,5 +1,6 @@
+## Setting up the backend
 
-## Installation
+## Dependency installation
 
 ```bash
 $ npm install
@@ -20,7 +21,7 @@ $ npm run start:prod
 
 ## swagger UI
 
-```paste the URL in the browser
+paste the URL in the browser
 http://localhost:3001/api#
 
 
