@@ -42,3 +42,9 @@ Production Mode:
  npm run start:dev
 
 ```
+
+# Swagger UI
+
+Swagger is set up for API documentation. To access the Swagger UI, paste the following URL into your browser:
+
+http://localhost:3001/api
