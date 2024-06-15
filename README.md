@@ -1,60 +1,44 @@
-## Setting up the backend
+# NestJS Backend Setup
 
-## Dependency installation
+This project is a NestJS backend application configured with Swagger for API documentation. Below are the steps and commands to set up, run, test, and build the application.
+
+## Prerequisites
+
+- Node.js (v14.x or higher)
+- npm (v6.x or higher) or Yarn (v1.x or higher)
+- Nest CLI (optional but recommended)
+
+## Installation
+
+Install the dependencies by running:
 
 ```bash
 $ npm install
+
 ```
 
-## Running the app
+## Running the Application
+
+Development Mode
+To run the application in development mode:
 
 ```bash
-# development
 $ npm run start
 
-# watch mode
+```
+Watch Mode
+To run the application in watch mode (automatically restarts on code changes):
+
+```bash
 $ npm run start:dev
 
-# production mode
-$ npm run start:prod
 ```
-
-## swagger UI
-
-paste the URL in the browser
-http://localhost:3001/api#
+Production Mode
+To run the application in production mode:
 
 
-## Tests
 
 ```bash
-# unit tests
-$ npm run test
+$ npm run start:dev
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
-
-## Building the app
-
-```bash
-# Production
-$ npm run build
-
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
