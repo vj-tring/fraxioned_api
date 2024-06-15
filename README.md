@@ -2,11 +2,13 @@
 
 This project is a NestJS backend application configured with Swagger for API documentation. Below are the steps and commands to set up, run, test, and build the application.
 
+
 ## Prerequisites
 
 - Node.js (v14.x or higher)
 - npm (v6.x or higher) or Yarn (v1.x or higher)
 - Nest CLI (optional but recommended)
+
 
 ## Installation
 
@@ -17,7 +19,7 @@ Install the dependencies by running:
 
 ```
 
-Database Configuration
+## Database Configuration
 
 The database for the application can be configured using properties in the db.config.ts. 
 
@@ -37,10 +39,9 @@ export const dbConfig = {
 ```
 
 
-
 ## Running the Application
 
-Development Mode:
+**Development Mode**
 
 To run the application in development mode:
 
@@ -48,7 +49,7 @@ To run the application in development mode:
  npm run start
 
 ```
-Watch Mode:
+**Watch Mode**
 
 To run the application in watch mode (automatically restarts on code changes):
 
@@ -56,27 +57,26 @@ To run the application in watch mode (automatically restarts on code changes):
  npm run start:dev
 
 ```
-Production Mode:
+**Production Mode**
 
 To run the application in production mode:
-
-
 
 ```bash
  npm run start:dev
 
 ```
 
-# Swagger UI
+
+## Swagger UI
 
 Swagger is set up for API documentation. To access the Swagger UI, paste the following URL into your browser:
 
 http://localhost:3001/api
 
 
-# Testing the Application
+## Testing the Application
 
-Unit Tests
+**Unit Tests**
 
 To run the unit tests:
 
@@ -85,7 +85,7 @@ To run the unit tests:
 
 ```
 
-End-to-End (e2e) Tests
+**End-to-End (e2e) Tests**
 
 To run the e2e tests:
 
@@ -94,7 +94,7 @@ To run the e2e tests:
 
 ```
 
-Test Coverage
+**Test Coverage**
 
 To generate the test coverage report:
 
@@ -103,7 +103,7 @@ To generate the test coverage report:
 
 ```
 
-# Building the Application
+## Building the Application
 
 To build the application for production:
 
@@ -112,9 +112,9 @@ To build the application for production:
 
 ```
 
-# Common NestJS Commands
+## Common NestJS Commands
 
-Generating a Module
+**Generating a Module**
 
 To generate a new module:
 
@@ -123,7 +123,7 @@ To generate a new module:
 
 ```
 
-Generating a Service
+**Generating a Service**
 
 To generate a new service:
 
@@ -132,7 +132,7 @@ To generate a new service:
 
 ```
 
-Generating a Controller
+**Generating a Controller**
 
 To generate a new controller:
 
@@ -141,7 +141,7 @@ To generate a new controller:
 
 ```
 
-# Updating Dependencies
+## Updating Dependencies
 
 To update the dependencies to their latest versions:
 
@@ -149,3 +149,7 @@ To update the dependencies to their latest versions:
  npm update
 
 ```
+
+
+## Thank You! 
+## Happy Backend
