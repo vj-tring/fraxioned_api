@@ -151,5 +151,4 @@ To update the dependencies to their latest versions:
 ```
 
 
-## Thank You! 
-## Happy Backend
+# Happy Backend
