@@ -23,7 +23,9 @@
       "@user/*": ["src/modules/user/*"],
       "@mail/*": ["src/modules/mail/*"],
       "@user-role/*": ["src/modules/user-role/*"],
-      "@role/*": ["src/modules/user-role/role/*"]
+      "@role/*": ["src/modules/user-role/role/*"],
+      "@logger/*": ["src/modules/logger/*"]
+
 
 
     }

@@ -4,9 +4,10 @@ import { ContactUsController } from './contact-us.controller';
 import { MailModule } from '@mail/mail.module';
 import { User } from '@user/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggerModule } from '@logger/logger.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), MailModule],
+  imports: [TypeOrmModule.forFeature([User]), MailModule, LoggerModule],
   providers: [ContactUsService],
   controllers: [ContactUsController],
 })

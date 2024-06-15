@@ -10,6 +10,7 @@ import { MailService } from '@mail/mail.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { HttpException } from '@nestjs/common';
+import { LoggerService } from '../../logger/logger.service';
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
@@ -24,6 +25,11 @@ const createMockMailService = (): Partial<MailService> => ({
   sendMail: jest.fn(),
 });
 
+const createMockLoggerService = (): Partial<LoggerService> => ({
+  log: jest.fn(),
+  error: jest.fn(),
+});
+
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let userRepository: MockRepository;
@@ -32,6 +38,7 @@ describe('AuthenticationService', () => {
   let userRoleRepository: MockRepository;
   let inviteUserRepository: MockRepository;
   let mailService: Partial<MailService>;
+  let logger: Partial<LoggerService>;
 
   beforeEach(async () => {
     userRepository = createMockRepository();
@@ -40,6 +47,7 @@ describe('AuthenticationService', () => {
     userRoleRepository = createMockRepository();
     inviteUserRepository = createMockRepository();
     mailService = createMockMailService();
+    logger = createMockLoggerService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -53,6 +61,7 @@ describe('AuthenticationService', () => {
           useValue: inviteUserRepository,
         },
         { provide: MailService, useValue: mailService },
+        { provide: LoggerService, useValue: logger },
       ],
     }).compile();
 
@@ -111,18 +120,22 @@ describe('AuthenticationService', () => {
         invitedBy: 1,
       });
 
-      expect(saveSpy).toBeCalled();
-      expect(sendMailSpy).toBeCalled();
+      expect(saveSpy).toHaveBeenCalledTimes(1);
+      expect(sendMailSpy).toHaveBeenCalledTimes(1);
+      expect(logger.log).toHaveBeenCalledWith('Invite sent to test@test.com');
     });
   });
 
   describe('register', () => {
     it('should throw an error if phone number already exists', async () => {
-      inviteUserRepository.findOne.mockResolvedValue(null);
+      userRepository.findOne.mockResolvedValue({
+        id: 1,
+        phone: '1234567890',
+      });
 
       await expect(
         service.register({
-          inviteToken: 'invalid',
+          inviteToken: 'valid',
           username: 'test',
           password: 'pass',
           phone: '1234567890',
@@ -208,8 +221,9 @@ describe('AuthenticationService', () => {
         imageUrl: '',
       });
 
-      expect(saveUserRoleSpy).toBeCalled();
-      expect(removeInviteUserSpy).toBeCalled();
+      expect(saveUserRoleSpy).toHaveBeenCalledTimes(1);
+      expect(removeInviteUserSpy).toHaveBeenCalledTimes(1);
+      expect(logger.log).toHaveBeenCalledWith('User registered with email test@test.com');
     });
   });
 
@@ -247,8 +261,9 @@ describe('AuthenticationService', () => {
         password: 'pass',
       });
 
-      expect(saveSessionSpy).toBeCalled();
+      expect(saveSessionSpy).toHaveBeenCalledTimes(1);
       expect(result).toHaveProperty('message', 'Login successful');
+      expect(logger.log).toHaveBeenCalledWith('User test@test.com logged in successfully');
     });
   });
 
@@ -272,72 +287,74 @@ describe('AuthenticationService', () => {
 
       await service.forgotPassword({ email: 'test@test.com' });
 
-      expect(saveUserSpy).toBeCalled();
-      expect(sendMailSpy).toBeCalled();
+      expect(saveUserSpy).toHaveBeenCalledTimes(1);
+      expect(sendMailSpy).toHaveBeenCalledTimes(1);
+      expect(logger.log).toHaveBeenCalledWith('Password reset email sent to test@test.com');
     });
   });
 
   describe('resetPassword', () => {
     it('should throw an error if reset token is invalid', async () => {
       userRepository.findOne.mockResolvedValue(null);
-
+  
       await expect(
-        service.resetPassword('invalid', { newPassword: 'newpass' }),
+        service.resetPassword('invalidToken', { newPassword: 'newpass' }),
       ).rejects.toThrow(HttpException);
     });
-
+  
     it('should throw an error if reset token is expired', async () => {
       userRepository.findOne.mockResolvedValue({
         resetTokenExpires: new Date(Date.now() - 1000),
       });
-
+  
       await expect(
-        service.resetPassword('expired', { newPassword: 'newpass' }),
+        service.resetPassword('expiredToken', { newPassword: 'newpass' }),
       ).rejects.toThrow(HttpException);
     });
-
+  
     it('should reset password successfully', async () => {
-      userRepository.findOne.mockResolvedValue({
+      const user = {
         id: 1,
         email: 'test@test.com',
         resetTokenExpires: new Date(Date.now() + 1000),
+      };
+      userRepository.findOne.mockResolvedValue(user);
+  
+      const saveSpy = jest.spyOn(userRepository, 'save');
+  
+      await service.resetPassword('validToken', { newPassword: 'newpass' });
+  
+      expect(saveSpy).toHaveBeenCalledTimes(1);
+      expect(userRepository.save).toHaveBeenCalledWith({
+        ...user,
+        password: expect.any(String),
+        resetToken: null,
+        resetTokenExpires: null,
       });
-
-      const saveUserSpy = jest.spyOn(userRepository, 'save');
-
-      const result = await service.resetPassword('valid', {
-        newPassword: 'newpass',
-      });
-
-      expect(saveUserSpy).toBeCalled();
-      expect(result).toHaveProperty(
-        'message',
-        'Password has been reset successfully',
-      );
+      expect(logger.log).toHaveBeenCalledWith(`Password reset successfully for ${user.email}`);
     });
   });
 
   describe('logout', () => {
     it('should throw an error if session token is invalid', async () => {
       sessionRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.logout('invalidToken')).rejects.toThrow(
-        HttpException,
-      );
+  
+      await expect(service.logout('invalidToken')).rejects.toThrow(HttpException);
     });
-
+  
     it('should logout successfully', async () => {
-      sessionRepository.findOne.mockResolvedValue({
-        id: 1,
-        token: 'validToken',
-      });
-
-      const deleteSessionSpy = jest.spyOn(sessionRepository, 'delete');
-
+      const session = { token: 'validToken' };
+      sessionRepository.findOne.mockResolvedValue(session);
+  
+      const deleteSpy = jest.spyOn(sessionRepository, 'delete');
+  
       const result = await service.logout('validToken');
-
-      expect(deleteSessionSpy).toBeCalled();
-      expect(result).toHaveProperty('message', 'Logout successful');
+  
+      expect(deleteSpy).toHaveBeenCalledTimes(1);
+      expect(deleteSpy).toHaveBeenCalledWith({ token: 'validToken' });
+      expect(result).toEqual({ message: 'Logout successful' });
+      expect(logger.log).toHaveBeenCalledWith(`User logged out with token validToken`);
     });
   });
+  
 });

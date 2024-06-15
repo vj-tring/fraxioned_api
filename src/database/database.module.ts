@@ -7,6 +7,7 @@ import { Role } from '@user-role/role/role.entity';
 import { UserRole } from '@user-role/user-role.entity';
 import { InviteUser } from '@user/invite-user.entity';
 import { MailConfig } from '@mail/mail.config';
+import { QueryLogger } from '@logger/query-logger';
 
 @Module({
   imports: [
@@ -19,8 +20,16 @@ import { MailConfig } from '@mail/mail.config';
       database: dbConfig.database,
       entities: [User, Session, Role, UserRole, InviteUser],
       synchronize: false,
+      logging: true,
+      logger: new QueryLogger(),
     }),
-    TypeOrmModule.forFeature([User, Session, Role, UserRole, InviteUser]),
+    TypeOrmModule.forFeature([
+      User,
+      Session,
+      Role,
+      UserRole,
+      InviteUser,
+    ]),
   ],
   providers: [MailConfig],
   exports: [TypeOrmModule],
