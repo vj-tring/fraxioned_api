@@ -17,6 +17,24 @@ Install the dependencies by running:
 
 ```
 
+Database Configuration
+
+The database for the application can be configured using properties in the db.config.ts. 
+
+got to path "src/database/config/db.config.ts"
+
+change the properties for your db connection.
+
+export const dbConfig = {
+  host: '',
+  port: 3306,
+  username: '',
+  password: '',
+  database: '',
+};
+
+
+
 ## Running the Application
 
 Development Mode:
@@ -51,3 +69,80 @@ To run the application in production mode:
 Swagger is set up for API documentation. To access the Swagger UI, paste the following URL into your browser:
 
 http://localhost:3001/api
+
+
+# Testing the Application
+
+Unit Tests
+
+To run the unit tests:
+
+```bash
+ npm run test
+
+```
+
+End-to-End (e2e) Tests
+
+To run the e2e tests:
+
+```bash
+ npm run test:e2e
+
+```
+
+Test Coverage
+
+To generate the test coverage report:
+
+```bash
+ npm run test:cov
+
+```
+
+# Building the Application
+
+To build the application for production:
+
+```bash
+ npm run build
+
+```
+
+# Common NestJS Commands
+
+Generating a Module
+
+To generate a new module:
+
+```bash
+ nest g module <module-name>
+
+```
+
+Generating a Service
+
+To generate a new service:
+
+```bash
+ nest g service <service-name>
+
+```
+
+Generating a Controller
+
+To generate a new controller:
+
+```bash
+ nest g controller <controller-name>
+
+```
+
+# Updating Dependencies
+
+To update the dependencies to their latest versions:
+
+```bash
+ npm update
+
+```
