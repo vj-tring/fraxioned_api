@@ -21,17 +21,20 @@ Database Configuration
 
 The database for the application can be configured using properties in the db.config.ts. 
 
-got to path "src/database/config/db.config.ts"
+- got to path "src/database/config/db.config.ts"
 
-change the properties for your db connection.
+- change the properties values with your connection params. 
 
+```
 export const dbConfig = {
+
   host: '',
   port: 3306,
   username: '',
   password: '',
   database: '',
 };
+```
 
 
 
