@@ -20,22 +20,22 @@ Install the dependencies by running:
 ## Running the Application
 
 Development Mode
-To run the application in development mode:
+(To run the application in development mode:)
 
 ```bash
  npm run start
 
 ```
 Watch Mode
-To run the application in watch mode (automatically restarts on code changes):
-
+(To run the application in watch mode (automatically restarts on code changes):
+)
 ```bash
  npm run start:dev
 
 ```
 Production Mode
-To run the application in production mode:
-
+(To run the application in production mode:
+)
 
 
 ```bash
