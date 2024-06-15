@@ -13,7 +13,7 @@ This project is a NestJS backend application configured with Swagger for API doc
 Install the dependencies by running:
 
 ```bash
-$ npm install
+ npm install
 
 ```
 
@@ -23,14 +23,14 @@ Development Mode
 To run the application in development mode:
 
 ```bash
-$ npm run start
+ npm run start
 
 ```
 Watch Mode
 To run the application in watch mode (automatically restarts on code changes):
 
 ```bash
-$ npm run start:dev
+ npm run start:dev
 
 ```
 Production Mode
@@ -39,6 +39,6 @@ To run the application in production mode:
 
 
 ```bash
-$ npm run start:dev
+ npm run start:dev
 
 ```
