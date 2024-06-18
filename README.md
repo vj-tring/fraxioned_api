@@ -1,73 +1,154 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# NestJS Backend Setup
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This project is a NestJS backend application configured with Swagger for API documentation. Below are the steps and commands to set up, run, test, and build the application.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Prerequisites
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Node.js (v14.x or higher)
+- npm (v6.x or higher) or Yarn (v1.x or higher)
+- Nest CLI (optional but recommended)
+
 
 ## Installation
 
-```bash
-$ npm install
-```
-
-## Running the app
+Install the dependencies by running:
 
 ```bash
-# development
-$ npm run start
+ npm install
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
-## Test
+## Database Configuration
+
+The database for the application can be configured using properties in the db.config.ts. 
+
+- got to path "src/database/config/db.config.ts"
+
+- change the properties values with your connection params. 
+
+```
+export const dbConfig = {
+
+  host: '',
+  port: 3306,
+  username: '',
+  password: '',
+  database: '',
+};
+```
+
+
+## Running the Application
+
+**Development Mode**
+
+To run the application in development mode:
 
 ```bash
-# unit tests
-$ npm run test
+ npm run start
 
-# e2e tests
-$ npm run test:e2e
+```
+**Watch Mode**
 
-# test coverage
-$ npm run test:cov
+To run the application in watch mode (automatically restarts on code changes):
+
+```bash
+ npm run start:dev
+
+```
+**Production Mode**
+
+To run the application in production mode:
+
+```bash
+ npm run start:dev
+
 ```
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Swagger UI
 
-## Stay in touch
+Swagger is set up for API documentation. To access the Swagger UI, paste the following URL into your browser:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+http://localhost:3001/api
 
-## License
 
-Nest is [MIT licensed](LICENSE).
+## Testing the Application
+
+**Unit Tests**
+
+To run the unit tests:
+
+```bash
+ npm run test
+
+```
+
+**End-to-End (e2e) Tests**
+
+To run the e2e tests:
+
+```bash
+ npm run test:e2e
+
+```
+
+**Test Coverage**
+
+To generate the test coverage report:
+
+```bash
+ npm run test:cov
+
+```
+
+## Building the Application
+
+To build the application for production:
+
+```bash
+ npm run build
+
+```
+
+## Common NestJS Commands
+
+**Generating a Module**
+
+To generate a new module:
+
+```bash
+ nest g module <module-name>
+
+```
+
+**Generating a Service**
+
+To generate a new service:
+
+```bash
+ nest g service <service-name>
+
+```
+
+**Generating a Controller**
+
+To generate a new controller:
+
+```bash
+ nest g controller <controller-name>
+
+```
+
+## Updating Dependencies
+
+To update the dependencies to their latest versions:
+
+```bash
+ npm update
+
+```
+
+
+# Happy Backend
