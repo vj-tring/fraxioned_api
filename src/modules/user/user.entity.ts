@@ -11,6 +11,12 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
+  @Column({ name: 'first_name', default: '' })
+  firstName: string;
+
+  @Column({ name: 'last_name', default: '' })
+  lastName: string;
+
   @Column({ name: 'username', default: '' })
   username: string;
 

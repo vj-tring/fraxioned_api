@@ -104,6 +104,8 @@ export class AuthenticationService {
     }
 
     const user = new User();
+    user.firstName = registerDTO.firstName;
+    user.lastName = registerDTO.lastName;
     user.email = inviteUser.email;
     user.username = registerDTO.username;
     user.phone = registerDTO.phone;
