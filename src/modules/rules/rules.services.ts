@@ -29,6 +29,7 @@ export class RulesEngineService {
 
     return { events, notSatisfiedConditions: conditionResults };
   }
+  
   async run1(facts: any) {
     const { events } = await this.engine.run(facts);
     return events;
@@ -95,7 +96,6 @@ export class RulesEngineService {
         },
         event: {
           type: 'property-validation',
-
           params: {
             message: 'Property details are valid',
             property: 'The Crown Jewel',
@@ -127,40 +127,11 @@ export class RulesEngineService {
         },
       }),
     ];
- 
-    
+
     const filteredRules = rules.filter((x) => x.name == propertyName);
     filteredRules.forEach((rule) => this.engine.addRule(rule));
   }
 
-  private initializeRules() {
-    const rules: Rule[] = [
-      new Rule({
-        conditions: {
-          all: [
-            {
-              fact: 'age',
-              operator: 'greaterThanInclusive',
-              value: 18,
-            },
-            {
-              fact: 'country',
-              operator: 'equal',
-              value: 'USA',
-            },
-          ],
-        },
-        event: {
-          type: 'content-access',
-          params: {
-            message: 'User is allowed to access content',
-          },
-        },
-      }),
-    ];
-
-    rules.forEach((rule) => this.addRule(rule));
-  }
   private initializeBusinessRules() {
     const rules: Rule[] = [
       new Rule({
