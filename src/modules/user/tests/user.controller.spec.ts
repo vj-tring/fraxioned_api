@@ -54,6 +54,8 @@ describe('UserController', () => {
   describe('create', () => {
     it('should create a user', async () => {
       const dto: CreateUserDTO = {
+        firstName: 'John',
+        lastName: 'Doe',
         username: 'John Doe',
         email: 'john@example.com',
         phone: '',
@@ -104,6 +106,8 @@ describe('UserController', () => {
     it('should update a user', async () => {
       const id = 1;
       const dto: UpdateUserDTO = {
+        firstName: 'John',
+        lastName: 'Doe',
         username: 'John Doe Updated',
         email: 'john_updated@example.com',
         id: 0,
