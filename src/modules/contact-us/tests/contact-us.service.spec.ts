@@ -32,7 +32,7 @@ describe('ContactUsService', () => {
           provide: LoggerService,
           useValue: {
             log: jest.fn(),
-            error: jest.fn(), 
+            error: jest.fn(),
           },
         },
       ],
@@ -84,7 +84,9 @@ describe('ContactUsService', () => {
 
     jest.spyOn(userRepository, 'findOne').mockResolvedValue(undefined);
 
-    await expect(service.handleContactUs(contactUsDTO)).rejects.toThrow(HttpException);
+    await expect(service.handleContactUs(contactUsDTO)).rejects.toThrow(
+      HttpException,
+    );
 
     try {
       await service.handleContactUs(contactUsDTO);

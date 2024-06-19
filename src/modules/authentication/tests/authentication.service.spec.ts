@@ -231,7 +231,9 @@ describe('AuthenticationService', () => {
 
       expect(saveUserRoleSpy).toHaveBeenCalledTimes(1);
       expect(removeInviteUserSpy).toHaveBeenCalledTimes(1);
-      expect(logger.log).toHaveBeenCalledWith('User registered with email test@test.com');
+      expect(logger.log).toHaveBeenCalledWith(
+        'User registered with email test@test.com',
+      );
     });
   });
 
@@ -253,11 +255,24 @@ describe('AuthenticationService', () => {
       ).rejects.toThrow(HttpException);
     });
 
+    it('should throw an error if user account is inactive', async () => {
+      userRepository.findOne.mockResolvedValue({
+        email: 'test@test.com',
+        password: 'hashedPassword',
+        isActive: false,
+      });
+
+      await expect(
+        service.login({ email: 'test@test.com', password: 'pass' }),
+      ).rejects.toThrow('User account is inactive. Please contact support.');
+    });
+
     it('should login successfully', async () => {
       userRepository.findOne.mockResolvedValue({
         id: 1,
         email: 'test@test.com',
         password: 'hashedPassword',
+        isActive: true,
       });
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
       sessionRepository.findOne.mockResolvedValue(null);
@@ -271,7 +286,9 @@ describe('AuthenticationService', () => {
 
       expect(saveSessionSpy).toHaveBeenCalledTimes(1);
       expect(result).toHaveProperty('message', 'Login successful');
-      expect(logger.log).toHaveBeenCalledWith('User test@test.com logged in successfully');
+      expect(logger.log).toHaveBeenCalledWith(
+        'User test@test.com logged in successfully',
+      );
     });
   });
 
@@ -297,29 +314,31 @@ describe('AuthenticationService', () => {
 
       expect(saveUserSpy).toHaveBeenCalledTimes(1);
       expect(sendMailSpy).toHaveBeenCalledTimes(1);
-      expect(logger.log).toHaveBeenCalledWith('Password reset email sent to test@test.com');
+      expect(logger.log).toHaveBeenCalledWith(
+        'Password reset email sent to test@test.com',
+      );
     });
   });
 
   describe('resetPassword', () => {
     it('should throw an error if reset token is invalid', async () => {
       userRepository.findOne.mockResolvedValue(null);
-  
+
       await expect(
         service.resetPassword('invalidToken', { newPassword: 'newpass' }),
       ).rejects.toThrow(HttpException);
     });
-  
+
     it('should throw an error if reset token is expired', async () => {
       userRepository.findOne.mockResolvedValue({
         resetTokenExpires: new Date(Date.now() - 1000),
       });
-  
+
       await expect(
         service.resetPassword('expiredToken', { newPassword: 'newpass' }),
       ).rejects.toThrow(HttpException);
     });
-  
+
     it('should reset password successfully', async () => {
       const user = {
         id: 1,
@@ -327,11 +346,11 @@ describe('AuthenticationService', () => {
         resetTokenExpires: new Date(Date.now() + 1000),
       };
       userRepository.findOne.mockResolvedValue(user);
-  
+
       const saveSpy = jest.spyOn(userRepository, 'save');
-  
+
       await service.resetPassword('validToken', { newPassword: 'newpass' });
-  
+
       expect(saveSpy).toHaveBeenCalledTimes(1);
       expect(userRepository.save).toHaveBeenCalledWith({
         ...user,
@@ -339,30 +358,35 @@ describe('AuthenticationService', () => {
         resetToken: null,
         resetTokenExpires: null,
       });
-      expect(logger.log).toHaveBeenCalledWith(`Password reset successfully for ${user.email}`);
+      expect(logger.log).toHaveBeenCalledWith(
+        `Password reset successfully for ${user.email}`,
+      );
     });
   });
 
   describe('logout', () => {
     it('should throw an error if session token is invalid', async () => {
       sessionRepository.findOne.mockResolvedValue(null);
-  
-      await expect(service.logout('invalidToken')).rejects.toThrow(HttpException);
+
+      await expect(service.logout('invalidToken')).rejects.toThrow(
+        HttpException,
+      );
     });
-  
+
     it('should logout successfully', async () => {
       const session = { token: 'validToken' };
       sessionRepository.findOne.mockResolvedValue(session);
-  
+
       const deleteSpy = jest.spyOn(sessionRepository, 'delete');
-  
+
       const result = await service.logout('validToken');
-  
+
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith({ token: 'validToken' });
       expect(result).toEqual({ message: 'Logout successful' });
-      expect(logger.log).toHaveBeenCalledWith(`User logged out with token validToken`);
+      expect(logger.log).toHaveBeenCalledWith(
+        `User logged out with token validToken`,
+      );
     });
   });
-  
 });

@@ -125,7 +125,9 @@ describe('RoleService', () => {
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { id: roleId },
       });
-      expect(logger.log).toHaveBeenCalledWith(`Fetching role with ID ${roleId}`);
+      expect(logger.log).toHaveBeenCalledWith(
+        `Fetching role with ID ${roleId}`,
+      );
     });
 
     it('should throw NotFoundException if role not found and log it', async () => {
@@ -135,7 +137,9 @@ describe('RoleService', () => {
       await expect(service.getRoleById(roleId)).rejects.toThrowError(
         NotFoundException,
       );
-      expect(logger.warn).toHaveBeenCalledWith(`Role with ID ${roleId} not found`);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Role with ID ${roleId} not found`,
+      );
     });
   });
 
@@ -176,7 +180,9 @@ describe('RoleService', () => {
   describe('deleteRole', () => {
     it('should delete role and log it', async () => {
       const roleId = 1;
-      jest.spyOn(repository, 'delete').mockResolvedValue({ affected: 1, raw: {} });
+      jest
+        .spyOn(repository, 'delete')
+        .mockResolvedValue({ affected: 1, raw: {} });
 
       await expect(service.deleteRole(roleId)).resolves.toBeUndefined();
       expect(repository.delete).toHaveBeenCalledWith(roleId);
@@ -185,10 +191,16 @@ describe('RoleService', () => {
 
     it('should throw NotFoundException if role not found and log it', async () => {
       const roleId = 1;
-      jest.spyOn(repository, 'delete').mockResolvedValue({ affected: 0, raw: {} });
+      jest
+        .spyOn(repository, 'delete')
+        .mockResolvedValue({ affected: 0, raw: {} });
 
-      await expect(service.deleteRole(roleId)).rejects.toThrowError(NotFoundException);
-      expect(logger.warn).toHaveBeenCalledWith(`Role with ID ${roleId} not found`);
+      await expect(service.deleteRole(roleId)).rejects.toThrowError(
+        NotFoundException,
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Role with ID ${roleId} not found`,
+      );
     });
   });
 });

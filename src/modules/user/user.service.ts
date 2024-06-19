@@ -37,7 +37,10 @@ export class UserService {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
-      throw new HttpException(`User with ID ${id} not found`, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        `User with ID ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
     }
     return user;
   }
@@ -50,7 +53,10 @@ export class UserService {
     });
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
-      throw new HttpException(`User with ID ${id} not found`, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        `User with ID ${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
     }
     const updatedUser = await this.userRepository.save(user);
     this.logger.log(`User with ID ${updatedUser.id} updated`);
