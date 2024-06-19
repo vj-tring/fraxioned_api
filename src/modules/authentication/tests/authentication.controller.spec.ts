@@ -64,6 +64,8 @@ describe('AuthenticationController', () => {
     it('should register a user and return a success message', async () => {
       const registerDTO: RegisterDTO = {
         inviteToken: 'some-token',
+        firstName: 'test',
+        lastName: 'user',
         username: 'testuser',
         phone: '1234567890',
         secondaryPhone: '0987654321',

@@ -135,7 +135,9 @@ describe('AuthenticationService', () => {
 
       await expect(
         service.register({
-          inviteToken: 'valid',
+          inviteToken: 'invalid',
+          firstName: 'test',
+          lastName: 'test',
           username: 'test',
           password: 'pass',
           phone: '1234567890',
@@ -157,6 +159,8 @@ describe('AuthenticationService', () => {
       await expect(
         service.register({
           inviteToken: 'invalid',
+          firstName: 'test',
+          lastName: 'test',
           username: 'test',
           password: 'pass',
           phone: '',
@@ -180,6 +184,8 @@ describe('AuthenticationService', () => {
       await expect(
         service.register({
           inviteToken: 'expired',
+          firstName: 'test',
+          lastName: 'test',
           username: 'test',
           password: 'pass',
           phone: '',
@@ -208,6 +214,8 @@ describe('AuthenticationService', () => {
 
       await service.register({
         inviteToken: 'valid',
+        firstName: 'test',
+        lastName: 'test',
         username: 'test',
         password: 'pass',
         phone: '',

@@ -72,6 +72,8 @@ describe('UserService', () => {
   describe('create', () => {
     it('should create a user', async () => {
       const createUserDTO: CreateUserDTO = {
+        firstName: 'John',
+        lastName: 'Doe',
         username: 'John Doe',
         email: 'john@example.com',
         password: 'password',
@@ -149,6 +151,8 @@ describe('UserService', () => {
   describe('update', () => {
     it('should update a user', async () => {
       const updateUserDTO: UpdateUserDTO = {
+        firstName: 'John',
+        lastName: 'Doe',
         username: 'John Doe Updated',
         id: 1,
         phone: '',
@@ -183,6 +187,8 @@ describe('UserService', () => {
       mockUserRepository.preload.mockReturnValue(null);
       await expect(
         service.update(999, {
+          firstName: 'John',
+          lastName: 'Doe',
           username: 'John Doe Updated',
           id: 0,
           phone: '',

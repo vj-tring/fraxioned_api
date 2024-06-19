@@ -4,6 +4,10 @@ export class UserDTO {
   @ApiProperty()
   id: number;
   @ApiProperty()
+  firstName: string;
+  @ApiProperty()
+  lastName: string;
+  @ApiProperty()
   username: string;
   @ApiProperty()
   phone: string;
