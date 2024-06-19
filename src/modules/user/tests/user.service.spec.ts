@@ -207,7 +207,12 @@ describe('UserService', () => {
       expect(logger.warn).toHaveBeenCalledWith('User with ID 999 not found');
 
       try {
-        await service.update(999, { username: 'John Doe Updated', id: 0, phone: '', secondaryPhone: '', email: '', secondaryEmail: '', address1: '', address2: '', state: '', city: '', zip: '', imageUrl: '', password: '' });
+        await service.update(999, {
+          firstName: '',
+          lastName: '',
+          username: 'John Doe Updated', id: 0, phone: '', secondaryPhone: '', email: '', secondaryEmail: '', address1: '', address2: '', state: '', city: '', zip: '', imageUrl: '', password: ''
+          
+        });
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
         expect(error.message).toBe('User with ID 999 not found');
