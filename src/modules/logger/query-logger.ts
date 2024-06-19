@@ -14,12 +14,22 @@ export class QueryLogger implements TypeOrmLogger {
     this.logger.info(message);
   }
 
-  logQueryError(error: string, query: string, parameters?: any[], queryRunner?: QueryRunner) {
+  logQueryError(
+    error: string,
+    query: string,
+    parameters?: any[],
+    queryRunner?: QueryRunner,
+  ) {
     const message = `Query Failed: ${query} Error: ${error}${parameters ? ` Parameters: ${JSON.stringify(parameters)}` : ''}`;
     this.logger.error(message);
   }
 
-  logQuerySlow(time: number, query: string, parameters?: any[], queryRunner?: QueryRunner) {
+  logQuerySlow(
+    time: number,
+    query: string,
+    parameters?: any[],
+    queryRunner?: QueryRunner,
+  ) {
     const message = `Query is slow: ${query} Execution time: ${time}ms${parameters ? ` Parameters: ${JSON.stringify(parameters)}` : ''}`;
     this.logger.warn(message);
   }

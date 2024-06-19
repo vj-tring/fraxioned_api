@@ -8,9 +8,10 @@ import Session from './session.entity';
 import { LoggerModule } from '@logger/logger.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Session, InviteUser]),
-  LoggerModule,
-],
+  imports: [
+    TypeOrmModule.forFeature([User, Session, InviteUser]),
+    LoggerModule,
+  ],
   providers: [UserService],
   controllers: [UserController],
 })

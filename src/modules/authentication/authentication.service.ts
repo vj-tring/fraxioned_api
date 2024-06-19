@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '@user/user.entity';
@@ -67,7 +67,9 @@ export class AuthenticationService {
         .randomBytes(50)
         .toString('hex')
         .slice(0, 100);
-      inviteUser.inviteTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      inviteUser.inviteTokenExpires = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      );
       inviteUser.invitedBy = inviteDTO.invitedBy;
 
       await this.inviteUserRepository.save(inviteUser);
@@ -143,7 +145,6 @@ export class AuthenticationService {
       throw error;
     }
 
-
     const inviteUser = await this.inviteUserRepository.findOne({
       where: { inviteToken: registerDTO.inviteToken },
     });
@@ -195,6 +196,12 @@ export class AuthenticationService {
       if (!user) {
         throw new HttpException(
           'Invalid email or password',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      if (!user.isActive) {
+        throw new HttpException(
+          'User account is inactive. Please contact support.',
           HttpStatus.UNAUTHORIZED,
         );
       }
@@ -290,9 +297,14 @@ export class AuthenticationService {
 
   async logout(token: string) {
     try {
-      const session = await this.sessionRepository.findOne({ where: { token } });
+      const session = await this.sessionRepository.findOne({
+        where: { token },
+      });
       if (!session) {
-        throw new HttpException('Invalid session token', HttpStatus.UNAUTHORIZED);
+        throw new HttpException(
+          'Invalid session token',
+          HttpStatus.UNAUTHORIZED,
+        );
       }
 
       await this.sessionRepository.delete({ token });

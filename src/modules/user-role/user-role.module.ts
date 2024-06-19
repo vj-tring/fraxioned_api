@@ -3,6 +3,6 @@ import { RoleModule } from './role/role.module';
 import { LoggerModule } from '@logger/logger.module';
 
 @Module({
-  imports: [RoleModule, LoggerModule,],
+  imports: [RoleModule, LoggerModule],
 })
 export class UserRoleModule {}

@@ -62,7 +62,7 @@ describe('UserService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks(); 
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -106,7 +106,10 @@ describe('UserService', () => {
 
       expect(logger.log).toHaveBeenCalledTimes(2);
       expect(logger.log).toHaveBeenNthCalledWith(1, 'Creating a new user');
-      expect(logger.log).toHaveBeenNthCalledWith(2, expect.stringContaining('User created with ID'));
+      expect(logger.log).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining('User created with ID'),
+      );
     });
   });
 
@@ -210,8 +213,19 @@ describe('UserService', () => {
         await service.update(999, {
           firstName: '',
           lastName: '',
-          username: 'John Doe Updated', id: 0, phone: '', secondaryPhone: '', email: '', secondaryEmail: '', address1: '', address2: '', state: '', city: '', zip: '', imageUrl: '', password: ''
-          
+          username: 'John Doe Updated',
+          id: 0,
+          phone: '',
+          secondaryPhone: '',
+          email: '',
+          secondaryEmail: '',
+          address1: '',
+          address2: '',
+          state: '',
+          city: '',
+          zip: '',
+          imageUrl: '',
+          password: '',
         });
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { MailConfig } from './mail.config';
-import { LoggerService } from '@logger/logger.service'; 
+import { LoggerService } from '@logger/logger.service';
 
 @Injectable()
 export class MailService {
@@ -36,7 +36,7 @@ export class MailService {
       return result;
     } catch (error) {
       this.logger.error(error.stack);
-      throw error; 
+      throw error;
     }
   }
 }

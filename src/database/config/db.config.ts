@@ -5,4 +5,3 @@ export const dbConfig = {
   password: 'root',
   database: 'fraxioned',
 };
-

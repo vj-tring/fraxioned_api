@@ -4,16 +4,15 @@ import { ContactUsDTO } from './contact-us.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '@user/user.entity';
-import { LoggerService } from '../logger/logger.service'; 
+import { LoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class ContactUsService {
-
   constructor(
     private readonly mailService: MailService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly loggerService: LoggerService, 
+    private readonly loggerService: LoggerService,
   ) {}
 
   async handleContactUs(contactUsDTO: ContactUsDTO) {
@@ -35,11 +34,11 @@ export class ContactUsService {
         text,
       );
 
-      this.loggerService.log('Contact message sent successfully'); 
+      this.loggerService.log('Contact message sent successfully');
 
       return { message: 'Contact message sent successfully' };
     } catch (error) {
-      this.loggerService.error(error.stack); 
+      this.loggerService.error(error.stack);
       throw error;
     }
   }

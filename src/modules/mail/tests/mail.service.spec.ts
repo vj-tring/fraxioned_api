@@ -62,8 +62,10 @@ describe('MailService', () => {
       text,
     });
 
-    expect(loggerService.log).toHaveBeenCalledWith(`Email sent to ${to} with subject: ${subject}`);
-    expect(loggerService.error).not.toHaveBeenCalled(); 
+    expect(loggerService.log).toHaveBeenCalledWith(
+      `Email sent to ${to} with subject: ${subject}`,
+    );
+    expect(loggerService.error).not.toHaveBeenCalled();
   });
 
   it('should log an error if sending email fails', async () => {
@@ -77,6 +79,6 @@ describe('MailService', () => {
     await expect(service.sendMail(to, subject, text)).rejects.toThrow(error);
 
     expect(loggerService.error).toHaveBeenCalledWith(error.stack);
-    expect(loggerService.log).not.toHaveBeenCalled(); 
+    expect(loggerService.log).not.toHaveBeenCalled();
   });
 });
