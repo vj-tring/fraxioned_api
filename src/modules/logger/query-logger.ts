@@ -1,28 +1,12 @@
-import { Logger as NestLogger } from '@nestjs/common';
 import { Logger as TypeOrmLogger, QueryRunner } from 'typeorm';
-import * as winston from 'winston';
+import { createLogger } from '@logger/config/logger.config';
+import winston from 'winston';
 
 export class QueryLogger implements TypeOrmLogger {
   private readonly logger: winston.Logger;
 
   constructor() {
-    this.logger = winston.createLogger({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.printf(({ timestamp, level, message }) => {
-          return `${timestamp} [${level}] ${message}`;
-        }),
-      ),
-      transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({
-          filename: 'logs/error.log',
-          level: 'error',
-        }),
-        new winston.transports.File({ filename: 'logs/combined.log' }),
-      ],
-    });
+    this.logger = createLogger();
   }
 
   logQuery(query: string, parameters?: any[], queryRunner?: QueryRunner) {
