@@ -1,0 +1,58 @@
+-- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
+--
+-- Host: 192.168.1.47    Database: fraxioned
+-- ------------------------------------------------------
+-- Server version	8.0.37
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `invite_user`
+--
+
+DROP TABLE IF EXISTS `invite_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `invite_user` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `role_id` int NOT NULL,
+  `invite_token` varchar(255) NOT NULL,
+  `invite_token_expires` timestamp NOT NULL,
+  `invited_by` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `invite_user`
+--
+
+LOCK TABLES `invite_user` WRITE;
+/*!40000 ALTER TABLE `invite_user` DISABLE KEYS */;
+INSERT INTO `invite_user` VALUES (4,'ritha.s@tringapps.com',1,'9767f272bda053c33407f820250b6800602652ff14110d4d990eec83942d0a7ed0e1e016b4ec11d8d5268788191f32496871','2024-06-13 05:29:10',1,'2024-06-12 05:29:06'),(5,'jmelvinmelu113@gmail.com',1,'a9cd2d7e7216a753571061582f5964b5231c4011125230b6140924832746fd3dcad51bd58bf5fc3fc0256bc9d125ea18f8a8','2024-06-14 09:32:58',1,'2024-06-13 09:32:47'),(6,'sivabharathi8992@gmail.com',1,'b659eb081574b9e3633d349d979ccc33ed5152db0ed5fc851bac6d50fa61fe2e6ac56d9893c3b22e355f7aef307aca3ff410','2024-06-19 05:34:51',1,'2024-06-18 05:34:13'),(7,'jeffyxander.12@gmail.com',2,'44ef3e5eed7a511a36d2a537eb5eb6f88c8b806bda878b662c11a53c55c6621dc0e1b22c57c91eb13f55d622aa99502e7d31','2024-06-19 06:16:12',1,'2024-06-18 06:15:34');
+/*!40000 ALTER TABLE `invite_user` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2024-06-19 10:29:07
