@@ -33,7 +33,10 @@
     "mysql2": "^3.10.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "winston-transport": "^4.7.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -81,8 +84,8 @@
       "^@user/(.*)$": "<rootDir>/modules/user/$1",
       "^@mail/(.*)$": "<rootDir>/modules/mail/$1",
       "^@user-role/(.*)$": "<rootDir>/modules/user-role/$1",
-      "^@role/(.*)$": "<rootDir>/modules/user-role/role/$1"
+      "^@role/(.*)$": "<rootDir>/modules/user-role/role/$1",
+      "^@logger/(.*)$": "<rootDir>/modules/logger/$1"
     }
-
   }
 }

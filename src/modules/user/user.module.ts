@@ -5,9 +5,12 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { InviteUser } from './invite-user.entity';
 import Session from './session.entity';
+import { LoggerModule } from '@logger/logger.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Session, InviteUser])],
+  imports: [TypeOrmModule.forFeature([User, Session, InviteUser]),
+  LoggerModule,
+],
   providers: [UserService],
   controllers: [UserController],
 })
