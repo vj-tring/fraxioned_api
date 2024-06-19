@@ -141,6 +141,16 @@ To generate a new controller:
 
 ```
 
+**Generating a new resource**
+
+To create a new resource, simply run the following command in the root directory of your project:
+
+```bash
+ nest g resource
+
+```
+command not only generates all the NestJS building blocks (module, service, controller classes) but also an entity class, DTO classes as well as the testing (.spec) files.
+
 ## Updating Dependencies
 
 To update the dependencies to their latest versions:
