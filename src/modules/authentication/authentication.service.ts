@@ -144,48 +144,6 @@ export class AuthenticationService {
       this.logger.error(error.stack);
       throw error;
     }
-
-    const inviteUser = await this.inviteUserRepository.findOne({
-      where: { inviteToken: registerDTO.inviteToken },
-    });
-    if (!inviteUser) {
-      throw new HttpException('Invalid invite token', HttpStatus.BAD_REQUEST);
-    }
-
-    if (inviteUser.inviteTokenExpires < new Date()) {
-      throw new HttpException(
-        'Invite token has expired',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const user = new User();
-    user.firstName = registerDTO.firstName;
-    user.lastName = registerDTO.lastName;
-    user.email = inviteUser.email;
-    user.username = registerDTO.username;
-    user.phone = registerDTO.phone;
-    user.secondaryPhone = registerDTO.secondaryPhone;
-    user.secondaryEmail = registerDTO.secondaryEmail;
-    user.address1 = registerDTO.address1;
-    user.address2 = registerDTO.address2;
-    user.state = registerDTO.state;
-    user.city = registerDTO.city;
-    user.zip = registerDTO.zip;
-    user.imageUrl = registerDTO.imageUrl;
-    user.password = await bcrypt.hash(registerDTO.password, 10);
-    user.isActive = true;
-
-    const savedUser = await this.userRepository.save(user);
-
-    const userRole = new UserRole();
-    userRole.userId = savedUser.id;
-    userRole.roleId = inviteUser.roleId;
-    await this.userRoleRepository.save(userRole);
-
-    await this.inviteUserRepository.remove(inviteUser);
-
-    return { message: 'User registered successfully' };
   }
 
   async login(loginDTO: LoginDTO) {
