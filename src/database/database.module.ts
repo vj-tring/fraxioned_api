@@ -18,7 +18,7 @@ import { QueryLogger } from '@logger/query-logger';
       username: dbConfig.username,
       password: dbConfig.password,
       database: dbConfig.database,
-      entities: [User, Session, Role, UserRole, InviteUser],
+      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
       synchronize: false,
       logging: true,
       logger: new QueryLogger(),

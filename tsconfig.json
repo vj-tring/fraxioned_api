@@ -25,9 +25,6 @@
       "@user-role/*": ["src/modules/user-role/*"],
       "@role/*": ["src/modules/user-role/role/*"],
       "@logger/*": ["src/modules/logger/*"]
-
-
-
     }
   }
 }
