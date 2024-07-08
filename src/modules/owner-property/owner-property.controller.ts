@@ -4,7 +4,9 @@ import { Property } from './entity/property.entity';
 import { PropertyPhoto } from './entity/property-photo.entity';
 import { OffSeasonDto } from './dto/off-season.dto';
 import { PeakSeasonDto } from './dto/peak-season.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Owner-Property')
 @Controller('api/property')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
