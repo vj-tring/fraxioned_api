@@ -7,6 +7,8 @@ import { PropertyController } from './owner-property.controller';
 import { OwnerProperty } from './entity/owner-property.entity';
 import { PropertyShareCount } from './entity/property-share-count.entity';
 import { OwnerPropertyDetail } from './entity/owner-property-detail.entity';
+import { PropertySeasonDate } from './entity/property-season-date.entity';
+import { Season } from './entity/season.entity';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { OwnerPropertyDetail } from './entity/owner-property-detail.entity';
       OwnerProperty,
       PropertyShareCount,
       OwnerPropertyDetail,
+      PropertySeasonDate,
+      Season,
     ]),
   ],
   providers: [PropertyService],

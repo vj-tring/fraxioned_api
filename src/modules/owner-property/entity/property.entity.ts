@@ -9,6 +9,7 @@ import {
 import { PropertyPhoto } from './property-photo.entity';
 import { PropertyShareCount } from './property-share-count.entity';
 import { OwnerProperty } from './owner-property.entity';
+import { PropertySeasonDate } from './property-season-date.entity';
 
 @Entity()
 export class Property {
@@ -24,6 +25,9 @@ export class Property {
   @Column({ name: 'OSAN' })
   totalNights: number;
 
+  @Column({ name: 'PSAN' })
+  peakTotalNights: number;
+
   @Column({ name: 'OSAHN' })
   totalHolidayNights: number;
 
@@ -36,4 +40,10 @@ export class Property {
 
   @OneToMany(() => OwnerProperty, (ownerProperty) => ownerProperty.property)
   ownerProperties: OwnerProperty[];
+
+  @OneToMany(
+    () => PropertySeasonDate,
+    (propertySeasonDate) => propertySeasonDate.property,
+  )
+  propertySeasonDates: PropertySeasonDate[];
 }

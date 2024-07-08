@@ -1,7 +1,7 @@
 export const dbConfig = {
-  host: 'localhost',
+  host: '192.168.1.47',
   port: 3306,
-  username: 'root',
+  username: 'admin',
   password: 'root',
   database: 'fraxioned',
 };

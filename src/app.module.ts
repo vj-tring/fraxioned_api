@@ -7,7 +7,7 @@ import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { UserRoleModule } from './modules/user-role/user-role.module';
 import { RoleModule } from './modules/user-role/role/role.module';
 import { LoggerModule } from './modules/logger/logger.module';
-import { OwnerPropertyModule } from './modules/home/owner-property.module';
+import { OwnerPropertyModule } from './modules/owner-property/owner-property.module';
 
 @Module({
   imports: [

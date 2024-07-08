@@ -3,6 +3,7 @@ import { PropertyService } from './owner-property.service';
 import { Property } from './entity/property.entity';
 import { PropertyPhoto } from './entity/property-photo.entity';
 import { OffSeasonDto } from './dto/off-season.dto';
+import { PeakSeasonDto } from './dto/peak-season.dto';
 
 @Controller('api/property')
 export class PropertyController {
@@ -24,10 +25,17 @@ export class PropertyController {
   ): Promise<Property[]> {
     return this.propertyService.getOwnerProperties(user_id);
   }
-  @Get('/owner-property-details/:userId')
+  @Get('/owner-property-details/off-season/:userId')
   async getOwnerPropertyDetailsByUserId(
     @Param('userId') userId: number,
   ): Promise<OffSeasonDto[]> {
     return this.propertyService.getOwnerPropertyDetailsByUserId(userId);
+  }
+
+  @Get('/owner-property-details/peak-season/:userId')
+  async getOwnerPropertyDetailsPeakSeason(
+    @Param('userId') userId: number,
+  ): Promise<PeakSeasonDto[]> {
+    return this.propertyService.getOwnerPropertyDetailsPeakSeason(userId);
   }
 }
