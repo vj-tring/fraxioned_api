@@ -21,22 +21,6 @@ export class OwnerPropertyService {
     private ownerPropertyDetailRepository: Repository<OwnerPropertyDetail>,
   ) {}
 
-  // async getPropertyDetailsById(propertyId: number): Promise<Property> {
-  //   return this.propertyRepository
-  //     .createQueryBuilder('property')
-  //     .leftJoinAndSelect('property.photos', 'photos')
-  //     .where('property.id = :id', { id: propertyId })
-  //     .getOne();
-  // }
-
-  // async getPropertyPhotosByPropertyId(
-  //   propertyId: number,
-  // ): Promise<PropertyPhoto[]> {
-  //   return this.propertyPhotoRepository.find({
-  //     where: { property: { id: propertyId } },
-  //   });
-  // }
-
   async getOwnerProperties(userId: number): Promise<any[]> {
     const ownerProperties = await this.ownerPropertyRepository.find({
       where: { userId },
@@ -62,9 +46,9 @@ export class OwnerPropertyService {
   ): Promise<OffSeasonDto[]> {
     const properties = await this.propertyRepository
       .createQueryBuilder('property')
-      .leftJoin('property.ownerProperties', 'ownerProperty')
-      .leftJoin('ownerProperty.ownerPropertyDetails', 'ownerPropertyDetail')
-      .leftJoin('property.propertySeasonDates', 'propertySeasonDate')
+      .innerJoin('property.ownerProperties', 'ownerProperty')
+      .innerJoin('ownerProperty.ownerPropertyDetails', 'ownerPropertyDetail')
+      .innerJoin('property.propertySeasonDates', 'propertySeasonDate')
       .where('ownerProperty.userId = :userId', { userId })
       .select([
         'property.totalNights',
@@ -113,8 +97,8 @@ export class OwnerPropertyService {
   ): Promise<PeakSeasonDto[]> {
     const properties = await this.propertyRepository
       .createQueryBuilder('property')
-      .leftJoin('property.ownerProperties', 'ownerProperty')
-      .leftJoin('property.propertySeasonDates', 'propertySeasonDate')
+      .innerJoin('property.ownerProperties', 'ownerProperty')
+      .innerJoin('property.propertySeasonDates', 'propertySeasonDate')
       .where('ownerProperty.userId = :userId', { userId })
       .select([
         'property.peakTotalNights',

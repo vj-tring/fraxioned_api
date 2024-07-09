@@ -16,7 +16,7 @@ export class PropertyService {
   async getPropertyDetailsById(propertyId: number): Promise<Property> {
     return this.propertyRepository
       .createQueryBuilder('property')
-      .leftJoinAndSelect('property.photos', 'photos')
+      .innerJoinAndSelect('property.photos', 'photos')
       .where('property.id = :id', { id: propertyId })
       .getOne();
   }
