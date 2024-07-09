@@ -10,32 +10,22 @@ import { ApiTags } from '@nestjs/swagger';
 export class OwnerPropertyController {
   constructor(private readonly propertyService: OwnerPropertyService) {}
 
-  // @Get(':id')
-  // async getPropertyDetails(@Param('id') id: number): Promise<Property> {
-  //   return this.propertyService.getPropertyDetailsById(id);
-  // }
-
-  // @Get('/photos/:id')
-  // async getPropertyPhotos(@Param('id') id: number): Promise<PropertyPhoto[]> {
-  //   return this.propertyService.getPropertyPhotosByPropertyId(id);
-  // }
-
-  @Get('/owner-property/:user_id')
+  @Get('/owner-property/:owner_id')
   async getOwnerProperties(
-    @Param('user_id') user_id: number,
+    @Param('owner_id') user_id: number,
   ): Promise<Property[]> {
     return this.propertyService.getOwnerProperties(user_id);
   }
-  @Get('/owner-property-details/off-season/:userId')
+  @Get('/owner-property-details/off-season/:ownerId')
   async getOwnerPropertyDetailsByUserId(
-    @Param('userId') userId: number,
+    @Param('ownerId') userId: number,
   ): Promise<OffSeasonDto[]> {
     return this.propertyService.getOwnerPropertyDetailsByUserId(userId);
   }
 
-  @Get('/owner-property-details/peak-season/:userId')
+  @Get('/owner-property-details/peak-season/:ownerId')
   async getOwnerPropertyDetailsPeakSeason(
-    @Param('userId') userId: number,
+    @Param('ownerId') userId: number,
   ): Promise<PeakSeasonDto[]> {
     return this.propertyService.getOwnerPropertyDetailsPeakSeason(userId);
   }
