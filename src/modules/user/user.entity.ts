@@ -56,10 +56,10 @@ export class User {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
-  @Column({ name: 'reset_token', default: '' })
+  @Column({ name: 'reset_token', nullable: true })
   resetToken: string;
 
-  @Column({ name: 'reset_token_expires', default: '' })
+  @Column({ name: 'reset_token_expires', type: 'timestamp', nullable: true })
   resetTokenExpires: Date;
 
   @Column({ name: 'last_login_time', type: 'timestamp', nullable: true })
@@ -68,7 +68,7 @@ export class User {
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @Column({ name: 'updated_by', default: '' })
+  @Column({ name: 'updated_by', type: 'timestamp', nullable: true })
   updatedBy: number;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
