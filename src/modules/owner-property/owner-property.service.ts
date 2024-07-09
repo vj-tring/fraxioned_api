@@ -9,7 +9,7 @@ import { OffSeasonDto } from './dto/off-season.dto';
 import { PeakSeasonDto } from './dto/peak-season.dto';
 
 @Injectable()
-export class PropertyService {
+export class OwnerPropertyService {
   constructor(
     @InjectRepository(Property)
     private propertyRepository: Repository<Property>,
@@ -21,21 +21,21 @@ export class PropertyService {
     private ownerPropertyDetailRepository: Repository<OwnerPropertyDetail>,
   ) {}
 
-  async getPropertyDetailsById(propertyId: number): Promise<Property> {
-    return this.propertyRepository
-      .createQueryBuilder('property')
-      .leftJoinAndSelect('property.photos', 'photos')
-      .where('property.id = :id', { id: propertyId })
-      .getOne();
-  }
+  // async getPropertyDetailsById(propertyId: number): Promise<Property> {
+  //   return this.propertyRepository
+  //     .createQueryBuilder('property')
+  //     .leftJoinAndSelect('property.photos', 'photos')
+  //     .where('property.id = :id', { id: propertyId })
+  //     .getOne();
+  // }
 
-  async getPropertyPhotosByPropertyId(
-    propertyId: number,
-  ): Promise<PropertyPhoto[]> {
-    return this.propertyPhotoRepository.find({
-      where: { property: { id: propertyId } },
-    });
-  }
+  // async getPropertyPhotosByPropertyId(
+  //   propertyId: number,
+  // ): Promise<PropertyPhoto[]> {
+  //   return this.propertyPhotoRepository.find({
+  //     where: { property: { id: propertyId } },
+  //   });
+  // }
 
   async getOwnerProperties(userId: number): Promise<any[]> {
     const ownerProperties = await this.ownerPropertyRepository.find({

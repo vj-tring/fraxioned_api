@@ -8,6 +8,7 @@ import { UserRoleModule } from './modules/user-role/user-role.module';
 import { RoleModule } from './modules/user-role/role/role.module';
 import { LoggerModule } from './modules/logger/logger.module';
 import { OwnerPropertyModule } from './modules/owner-property/owner-property.module';
+import { PropertyModule } from './modules/property/property.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { OwnerPropertyModule } from './modules/owner-property/owner-property.mod
     RoleModule,
     LoggerModule,
     OwnerPropertyModule,
+    PropertyModule,
   ],
 })
 export class AppModule {}
