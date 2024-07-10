@@ -19,8 +19,8 @@ describe('OwnerPropertyController', () => {
 
   const mockPropertyService = {
     getOwnerProperties: jest.fn(),
-    getOwnerPropertyDetailsByUserId: jest.fn(),
-    getOwnerPropertyDetailsPeakSeason: jest.fn(),
+    getOwnerPropertyOffSeasonDetails: jest.fn(),
+    getOwnerPropertyPeakSeasonDetails: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -158,14 +158,14 @@ describe('OwnerPropertyController', () => {
         },
       ];
       jest
-        .spyOn(service, 'getOwnerPropertyDetailsByUserId')
+        .spyOn(service, 'getOwnerPropertyOffSeasonDetails')
         .mockResolvedValue(result);
 
-      expect(await controller.getOwnerPropertyDetailsByUserId(1)).toBe(result);
+      expect(await controller.getOwnerPropertyOffSeasonDetails(1)).toBe(result);
     });
   });
 
-  describe('getOwnerPropertyDetailsPeakSeason', () => {
+  describe('getOwnerPropertyPeakSeasonDetails', () => {
     it('should return an array of peak-season details', async () => {
       const result: PeakSeasonDto[] = [
         {
@@ -179,10 +179,10 @@ describe('OwnerPropertyController', () => {
         },
       ];
       jest
-        .spyOn(service, 'getOwnerPropertyDetailsPeakSeason')
+        .spyOn(service, 'getOwnerPropertyPeakSeasonDetails')
         .mockResolvedValue(result);
 
-      expect(await controller.getOwnerPropertyDetailsPeakSeason(1)).toBe(
+      expect(await controller.getOwnerPropertyPeakSeasonDetails(1)).toBe(
         result,
       );
     });

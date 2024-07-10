@@ -7,6 +7,7 @@ import { PropertyPhoto } from '../entity/property-photo.entity';
 import { OwnerProperty } from '../entity/owner-property.entity';
 import { OwnerPropertyDetail } from '../entity/owner-property-detail.entity';
 
+
 describe('OwnerPropertyService', () => {
   let service: OwnerPropertyService;
   let propertyRepository: Repository<Property>;
@@ -109,7 +110,7 @@ describe('OwnerPropertyService', () => {
         getMany: jest.fn().mockResolvedValue(properties),
       } as any);
 
-      const result = await service.getOwnerPropertyDetailsByUserId(1);
+      const result = await service.getOwnerPropertyOffSeasonDetails(1);
       expect(result).toEqual([
         {
           totalNights: 20,
@@ -146,11 +147,11 @@ describe('OwnerPropertyService', () => {
         getMany: jest.fn().mockResolvedValue(properties),
       } as any);
 
-      jest.spyOn<any, any>(service, 'mockNightStaying').mockReturnValue(5);
-      jest.spyOn<any, any>(service, 'mockNightRenting').mockReturnValue(3);
-      jest.spyOn<any, any>(service, 'mockNightsUndecided').mockReturnValue(2);
+      jest.spyOn<any, any>(service, 'nightsStaying').mockReturnValue(5);
+      jest.spyOn<any, any>(service, 'nightsRenting').mockReturnValue(3);
+      jest.spyOn<any, any>(service, 'nightsUndecided').mockReturnValue(2);
 
-      const result = await service.getOwnerPropertyDetailsPeakSeason(1);
+      const result = await service.getOwnerPropertyPeakSeasonDetails(1);
       expect(result).toEqual([
         {
           peakTotalNights: 15,

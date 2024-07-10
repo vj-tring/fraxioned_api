@@ -41,7 +41,7 @@ export class OwnerPropertyService {
     }));
   }
 
-  async getOwnerPropertyDetailsByUserId(
+  async getOwnerPropertyOffSeasonDetails(
     userId: number,
   ): Promise<OffSeasonDto[]> {
     const properties = await this.propertyRepository
@@ -94,7 +94,7 @@ export class OwnerPropertyService {
     return offSeasonDtos;
   }
 
-  async getOwnerPropertyDetailsPeakSeason(
+  async getOwnerPropertyPeakSeasonDetails(
     userId: number,
   ): Promise<PeakSeasonDto[]> {
     const properties = await this.propertyRepository
@@ -118,9 +118,9 @@ export class OwnerPropertyService {
         new Date(propertySeasonDate.season_end);
       }
 
-      const nightStaying = this.mockNightStaying();
-      const nightRenting = this.mockNightRenting();
-      const nightsUndecided = this.mockNightsUndecided(
+      const nightStaying = this.nightsStaying();
+      const nightRenting = this.nightsRenting();
+      const nightsUndecided = this.nightsUndecided(
         nightStaying,
         nightRenting,
       );
@@ -138,16 +138,17 @@ export class OwnerPropertyService {
     });
     return peakSeasonDtos;
   }
-  //to-do
-  private mockNightStaying(): number {
+  // TODO : Need to remove random number generation and get Night Staying details from OwnerRez API
+  private nightsStaying(): number {
     return Math.floor(Math.random() * 10) + 1;
   }
 
-  private mockNightRenting(): number {
+ // TODO : Need to remove random number generation and get Night Renting details from OwnerRez API
+  private nightsRenting(): number {
     return Math.floor(Math.random() * 10) + 1;
   }
 
-  private mockNightsUndecided(
+  private nightsUndecided(
     nightStaying: number,
     nightRenting: number,
   ): number {
