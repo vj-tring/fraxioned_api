@@ -54,6 +54,7 @@ describe('OwnerPropertyService', () => {
       const ownerProperties = [
         { property: { id: 1 }, noOfShare: 5 },
         { property: { id: 2 }, noOfShare: 10 },
+        
       ];
 
       const properties = [
