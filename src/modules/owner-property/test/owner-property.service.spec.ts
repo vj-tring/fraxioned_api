@@ -1,33 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OwnerPropertyController } from '../owner-property.controller';
-import { OwnerPropertyService } from '../owner-property.service';
-import { Property } from '../entity/property.entity';
-import { OffSeasonDto } from '../dto/off-season.dto';
-import { PeakSeasonDto } from '../dto/peak-season.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { OwnerPropertyService } from '../owner-property.service';
+import { Property } from '../entity/property.entity';
 import { PropertyPhoto } from '../entity/property-photo.entity';
 import { OwnerProperty } from '../entity/owner-property.entity';
 import { OwnerPropertyDetail } from '../entity/owner-property-detail.entity';
 
-describe('OwnerPropertyController', () => {
-  let controller: OwnerPropertyController;
+describe('OwnerPropertyService', () => {
   let service: OwnerPropertyService;
-
-  const mockPropertyService = {
-    getOwnerProperties: jest.fn(),
-    getOwnerPropertyDetailsByUserId: jest.fn(),
-    getOwnerPropertyDetailsPeakSeason: jest.fn(),
-  };
+  let propertyRepository: Repository<Property>;
+  let ownerPropertyRepository: Repository<OwnerProperty>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let ownerPropertyDetailRepository: Repository<OwnerPropertyDetail>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [OwnerPropertyController],
       providers: [
-        {
-          provide: OwnerPropertyService,
-          useValue: mockPropertyService,
-        },
+        OwnerPropertyService,
         {
           provide: getRepositoryToken(Property),
           useClass: Repository,
@@ -47,93 +37,131 @@ describe('OwnerPropertyController', () => {
       ],
     }).compile();
 
-    controller = module.get<OwnerPropertyController>(OwnerPropertyController);
     service = module.get<OwnerPropertyService>(OwnerPropertyService);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+    propertyRepository = module.get<Repository<Property>>(
+      getRepositoryToken(Property),
+    );
+    ownerPropertyRepository = module.get<Repository<OwnerProperty>>(
+      getRepositoryToken(OwnerProperty),
+    );
+    ownerPropertyDetailRepository = module.get<Repository<OwnerPropertyDetail>>(
+      getRepositoryToken(OwnerPropertyDetail),
+    );
   });
 
   describe('getOwnerProperties', () => {
-    it('should return an array of properties', async () => {
-      const result: Property[] = [
-        {
-          id: 1,
-          name: 'Property 1',
-          address: 'Address 1',
-          photos: [],
-          share: null,
-          ownerProperties: [],
-          propertySeasonDates: [],
-          totalNights: 0,
-          peakTotalNights: 0,
-          totalHolidayNights: 0,
-        },
-        {
-          id: 2,
-          name: 'Property 2',
-          address: 'Address 2',
-          photos: [],
-          share: null,
-          ownerProperties: [],
-          propertySeasonDates: [],
-          totalNights: 0,
-          peakTotalNights: 0,
-          totalHolidayNights: 0,
-        },
+    it('should return an array of owner properties', async () => {
+      const ownerProperties = [
+        { property: { id: 1 }, noOfShare: 5 },
+        { property: { id: 2 }, noOfShare: 10 },
       ];
-      jest.spyOn(service, 'getOwnerProperties').mockResolvedValue(result);
 
-      expect(await controller.getOwnerProperties(1)).toBe(result);
+      const properties = [
+        { id: 1, name: 'Property 1', address: 'Address 1', photos: [] },
+        { id: 2, name: 'Property 2', address: 'Address 2', photos: [] },
+      ];
+
+      jest
+        .spyOn(ownerPropertyRepository, 'find')
+        .mockResolvedValue(ownerProperties as any);
+      jest
+        .spyOn(propertyRepository, 'find')
+        .mockResolvedValue(properties as any);
+
+      const result = await service.getOwnerProperties(1);
+      expect(result).toEqual([
+        { property: properties[0], noOfShare: 5 },
+        { property: properties[1], noOfShare: 10 },
+      ]);
     });
   });
 
   describe('getOwnerPropertyDetailsByUserId', () => {
-    it('should return an array of off-season details', async () => {
-      const result: OffSeasonDto[] = [
+    it('should return an array of off-season property details', async () => {
+      const properties = [
         {
-          totalNights: 10,
-          nightsUsed: 5,
-          nightsRemaining: 0,
-          nightsBooked: 0,
-          totalHolidayNights: 0,
-          holidaysUsed: 0,
-          holidaysRemaining: 0,
-          holidaysBooked: 0,
-          start_date: '',
-          end_date: '',
-          year: 0,
+          totalNights: 20,
+          totalHolidayNights: 10,
+          ownerProperties: [
+            {
+              ownerPropertyDetails: [
+                {
+                  OSUN: 5,
+                  OSBN: 3,
+                  OSRN: 2,
+                  OSUHN: 2,
+                  OSBHN: 3,
+                  OSRHN: 5,
+                },
+              ],
+            },
+          ],
+          propertySeasonDates: [
+            { seasonId: 2, season_start: new Date(), season_end: new Date() },
+          ],
         },
       ];
-      jest
-        .spyOn(service, 'getOwnerPropertyDetailsByUserId')
-        .mockResolvedValue(result);
 
-      expect(await controller.getOwnerPropertyDetailsByUserId(1)).toBe(result);
+      jest.spyOn(propertyRepository, 'createQueryBuilder').mockReturnValue({
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(properties),
+      } as any);
+
+      const result = await service.getOwnerPropertyDetailsByUserId(1);
+      expect(result).toEqual([
+        {
+          totalNights: 20,
+          nightsUsed: 5,
+          nightsRemaining: 2,
+          nightsBooked: 3,
+          totalHolidayNights: 10,
+          holidaysUsed: 2,
+          holidaysRemaining: 5,
+          holidaysBooked: 3,
+          start_date: properties[0].propertySeasonDates[0].season_start,
+          end_date: properties[0].propertySeasonDates[0].season_end,
+          year: new Date().getFullYear(),
+        },
+      ]);
     });
   });
 
   describe('getOwnerPropertyDetailsPeakSeason', () => {
-    it('should return an array of peak-season details', async () => {
-      const result: PeakSeasonDto[] = [
+    it('should return an array of peak-season property details', async () => {
+      const properties = [
         {
-          peakTotalNights: 10,
-          night_staying: 2,
-          start_date: '',
-          end_date: '',
-          year: 0,
-          night_renting: 0,
-          nights_undecided: 0,
+          peakTotalNights: 15,
+          propertySeasonDates: [
+            { seasonId: 1, season_start: new Date(), season_end: new Date() },
+          ],
         },
       ];
-      jest
-        .spyOn(service, 'getOwnerPropertyDetailsPeakSeason')
-        .mockResolvedValue(result);
 
-      expect(await controller.getOwnerPropertyDetailsPeakSeason(1)).toBe(
-        result,
-      );
+      jest.spyOn(propertyRepository, 'createQueryBuilder').mockReturnValue({
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(properties),
+      } as any);
+
+      jest.spyOn<any, any>(service, 'mockNightStaying').mockReturnValue(5);
+      jest.spyOn<any, any>(service, 'mockNightRenting').mockReturnValue(3);
+      jest.spyOn<any, any>(service, 'mockNightsUndecided').mockReturnValue(2);
+
+      const result = await service.getOwnerPropertyDetailsPeakSeason(1);
+      expect(result).toEqual([
+        {
+          peakTotalNights: 15,
+          start_date: properties[0].propertySeasonDates[0].season_start,
+          end_date: properties[0].propertySeasonDates[0].season_end,
+          year: new Date().getFullYear(),
+          night_staying: 5,
+          night_renting: 3,
+          nights_undecided: 2,
+        },
+      ]);
     });
   });
 });
