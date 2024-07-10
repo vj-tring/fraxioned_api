@@ -3,6 +3,7 @@ import { PropertyController } from '../property.controller';
 import { PropertyService } from '../property.service';
 import { Property } from '../../owner-property/entity/property.entity';
 import { PropertyPhoto } from '../../owner-property/entity/property-photo.entity';
+import { PropertyModule } from '../property.module';
 
 describe('PropertyController', () => {
   let controller: PropertyController;
@@ -17,6 +18,13 @@ describe('PropertyController', () => {
           useValue: {
             getPropertyDetailsById: jest.fn(),
             getPropertyPhotosByPropertyId: jest.fn(),
+          },
+        },
+        {
+          provide: PropertyModule,
+          useValue: {
+            createProperty: jest.fn(),
+            createPropertyPhoto: jest.fn(),
           },
         },
       ],

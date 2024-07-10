@@ -9,8 +9,9 @@ import { Repository } from 'typeorm';
 import { PropertyPhoto } from '../entity/property-photo.entity';
 import { OwnerProperty } from '../entity/owner-property.entity';
 import { OwnerPropertyDetail } from '../entity/owner-property-detail.entity';
-import { validate } from 'class-validator';
 import { PropertyDTO } from '../dto/property.dto';
+import { validate } from 'class-validator';
+import { OwnerPropertyModule } from '../owner-property.module';
 
 describe('OwnerPropertyController', () => {
   let controller: OwnerPropertyController;
@@ -45,6 +46,14 @@ describe('OwnerPropertyController', () => {
         {
           provide: getRepositoryToken(OwnerPropertyDetail),
           useClass: Repository,
+        },
+        {
+          provide: OwnerPropertyModule,
+          useValue: {
+            createProperty: jest.fn(),
+            createPropertyDetail: jest.fn(),
+            createPropertyPhoto: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -107,28 +116,22 @@ describe('OwnerPropertyController', () => {
     it('should return an array of properties', async () => {
       const result = [
         {
-          id: 1,
-          name: 'Property 1',
-          address: 'Address 1',
-          photos: [],
-          share: null,
-          ownerProperties: [],
-          propertySeasonDates: [],
-          totalNights: 0,
-          peakTotalNights: 0,
-          totalHolidayNights: 0,
+          property: {
+            id: 1,
+            name: 'Property 1',
+            address: 'Address 1',
+            photos: [],
+          },
+          noOfShare: 5,
         },
         {
-          id: 2,
-          name: 'Property 2',
-          address: 'Address 2',
-          photos: [],
-          share: null,
-          ownerProperties: [],
-          propertySeasonDates: [],
-          totalNights: 0,
-          peakTotalNights: 0,
-          totalHolidayNights: 0,
+          property: {
+            id: 2,
+            name: 'Property 2',
+            address: 'Address 2',
+            photos: [],
+          },
+          noOfShare: 3,
         },
       ];
       jest.spyOn(service, 'getOwnerProperties').mockResolvedValue(result);
@@ -143,15 +146,15 @@ describe('OwnerPropertyController', () => {
         {
           totalNights: 10,
           nightsUsed: 5,
-          nightsRemaining: 0,
+          nightsRemaining: 5,
           nightsBooked: 0,
           totalHolidayNights: 0,
           holidaysUsed: 0,
           holidaysRemaining: 0,
           holidaysBooked: 0,
-          start_date: '',
-          end_date: '',
-          year: 0,
+          start_date: '2024-07-01',
+          end_date: '2024-07-10',
+          year: 2024,
         },
       ];
       jest
@@ -168,11 +171,11 @@ describe('OwnerPropertyController', () => {
         {
           peakTotalNights: 10,
           night_staying: 2,
-          start_date: '',
-          end_date: '',
-          year: 0,
-          night_renting: 0,
-          nights_undecided: 0,
+          night_renting: 3,
+          nights_undecided: 5,
+          start_date: '2024-07-01',
+          end_date: '2024-07-10',
+          year: 2024,
         },
       ];
       jest

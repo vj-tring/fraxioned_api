@@ -10,9 +10,9 @@ import { ApiTags } from '@nestjs/swagger';
 export class OwnerPropertyController {
   constructor(private readonly propertyService: OwnerPropertyService) {}
 
-  @Get('/owner-property/:owner_id')
+  @Get('/owner-property/:ownerId')
   async getOwnerProperties(
-    @Param('owner_id') user_id: number,
+    @Param('ownerId') user_id: number,
   ): Promise<Property[]> {
     return this.propertyService.getOwnerProperties(user_id);
   }

@@ -51,6 +51,7 @@ export class OwnerPropertyService {
       .innerJoin('property.propertySeasonDates', 'propertySeasonDate')
       .where('ownerProperty.userId = :userId', { userId })
       .select([
+        'property.id',
         'property.totalNights',
         'property.totalHolidayNights',
         'ownerPropertyDetail.OSUN',
@@ -75,6 +76,7 @@ export class OwnerPropertyService {
       }
 
       return {
+        propertyId: property.id,
         totalNights: property.totalNights,
         nightsUsed: ownerPropertyDetail?.OSUN || 0,
         nightsRemaining: ownerPropertyDetail?.OSRN || 0,
@@ -101,6 +103,7 @@ export class OwnerPropertyService {
       .innerJoin('property.propertySeasonDates', 'propertySeasonDate')
       .where('ownerProperty.userId = :userId', { userId })
       .select([
+        'property.id',
         'property.peakTotalNights',
         'propertySeasonDate.season_start',
         'propertySeasonDate.season_end',
@@ -115,19 +118,27 @@ export class OwnerPropertyService {
         new Date(propertySeasonDate.season_end);
       }
 
+      const nightStaying = this.mockNightStaying();
+      const nightRenting = this.mockNightRenting();
+      const nightsUndecided = this.mockNightsUndecided(
+        nightStaying,
+        nightRenting,
+      );
+
       return {
+        propertyId: property.id,
         start_date: propertySeasonDate.season_start,
         end_date: propertySeasonDate.season_end,
         peakTotalNights: property.peakTotalNights,
         year: new Date().getFullYear(),
-        night_staying: this.mockNightStaying(),
-        night_renting: this.mockNightRenting(),
-        nights_undecided: this.mockNightsUndecided(),
+        night_staying: nightStaying,
+        night_renting: nightRenting,
+        nights_undecided: nightsUndecided,
       };
     });
     return peakSeasonDtos;
   }
-
+  //to-do
   private mockNightStaying(): number {
     return Math.floor(Math.random() * 10) + 1;
   }
@@ -136,7 +147,10 @@ export class OwnerPropertyService {
     return Math.floor(Math.random() * 10) + 1;
   }
 
-  private mockNightsUndecided(): number {
-    return Math.floor(Math.random() * 5);
+  private mockNightsUndecided(
+    nightStaying: number,
+    nightRenting: number,
+  ): number {
+    return nightStaying + nightRenting;
   }
 }

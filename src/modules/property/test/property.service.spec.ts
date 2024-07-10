@@ -53,7 +53,6 @@ describe('PropertyService', () => {
             property: null,
           } as PropertyPhoto,
         ],
-        // other property fields...
       } as Property;
 
       jest.spyOn(propertyRepository, 'createQueryBuilder').mockReturnValue({
