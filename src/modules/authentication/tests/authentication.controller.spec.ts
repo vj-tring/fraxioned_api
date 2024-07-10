@@ -6,6 +6,7 @@ import { RegisterDTO } from '@auth/dto/register.dto';
 import { LoginDTO } from '@auth/dto/login.dto';
 import { ForgotPasswordDTO } from '@auth/dto/forgot-password.dto';
 import { ResetPasswordDTO } from '@auth/dto/reset-password.dto';
+import { AuthenticationModule } from '@auth/authentication.module';
 
 describe('AuthenticationController', () => {
   let controller: AuthenticationController;
@@ -35,6 +36,10 @@ describe('AuthenticationController', () => {
               .fn()
               .mockResolvedValue({ message: 'Logout successful' }),
           },
+        },
+        {
+          provide: AuthenticationModule,
+          useValue: {},
         },
       ],
     }).compile();

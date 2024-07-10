@@ -9,13 +9,15 @@ import { PropertyService } from './property.service';
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
-  @Get(':id')
-  async getPropertyDetails(@Param('id') id: number): Promise<Property> {
+  @Get(':propertyId')
+  async getPropertyDetails(@Param('propertyId') id: number): Promise<Property> {
     return this.propertyService.getPropertyDetailsById(id);
   }
 
-  @Get('/photos/:id')
-  async getPropertyPhotos(@Param('id') id: number): Promise<PropertyPhoto[]> {
+  @Get('/photos/:propertyId')
+  async getPropertyPhotos(
+    @Param('propertyId') id: number,
+  ): Promise<PropertyPhoto[]> {
     return this.propertyService.getPropertyPhotosByPropertyId(id);
   }
 }

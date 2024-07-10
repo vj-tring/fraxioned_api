@@ -41,7 +41,7 @@ export class OwnerPropertyService {
     }));
   }
 
-  async getOwnerPropertyDetailsByUserId(
+  async getOwnerPropertyOffSeasonDetails(
     userId: number,
   ): Promise<OffSeasonDto[]> {
     const properties = await this.propertyRepository
@@ -51,6 +51,7 @@ export class OwnerPropertyService {
       .innerJoin('property.propertySeasonDates', 'propertySeasonDate')
       .where('ownerProperty.userId = :userId', { userId })
       .select([
+        'property.id',
         'property.totalNights',
         'property.totalHolidayNights',
         'ownerPropertyDetail.OSUN',
@@ -75,6 +76,7 @@ export class OwnerPropertyService {
       }
 
       return {
+        propertyId: property.id,
         totalNights: property.totalNights,
         nightsUsed: ownerPropertyDetail?.OSUN || 0,
         nightsRemaining: ownerPropertyDetail?.OSRN || 0,
@@ -92,7 +94,7 @@ export class OwnerPropertyService {
     return offSeasonDtos;
   }
 
-  async getOwnerPropertyDetailsPeakSeason(
+  async getOwnerPropertyPeakSeasonDetails(
     userId: number,
   ): Promise<PeakSeasonDto[]> {
     const properties = await this.propertyRepository
@@ -101,6 +103,7 @@ export class OwnerPropertyService {
       .innerJoin('property.propertySeasonDates', 'propertySeasonDate')
       .where('ownerProperty.userId = :userId', { userId })
       .select([
+        'property.id',
         'property.peakTotalNights',
         'propertySeasonDate.season_start',
         'propertySeasonDate.season_end',
@@ -115,28 +118,40 @@ export class OwnerPropertyService {
         new Date(propertySeasonDate.season_end);
       }
 
+      const nightStaying = this.nightsStaying();
+      const nightRenting = this.nightsRenting();
+      const nightsUndecided = this.nightsUndecided(
+        nightStaying,
+        nightRenting,
+      );
+
       return {
+        propertyId: property.id,
         start_date: propertySeasonDate.season_start,
         end_date: propertySeasonDate.season_end,
         peakTotalNights: property.peakTotalNights,
         year: new Date().getFullYear(),
-        night_staying: this.mockNightStaying(),
-        night_renting: this.mockNightRenting(),
-        nights_undecided: this.mockNightsUndecided(),
+        night_staying: nightStaying,
+        night_renting: nightRenting,
+        nights_undecided: nightsUndecided,
       };
     });
     return peakSeasonDtos;
   }
-
-  private mockNightStaying(): number {
+  // TODO : Need to remove random number generation and get Night Staying details from OwnerRez API
+  private nightsStaying(): number {
     return Math.floor(Math.random() * 10) + 1;
   }
 
-  private mockNightRenting(): number {
+ // TODO : Need to remove random number generation and get Night Renting details from OwnerRez API
+  private nightsRenting(): number {
     return Math.floor(Math.random() * 10) + 1;
   }
 
-  private mockNightsUndecided(): number {
-    return Math.floor(Math.random() * 5);
+  private nightsUndecided(
+    nightStaying: number,
+    nightRenting: number,
+  ): number {
+    return nightStaying + nightRenting;
   }
 }

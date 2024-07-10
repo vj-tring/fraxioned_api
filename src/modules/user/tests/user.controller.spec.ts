@@ -3,6 +3,7 @@ import { UserController } from '@user/user.controller';
 import { UserService } from '@user/user.service';
 import { CreateUserDTO } from '@user/dto/create-user.dto';
 import { UpdateUserDTO } from '@user/dto/update-user.dto';
+import { UserModule } from '@user/user.module';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -39,6 +40,10 @@ describe('UserController', () => {
         {
           provide: UserService,
           useValue: mockUserService,
+        },
+        {
+          provide: UserModule,
+          useValue: {},
         },
       ],
     }).compile();
