@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { PropertyPhoto } from '../entity/property-photo.entity';
 import { OwnerProperty } from '../entity/owner-property.entity';
 import { OwnerPropertyDetail } from '../entity/owner-property-detail.entity';
+import { validate } from 'class-validator';
+import { PropertyDTO } from '../dto/property.dto';
 
 describe('OwnerPropertyController', () => {
   let controller: OwnerPropertyController;
@@ -53,6 +55,52 @@ describe('OwnerPropertyController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('DTO Validation', () => {
+    it('should validate OffSeasonDto', async () => {
+      const dto = new OffSeasonDto();
+      dto.totalNights = 10;
+      dto.nightsUsed = 5;
+      dto.nightsRemaining = 5;
+      dto.nightsBooked = 0;
+      dto.totalHolidayNights = 0;
+      dto.holidaysUsed = 0;
+      dto.holidaysRemaining = 0;
+      dto.holidaysBooked = 0;
+      dto.start_date = '2024-07-01';
+      dto.end_date = '2024-07-10';
+      dto.year = 2024;
+
+      const errors = await validate(dto);
+      expect(errors.length).toBe(0);
+    });
+
+    it('should validate PeakSeasonDto', async () => {
+      const dto = new PeakSeasonDto();
+      dto.peakTotalNights = 10;
+      dto.night_staying = 2;
+      dto.start_date = '2024-07-01';
+      dto.end_date = '2024-07-10';
+      dto.year = 2024;
+      dto.night_renting = 0;
+      dto.nights_undecided = 0;
+
+      const errors = await validate(dto);
+      expect(errors.length).toBe(0);
+    });
+
+    it('should validate PropertyDto', async () => {
+      const dto = new PropertyDTO();
+      dto.image = 'test';
+      dto.name = 'test';
+      dto.address = 'test address';
+      dto.numberOfShares = 2;
+      dto.totalShares = 8;
+
+      const errors = await validate(dto);
+      expect(errors.length).toBe(0);
+    });
   });
 
   describe('getOwnerProperties', () => {
