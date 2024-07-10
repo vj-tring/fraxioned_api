@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ContactUsController } from '@contactUs/contact-us.controller';
 import { ContactUsService } from '@contactUs/contact-us.service';
 import { ContactUsDTO } from '@contactUs/contact-us.dto';
+import { ContactUsModule } from '@contactUs/contact-us.module';
 
 class MockContactUsService {
   handleContactUs = jest
@@ -20,6 +21,10 @@ describe('ContactUsController', () => {
         {
           provide: ContactUsService,
           useClass: MockContactUsService,
+        },
+        {
+          provide: ContactUsModule,
+          useValue: {},
         },
       ],
     }).compile();
