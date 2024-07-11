@@ -1,6 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PeakSeasonDto {
+  @ApiProperty({ name: 'PSAN' })
+  totalNights: number;
+
+  @ApiProperty({ name: 'PSUN' })
+  nightsUsed: number;
+
+  @ApiProperty({ name: 'PSRN' })
+  nightsRemaining: number;
+
+  @ApiProperty({ name: 'PSBN' })
+  nightsBooked: number;
+
+  @ApiProperty({ name: 'PSAHN' })
+  totalHolidayNights: number;
+
+  @ApiProperty({ name: 'PSUHN' })
+  holidaysUsed: number;
+
+  @ApiProperty({ name: 'PSRHN' })
+  holidaysRemaining: number;
+
+  @ApiProperty({ name: 'PSBHN' })
+  holidaysBooked: number;
+
   @ApiProperty({ type: 'Date', name: 'season_start' })
   start_date: string;
 
@@ -9,16 +33,4 @@ export class PeakSeasonDto {
 
   @ApiProperty({ name: 'year' })
   year: number;
-
-  @ApiProperty({ name: 'PSAN' })
-  peakTotalNights: number;
-
-  @ApiProperty({ name: 'night_staying' })
-  night_staying: number;
-
-  @ApiProperty({ name: 'night_renting' })
-  night_renting: number;
-
-  @ApiProperty({ name: 'nights_undecided' })
-  nights_undecided: number;
 }

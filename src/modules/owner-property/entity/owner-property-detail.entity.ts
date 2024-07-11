@@ -30,6 +30,24 @@ export class OwnerPropertyDetail {
   @Column()
   OSRHN: number;
 
+  @Column()
+  PSUN: number;
+
+  @Column()
+  PSBN: number;
+
+  @Column()
+  PSRN: number;
+
+  @Column()
+  PSUHN: number;
+
+  @Column()
+  PSBHN: number;
+
+  @Column()
+  PSRHN: number;
+
   @ManyToOne(
     () => OwnerProperty,
     (ownerProperty) => ownerProperty.ownerPropertyDetails,

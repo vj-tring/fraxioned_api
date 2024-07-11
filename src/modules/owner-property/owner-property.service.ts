@@ -6,6 +6,7 @@ import { PropertyPhoto } from './entity/property-photo.entity';
 import { OwnerProperty } from './entity/owner-property.entity';
 import { OwnerPropertyDetail } from './entity/owner-property-detail.entity';
 import { OffSeasonDto } from './dto/off-season.dto';
+import { PeakSeasonRentingDto } from './dto/peak-season-renting.dto';
 import { PeakSeasonDto } from './dto/peak-season.dto';
 
 @Injectable()
@@ -96,7 +97,7 @@ export class OwnerPropertyService {
 
   async getOwnerPropertyPeakSeasonDetails(
     userId: number,
-  ): Promise<PeakSeasonDto[]> {
+  ): Promise<PeakSeasonRentingDto[]> {
     const properties = await this.propertyRepository
       .createQueryBuilder('property')
       .innerJoin('property.ownerProperties', 'ownerProperty')
@@ -110,7 +111,7 @@ export class OwnerPropertyService {
       ])
       .getMany();
 
-    const peakSeasonDtos: PeakSeasonDto[] = properties.map((property) => {
+    const peakSeasonDtos: PeakSeasonRentingDto[] = properties.map((property) => {
       const propertySeasonDate = property.propertySeasonDates?.[0];
 
       if (propertySeasonDate && propertySeasonDate.seasonId === 1) {
@@ -120,10 +121,7 @@ export class OwnerPropertyService {
 
       const nightStaying = this.nightsStaying();
       const nightRenting = this.nightsRenting();
-      const nightsUndecided = this.nightsUndecided(
-        nightStaying,
-        nightRenting,
-      );
+      const nightsUndecided = this.nightsUndecided(nightStaying, nightRenting);
 
       return {
         propertyId: property.id,
@@ -138,20 +136,72 @@ export class OwnerPropertyService {
     });
     return peakSeasonDtos;
   }
+
+  async getPeakSeasonDetails(
+    userId: number,
+  ): Promise<PeakSeasonDto[]> {
+    const properties = await this.propertyRepository
+      .createQueryBuilder('property')
+      .innerJoin('property.ownerProperties', 'ownerProperty')
+      .innerJoin('ownerProperty.ownerPropertyDetails', 'ownerPropertyDetail')
+      .innerJoin('property.propertySeasonDates', 'propertySeasonDate')
+      .where('ownerProperty.userId = :userId', { userId })
+      .select([
+        'property.id',
+        'property.totalNights',
+        'property.totalHolidayNights',
+        'ownerPropertyDetail.PSUN',
+        'ownerPropertyDetail.PSBN',
+        'ownerPropertyDetail.PSRN',
+        'ownerPropertyDetail.PSUHN',
+        'ownerPropertyDetail.PSBHN',
+        'ownerPropertyDetail.PSRHN',
+        'propertySeasonDate.season_start',
+        'propertySeasonDate.season_end',
+      ])
+      .getMany();
+
+    const peakSeasonDtos: PeakSeasonDto[] = properties.map((property) => {
+      const ownerProperty = property.ownerProperties?.[0];
+      const ownerPropertyDetail = ownerProperty?.ownerPropertyDetails?.[0];
+      const propertySeasonDate = property.propertySeasonDates?.[0];
+
+      if (propertySeasonDate && propertySeasonDate.seasonId === 2) {
+        new Date(propertySeasonDate.season_start);
+        new Date(propertySeasonDate.season_end);
+      }
+
+      return {
+        propertyId: property.id,
+        totalNights: property.totalNights,
+        nightsUsed: ownerPropertyDetail?.PSUN || 0,
+        nightsRemaining: ownerPropertyDetail?.PSRN || 0,
+        nightsBooked: ownerPropertyDetail?.PSBN || 0,
+        totalHolidayNights: property.totalHolidayNights,
+        holidaysUsed: ownerPropertyDetail?.PSUHN || 0,
+        holidaysRemaining: ownerPropertyDetail?.PSRHN || 0,
+        holidaysBooked: ownerPropertyDetail?.PSBHN || 0,
+        start_date: propertySeasonDate?.season_start,
+        end_date: propertySeasonDate?.season_end,
+        year: new Date().getFullYear(),
+      };
+    });
+
+    return peakSeasonDtos;
+  }
+
   // TODO : Need to remove random number generation and get Night Staying details from OwnerRez API
   private nightsStaying(): number {
     return Math.floor(Math.random() * 10) + 1;
   }
 
- // TODO : Need to remove random number generation and get Night Renting details from OwnerRez API
+  // TODO : Need to remove random number generation and get Night Renting details from OwnerRez API
   private nightsRenting(): number {
     return Math.floor(Math.random() * 10) + 1;
   }
 
-  private nightsUndecided(
-    nightStaying: number,
-    nightRenting: number,
-  ): number {
+  private nightsUndecided(nightStaying: number, nightRenting: number): number {
     return nightStaying + nightRenting;
   }
+
 }

@@ -130,7 +130,7 @@ describe('OwnerPropertyService', () => {
   });
 
   describe('getOwnerPropertyDetailsPeakSeason', () => {
-    it('should return an array of peak-season property details', async () => {
+    it('should return an array of peak-season-renting property details', async () => {
       const properties = [
         {
           peakTotalNights: 15,
@@ -161,6 +161,58 @@ describe('OwnerPropertyService', () => {
           night_staying: 5,
           night_renting: 3,
           nights_undecided: 2,
+        },
+      ]);
+    });
+  });
+
+  describe('getPeakSeasonDetails', () => {
+    it('should return an array of peak-season property details', async () => {
+      const properties = [
+        {
+          totalNights: 20,
+          totalHolidayNights: 10,
+          ownerProperties: [
+            {
+              ownerPropertyDetails: [
+                {
+                 PSUN: 5,
+                 PSBN: 3,
+                 PSRN: 2,
+                 PSUHN: 2,
+                 PSBHN: 3,
+                 PSRHN: 5,
+                },
+              ],
+            },
+          ],
+          propertySeasonDates: [
+            { seasonId: 2, season_start: new Date(), season_end: new Date() },
+          ],
+        },
+      ];
+
+      jest.spyOn(propertyRepository, 'createQueryBuilder').mockReturnValue({
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(properties),
+      } as any);
+
+      const result = await service.getPeakSeasonDetails(1);
+      expect(result).toEqual([
+        {
+          totalNights: 20,
+          nightsUsed: 5,
+          nightsRemaining: 2,
+          nightsBooked: 3,
+          totalHolidayNights: 10,
+          holidaysUsed: 2,
+          holidaysRemaining: 5,
+          holidaysBooked: 3,
+          start_date: properties[0].propertySeasonDates[0].season_start,
+          end_date: properties[0].propertySeasonDates[0].season_end,
+          year: new Date().getFullYear(),
         },
       ]);
     });

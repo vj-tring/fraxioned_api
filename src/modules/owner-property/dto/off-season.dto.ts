@@ -33,13 +33,4 @@ export class OffSeasonDto {
 
   @ApiProperty({ name: 'year' })
   year: number;
-
-  //   @ApiProperty({ name: 'PSUN' })
-  //   night_staying: number;
-
-  //   @ApiProperty()
-  //   night_renting: number;
-
-  //   @ApiProperty()
-  //   nights_undecided: number;
 }
