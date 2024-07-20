@@ -3,7 +3,7 @@ import { ContactUsService } from '@contactUs/contact-us.service';
 import { MailService } from '@mail/mail.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '@user/user.entity';
+import { User } from '@user/entities/user.entity';
 import { ContactUsDTO } from '@contactUs/contact-us.dto';
 import { LoggerService } from '@logger/logger.service';
 import { HttpException, HttpStatus } from '@nestjs/common';

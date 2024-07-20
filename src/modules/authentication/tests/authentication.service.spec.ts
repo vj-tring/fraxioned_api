@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationService } from '../authentication.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '@user/user.entity';
-import { Session } from '@user/session.entity';
+import { User } from '@user/entities/user.entity';
+import { Session } from '@user/entities/session.entity';
 import { Role } from '@user-role/role/role.entity';
 import { UserRole } from '@user-role/user-role.entity';
-import { InviteUser } from '@user/invite-user.entity';
+import { InviteUser } from '@user/entities/invite-user.entity';
 import { MailService } from '@mail/mail.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
