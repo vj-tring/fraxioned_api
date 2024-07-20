@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dbConfig } from './config/db.config';
-import { User } from '@user/user.entity';
-import { Session } from '@user/session.entity';
+import { User } from '@user/entities/user.entity';
+import { Session } from '@user/entities/session.entity';
 import { Role } from '@user-role/role/role.entity';
 import { UserRole } from '@user-role/user-role.entity';
-import { InviteUser } from '@user/invite-user.entity';
+import { InviteUser } from '@user/entities/invite-user.entity';
 import { MailConfig } from '@mail/mail.config';
 import { QueryLogger } from '@logger/query-logger';
 

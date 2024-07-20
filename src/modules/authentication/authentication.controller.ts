@@ -12,6 +12,11 @@ import { ApiTags } from '@nestjs/swagger';
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
+  @Post('welcome')
+  async welcome() {
+    return { message: 'welcome to fraxioned' };
+  }
+
   @Post('invite')
   async sendInvite(@Body() inviteDTO: InviteDTO) {
     await this.authenticationService.sendInvite(inviteDTO);

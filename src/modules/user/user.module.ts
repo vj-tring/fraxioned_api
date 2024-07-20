@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { InviteUser } from './invite-user.entity';
-import Session from './session.entity';
+import { InviteUser } from './entities/invite-user.entity';
+import Session from './entities/session.entity';
 import { LoggerModule } from '@logger/logger.module';
 
 @Module({

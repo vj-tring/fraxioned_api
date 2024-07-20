@@ -1,11 +1,11 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '@user/user.entity';
-import { Session } from '@user/session.entity';
+import { User } from '@user/entities/user.entity';
+import { Session } from '@user/entities/session.entity';
 import { Role } from '@user-role/role/role.entity';
 import { UserRole } from '@user-role/user-role.entity';
-import { InviteUser } from '@user/invite-user.entity';
+import { InviteUser } from '@user/entities/invite-user.entity';
 import { InviteDTO } from './dto/invite.dto';
 import { RegisterDTO } from './dto/register.dto';
 import { LoginDTO } from './dto/login.dto';
