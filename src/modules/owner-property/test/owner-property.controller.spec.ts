@@ -3,7 +3,7 @@ import { OwnerPropertyController } from '../owner-property.controller';
 import { OwnerPropertyService } from '../owner-property.service';
 import { Property } from '../entity/property.entity';
 import { OffSeasonDto } from '../dto/off-season.dto';
-import { PeakSeasonDto } from '../dto/peak-season.dto';
+import { PeakSeasonRentingDto } from '../dto/peak-season-renting.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PropertyPhoto } from '../entity/property-photo.entity';
@@ -12,6 +12,7 @@ import { OwnerPropertyDetail } from '../entity/owner-property-detail.entity';
 import { PropertyDTO } from '../dto/property.dto';
 import { validate } from 'class-validator';
 import { OwnerPropertyModule } from '../owner-property.module';
+import { PeakSeasonDto } from '../dto/peak-season.dto';
 
 describe('OwnerPropertyController', () => {
   let controller: OwnerPropertyController;
@@ -21,6 +22,7 @@ describe('OwnerPropertyController', () => {
     getOwnerProperties: jest.fn(),
     getOwnerPropertyOffSeasonDetails: jest.fn(),
     getOwnerPropertyPeakSeasonDetails: jest.fn(),
+    getPeakSeasonDetails:jest.fn(),
   };
 
   beforeEach(async () => {
@@ -87,6 +89,24 @@ describe('OwnerPropertyController', () => {
 
     it('should validate PeakSeasonDto', async () => {
       const dto = new PeakSeasonDto();
+      dto.totalNights = 10;
+      dto.nightsUsed = 5;
+      dto.nightsRemaining = 5;
+      dto.nightsBooked = 0;
+      dto.totalHolidayNights = 0;
+      dto.holidaysUsed = 0;
+      dto.holidaysRemaining = 0;
+      dto.holidaysBooked = 0;
+      dto.start_date = '2024-07-01';
+      dto.end_date = '2024-07-10';
+      dto.year = 2024;
+
+      const errors = await validate(dto); 
+      expect(errors.length).toBe(0);
+    });
+
+    it('should validate PeakSeasonRentingDto', async () => {
+      const dto = new PeakSeasonRentingDto();
       dto.peakTotalNights = 10;
       dto.night_staying = 2;
       dto.start_date = '2024-07-01';
@@ -166,8 +186,8 @@ describe('OwnerPropertyController', () => {
   });
 
   describe('getOwnerPropertyPeakSeasonDetails', () => {
-    it('should return an array of peak-season details', async () => {
-      const result: PeakSeasonDto[] = [
+    it('should return an array of peak-season-renting details', async () => {
+      const result: PeakSeasonRentingDto[] = [
         {
           peakTotalNights: 10,
           night_staying: 2,
@@ -183,6 +203,33 @@ describe('OwnerPropertyController', () => {
         .mockResolvedValue(result);
 
       expect(await controller.getOwnerPropertyPeakSeasonDetails(1)).toBe(
+        result,
+      );
+    });
+  });
+
+  describe('getPeakSeasonDetails', () => {
+    it('should return an array of peak-season details', async () => {
+      const result: PeakSeasonDto[] = [
+        {
+          totalNights: 10,
+          nightsUsed: 5,
+          nightsRemaining: 5,
+          nightsBooked: 0,
+          totalHolidayNights: 0,
+          holidaysUsed: 0,
+          holidaysRemaining: 0,
+          holidaysBooked: 0,
+          start_date: '2024-07-01',
+          end_date: '2024-07-10',
+          year: 2024,
+        },
+      ];
+      jest
+        .spyOn(service, 'getPeakSeasonDetails')
+        .mockResolvedValue(result);
+
+      expect(await controller.getPeakSeasonDetails(1)).toBe(
         result,
       );
     });
