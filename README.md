@@ -23,7 +23,7 @@ Install the dependencies by running:
 
 The database for the application can be configured using properties in the db.config.ts. 
 
-- got to path "src/database/config/db.config.ts"
+- go to path "src/database/config/db.config.ts"
 
 - change the properties values with your connection params. 
 
