@@ -10,8 +10,10 @@
     * [ ] Tested the functionalities.
     * [ ] Is New changes working as expected and does not affecting other functionalities.
     * [ ] Is lint passed.
+    * [ ] Is JIRA card number mentioned in Branch name and PR Name.
     
-
+* **Peer Reviewer responsibilities**
+    * [ ] Understood the requirements and Tested the changes by running the code locally.
 
 * **Reviewer responsibilities**
     * [ ] Tested the changes by running the code locally.
