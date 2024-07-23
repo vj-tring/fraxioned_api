@@ -5,13 +5,15 @@ import {
   SwaggerDocumentOptions,
 } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { AllExceptionsFilter } from './exception/all-exceptions.filter';
+import { DataSource } from 'typeorm';
+import { seedRole } from './commons/seeds/roleSeed';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // app.useGlobalFilters(new AllExceptionsFilter());
-
+  const dataSource = app.get(DataSource);
+  await seedRole(dataSource);
+  
   app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('Fraxioned API')

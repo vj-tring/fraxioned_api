@@ -10,7 +10,7 @@ import {
 import { RoleService } from './role.service';
 import { CreateRoleDTO } from '@user-role/dto/create-role.dto';
 import { UpdateRoleDTO } from '@user-role/dto/update-role.dto';
-import { Role } from './role.entity';
+import { Role } from '@entities/role.entity';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Role')

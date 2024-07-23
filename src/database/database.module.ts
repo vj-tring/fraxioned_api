@@ -1,31 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { dbConfig } from './config/db.config';
-import { User } from '@user/entities/user.entity';
-import { Session } from '@user/entities/session.entity';
-import { Role } from '@user-role/role/role.entity';
-import { UserRole } from '@user-role/user-role.entity';
-import { InviteUser } from '@user/entities/invite-user.entity';
-import { MailConfig } from '@mail/mail.config';
-import { QueryLogger } from '@logger/query-logger';
+import { typeOrmConfigAsync } from './config/typeorm.config';
+import { ConfigModule } from '@nestjs/config';
+import { User } from '@entities/user.entity';
+import { Sessions } from '@entities/sessions.entity';
+import { Role } from '@entities/role.entity';  
+import { UserRole } from '@entities/user_role.entity';  
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: dbConfig.host,
-      port: dbConfig.port,
-      username: dbConfig.username,
-      password: dbConfig.password,
-      database: dbConfig.database,
-      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      synchronize: false,
-      logging: true,
-      logger: new QueryLogger(),
-    }),
-    TypeOrmModule.forFeature([User, Session, Role, UserRole, InviteUser]),
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync(typeOrmConfigAsync),
+    TypeOrmModule.forFeature([User, Sessions, Role, UserRole]),
   ],
-  providers: [MailConfig],
   exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

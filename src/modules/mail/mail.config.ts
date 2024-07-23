@@ -1,3 +1,7 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
 export class MailConfig {
   SMTP_HOST: string;
   SMTP_PORT: number;
@@ -5,11 +9,11 @@ export class MailConfig {
   SMTP_PASSWORD: string;
   FROM_EMAIL: string;
 
-  constructor() {
-    this.SMTP_HOST = 'smtp.gmail.com';
-    this.SMTP_PORT = 587;
-    this.SMTP_USERNAME = 'johnson.selvakumar@tringapps.net';
-    this.SMTP_PASSWORD = 'grge xsdo rfqc ymps';
-    this.FROM_EMAIL = 'johnson.selvakumar@tringapps.net';
+  constructor(private configService: ConfigService) {
+    this.SMTP_HOST = this.configService.get<string>('MAIL_HOST');
+    this.SMTP_PORT = this.configService.get<number>('MAIL_PORT');
+    this.SMTP_USERNAME = this.configService.get<string>('MAIL_USER');
+    this.SMTP_PASSWORD = this.configService.get<string>('MAIL_PASSWORD');
+    this.FROM_EMAIL = this.configService.get<string>('MAIL_FROM');
   }
 }

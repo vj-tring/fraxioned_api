@@ -1,279 +1,188 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { InviteUserDto } from './dto/invite-user.dto';
+import { User } from '@entities/user.entity';
+import { UserAddressDetails } from '@entities/user_address_details.entity';
+import { UserEmailDetails } from '@entities/user_email_details.entity';
+import { UserPhoneDetails } from '@entities/user_phone_details.entity';
+import { UserRole } from '@entities/user_role.entity';
 import { Repository } from 'typeorm';
-import { User } from '@user/entities/user.entity';
-import { Session } from '@user/entities/session.entity';
-import { Role } from '@user-role/role/role.entity';
-import { UserRole } from '@user-role/user-role.entity';
-import { InviteUser } from '@user/entities/invite-user.entity';
-import { InviteDTO } from './dto/invite.dto';
-import { RegisterDTO } from './dto/register.dto';
-import { LoginDTO } from './dto/login.dto';
-import { ForgotPasswordDTO } from './dto/forgot-password.dto';
-import { ResetPasswordDTO } from './dto/reset-password.dto';
+import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from '@mail/mail.service';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
+import { LoginDto } from './dto/login.dto';
 import { LoggerService } from '@logger/logger.service';
+import { Sessions } from '@entities/sessions.entity';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Session)
-    private readonly sessionRepository: Repository<Session>,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(UserAddressDetails)
+    private readonly userAddressRepository: Repository<UserAddressDetails>,
+    @InjectRepository(UserEmailDetails)
+    private readonly userEmailRepository: Repository<UserEmailDetails>,
+    @InjectRepository(UserPhoneDetails)
+    private readonly userPhoneRepository: Repository<UserPhoneDetails>,
     @InjectRepository(UserRole)
     private readonly userRoleRepository: Repository<UserRole>,
-    @InjectRepository(InviteUser)
-    private readonly inviteUserRepository: Repository<InviteUser>,
+    @InjectRepository(Sessions)
+    private readonly sessionRepository: Repository<Sessions>,
     private readonly mailService: MailService,
     private readonly logger: LoggerService,
   ) {}
 
-  async sendInvite(inviteDTO: InviteDTO) {
-    try {
-      const existingUser = await this.userRepository.findOne({
-        where: { email: inviteDTO.email },
-      });
-      if (existingUser) {
-        throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
-      }
+  async inviteUser(inviteUserDto: InviteUserDto) {
+    const { email, firstName, lastName, addressLine1, addressLine2, state, city, zip, phoneNumber, roleId } = inviteUserDto;
 
-      const existingInvite = await this.inviteUserRepository.findOne({
-        where: { email: inviteDTO.email },
-      });
-      if (existingInvite) {
-        throw new HttpException(
-          'Invite already sent to this email',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+    this.logger.log(`Inviting user with email: ${email}`);
 
-      const role = await this.roleRepository.findOne({
-        where: { id: inviteDTO.roleId },
-      });
-
-      if (!role) {
-        throw new HttpException('Invalid role ID', HttpStatus.BAD_REQUEST);
-      }
-
-      const inviteUser = new InviteUser();
-      inviteUser.email = inviteDTO.email;
-      inviteUser.roleId = inviteDTO.roleId;
-      inviteUser.inviteToken = crypto
-        .randomBytes(50)
-        .toString('hex')
-        .slice(0, 100);
-      inviteUser.inviteTokenExpires = new Date(
-        Date.now() + 24 * 60 * 60 * 1000,
-      );
-      inviteUser.invitedBy = inviteDTO.invitedBy;
-
-      await this.inviteUserRepository.save(inviteUser);
-
-      const subject = 'Invitation to join our platform';
-      const text = `Hello! You have been invited to join our platform. Please click on the following link to complete your registration: http://localhost:3000/register?inviteToken=${inviteUser.inviteToken}
-                    NOTE: this token is valid for only 24 hours`;
-
-      await this.mailService.sendMail(inviteDTO.email, subject, text);
-      this.logger.log(`Sending Invite To ${inviteDTO.email}........`);
-      this.logger.log(`Invite sent to ${inviteDTO.email}`);
-    } catch (error) {
-      this.logger.error(error.stack);
-      throw error;
+    const existingUserEmail = await this.userEmailRepository.findOne({ where: { email_id: email } });
+    if (existingUserEmail) {
+      this.logger.error(`Email already exists: ${email}`);
+      throw new ConflictException('Email already exists');
     }
+
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    const user = this.userRepository.create({
+      first_name: firstName,
+      last_name: lastName,
+      password: hashedPassword,
+      is_active: 1,
+    });
+
+    await this.userRepository.save(user);
+
+    const userAddress = this.userAddressRepository.create({
+      user,
+      address_line_1: addressLine1,
+      address_line_2: addressLine2,
+      state,
+      city,
+      zip,
+    });
+
+    await this.userAddressRepository.save(userAddress);
+
+    const userEmail = this.userEmailRepository.create({
+      user,
+      email_id: email,
+    });
+
+    await this.userEmailRepository.save(userEmail);
+
+    const userPhone = this.userPhoneRepository.create({
+      user,
+      phone_number: phoneNumber,
+    });
+
+    await this.userPhoneRepository.save(userPhone);
+
+    const userRole = this.userRoleRepository.create({
+      user,
+      role: { id: roleId } as any, 
+    });
+
+    await this.userRoleRepository.save(userRole);
+
+    const loginLink = `http://your-app.com/login`;
+
+    await this.mailService.sendMail(
+      email,
+      'You are invited!',
+      `Hello ${firstName},\n\nYou have been invited to our platform. Please use the following link to login: ${loginLink}\n\nYour temporary password is: ${tempPassword}\n\nBest regards,\nYour Team`
+    );
+
+    this.logger.log(`Invite sent successfully to ${email}`);
+    return { message: 'Invite sent successfully' };
   }
 
-  async register(registerDTO: RegisterDTO) {
-    try {
-      const inviteUserPhone = await this.userRepository.findOne({
-        where: { phone: registerDTO.phone },
-      });
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+    this.logger.log(`User attempting to login with email: ${email}`);
 
-      if (inviteUserPhone) {
-        throw new HttpException(
-          'Phone number already exists',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const inviteUser = await this.inviteUserRepository.findOne({
-        where: { inviteToken: registerDTO.inviteToken },
-      });
-      if (!inviteUser) {
-        throw new HttpException('Invalid invite token', HttpStatus.BAD_REQUEST);
-      }
-
-      if (inviteUser.inviteTokenExpires < new Date()) {
-        throw new HttpException(
-          'Invite token has expired',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const user = new User();
-      user.firstName = registerDTO.firstName;
-      user.lastName = registerDTO.lastName;
-      user.email = inviteUser.email;
-      user.username = registerDTO.username;
-      user.phone = registerDTO.phone;
-      user.secondaryPhone = registerDTO.secondaryPhone;
-      user.secondaryEmail = registerDTO.secondaryEmail;
-      user.address1 = registerDTO.address1;
-      user.address2 = registerDTO.address2;
-      user.state = registerDTO.state;
-      user.city = registerDTO.city;
-      user.zip = registerDTO.zip;
-      user.imageUrl = registerDTO.imageUrl;
-      user.password = await bcrypt.hash(registerDTO.password, 10);
-      user.isActive = true;
-
-      const savedUser = await this.userRepository.save(user);
-
-      const userRole = new UserRole();
-      userRole.userId = savedUser.id;
-      userRole.roleId = inviteUser.roleId;
-      await this.userRoleRepository.save(userRole);
-
-      await this.inviteUserRepository.remove(inviteUser);
-
-      this.logger.log(`User registered with email ${user.email}`);
-      return { message: 'User registered successfully' };
-    } catch (error) {
-      this.logger.error(error.stack);
-      throw error;
+    const userEmail = await this.userEmailRepository.findOne({ 
+      where: { email_id: email },
+      relations: ['user'] 
+    });
+  
+    if (!userEmail) {
+      this.logger.error(`User not found with email: ${email}`);
+      throw new NotFoundException('User not found');
     }
-  }
+  
+    const user = userEmail.user;
+  
+    if (!user) {
+      this.logger.error(`User entity not found for email: ${email}`);
+      throw new NotFoundException('User not found');
+    }
+  
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+  
+    if (!isPasswordValid) {
+      this.logger.error(`Invalid credentials for email: ${email}`);
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-  async login(loginDTO: LoginDTO) {
-    try {
-      const user = await this.userRepository.findOne({
-        where: { email: loginDTO.email },
+    if (!user.is_active) {
+      this.logger.error(`User account is inactive for email: ${email}`);
+      throw new UnauthorizedException('The user account is currently inactive');
+    }
+
+    let session = await this.sessionRepository.findOne({
+      where: { user: { id: user.id } },
+    });
+
+    if (!session) {
+      session = this.sessionRepository.create({
+        user,
+        token: crypto.randomBytes(50).toString('hex'),
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
-      if (!user) {
-        throw new HttpException(
-          'Invalid email or password',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-      if (!user.isActive) {
-        throw new HttpException(
-          'User account is inactive. Please contact support.',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      const isPasswordValid = await bcrypt.compare(
-        loginDTO.password,
-        user.password,
-      );
-      if (!isPasswordValid) {
-        throw new HttpException(
-          'Invalid email or password',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      let session = await this.sessionRepository.findOne({
-        where: { userId: user.id },
-      });
-
-      if (!session) {
-        session = new Session();
-        session.userId = user.id;
-      }
-
+    } else {
       session.token = crypto.randomBytes(50).toString('hex');
-      session.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-      await this.sessionRepository.save(session);
-
-      this.logger.log(`User ${user.email} logged in successfully`);
-      return {
-        message: 'Login successful',
-        user: { id: user.id, email: user.email, username: user.username },
-        session: { token: session.token, expiresAt: session.expiresAt },
-      };
-    } catch (error) {
-      this.logger.error(error.stack);
-      throw error;
+      session.expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
     }
+
+    await this.sessionRepository.save(session);
+
+    const { password: userPassword, ...userDetails } = user;
+
+    this.logger.log(`Login successful for email: ${email}`);
+    return {
+      message: 'Login successful',
+      user: userDetails,
+      session: { token: session.token, expires_at: session.expires_at },
+    };
   }
 
-  async forgotPassword(forgotPasswordDTO: ForgotPasswordDTO) {
-    try {
-      const user = await this.userRepository.findOne({
-        where: { email: forgotPasswordDTO.email },
-      });
-      if (!user) {
-        throw new HttpException('Email not found', HttpStatus.NOT_FOUND);
-      }
-
-      user.resetToken = crypto.randomBytes(50).toString('hex').slice(0, 100);
-      user.resetTokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000);
-
-      await this.userRepository.save(user);
-
-      const resetUrl = `http://localhost:3000/reset-password?resetToken=${user.resetToken}`;
-
-      const subject = 'Password Reset Request';
-      const text = `Hello! To reset your password, please click the following link: ${resetUrl}
-                    This link is valid for 1 hour.`;
-
-      await this.mailService.sendMail(user.email, subject, text);
-      this.logger.log(`Password reset email sent to ${user.email}`);
-    } catch (error) {
-      this.logger.error(error.stack);
-      throw error;
-    }
-  }
-
-  async resetPassword(resetToken: string, resetPasswordDTO: ResetPasswordDTO) {
-    try {
-      const user = await this.userRepository.findOne({ where: { resetToken } });
-      if (!user || user.resetTokenExpires < new Date()) {
-        throw new HttpException(
-          'Invalid or expired reset token',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      user.password = await bcrypt.hash(resetPasswordDTO.newPassword, 10);
-      user.resetToken = null;
-      user.resetTokenExpires = null;
-
-      await this.userRepository.save(user);
-
-      this.logger.log(`Password reset successfully for ${user.email}`);
-      return { message: 'Password has been reset successfully' };
-    } catch (error) {
-      this.logger.error(error.stack);
-      throw error;
-    }
-  }
-
-  async logout(token: string) {
+  async validateUser(userId: number, accessToken: string): Promise<boolean> {
     try {
       const session = await this.sessionRepository.findOne({
-        where: { token },
+        where: { user: { id: userId }, token: accessToken },
       });
-      if (!session) {
-        throw new HttpException(
-          'Invalid session token',
-          HttpStatus.UNAUTHORIZED,
-        );
+
+      if (!session || session.expires_at < new Date()) {
+        return false;
       }
 
-      await this.sessionRepository.delete({ token });
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+      });
 
-      this.logger.log(`User logged out with token ${token}`);
-      return { message: 'Logout successful' };
+      if (!user || !user.is_active) {
+        return false;
+      }
+
+      return true;
     } catch (error) {
-      this.logger.error(error.stack);
-      throw error;
+      throw new UnauthorizedException(
+        'The provided user ID or access token is invalid',
+      );
     }
   }
 }

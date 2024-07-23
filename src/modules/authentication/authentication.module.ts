@@ -1,22 +1,23 @@
 import { Module } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
+import { User } from '@entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '@user/entities/user.entity';
-import { Session } from '@user/entities/session.entity';
+import { Role } from '@entities/role.entity';
+import { Sessions } from '@entities/sessions.entity';
+import { UserRole } from '@entities/user_role.entity';
 import { MailModule } from '@mail/mail.module';
-import { Role } from '@user-role/role/role.entity';
-import { UserRole } from '@user-role/user-role.entity';
-import { InviteUser } from '@user/entities/invite-user.entity';
 import { LoggerModule } from '@logger/logger.module';
+import { UserAddressDetails } from '@entities/user_address_details.entity';
+import { UserEmailDetails } from '@entities/user_email_details.entity';
+import { UserPhoneDetails } from '@entities/user_phone_details.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Session, Role, UserRole, InviteUser]),
+    TypeOrmModule.forFeature([User,UserAddressDetails, UserRole, UserEmailDetails, UserPhoneDetails, Sessions, Role, UserRole]),
     MailModule,
     LoggerModule,
-  ],
+  ],  controllers: [AuthenticationController],
   providers: [AuthenticationService],
-  controllers: [AuthenticationController],
 })
 export class AuthenticationModule {}
