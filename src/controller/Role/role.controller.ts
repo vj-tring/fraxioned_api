@@ -7,10 +7,10 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { RoleService } from '../../service/Role/role.service';
-import { CreateRoleDTO } from 'src/dto/UserRole/create-role.dto';
-import { UpdateRoleDTO } from 'src/dto/UserRole/update-role.dto';
-import { Role } from '@entities/role.entity';
+import { RoleService } from 'services/Role/role.service';
+import { CreateRoleDTO } from 'src/dto/Role/create-role.dto';
+import { UpdateRoleDTO } from 'src/dto/Role/update-role.dto';
+import { Role } from 'entities/role.entity';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Role')

@@ -18,14 +18,18 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@auth/*": ["src/modules/authentication/*"],
-      "@contactUs/*": ["src/modules/contact-us/*"],
-      "@user/*": ["src/modules/user/*"],
-      "@mail/*": ["src/modules/mail/*"],
-      "@user-role/*": ["src/modules/user-role/*"],
-      "@role/*": ["src/modules/role/*"],
-      "@logger/*": ["src/modules/logger/*"],
-      "@entities/*": ["src/entities/*"],
+      "src/*": ["src/*"],
+      "modules/*": ["src/modules/*"],
+      "services/*": ["src/service/*"],
+      "contollers/*": ["src/contoller/*"],
+      "config/*": ["src/config/*"],
+      "swagger/*": ["src/swagger/*"],
+      "tests/*": ["src/tests/*"],
+      "exception/*": ["src/exception/*"],
+      "commons/*": ["src/commons/*"],
+      "database/*": ["src/database/*"],
+      "dto/*": ["src/dto/*"],
+      "entities/*": ["src/entities/*"],
 
     }
   }

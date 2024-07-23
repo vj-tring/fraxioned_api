@@ -50,6 +50,7 @@
     "@types/glob": "^8.1.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
+    "@types/nodemailer": "^6.4.15",
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -84,14 +85,18 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@auth/(.*)$": "<rootDir>/modules/authentication/$1",
-      "^@contactUs/(.*)$": "<rootDir>/modules/contact-us/$1",
-      "^@user/(.*)$": "<rootDir>/modules/user/$1",
-      "^@mail/(.*)$": "<rootDir>/modules/mail/$1",
-      "^@user-role/(.*)$": "<rootDir>/modules/user-role/$1",
-      "^@role/(.*)$": "<rootDir>/modules/user-role/role/$1",
-      "^@logger/(.*)$": "<rootDir>/modules/logger/$1",
-      "^@entities/(.*)$": "<rootDir>/entities/$1"
+      "^src/(.*)$": "<rootDir>/$1",
+      "^services/(.*)$": "<rootDir>/service/$1",
+      "^entities/(.*)$": "<rootDir>/entities/$1",
+      "^config/(.*)$": "<rootDir>/config/$1",
+      "^controllers/(.*)$": "<rootDir>/controller/$1",
+      "^dto/(.*)$": "<rootDir>/dto/$1",
+      "^modules/(.*)$": "<rootDir>/modules/$1",
+      "^database/(.*)$": "<rootDir>/database/$1",
+      "^commons/(.*)$": "<rootDir>/commons/$1",
+      "^swagger/(.*)$": "<rootDir>/swagger/$1",
+      "^tests/(.*)$": "<rootDir>/tests/$1"
+
     }
   }
 }

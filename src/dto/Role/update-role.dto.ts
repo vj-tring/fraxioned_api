@@ -5,7 +5,7 @@ export class UpdateRoleDTO {
   @IsString()
   @IsOptional()
   @ApiProperty()
-  roleName?: string;
+  role_name?: string;
 
   @IsString()
   @IsOptional()
@@ -14,5 +14,5 @@ export class UpdateRoleDTO {
 
   @IsInt()
   @IsNotEmpty()
-  updatedBy: number;
+  updated_by: number;
 }

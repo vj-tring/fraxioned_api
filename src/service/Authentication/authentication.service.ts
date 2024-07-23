@@ -5,18 +5,18 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InviteUserDto } from '../../dto/AuthenticationDto/invite-user.dto';
-import { User } from '@entities/user.entity';
-import { UserAddressDetails } from '@entities/user_address_details.entity';
-import { UserEmailDetails } from '@entities/user_email_details.entity';
-import { UserPhoneDetails } from '@entities/user_phone_details.entity';
-import { UserRole } from '@entities/user_role.entity';
+import { User } from 'entities/user.entity';
+import { UserAddressDetails } from 'entities/user_address_details.entity';
+import { UserEmailDetails } from 'entities/user_email_details.entity';
+import { UserPhoneDetails } from 'entities/user_phone_details.entity';
+import { UserRole } from 'entities/user_role.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MailService } from '@mail/mail.service';
+import { MailService } from 'src/service/Mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from '../../dto/AuthenticationDto/login.dto';
-import { LoggerService } from '@logger/logger.service';
-import { Sessions } from '@entities/sessions.entity';
+import { LoggerService } from 'src/service/Logger/logger.service';
+import { Sessions } from 'entities/sessions.entity';
 import * as crypto from 'crypto';
 
 @Injectable()

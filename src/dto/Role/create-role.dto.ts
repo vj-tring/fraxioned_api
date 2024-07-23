@@ -5,7 +5,7 @@ export class CreateRoleDTO {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  roleName: string;
+  role_name: string;
 
   @IsString()
   @ApiProperty()
@@ -14,5 +14,5 @@ export class CreateRoleDTO {
   @IsInt()
   @IsNotEmpty()
   @ApiProperty()
-  createdBy: number;
+  created_by: number;
 }
