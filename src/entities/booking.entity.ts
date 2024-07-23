@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique, ManyToOne, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Unique,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Property } from './property.entity';
 import { PropertySeasonDate } from './property_season_date.entity';

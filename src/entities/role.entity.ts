@@ -16,12 +16,23 @@ export class Role {
   @Column({ type: 'int', nullable: false })
   created_by: number;
 
-  @Column({ type: 'timestamp', precision: 6, nullable: false, default: () => 'CURRENT_TIMESTAMP(6)' })
+  @Column({
+    type: 'timestamp',
+    precision: 6,
+    nullable: false,
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   created_at: Date;
 
   @Column({ type: 'int', nullable: true, default: null })
   updated_by: number;
 
-  @Column({ type: 'timestamp', precision: 6, nullable: true, default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
+  @Column({
+    type: 'timestamp',
+    precision: 6,
+    nullable: true,
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
   updated_at: Date;
 }

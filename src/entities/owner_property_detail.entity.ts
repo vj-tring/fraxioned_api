@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique, ManyToOne, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Unique,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { OwnerProperty } from './owner_property.entity';
 import { CalendarYear } from './calendar_year.entity';
 

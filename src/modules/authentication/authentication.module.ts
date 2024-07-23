@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AuthenticationService } from './authentication.service';
-import { AuthenticationController } from './authentication.controller';
+import { AuthenticationService } from '../../service/Authentication/authentication.service';
+import { AuthenticationController } from '../../controller/Authentication/authentication.controller';
 import { User } from '@entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from '@entities/role.entity';
@@ -14,10 +14,20 @@ import { UserPhoneDetails } from '@entities/user_phone_details.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User,UserAddressDetails, UserRole, UserEmailDetails, UserPhoneDetails, Sessions, Role, UserRole]),
+    TypeOrmModule.forFeature([
+      User,
+      UserAddressDetails,
+      UserRole,
+      UserEmailDetails,
+      UserPhoneDetails,
+      Sessions,
+      Role,
+      UserRole,
+    ]),
     MailModule,
     LoggerModule,
-  ],  controllers: [AuthenticationController],
+  ],
+  controllers: [AuthenticationController],
   providers: [AuthenticationService],
 })
 export class AuthenticationModule {}

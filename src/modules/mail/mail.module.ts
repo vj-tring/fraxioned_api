@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { MailService } from './mail.service';
-import { MailConfigModule } from './mail-config.module';
+import { MailService } from '../../service/Mail/mail.service';
+import { MailConfigModule } from '../../config/Mail/mail-config.module';
 import { LoggerModule } from '@logger/logger.module';
 
 @Module({

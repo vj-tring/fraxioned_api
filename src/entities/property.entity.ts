@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique, ManyToOne, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Unique,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { RentalType } from './rental_type.entity';
 
 @Entity('property')
@@ -94,7 +102,12 @@ export class Property {
   @Column({ type: 'int', nullable: true, default: null })
   updated_by: number;
 
-  @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
   updated_at: Date;
 
   @Column({ type: 'int', nullable: false, default: 1 })

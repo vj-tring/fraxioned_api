@@ -1,5 +1,8 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModuleAsyncOptions, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import {
+  TypeOrmModuleAsyncOptions,
+  TypeOrmModuleOptions,
+} from '@nestjs/typeorm';
 import { QueryLogger } from '@logger/query-logger';
 
 export default class TypeOrmConfig {
@@ -12,7 +15,7 @@ export default class TypeOrmConfig {
       password: configService.get<string>('DB_PASSWORD'),
       database: configService.get<string>('DB_NAME'),
       entities: [__dirname + '../../../**/*.entity{.ts,.js}'],
-      synchronize: true, 
+      synchronize: true,
       logging: true,
       logger: new QueryLogger(),
     };
@@ -22,6 +25,7 @@ export default class TypeOrmConfig {
 export const typeOrmConfigAsync: TypeOrmModuleAsyncOptions = {
   imports: [ConfigModule],
   useFactory: async (
-    configService: ConfigService, ): Promise<TypeOrmModuleOptions> => TypeOrmConfig.getOrmConfig(configService),
+    configService: ConfigService,
+  ): Promise<TypeOrmModuleOptions> => TypeOrmConfig.getOrmConfig(configService),
   inject: [ConfigService],
 };

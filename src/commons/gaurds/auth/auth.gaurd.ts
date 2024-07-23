@@ -7,9 +7,7 @@ import {
 import { AuthenticationService } from '@auth/authentication.service';
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private authService: AuthenticationService,
-  ) {}
+  constructor(private authService: AuthenticationService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();

@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
-import { InviteUserDto } from './dto/invite-user.dto';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
+import { InviteUserDto } from '../../dto/AuthenticationDto/invite-user.dto';
 import { User } from '@entities/user.entity';
 import { UserAddressDetails } from '@entities/user_address_details.entity';
 import { UserEmailDetails } from '@entities/user_email_details.entity';
@@ -9,7 +14,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from '@mail/mail.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto } from '../../dto/AuthenticationDto/login.dto';
 import { LoggerService } from '@logger/logger.service';
 import { Sessions } from '@entities/sessions.entity';
 import * as crypto from 'crypto';
@@ -34,11 +39,24 @@ export class AuthenticationService {
   ) {}
 
   async inviteUser(inviteUserDto: InviteUserDto) {
-    const { email, firstName, lastName, addressLine1, addressLine2, state, city, zip, phoneNumber, roleId } = inviteUserDto;
+    const {
+      email,
+      firstName,
+      lastName,
+      addressLine1,
+      addressLine2,
+      state,
+      city,
+      zip,
+      phoneNumber,
+      roleId,
+    } = inviteUserDto;
 
     this.logger.log(`Inviting user with email: ${email}`);
 
-    const existingUserEmail = await this.userEmailRepository.findOne({ where: { email_id: email } });
+    const existingUserEmail = await this.userEmailRepository.findOne({
+      where: { email_id: email },
+    });
     if (existingUserEmail) {
       this.logger.error(`Email already exists: ${email}`);
       throw new ConflictException('Email already exists');
@@ -83,7 +101,7 @@ export class AuthenticationService {
 
     const userRole = this.userRoleRepository.create({
       user,
-      role: { id: roleId } as any, 
+      role: { id: roleId } as any,
     });
 
     await this.userRoleRepository.save(userRole);
@@ -93,7 +111,7 @@ export class AuthenticationService {
     await this.mailService.sendMail(
       email,
       'You are invited!',
-      `Hello ${firstName},\n\nYou have been invited to our platform. Please use the following link to login: ${loginLink}\n\nYour temporary password is: ${tempPassword}\n\nBest regards,\nYour Team`
+      `Hello ${firstName},\n\nYou have been invited to our platform. Please use the following link to login: ${loginLink}\n\nYour temporary password is: ${tempPassword}\n\nBest regards,\nYour Team`,
     );
 
     this.logger.log(`Invite sent successfully to ${email}`);
@@ -104,25 +122,25 @@ export class AuthenticationService {
     const { email, password } = loginDto;
     this.logger.log(`User attempting to login with email: ${email}`);
 
-    const userEmail = await this.userEmailRepository.findOne({ 
+    const userEmail = await this.userEmailRepository.findOne({
       where: { email_id: email },
-      relations: ['user'] 
+      relations: ['user'],
     });
-  
+
     if (!userEmail) {
       this.logger.error(`User not found with email: ${email}`);
       throw new NotFoundException('User not found');
     }
-  
+
     const user = userEmail.user;
-  
+
     if (!user) {
       this.logger.error(`User entity not found for email: ${email}`);
       throw new NotFoundException('User not found');
     }
-  
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
-  
+
     if (!isPasswordValid) {
       this.logger.error(`Invalid credentials for email: ${email}`);
       throw new UnauthorizedException('Invalid credentials');

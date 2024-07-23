@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique, ManyToOne, JoinColumn, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Unique,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { User } from './user.entity';
 
 @Entity('sessions')
@@ -18,6 +26,11 @@ export class Sessions {
   @Column({ type: 'timestamp', nullable: false })
   expires_at: Date;
 
-  @Column({ type: 'timestamp', precision: 6, nullable: false, default: () => 'CURRENT_TIMESTAMP(6)' })
+  @Column({
+    type: 'timestamp',
+    precision: 6,
+    nullable: false,
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   created_at: Date;
 }

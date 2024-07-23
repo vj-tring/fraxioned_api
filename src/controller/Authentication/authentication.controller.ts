@@ -1,7 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthenticationService } from './authentication.service';
-import { InviteUserDto } from './dto/invite-user.dto';
-import { LoginDto } from './dto/login.dto';
+import {
+  Controller,
+  Post,
+  Body,
+} from '@nestjs/common';
+import { AuthenticationService } from '../../service/Authentication/authentication.service';
+import { InviteUserDto } from '../../dto/AuthenticationDto/invite-user.dto';
+import { LoginDto } from '../../dto/AuthenticationDto/login.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Authentication')
@@ -9,7 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
-   @Post('invite')
+  @Post('invite')
   inviteUser(@Body() inviteUserDto: InviteUserDto) {
     return this.authenticationService.inviteUser(inviteUserDto);
   }

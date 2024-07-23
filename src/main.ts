@@ -13,7 +13,7 @@ async function bootstrap() {
 
   const dataSource = app.get(DataSource);
   await seedRole(dataSource);
-  
+
   app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('Fraxioned API')

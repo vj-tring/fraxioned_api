@@ -7,9 +7,7 @@ describe('Swagger', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      // ...
-    }).compile();
+    const module: TestingModule = await Test.createTestingModule({}).compile();
 
     app = module.createNestApplication();
     await app.init();

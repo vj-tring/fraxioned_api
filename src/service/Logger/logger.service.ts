@@ -1,5 +1,5 @@
 import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
-import { createLogger } from '@logger/config/logger.config';
+import { createLogger } from 'src/config/Logger/logger.config';
 import winston from 'winston';
 
 @Injectable()
