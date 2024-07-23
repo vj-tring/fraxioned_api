@@ -21,7 +21,7 @@
       "src/*": ["src/*"],
       "modules/*": ["src/modules/*"],
       "services/*": ["src/service/*"],
-      "contollers/*": ["src/contoller/*"],
+      "controllers/*": ["src/controller/*"],
       "config/*": ["src/config/*"],
       "swagger/*": ["src/swagger/*"],
       "tests/*": ["src/tests/*"],
