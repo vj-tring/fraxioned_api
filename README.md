@@ -21,21 +21,26 @@ Install the dependencies by running:
 
 ## Database Configuration
 
-The database for the application can be configured using properties in the db.config.ts. 
+The database for the application can be configured using properties in the .env file. 
 
-- go to path "src/database/config/db.config.ts"
+- create a .enf file in the root folder.
+- change the values of the properties with your connection params. 
 
-- change the properties values with your connection params. 
-
+sample:
 ```
-export const dbConfig = {
+# MySQL DB Configurations
+DB_HOST = localhost
+DB_USERNAME = root
+DB_PASSWORD = root
+DB_PORT = 3306
+DB_NAME = database_name
 
-  host: '',
-  port: 3306,
-  username: '',
-  password: '',
-  database: '',
-};
+# .env
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USER=user@email.com
+MAIL_PASSWORD=grge xxxx xxxx xxxx
+MAIL_FROM=user@gmail.com
 ```
 
 
