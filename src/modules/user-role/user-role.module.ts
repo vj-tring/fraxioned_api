@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { RoleModule } from './role/role.module';
-import { LoggerModule } from '@logger/logger.module';
+import { RoleModule } from 'modules/role/role.module';
+import { LoggerModule } from 'modules/logger/logger.module';
 
 @Module({
   imports: [RoleModule, LoggerModule],
