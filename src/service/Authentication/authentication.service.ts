@@ -3,8 +3,9 @@ import {
   NotFoundException,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
-import { InviteUserDto } from '../../dto/AuthenticationDto/invite-user.dto';
+import { InviteUserDto } from '../../dto/Authentication/invite-user.dto';
 import { User } from 'entities/user.entity';
 import { UserAddressDetails } from 'entities/user_address_details.entity';
 import { UserEmailDetails } from 'entities/user_email_details.entity';
@@ -14,7 +15,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/service/Mail/mail.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from '../../dto/AuthenticationDto/login.dto';
+import { LoginDto } from '../../dto/Authentication/login.dto';
 import { LoggerService } from 'src/service/Logger/logger.service';
 import { Sessions } from 'entities/sessions.entity';
 import * as crypto from 'crypto';
@@ -39,6 +40,18 @@ export class AuthenticationService {
   ) {}
 
   async inviteUser(inviteUserDto: InviteUserDto) {
+    if (!inviteUserDto.updated_by) {
+      throw new BadRequestException('updated_by is required');
+    }
+    if (!inviteUserDto.created_by) {
+      throw new BadRequestException('created_by is required');
+    }
+    if (!inviteUserDto.email) {
+      throw new BadRequestException('email is required');
+    }
+    if (!inviteUserDto.phoneNumber) {
+      throw new BadRequestException('phoneNumber is required');
+    }
     const {
       email,
       firstName,
@@ -50,6 +63,8 @@ export class AuthenticationService {
       zip,
       phoneNumber,
       roleId,
+      created_by,
+      updated_by
     } = inviteUserDto;
 
     this.logger.log(`Inviting user with email: ${email}`);
@@ -70,6 +85,8 @@ export class AuthenticationService {
       last_name: lastName,
       password: hashedPassword,
       is_active: 1,
+      created_by: created_by,
+      updated_by: updated_by
     });
 
     await this.userRepository.save(user);
@@ -106,7 +123,7 @@ export class AuthenticationService {
 
     await this.userRoleRepository.save(userRole);
 
-    const loginLink = `http://your-app.com/login`;
+    const loginLink = `http://fraxionedOwners.com/login`;
 
     await this.mailService.sendMail(
       email,
@@ -151,6 +168,9 @@ export class AuthenticationService {
       throw new UnauthorizedException('The user account is currently inactive');
     }
 
+    user.last_login_time = new Date();
+    await this.userRepository.save(user);
+  
     let session = await this.sessionRepository.findOne({
       where: { user: { id: user.id } },
     });

@@ -8,6 +8,7 @@ import {
   Index,
 } from 'typeorm';
 import { RentalType } from './rental_type.entity';
+import { PropertyShareCount } from './property_share_count.entity';
 
 @Entity('property')
 @Unique(['id'])
@@ -24,8 +25,10 @@ export class Property {
   @Index()
   rental_type: RentalType;
 
-  @Column({ type: 'int', nullable: true, default: null })
-  share_id: number;
+  @ManyToOne(() => PropertyShareCount, { nullable: true })
+  @JoinColumn({ name: 'share_id' })
+  @Index()
+  property: PropertyShareCount;
 
   @Column({ type: 'varchar', length: 255, nullable: true, default: null })
   city: string;
@@ -128,7 +131,7 @@ export class Property {
   @Column({ type: 'int', nullable: false, default: 7 })
   cancellation_day_limit: number;
 
-  @Column({ type: 'point', nullable: true, default: null })
+  @Column({ type: 'point', nullable: false, default: null })
   map_coordinates: string;
 
   @Column({ type: 'tinyint', nullable: true, default: null })

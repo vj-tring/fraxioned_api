@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationController } from '../../controller/Authentication/authentication.controller';
 import { AuthenticationService } from '../../service/Authentication/authentication.service';
-import { InviteUserDto } from '../../dto/AuthenticationDto/invite-user.dto';
-import { LoginDto } from '../../dto/AuthenticationDto/login.dto';
+import { InviteUserDto } from '../../dto/Authentication/invite-user.dto';
+import { LoginDto } from '../../dto/Authentication/login.dto';
 
 describe('AuthenticationController', () => {
   let controller: AuthenticationController;
@@ -43,6 +43,8 @@ describe('AuthenticationController', () => {
         zip: '90001',
         phoneNumber: '1234567890',
         roleId: 1,
+        updated_by: 0,
+        created_by: 0
       };
 
       const result = await controller.inviteUser(inviteUserDto);

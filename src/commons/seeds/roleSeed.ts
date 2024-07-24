@@ -14,8 +14,8 @@ export const seedRole = async (dataSource: DataSource) => {
         updated_at: new Date(Date.now()),
       },
       {
-        role_name: 'Broker',
-        description: 'broker-role',
+        role_name: 'Owner',
+        description: 'owner-role',
         created_by: 1,
         created_at: new Date(Date.now()),
         updated_by: 1,

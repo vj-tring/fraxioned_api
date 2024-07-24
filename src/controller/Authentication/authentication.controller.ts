@@ -4,8 +4,8 @@ import {
   Body,
 } from '@nestjs/common';
 import { AuthenticationService } from '../../service/Authentication/authentication.service';
-import { InviteUserDto } from '../../dto/AuthenticationDto/invite-user.dto';
-import { LoginDto } from '../../dto/AuthenticationDto/login.dto';
+import { InviteUserDto } from '../../dto/Authentication/invite-user.dto';
+import { LoginDto } from '../../dto/Authentication/login.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Authentication')

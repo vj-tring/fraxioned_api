@@ -10,8 +10,8 @@ import { Sessions } from 'entities/sessions.entity';
 import { MailService } from 'services/Mail/mail.service';
 import { LoggerService } from 'services/Logger/logger.service';
 import { Repository } from 'typeorm';
-import { InviteUserDto } from 'dto/AuthenticationDto/invite-user.dto';
-import { LoginDto } from 'dto/AuthenticationDto/login.dto';
+import { InviteUserDto } from 'src/dto/Authentication/invite-user.dto';
+import { LoginDto } from 'src/dto/Authentication/login.dto';
 import { NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
@@ -74,6 +74,8 @@ describe('AuthenticationService', () => {
         zip: '90001',
         phoneNumber: '1234567890',
         roleId: 1,
+        updated_by: 0,
+        created_by: 0
       };
 
       userEmailRepository.findOne.mockResolvedValue(null);
@@ -109,6 +111,8 @@ describe('AuthenticationService', () => {
         zip: '90001',
         phoneNumber: '1234567890',
         roleId: 1,
+        updated_by: 0,
+        created_by: 0
       };
 
       userEmailRepository.findOne.mockResolvedValue({});

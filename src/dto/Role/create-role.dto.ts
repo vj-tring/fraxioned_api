@@ -15,4 +15,5 @@ export class CreateRoleDTO {
   @IsNotEmpty()
   @ApiProperty()
   created_by: number;
+  static created_by: any;
 }

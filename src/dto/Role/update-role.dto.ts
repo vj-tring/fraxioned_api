@@ -14,5 +14,6 @@ export class UpdateRoleDTO {
 
   @IsInt()
   @IsNotEmpty()
+  @ApiProperty()
   updated_by: number;
 }

@@ -30,4 +30,10 @@ export class InviteUserDto {
 
   @ApiProperty()
   roleId: number;
+  
+  @ApiProperty()
+  updated_by: number;
+  
+  @ApiProperty()
+  created_by: number;
 }
