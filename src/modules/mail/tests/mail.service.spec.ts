@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MailService } from '@mail/mail.service';
-import { MailConfig } from '@mail/mail.config';
+import { MailService } from 'src/service/Mail/mail.service';
+import { MailConfig } from 'src/config/Mail/mail.config';
 import * as nodemailer from 'nodemailer';
-import { LoggerService } from '@logger/logger.service';
+import { LoggerService } from 'src/service/Logger/logger.service';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('nodemailer');
 
@@ -10,21 +11,35 @@ describe('MailService', () => {
   let service: MailService;
   let transporterMock: any;
   let loggerService: LoggerService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     transporterMock = {
       sendMail: jest.fn().mockResolvedValue({}),
     };
 
-    nodemailer.createTransport.mockReturnValue(transporterMock);
+    (nodemailer.createTransport as jest.Mock).mockReturnValue(transporterMock);
 
-    const mailConfig: MailConfig = {
-      SMTP_HOST: 'smtp.example.com',
-      SMTP_PORT: 587,
-      SMTP_USERNAME: 'user@example.com',
-      SMTP_PASSWORD: 'password',
-      FROM_EMAIL: 'from@example.com',
-    };
+    configService = {
+      get: jest.fn((key: string) => {
+        switch (key) {
+          case 'MAIL_HOST':
+            return 'smtp.example.com';
+          case 'MAIL_PORT':
+            return 587;
+          case 'MAIL_USER':
+            return 'user@example.com';
+          case 'MAIL_PASSWORD':
+            return 'password';
+          case 'MAIL_FROM':
+            return 'from@example.com';
+          default:
+            return null;
+        }
+      }),
+    } as unknown as ConfigService;
+
+    const mailConfig = new MailConfig(configService);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
