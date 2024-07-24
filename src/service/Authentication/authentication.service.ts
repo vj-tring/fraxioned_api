@@ -40,19 +40,7 @@ export class AuthenticationService {
   ) {}
 
   async inviteUser(inviteUserDto: InviteUserDto) {
-    if (!inviteUserDto.updated_by) {
-      throw new BadRequestException('updated_by is required');
-    }
-    if (!inviteUserDto.created_by) {
-      throw new BadRequestException('created_by is required');
-    }
-    if (!inviteUserDto.email) {
-      throw new BadRequestException('email is required');
-    }
-    if (!inviteUserDto.phoneNumber) {
-      throw new BadRequestException('phoneNumber is required');
-    }
-    const {
+      const {
       email,
       firstName,
       lastName,

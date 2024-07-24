@@ -12,7 +12,7 @@ import { LoggerService } from 'services/Logger/logger.service';
 import { Repository } from 'typeorm';
 import { InviteUserDto } from 'src/dto/Authentication/invite-user.dto';
 import { LoginDto } from 'src/dto/Authentication/login.dto';
-import { NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;

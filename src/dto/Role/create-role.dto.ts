@@ -3,7 +3,7 @@ import { IsString, IsNotEmpty, IsInt } from 'class-validator';
 
 export class CreateRoleDTO {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({message: 'role_name is required'})
   @ApiProperty()
   role_name: string;
 
@@ -12,7 +12,7 @@ export class CreateRoleDTO {
   description?: string;
 
   @IsInt()
-  @IsNotEmpty()
+  @IsNotEmpty({message: 'created_by is required'})
   @ApiProperty()
   created_by: number;
   static created_by: any;

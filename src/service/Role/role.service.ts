@@ -16,12 +16,7 @@ export class RoleService {
   ) {}
 
   async createRole(createRoleDto: CreateRoleDTO): Promise<Role> {
-    if (!createRoleDto.role_name) {
-      throw new BadRequestException('role_name is required');
-    }
-    if (!createRoleDto.created_by) {
-      throw new BadRequestException('created_by is required');
-    }
+  
     const existingRole = await this.roleRepository.findOne({ where: { role_name: createRoleDto.role_name } });
     if (existingRole) {
       this.logger.warn(`Role with name ${createRoleDto.role_name} already exists`);
@@ -49,12 +44,6 @@ export class RoleService {
   }
 
   async updateRole(id: number, updateRoleDto: UpdateRoleDTO): Promise<Role> {
-    if (!updateRoleDto.role_name) {
-      throw new BadRequestException('role_name is required');
-    }
-    if (!updateRoleDto.updated_by) {
-      throw new BadRequestException('updated_by is required');
-    }
     const existingRole = await this.roleRepository.findOne({ where: { role_name: updateRoleDto.role_name } });
     if (existingRole && existingRole.id !== id) {
       this.logger.warn(`Role with name ${updateRoleDto.role_name} already exists`);
