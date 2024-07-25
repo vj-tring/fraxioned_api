@@ -14,11 +14,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { AuthenticationService } from 'src/service/authentication.service';
-import { InviteUserDto } from 'src/dto/invite-user.dto';
+import { InviteUserDto } from 'dto/inviteUser.dto';
 import { LoginDto } from 'src/dto/login.dto';
-import { ForgotPasswordDto } from 'src/dto/forgot-password.dto';
-import { ResetPasswordDto } from 'src/dto/reset-password.dto';
-import { ChangePasswordDto } from 'src/dto/recover-password.dto';
+import { ForgotPasswordDto } from 'dto/forgotPassword.dto';
+import { ResetPasswordDto } from 'dto/resetPassword.dto';
+import { ChangePasswordDto } from 'dto/recoverPassword.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from 'src/entities/user.entity';
 
