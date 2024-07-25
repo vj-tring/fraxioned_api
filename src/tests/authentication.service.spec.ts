@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationService } from '../../service/Authentication/authentication.service';
+import { AuthenticationService } from '../service/authentication.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from 'entities/user.entity';
 import { UserAddressDetails } from 'entities/user_address_details.entity';
@@ -7,11 +7,11 @@ import { UserEmailDetails } from 'entities/user_email_details.entity';
 import { UserPhoneDetails } from 'entities/user_phone_details.entity';
 import { UserRole } from 'entities/user_role.entity';
 import { Sessions } from 'entities/sessions.entity';
-import { MailService } from 'services/Mail/mail.service';
-import { LoggerService } from 'services/Logger/logger.service';
+import { MailService } from 'src/service/mail.service';
+import { LoggerService } from 'src/service/logger.service';
 import { Repository } from 'typeorm';
-import { InviteUserDto } from 'src/dto/Authentication/invite-user.dto';
-import { LoginDto } from 'src/dto/Authentication/login.dto';
+import { InviteUserDto } from 'dto/inviteUser.dto';
+import { LoginDto } from 'src/dto/login.dto';
 import {
   NotFoundException,
   UnauthorizedException,
@@ -19,9 +19,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { ResetPasswordDto } from 'src/dto/Authentication/reset-password.dto';
-import { ChangePasswordDto } from 'src/dto/Authentication/recover-password.dto';
-import { ForgotPasswordDto } from 'src/dto/Authentication/forgot-password.dto';
+import { ForgotPasswordDto } from 'dto/forgotPassword.dto';
+import { ChangePasswordDto } from 'dto/recoverPassword.dto';
+import { ResetPasswordDto } from 'dto/resetPassword.dto';
 
 type MockRepository<T> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfigAsync } from './config/typeorm.config';
+import { typeOrmConfigAsync } from '../database/typeorm.config';
 import { ConfigModule } from '@nestjs/config';
 import { User } from 'entities/user.entity';
 import { Sessions } from 'entities/sessions.entity';

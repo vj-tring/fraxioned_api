@@ -1,5 +1,5 @@
 import { Logger as TypeOrmLogger } from 'typeorm';
-import { createLogger } from 'src/config/Logger/logger.config';
+import { createLogger } from 'src/config/logger.config';
 import winston from 'winston';
 
 export class QueryLogger implements TypeOrmLogger {

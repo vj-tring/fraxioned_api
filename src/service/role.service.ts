@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from 'entities/role.entity';
-import { CreateRoleDTO } from 'src/dto/Role/create-role.dto';
-import { UpdateRoleDTO } from 'src/dto/Role/update-role.dto';
-import { LoggerService } from 'src/service/Logger/logger.service';
+import { CreateRoleDTO } from 'dto/createRole.dto';
+import { UpdateRoleDTO } from 'dto/updateRole.dto';
+import { LoggerService } from 'src/service/logger.service';
 import { RoleAlreadyExistsException } from 'src/exception/role/role_name_exists';
 
 @Injectable()

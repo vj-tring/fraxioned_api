@@ -3,7 +3,7 @@ import {
   TypeOrmModuleAsyncOptions,
   TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
-import { QueryLogger } from 'services/Logger/query-logger';
+import { QueryLogger } from 'src/service/query-logger';
 
 export default class TypeOrmConfig {
   static getOrmConfig(configService: ConfigService): TypeOrmModuleOptions {

@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationController } from 'controllers/Authentication/authentication.controller';
-import { AuthenticationService } from 'services/Authentication/authentication.service';
-import { InviteUserDto } from 'dto/Authentication/invite-user.dto';
-import { LoginDto } from 'dto/Authentication/login.dto';
-import { ForgotPasswordDto } from 'dto/Authentication/forgot-password.dto';
-import { ChangePasswordDto } from 'src/dto/Authentication/recover-password.dto';
-import { ResetPasswordDto } from 'dto/Authentication/reset-password.dto';
+import { AuthenticationController } from 'src/controller/authentication.controller';
+import { AuthenticationService } from 'src/service/authentication.service';
+import { InviteUserDto } from 'dto/inviteUser.dto';
+import { LoginDto } from 'src/dto/login.dto';
+import { ForgotPasswordDto } from 'dto/forgotPassword.dto';
+import { ChangePasswordDto } from 'dto/recoverPassword.dto';
+import { ResetPasswordDto } from 'dto/resetPassword.dto';
 import {
   NotFoundException,
   BadRequestException,

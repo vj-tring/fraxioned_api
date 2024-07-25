@@ -5,7 +5,7 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { InviteUserDto } from 'dto/Authentication/invite-user.dto';
+import { InviteUserDto } from 'dto/inviteUser.dto';
 import { User } from 'entities/user.entity';
 import { UserAddressDetails } from 'entities/user_address_details.entity';
 import { UserEmailDetails } from 'entities/user_email_details.entity';
@@ -13,15 +13,15 @@ import { UserPhoneDetails } from 'entities/user_phone_details.entity';
 import { UserRole } from 'entities/user_role.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MailService } from 'src/service/Mail/mail.service';
+import { MailService } from 'src/service/mail.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from 'dto/Authentication/login.dto';
-import { LoggerService } from 'src/service/Logger/logger.service';
+import { LoginDto } from 'src/dto/login.dto';
+import { LoggerService } from 'src/service/logger.service';
 import { Sessions } from 'entities/sessions.entity';
 import * as crypto from 'crypto';
-import { ForgotPasswordDto } from 'src/dto/Authentication/forgot-password.dto';
-import { ChangePasswordDto } from 'src/dto/Authentication/recover-password.dto';
-import { ResetPasswordDto } from 'src/dto/Authentication/reset-password.dto';
+import { ForgotPasswordDto } from 'dto/forgotPassword.dto';
+import { ChangePasswordDto } from 'dto/recoverPassword.dto';
+import { ResetPasswordDto } from 'dto/resetPassword.dto';
 
 @Injectable()
 export class AuthenticationService {

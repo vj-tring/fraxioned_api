@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MailService } from 'src/service/Mail/mail.service';
-import { MailConfig } from 'src/config/Mail/mail.config';
+import { MailService } from 'src/service/mail.service';
+import { MailConfig } from 'src/config/mail.config';
 import * as nodemailer from 'nodemailer';
-import { LoggerService } from 'src/service/Logger/logger.service';
+import { LoggerService } from 'src/service/logger.service';
 import { ConfigService } from '@nestjs/config';
 import { Transporter } from 'nodemailer';
 

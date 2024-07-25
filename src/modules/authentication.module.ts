@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AuthenticationService } from '../../service/Authentication/authentication.service';
-import { AuthenticationController } from '../../controller/Authentication/authentication.controller';
+import { AuthenticationService } from '../service/authentication.service';
+import { AuthenticationController } from '../controller/authentication.controller';
 import { User } from 'entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from 'entities/role.entity';
 import { Sessions } from 'entities/sessions.entity';
 import { UserRole } from 'entities/user_role.entity';
-import { MailModule } from 'modules/mail/mail.module';
-import { LoggerModule } from 'modules/logger/logger.module';
+import { MailModule } from 'src/modules/mail.module';
+import { LoggerModule } from 'src/modules/logger.module';
 import { UserAddressDetails } from 'entities/user_address_details.entity';
 import { UserEmailDetails } from 'entities/user_email_details.entity';
 import { UserPhoneDetails } from 'entities/user_phone_details.entity';

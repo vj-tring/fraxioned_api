@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RoleController } from 'src/controller/Role/role.controller';
-import { RoleService } from 'src/service/Role/role.service';
-import { CreateRoleDTO } from 'src/dto/Role/create-role.dto';
-import { UpdateRoleDTO } from 'src/dto/Role/update-role.dto';
+import { RoleController } from 'controllers/role.controller';
+import { RoleService } from 'src/service/role.service';
+import { CreateRoleDTO } from 'dto/createRole.dto';
+import { UpdateRoleDTO } from 'dto/updateRole.dto';
 import { Role } from 'src/entities/role.entity';
 
 describe('RoleController', () => {

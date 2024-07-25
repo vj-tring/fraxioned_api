@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RoleService } from 'src/service/Role/role.service';
+import { RoleService } from 'src/service/role.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Role } from 'src/entities/role.entity';
-import { CreateRoleDTO } from 'src/dto/Role/create-role.dto';
-import { UpdateRoleDTO } from 'src/dto/Role/update-role.dto';
+import { CreateRoleDTO } from 'dto/createRole.dto';
+import { UpdateRoleDTO } from 'dto/updateRole.dto';
 import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { LoggerService } from 'src/service/Logger/logger.service';
+import { LoggerService } from 'src/service/logger.service';
 
 type MockRepository<T> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
