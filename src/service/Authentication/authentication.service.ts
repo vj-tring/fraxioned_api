@@ -5,7 +5,7 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { InviteUserDto } from '../../dto/Authentication/invite-user.dto';
+import { InviteUserDto } from 'dto/Authentication/invite-user.dto';
 import { User } from 'entities/user.entity';
 import { UserAddressDetails } from 'entities/user_address_details.entity';
 import { UserEmailDetails } from 'entities/user_email_details.entity';
@@ -15,10 +15,13 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/service/Mail/mail.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from '../../dto/Authentication/login.dto';
+import { LoginDto } from 'dto/Authentication/login.dto';
 import { LoggerService } from 'src/service/Logger/logger.service';
 import { Sessions } from 'entities/sessions.entity';
 import * as crypto from 'crypto';
+import { ForgotPasswordDto } from 'src/dto/Authentication/forgot-password.dto';
+import { ChangePasswordDto } from 'src/dto/Authentication/recover-password.dto';
+import { ResetPasswordDto } from 'src/dto/Authentication/reset-password.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -39,8 +42,8 @@ export class AuthenticationService {
     private readonly logger: LoggerService,
   ) {}
 
-  async inviteUser(inviteUserDto: InviteUserDto) {
-      const {
+  async inviteUser(inviteUserDto: InviteUserDto): Promise<{ message: string }> {
+    const {
       email,
       firstName,
       lastName,
@@ -52,7 +55,7 @@ export class AuthenticationService {
       phoneNumber,
       roleId,
       created_by,
-      updated_by
+      updated_by,
     } = inviteUserDto;
 
     this.logger.log(`Inviting user with email: ${email}`);
@@ -74,7 +77,7 @@ export class AuthenticationService {
       password: hashedPassword,
       is_active: 1,
       created_by: created_by,
-      updated_by: updated_by
+      updated_by: updated_by,
     });
 
     await this.userRepository.save(user);
@@ -106,7 +109,7 @@ export class AuthenticationService {
 
     const userRole = this.userRoleRepository.create({
       user,
-      role: { id: roleId } as any,
+      role: { id: roleId } as Partial<UserRole>,
     });
 
     await this.userRoleRepository.save(userRole);
@@ -123,7 +126,11 @@ export class AuthenticationService {
     return { message: 'Invite sent successfully' };
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<{
+    message: string;
+    user: Partial<User>;
+    session: { token: string; expires_at: Date };
+  }> {
     const { email, password } = loginDto;
     this.logger.log(`User attempting to login with email: ${email}`);
 
@@ -158,7 +165,7 @@ export class AuthenticationService {
 
     user.last_login_time = new Date();
     await this.userRepository.save(user);
-  
+
     let session = await this.sessionRepository.findOne({
       where: { user: { id: user.id } },
     });
@@ -176,7 +183,7 @@ export class AuthenticationService {
 
     await this.sessionRepository.save(session);
 
-    const { password: userPassword, ...userDetails } = user;
+    const { ...userDetails } = user;
 
     this.logger.log(`Login successful for email: ${email}`);
     return {
@@ -184,6 +191,86 @@ export class AuthenticationService {
       user: userDetails,
       session: { token: session.token, expires_at: session.expires_at },
     };
+  }
+
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    const userEmail = await this.userEmailRepository.findOne({
+      where: { email_id: forgotPasswordDto.email },
+      relations: ['user'],
+    });
+
+    if (!userEmail || !userEmail.user) {
+      throw new NotFoundException(
+        'The account associated with this user was not found',
+      );
+    }
+
+    const user = userEmail.user;
+    user.reset_token = crypto.randomBytes(50).toString('hex').slice(0, 100);
+    user.reset_token_expires = new Date(Date.now() + 1 * 60 * 60 * 1000);
+
+    await this.userRepository.save(user);
+
+    const link = `http://fraxioned.com/reset-password?resetToken=${user.reset_token}`;
+
+    const subject = 'Password Reset Request';
+    const text = `To reset your password, please click the following link: ${link}`;
+
+    await this.mailService.sendMail(userEmail.email_id, subject, text);
+
+    return { message: 'Password reset email sent successfully' };
+  }
+
+  async changePassword(
+    reset_token: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({ where: { reset_token } });
+    if (!user) {
+      throw new NotFoundException(
+        'The account associated with this user was not found',
+      );
+    }
+
+    if (user.reset_token_expires < new Date()) {
+      throw new BadRequestException('The password reset token has expired');
+    }
+
+    user.password = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    user.reset_token = '';
+    user.reset_token_expires = null;
+
+    await this.userRepository.save(user);
+
+    return { message: 'Password has been reset successfully' };
+  }
+
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({
+      where: { id: resetPasswordDto.userId },
+    });
+    if (!user) {
+      throw new NotFoundException(
+        'The account associated with this user was not found',
+      );
+    }
+    if (!user.is_active) {
+      throw new UnauthorizedException('The user account is currently inactive');
+    }
+    const isOldPasswordValid = await bcrypt.compare(
+      resetPasswordDto.oldPassword,
+      user.password,
+    );
+    if (!isOldPasswordValid) {
+      throw new UnauthorizedException('The provided old password is incorrect');
+    }
+    const updatedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
+    await this.userRepository.update(user.id, { password: updatedPassword });
+    return { message: 'Password reset successfully' };
   }
 
   async validateUser(userId: number, accessToken: string): Promise<boolean> {
@@ -209,6 +296,26 @@ export class AuthenticationService {
       throw new UnauthorizedException(
         'The provided user ID or access token is invalid',
       );
+    }
+  }
+
+  async logout(token: string): Promise<{ message: string }> {
+    try {
+      const session = await this.sessionRepository.findOne({
+        where: { token },
+      });
+
+      if (!session) {
+        throw new UnauthorizedException(
+          'The session has expired or is invalid',
+        );
+      }
+
+      await this.sessionRepository.delete({ token: session.token });
+
+      return { message: 'Logout successful' };
+    } catch (error) {
+      throw error;
     }
   }
 }

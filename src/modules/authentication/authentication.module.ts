@@ -26,7 +26,6 @@ import { UserPhoneDetails } from 'entities/user_phone_details.entity';
     ]),
     MailModule,
     LoggerModule,
-    
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService],

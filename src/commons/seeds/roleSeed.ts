@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { Role } from 'entities/role.entity';
 
-export const seedRole = async (dataSource: DataSource) => {
+export const seedRole = async (dataSource: DataSource): Promise<void> => {
   const existingUsers = await dataSource.getRepository(Role).find();
   if (existingUsers.length === 0) {
     await dataSource.getRepository(Role).save([

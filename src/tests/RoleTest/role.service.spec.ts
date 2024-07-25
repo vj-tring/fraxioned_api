@@ -8,9 +8,9 @@ import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { LoggerService } from 'src/service/Logger/logger.service';
 
-type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+type MockRepository<T> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
-const createMockRepository = <T = any>(): MockRepository<T> => ({
+const createMockRepository = <T>(): MockRepository<T> => ({
   findOne: jest.fn(),
   find: jest.fn(),
   save: jest.fn(),
@@ -29,7 +29,7 @@ describe('RoleService', () => {
   };
 
   beforeEach(async () => {
-    repository = createMockRepository();
+    repository = createMockRepository<Role>();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

@@ -20,7 +20,7 @@ export const dailyRotateFileTransportExceptions = new DailyRotateFile({
   maxFiles: '7d',
 });
 
-export const createLogger = () =>
+export const createLogger = (): winston.Logger =>
   winston.createLogger({
     level: 'info',
     format: winston.format.combine(

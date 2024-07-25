@@ -10,23 +10,23 @@ export class LoggerService implements NestLoggerService {
     this.logger = createLogger();
   }
 
-  log(message: string) {
+  log(message: string): void {
     this.logger.info(message);
   }
 
-  error(message: string) {
+  error(message: string): void {
     this.logger.error(message);
   }
 
-  warn(message: string) {
+  warn(message: string): void {
     this.logger.warn(message);
   }
 
-  debug(message: string) {
+  debug(message: string): void {
     this.logger.debug(message);
   }
 
-  verbose(message: string) {
+  verbose(message: string): void {
     this.logger.verbose(message);
   }
 }

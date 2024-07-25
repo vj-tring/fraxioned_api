@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { Transporter } from 'nodemailer';
 import { MailConfig } from 'config/Mail/mail.config';
 import { LoggerService } from 'services/Logger/logger.service';
 
 @Injectable()
 export class MailService {
-  private transporter: any;
+  private transporter: Transporter;
 
   constructor(
     private mailConfig: MailConfig,
@@ -22,7 +23,7 @@ export class MailService {
     });
   }
 
-  async sendMail(to: string, subject: string, text: string) {
+  async sendMail(to: string, subject: string, text: string): Promise<void> {
     const mailOptions = {
       from: this.mailConfig.FROM_EMAIL,
       to,

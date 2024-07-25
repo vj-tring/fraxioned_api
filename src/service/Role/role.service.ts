@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from 'entities/role.entity';
@@ -16,10 +16,13 @@ export class RoleService {
   ) {}
 
   async createRole(createRoleDto: CreateRoleDTO): Promise<Role> {
-  
-    const existingRole = await this.roleRepository.findOne({ where: { role_name: createRoleDto.role_name } });
+    const existingRole = await this.roleRepository.findOne({
+      where: { role_name: createRoleDto.role_name },
+    });
     if (existingRole) {
-      this.logger.warn(`Role with name ${createRoleDto.role_name} already exists`);
+      this.logger.warn(
+        `Role with name ${createRoleDto.role_name} already exists`,
+      );
       throw new RoleAlreadyExistsException(createRoleDto.role_name);
     }
 
@@ -44,11 +47,15 @@ export class RoleService {
   }
 
   async updateRole(id: number, updateRoleDto: UpdateRoleDTO): Promise<Role> {
-    const existingRole = await this.roleRepository.findOne({ where: { role_name: updateRoleDto.role_name } });
+    const existingRole = await this.roleRepository.findOne({
+      where: { role_name: updateRoleDto.role_name },
+    });
     if (existingRole && existingRole.id !== id) {
-      this.logger.warn(`Role with name ${updateRoleDto.role_name} already exists`);
+      this.logger.warn(
+        `Role with name ${updateRoleDto.role_name} already exists`,
+      );
       throw new RoleAlreadyExistsException(updateRoleDto.role_name);
-    }  
+    }
     const role = await this.getRoleById(id);
     Object.assign(role, updateRoleDto);
     this.logger.log(`Role with ID ${id} updated`);

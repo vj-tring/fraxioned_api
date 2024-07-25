@@ -1,4 +1,4 @@
-import { Logger as TypeOrmLogger, QueryRunner } from 'typeorm';
+import { Logger as TypeOrmLogger } from 'typeorm';
 import { createLogger } from 'src/config/Logger/logger.config';
 import winston from 'winston';
 
@@ -9,40 +9,30 @@ export class QueryLogger implements TypeOrmLogger {
     this.logger = createLogger();
   }
 
-  logQuery(query: string, parameters?: any[], queryRunner?: QueryRunner) {
+  logQuery(query: string, parameters?: unknown[]): void {
     const message = `Query: ${query}${parameters ? ` Parameters: ${JSON.stringify(parameters)}` : ''}`;
     this.logger.info(message);
   }
 
-  logQueryError(
-    error: string,
-    query: string,
-    parameters?: any[],
-    queryRunner?: QueryRunner,
-  ) {
+  logQueryError(error: string, query: string, parameters?: unknown[]): void {
     const message = `Query Failed: ${query} Error: ${error}${parameters ? ` Parameters: ${JSON.stringify(parameters)}` : ''}`;
     this.logger.error(message);
   }
 
-  logQuerySlow(
-    time: number,
-    query: string,
-    parameters?: any[],
-    queryRunner?: QueryRunner,
-  ) {
+  logQuerySlow(time: number, query: string, parameters?: unknown[]): void {
     const message = `Query is slow: ${query} Execution time: ${time}ms${parameters ? ` Parameters: ${JSON.stringify(parameters)}` : ''}`;
     this.logger.warn(message);
   }
 
-  logSchemaBuild(message: string, queryRunner?: QueryRunner) {
+  logSchemaBuild(message: string): void {
     this.logger.info(`Schema Build: ${message}`);
   }
 
-  logMigration(message: string, queryRunner?: QueryRunner) {
+  logMigration(message: string): void {
     this.logger.info(`Migration: ${message}`);
   }
 
-  log(level: 'log' | 'info' | 'warn', message: any, queryRunner?: QueryRunner) {
+  log(level: 'log' | 'info' | 'warn', message: string): void {
     switch (level) {
       case 'log':
         this.logger.log('info', message);

@@ -3,7 +3,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class InviteUserDto {
   @ApiProperty()
-  @IsNotEmpty({message: 'email is required'})
+  @IsNotEmpty({ message: 'email is required' })
   email: string;
 
   @ApiProperty()
@@ -28,17 +28,17 @@ export class InviteUserDto {
   zip: string;
 
   @ApiProperty()
-  @IsNotEmpty({message: 'phoneNumber is required'})
+  @IsNotEmpty({ message: 'phoneNumber is required' })
   phoneNumber: string;
 
   @ApiProperty()
   roleId: number;
-  
+
   @ApiProperty()
-  @IsNotEmpty({message: 'updated_by is required'})
+  @IsNotEmpty({ message: 'updated_by is required' })
   updated_by: number;
-  
+
   @ApiProperty()
-  @IsNotEmpty({message: 'created_by is required'})
+  @IsNotEmpty({ message: 'created_by is required' })
   created_by: number;
 }

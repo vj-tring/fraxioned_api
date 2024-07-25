@@ -83,15 +83,6 @@ describe('RoleController', () => {
         role_name: 'Admin',
         created_by: 0,
       };
-      const createdRole: Role = {
-        id: 1,
-        role_name: 'Admin',
-        description: '',
-        created_by: 0,
-        created_at: expect.any(Date),
-        updated_by: 0,
-        updated_at: expect.any(Date),
-      };
       const result = await controller.createRole(createRoleDto);
       expect(result).toEqual({
         id: 1,
@@ -190,15 +181,7 @@ describe('RoleController', () => {
         role_name: 'New Admin',
         updated_by: 0,
       };
-      const updatedRole: Role = {
-        id: roleId,
-        role_name: 'New Admin',
-        description: 'Administrator role',
-        created_by: 0,
-        created_at: expect.any(Date),
-        updated_by: 0,
-        updated_at: expect.any(Date),
-      };
+
       const result = await controller.updateRole(roleId, updateRoleDto);
       expect(result).toEqual({
         id: roleId,
@@ -209,7 +192,10 @@ describe('RoleController', () => {
         updated_by: 0,
         updated_at: expect.any(Date),
       });
-      expect(roleService.updateRole).toHaveBeenCalledWith(roleId, updateRoleDto);
+      expect(roleService.updateRole).toHaveBeenCalledWith(
+        roleId,
+        updateRoleDto,
+      );
     });
   });
 

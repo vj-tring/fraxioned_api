@@ -4,20 +4,20 @@ import { MailConfig } from 'src/config/Mail/mail.config';
 import * as nodemailer from 'nodemailer';
 import { LoggerService } from 'src/service/Logger/logger.service';
 import { ConfigService } from '@nestjs/config';
+import { Transporter } from 'nodemailer';
 
 jest.mock('nodemailer');
 
 describe('MailService', () => {
   let service: MailService;
-  let transporterMock: any;
+  let transporterMock: jest.Mocked<Transporter>;
   let loggerService: LoggerService;
   let configService: ConfigService;
 
   beforeEach(async () => {
     transporterMock = {
       sendMail: jest.fn().mockResolvedValue({}),
-    };
-
+    } as unknown as jest.Mocked<Transporter>;
     (nodemailer.createTransport as jest.Mock).mockReturnValue(transporterMock);
 
     configService = {

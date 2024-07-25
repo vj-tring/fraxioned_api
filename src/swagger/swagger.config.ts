@@ -4,9 +4,9 @@
 
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-var fs = require('fs');
+const fs = require('fs');
 
-export const setupSwagger = (app: INestApplication<any>) => {
+export const setupSwagger = (app: INestApplication): void => {
   const options = new DocumentBuilder()
     .setTitle('Tandem Infrastructure')
     .setDescription('Welcome to Tandem Infrastructure')
