@@ -8,7 +8,7 @@ import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
 import { seedRole } from './commons/seeds/roleSeed';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   const dataSource = app.get(DataSource);

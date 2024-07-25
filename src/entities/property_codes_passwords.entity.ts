@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Index,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import { Property } from './property.entity';
 
 @Entity('property_codes_passwords')
@@ -6,7 +13,7 @@ export class PropertyCodesPasswords {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Property, {nullable: true})
+  @ManyToOne(() => Property, { nullable: true })
   @JoinColumn({ name: 'property_id' })
   @Index()
   property: Property;
