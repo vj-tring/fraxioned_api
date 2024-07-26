@@ -1,25 +1,28 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
-  Index,
-} from 'typeorm';
-import { Property } from './property.entity';
-import { Amenity } from './amenity.entity';
+import { Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Properties } from './properties.entity';
+import { Amenities } from './amenities.entity';
 
-@Entity('property_amenities')
-export class PropertyAmenities {
-  @PrimaryGeneratedColumn()
+@Entity('fx_property_amenities')
+export class PropertiesAmenities {
+  @PrimaryGeneratedColumn({
+    name: 'id',
+    comment: 'This is a unique identifier',
+  })
   id: number;
 
-  @ManyToOne(() => Property)
-  @JoinColumn({ name: 'property_id' })
-  @Index()
-  property: Property;
+  @OneToOne(() => Properties, (properties) => properties.id, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({
+    name: 'property_id',
+  })
+  propertyId: Properties;
 
-  @ManyToOne(() => Amenity)
-  @JoinColumn({ name: 'amenity_id' })
-  @Index()
-  amenity: Amenity;
+  @OneToOne(() => Amenities, (amenities) => amenities.id, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({
+    name: 'amenity_id',
+  })
+  amenityId: Amenities;
 }

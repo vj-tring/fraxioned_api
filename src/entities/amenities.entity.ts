@@ -1,13 +1,15 @@
 import {
-  Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
+  Entity,
+  OneToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PropertiesAmenities } from './property_amenities.entity';
 
-@Entity('fx_role')
-export class Role {
+@Entity('fx_amenities')
+export class Amenities {
   @PrimaryGeneratedColumn({
     name: 'id',
     comment: 'This is a unique identifier',
@@ -18,13 +20,19 @@ export class Role {
     name: 'name',
     type: 'varchar',
   })
-  roleName: string;
+  amenityName: string;
 
   @Column({
     name: 'description',
     type: 'varchar',
   })
-  roleDescription: string;
+  amenityDescription: string;
+
+  @Column({
+    name: 'type',
+    type: 'varchar',
+  })
+  amenityType: string;
 
   // @ManyToOne(() => Users, (user) => user.createdDeals, {
   //   onDelete: 'SET NULL',
@@ -53,4 +61,13 @@ export class Role {
     nullable: true,
   })
   updatedAt: Date = undefined;
+
+  @OneToOne(
+    () => PropertiesAmenities,
+    (propertiesAmenities) => propertiesAmenities.amenityId,
+    {
+      cascade: true,
+    },
+  )
+  propertiesAmenities: PropertiesAmenities;
 }
