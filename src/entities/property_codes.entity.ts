@@ -28,7 +28,7 @@ export class PropertiesCodes {
   propertyCodeType: string;
 
   @Column({
-    name: 'type',
+    name: 'code',
     type: 'varchar',
   })
   propertyCode: string;

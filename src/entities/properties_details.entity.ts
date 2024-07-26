@@ -125,7 +125,7 @@ export class PropertiesDetails {
 
   @Column({
     name: 'wifi_network',
-    type: 'string',
+    type: 'varchar',
   })
   wifiNetwork: string;
 }
