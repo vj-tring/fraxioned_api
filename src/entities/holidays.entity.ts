@@ -1,14 +1,6 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
-  Index,
-} from 'typeorm';
-import { CalendarYear } from './calendar_year.entity';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('holidays')
+@Entity('fxn_holidays')
 export class Holidays {
   @PrimaryGeneratedColumn()
   id: number;
@@ -16,14 +8,12 @@ export class Holidays {
   @Column({ type: 'varchar', length: 255, nullable: true, default: null })
   name: string;
 
-  @ManyToOne(() => CalendarYear)
-  @JoinColumn({ name: 'year_id' })
-  @Index()
-  year: CalendarYear;
+  @Column({ type: 'int', nullable: true, default: null })
+  year: number;
 
-  @Column({ type: 'date', nullable: true, default: null })
-  start_date: Date;
+  @Column({ name: 'start_date', type: 'date', nullable: true, default: null })
+  startDate: Date;
 
-  @Column({ type: 'date', nullable: true, default: null })
-  end_date: Date;
+  @Column({ name: 'end_date', type: 'date', nullable: true, default: null })
+  endDate: Date;
 }

@@ -2,78 +2,98 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  Unique,
   ManyToOne,
   JoinColumn,
-  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
-import { Property } from './property.entity';
-import { PropertySeasonDate } from './property_season_date.entity';
+import { Users } from './users.entity';
+import { Properties } from './properties.entity';
 
-@Entity('booking')
-@Unique(['id'])
+@Entity('fxn_booking')
 export class Booking {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  @Index()
-  user: User;
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: Users;
 
-  @ManyToOne(() => Property)
-  @JoinColumn({ name: 'property_id' })
-  @Index()
-  property: Property;
+  @ManyToOne(() => Properties, (property) => property.id)
+  @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
+  property: Properties;
 
-  @Column({ type: 'date', nullable: false })
-  checkin_date: Date;
+  @Column({ name: 'checkin_at', type: 'timestamp', nullable: false })
+  checkinDate: Date;
 
-  @Column({ type: 'date', nullable: false })
-  checkout_date: Date;
+  @Column({ name: 'checkout_at', type: 'timestamp', nullable: false })
+  checkoutDate: Date;
 
-  @Column({ type: 'int', nullable: false })
-  no_of_guests: number;
+  @Column({ name: 'no_of_guests', type: 'int', nullable: false })
+  noOfGuests: number;
 
-  @Column({ type: 'int', nullable: false })
-  no_of_pets: number;
+  @Column({ name: 'no_of_pets', type: 'int', nullable: false })
+  noOfPets: number;
 
-  @ManyToOne(() => PropertySeasonDate)
-  @JoinColumn({ name: 'property_season_id' })
-  @Index()
-  property_season: PropertySeasonDate;
+  @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
+  createdAt: Date;
 
-  @Column({ type: 'date', nullable: true, default: null })
-  booked_date: Date;
+  @UpdateDateColumn({ name: 'updated_at', nullable: true, default: null })
+  updatedAt: Date;
 
-  @Column({ type: 'date', nullable: true, default: null })
-  cancelled_date: Date;
+  @Column({
+    name: 'cancelled_at',
+    type: 'timestamp',
+    nullable: true,
+    default: null,
+  })
+  cancelledAt: Date;
 
-  @Column({ type: 'date', nullable: true, default: null })
-  updated_date: Date;
+  @Column({ name: 'is_last_minute_booking', type: 'tinyint', nullable: false })
+  isLastMinuteBooking: boolean;
 
-  @Column({ type: 'tinyint', nullable: false })
-  is_last_minute_booking: number;
+  @Column({ name: 'no_of_adults', type: 'int', nullable: true, default: null })
+  noOfAdults: number;
 
-  @Column({ type: 'tinyint', nullable: false, default: 0 })
-  is_lost_nights_or_not: number;
+  @Column({
+    name: 'no_of_children',
+    type: 'int',
+    nullable: true,
+    default: null,
+  })
+  noOfChildren: number;
 
-  @Column({ type: 'int', nullable: true, default: null })
-  no_of_adults: number;
+  @Column({ name: 'no_of_infants', type: 'int', nullable: true, default: null })
+  noOfInfants: number;
 
-  @Column({ type: 'int', nullable: true, default: null })
-  no_of_children: number;
-
-  @Column({ type: 'int', nullable: true, default: null })
-  no_of_infants: number;
-
-  @Column({ type: 'varchar', length: 255, nullable: true, default: null })
+  @Column({ type: 'varchar', length: 1000, nullable: true, default: null })
   notes: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true, default: null })
-  confirmation_code: string;
+  @Column({
+    name: 'confirmation_code',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+    default: null,
+  })
+  confirmationCode: string;
 
-  @Column({ type: 'varchar', length: 45, nullable: true, default: null })
-  booked_time: string;
+  @Column({
+    name: 'cleaning_fee',
+    type: 'float',
+    nullable: true,
+    default: null,
+  })
+  cleaningFee: number;
+
+  @Column({ name: 'pet_fee', type: 'float', nullable: true, default: null })
+  petFee: number;
+
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdBy: Users;
+
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedBy: Users;
 }

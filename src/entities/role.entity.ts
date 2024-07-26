@@ -1,38 +1,55 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Users } from './users.entity';
 
-@Entity('role')
-@Unique(['id'])
-@Unique(['role_name'])
+@Entity('fxn_roles')
 export class Role {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    name: 'id',
+    comment: 'This is a unique identifier',
+  })
   id: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  role_name: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true, default: null })
-  description: string;
-
-  @Column({ type: 'int', nullable: false })
-  created_by: number;
-
   @Column({
-    type: 'timestamp',
-    precision: 6,
-    nullable: false,
-    default: () => 'CURRENT_TIMESTAMP(6)',
+    name: 'name',
+    type: 'varchar',
   })
-  created_at: Date;
-
-  @Column({ type: 'int', nullable: true, default: null })
-  updated_by: number;
+  roleName: string;
 
   @Column({
-    type: 'timestamp',
-    precision: 6,
+    name: 'description',
+    type: 'varchar',
+  })
+  roleDescription: string;
+
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({
+    name: 'created_by',
+  })
+  createdBy: Users;
+
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({
+    name: 'updated_by',
+  })
+  updatedBy: Users;
+
+  @CreateDateColumn({
+    name: 'created_at',
     nullable: true,
-    default: () => 'CURRENT_TIMESTAMP(6)',
-    onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
-  updated_at: Date;
+  createdAt: Date = undefined;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+    nullable: true,
+  })
+  updatedAt: Date = undefined;
 }

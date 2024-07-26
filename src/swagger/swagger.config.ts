@@ -8,10 +8,10 @@ const fs = require('fs');
 
 export const setupSwagger = (app: INestApplication): void => {
   const options = new DocumentBuilder()
-    .setTitle('Tandem Infrastructure')
-    .setDescription('Welcome to Tandem Infrastructure')
+    .setTitle('Fraxioned API')
+    .setDescription('Welcome to Fraxioned')
     .setVersion('1.0')
-    .addTag('Tandem')
+    .addTag('Fraxioned')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
