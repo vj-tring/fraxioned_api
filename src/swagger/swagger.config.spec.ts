@@ -20,7 +20,7 @@ describe('Swagger', () => {
   describe('setupSwagger', () => {
     it('should setup swagger correctly', () => {
       const options = new DocumentBuilder()
-        .setTitle('Fraxioned')
+        .setTitle('Fraxioned API')
         .setDescription('Welcome to Fraxioned')
         .setVersion('1.0')
         .addTag('Fraxioned')
