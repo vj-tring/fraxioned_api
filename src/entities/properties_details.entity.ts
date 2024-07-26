@@ -19,7 +19,7 @@ export class PropertiesDetails {
   @JoinColumn({
     name: 'property_id',
   })
-  propertyId: Properties;
+  property: Properties;
 
   @Column({
     name: 'no_of_guests_allowed',

@@ -4,15 +4,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { PropertiesDetails } from './properties_details.entity';
-import { PropertiesImages } from './properties_images.entity';
-import { PropertiesSeasonHolidays } from './properties_season_holidays.entity';
-import { PropertiesAmenities } from './property_amenities.entity';
-import { PropertiesCodes } from './property_codes.entity';
 import { Users } from './users.entity';
 
 @Entity('fx_properties')
@@ -107,49 +101,4 @@ export class Properties {
     nullable: true,
   })
   updatedAt: Date = undefined;
-
-  @OneToOne(
-    () => PropertiesDetails,
-    (propertiesDeatils) => propertiesDeatils.propertyId,
-    {
-      cascade: true,
-    },
-  )
-  propertyDeatils: PropertiesDetails;
-
-  @OneToOne(
-    () => PropertiesImages,
-    (propertiesImages) => propertiesImages.propertyId,
-    {
-      cascade: true,
-    },
-  )
-  propertiesImages: PropertiesImages;
-
-  @OneToOne(
-    () => PropertiesSeasonHolidays,
-    (propertiesSeasonHolidays) => propertiesSeasonHolidays.propertyId,
-    {
-      cascade: true,
-    },
-  )
-  propertiesSeasonHolidays: PropertiesSeasonHolidays;
-
-  @OneToOne(
-    () => PropertiesAmenities,
-    (propertiesAmenities) => propertiesAmenities.propertyId,
-    {
-      cascade: true,
-    },
-  )
-  propertiesAmenities: PropertiesAmenities;
-
-  @OneToOne(
-    () => PropertiesCodes,
-    (propertiesCodes) => propertiesCodes.propertyId,
-    {
-      cascade: true,
-    },
-  )
-  propertiesCodes: PropertiesCodes;
 }

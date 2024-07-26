@@ -14,11 +14,11 @@ export class PropertiesAmenities {
   @JoinColumn({
     name: 'property_id',
   })
-  propertyId: Properties;
+  property: Properties;
 
   @ManyToOne(() => Amenities, (amenities) => amenities.id)
   @JoinColumn({
     name: 'amenity_id',
   })
-  amenityId: Amenities;
+  amenity: Amenities;
 }
