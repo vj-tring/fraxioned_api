@@ -19,7 +19,7 @@ export class PropertiesImages {
   @JoinColumn({
     name: 'property_id',
   })
-  propertyId: Properties;
+  property: Properties;
 
   @Column({
     name: 'url',

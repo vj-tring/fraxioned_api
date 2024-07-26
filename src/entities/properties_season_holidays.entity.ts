@@ -20,13 +20,13 @@ export class PropertiesSeasonHolidays {
   @JoinColumn({
     name: 'property_id',
   })
-  propertyId: Properties;
+  property: Properties;
 
   @ManyToOne(() => Holidays, (holidays) => holidays.id)
   @JoinColumn({
     name: 'holiday_id',
   })
-  holidayId: Holidays;
+  holiday: Holidays;
 
   @Column({
     name: 'is_peak_season',
