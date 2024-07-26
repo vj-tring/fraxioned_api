@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Properties } from './properties.entity';
 
-@Entity('fx_property_images')
+@Entity('fxn_property_images')
 export class PropertiesImages {
   @PrimaryGeneratedColumn({
     name: 'id',

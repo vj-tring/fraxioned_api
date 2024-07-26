@@ -10,7 +10,7 @@ import {
 import { Users } from './users.entity';
 import { Properties } from './properties.entity';
 
-@Entity('fx_booking')
+@Entity('fxn_booking')
 export class Booking {
   @PrimaryGeneratedColumn()
   id: number;

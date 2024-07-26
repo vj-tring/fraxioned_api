@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Users } from './users.entity';
 
-@Entity('fx_user_sessions')
+@Entity('fxn_user_sessions')
 @Unique(['token'])
 export class UserSessions {
   @PrimaryGeneratedColumn()

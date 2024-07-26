@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Users } from './users.entity';
 
-@Entity('fx_properties')
+@Entity('fxn_properties')
 export class Properties {
   @PrimaryGeneratedColumn({
     name: 'id',

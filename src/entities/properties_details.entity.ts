@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Properties } from './properties.entity';
 
-@Entity('fx_property_details')
+@Entity('fxn_property_details')
 export class PropertiesDetails {
   @PrimaryGeneratedColumn({
     name: 'id',

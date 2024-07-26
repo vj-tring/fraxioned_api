@@ -8,7 +8,7 @@ import {
 import { Users } from './users.entity';
 import { Properties } from './properties.entity';
 
-@Entity('fx_user_documents')
+@Entity('fxn_user_documents')
 export class UserDocuments {
   @PrimaryGeneratedColumn()
   id: number;

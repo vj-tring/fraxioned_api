@@ -2,7 +2,7 @@ import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Properties } from './properties.entity';
 import { Amenities } from './amenities.entity';
 
-@Entity('fx_property_amenities')
+@Entity('fxn_property_amenities')
 export class PropertiesAmenities {
   @PrimaryGeneratedColumn({
     name: 'id',

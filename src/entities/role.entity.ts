@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Users } from './users.entity';
 
-@Entity('fx_roles')
+@Entity('fxn_roles')
 export class Role {
   @PrimaryGeneratedColumn({
     name: 'id',

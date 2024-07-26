@@ -8,7 +8,7 @@ import {
 import { Properties } from './properties.entity';
 import { Holidays } from './holidays.entity';
 
-@Entity('fx_property_season_holidays')
+@Entity('fxn_property_season_holidays')
 export class PropertiesSeasonHolidays {
   @PrimaryGeneratedColumn({
     name: 'id',

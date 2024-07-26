@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Users } from './users.entity';
 
-@Entity('fx_user_contact_details')
+@Entity('fxn_user_contact_details')
 export class UserContactDetails {
   @PrimaryGeneratedColumn()
   id: number;

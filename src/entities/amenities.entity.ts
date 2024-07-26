@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('fx_amenities')
+@Entity('fxn_amenities')
 export class Amenities {
   @PrimaryGeneratedColumn({
     name: 'id',

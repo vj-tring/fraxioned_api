@@ -10,7 +10,7 @@ import {
 import { Users } from './users.entity';
 import { Properties } from './properties.entity';
 
-@Entity('fx_user_properties')
+@Entity('fxn_user_properties')
 export class UserProperties {
   @PrimaryGeneratedColumn()
   id: number;
