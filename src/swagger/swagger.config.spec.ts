@@ -20,10 +20,10 @@ describe('Swagger', () => {
   describe('setupSwagger', () => {
     it('should setup swagger correctly', () => {
       const options = new DocumentBuilder()
-        .setTitle('Tandem Infrastructure')
-        .setDescription('Welcome to Tandem Infrastructure')
+        .setTitle('Fraxioned')
+        .setDescription('Welcome to Fraxioned')
         .setVersion('1.0')
-        .addTag('Tandem')
+        .addTag('Fraxioned')
         .addBearerAuth()
         .build();
 

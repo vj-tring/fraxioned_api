@@ -1,1 +1,0 @@
-{"openapi":"3.0.0","paths":{},"info":{"title":"Tandem Infrastructure","description":"Welcome to Tandem Infrastructure","version":"1.0","contact":{}},"tags":[{"name":"Tandem","description":""}],"servers":[],"components":{"securitySchemes":{"bearer":{"scheme":"bearer","bearerFormat":"JWT","type":"http"}},"schemas":{}}}
