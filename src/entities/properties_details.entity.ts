@@ -15,9 +15,7 @@ export class PropertiesDetails {
   })
   id: number;
 
-  @OneToOne(() => Properties, (properties) => properties.id, {
-    onDelete: 'SET NULL',
-  })
+  @OneToOne(() => Properties, (properties) => properties.id)
   @JoinColumn({
     name: 'property_id',
   })
@@ -99,31 +97,31 @@ export class PropertiesDetails {
     name: 'psan',
     type: 'integer',
   })
-  psan: number;
+  peakSeasonAllottedNights: number;
 
   @Column({
     name: 'osan',
     type: 'integer',
   })
-  osan: number;
+  offSeasonAllottedNights: number;
 
   @Column({
     name: 'psahn',
     type: 'integer',
   })
-  psahn: number;
+  peakSeasonAllottedHolidayNights: number;
 
   @Column({
     name: 'osahn',
     type: 'integer',
   })
-  osahn: number;
+  offSeasonAllottedHolidayNights: number;
 
   @Column({
     name: 'lmban',
     type: 'integer',
   })
-  lmban: number;
+  lastMinuteBookingAllottedNights: number;
 
   @Column({
     name: 'wifi_network',

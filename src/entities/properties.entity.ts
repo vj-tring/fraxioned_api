@@ -2,18 +2,18 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  // Unique,
-  // ManyToOne,
-  // JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { PropertiesDetails } from './properties_details.entity';
 import { PropertiesImages } from './properties_images.entity';
 import { PropertiesSeasonHolidays } from './properties_season_holidays.entity';
 import { PropertiesAmenities } from './property_amenities.entity';
 import { PropertiesCodes } from './property_codes.entity';
+import { Users } from './users.entity';
 
 @Entity('fx_properties')
 export class Properties {
@@ -82,23 +82,19 @@ export class Properties {
     name: 'map_coordinates',
     type: 'point',
   })
-  mapCoordinates: string;
+  mapCoordinates: string;  
 
-  // @ManyToOne(() => Users, (user) => user.createdDeals, {
-  //   onDelete: 'SET NULL',
-  // })
-  // @JoinColumn({
-  //   name: 'created_by',
-  // })
-  createdBy: string;
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({
+    name: 'created_by',
+  })
+  createdBy: Users;
 
-  // @ManyToOne(() => Users, (user) => user.updatedDeals, {
-  //   onDelete: 'SET NULL',
-  // })
-  // @JoinColumn({
-  //   name: 'updated_by',
-  // })
-  updatedBy: string;
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({
+    name: 'updated_by',
+  })
+  updatedBy: Users;
 
   @CreateDateColumn({
     name: 'created_at',

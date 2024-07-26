@@ -4,9 +4,12 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Users } from './users.entity';
 
-@Entity('fx_role')
+@Entity('fx_roles')
 export class Role {
   @PrimaryGeneratedColumn({
     name: 'id',
@@ -26,21 +29,17 @@ export class Role {
   })
   roleDescription: string;
 
-  // @ManyToOne(() => Users, (user) => user.createdDeals, {
-  //   onDelete: 'SET NULL',
-  // })
-  // @JoinColumn({
-  //   name: 'created_by',
-  // })
-  createdBy: string;
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({
+    name: 'created_by',
+  })
+  createdBy: Users;
 
-  // @ManyToOne(() => Users, (user) => user.updatedDeals, {
-  //   onDelete: 'SET NULL',
-  // })
-  // @JoinColumn({
-  //   name: 'updated_by',
-  // })
-  updatedBy: string;
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({
+    name: 'updated_by',
+  })
+  updatedBy: Users;
 
   @CreateDateColumn({
     name: 'created_at',

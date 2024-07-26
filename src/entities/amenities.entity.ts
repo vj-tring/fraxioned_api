@@ -2,11 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { PropertiesAmenities } from './property_amenities.entity';
+import { Users } from './users.entity';
 
 @Entity('fx_amenities')
 export class Amenities {
@@ -34,40 +37,4 @@ export class Amenities {
   })
   amenityType: string;
 
-  // @ManyToOne(() => Users, (user) => user.createdDeals, {
-  //   onDelete: 'SET NULL',
-  // })
-  // @JoinColumn({
-  //   name: 'created_by',
-  // })
-  createdBy: string;
-
-  // @ManyToOne(() => Users, (user) => user.updatedDeals, {
-  //   onDelete: 'SET NULL',
-  // })
-  // @JoinColumn({
-  //   name: 'updated_by',
-  // })
-  updatedBy: string;
-
-  @CreateDateColumn({
-    name: 'created_at',
-    nullable: true,
-  })
-  createdAt: Date = undefined;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-    nullable: true,
-  })
-  updatedAt: Date = undefined;
-
-  @OneToOne(
-    () => PropertiesAmenities,
-    (propertiesAmenities) => propertiesAmenities.amenityId,
-    {
-      cascade: true,
-    },
-  )
-  propertiesAmenities: PropertiesAmenities;
 }

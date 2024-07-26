@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Properties } from './properties.entity';
 import { Amenities } from './amenities.entity';
 
@@ -10,17 +10,13 @@ export class PropertiesAmenities {
   })
   id: number;
 
-  @OneToOne(() => Properties, (properties) => properties.id, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(() => Properties, (properties) => properties.id)
   @JoinColumn({
     name: 'property_id',
   })
   propertyId: Properties;
 
-  @OneToOne(() => Amenities, (amenities) => amenities.id, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(() => Amenities, (amenities) => amenities.id)
   @JoinColumn({
     name: 'amenity_id',
   })

@@ -2,10 +2,12 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Properties } from './properties.entity';
+import { Holidays } from './holidays.entity';
 
 @Entity('fx_property_season_holidays')
 export class PropertiesSeasonHolidays {
@@ -15,19 +17,17 @@ export class PropertiesSeasonHolidays {
   })
   id: number;
 
-  @OneToOne(() => Properties, (properties) => properties.id, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(() => Properties, (properties) => properties.id)
   @JoinColumn({
     name: 'property_id',
   })
   propertyId: Properties;
 
-  @Column({
+  @ManyToOne(() => Holidays, (holidays) => holidays.id)
+  @JoinColumn({
     name: 'holiday_id',
-    type: 'integer',
   })
-  holidayId: number;
+  holidayId: Holidays;
 
   @Column({
     name: 'is_peak_season',

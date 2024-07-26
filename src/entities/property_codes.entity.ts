@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -15,9 +16,7 @@ export class PropertiesCodes {
   })
   id: number;
 
-  @OneToOne(() => Properties, (properties) => properties.id, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(() => Properties, (properties) => properties.id)
   @JoinColumn({
     name: 'property_id',
   })
