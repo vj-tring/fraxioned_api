@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Properties } from './properties.entity';
 import { Amenities } from './amenities.entity';
 

@@ -1,15 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { PropertiesAmenities } from './property_amenities.entity';
-import { Users } from './users.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('fx_amenities')
 export class Amenities {
@@ -36,5 +25,4 @@ export class Amenities {
     type: 'varchar',
   })
   amenityType: string;
-
 }

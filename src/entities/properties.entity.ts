@@ -82,7 +82,7 @@ export class Properties {
     name: 'map_coordinates',
     type: 'point',
   })
-  mapCoordinates: string;  
+  mapCoordinates: string;
 
   @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({
