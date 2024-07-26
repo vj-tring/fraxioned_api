@@ -29,13 +29,10 @@ export class UserProperties {
   @Column({ name: 'acquisition_date', type: 'date', nullable: false })
   acquisitionDate: Date;
 
-  @Column({ name: 'sale_date', type: 'date', nullable: true, default: null })
-  saleDate: Date;
-
   @Column({ name: 'is_active', type: 'tinyint', nullable: false, default: 1 })
   isActive: boolean;
 
-  @Column({ type: 'int', nullable: true, default: null })
+  @Column({ name: 'year', type: 'int', nullable: true, default: null })
   year: number;
 
   @Column({ name: 'psan', type: 'int', nullable: true, default: null })
