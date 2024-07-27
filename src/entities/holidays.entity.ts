@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Users } from './users.entity';
 
 @Entity('fxn_holidays')
 export class Holidays {
@@ -16,4 +25,18 @@ export class Holidays {
 
   @Column({ name: 'end_date', type: 'date', nullable: true, default: null })
   endDate: Date;
+
+  @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', nullable: true, default: null })
+  updatedAt: Date;
+
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdBy: Users;
+
+  @ManyToOne(() => Users, (user) => user.id)
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedBy: Users;
 }
