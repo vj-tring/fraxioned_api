@@ -1,11 +1,15 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Properties } from './properties.entity';
+import { User } from './user.entity';
 
 @Entity('fxn_property_details')
 export class PropertyDetails {
@@ -128,4 +132,28 @@ export class PropertyDetails {
     type: 'varchar',
   })
   wifiNetwork: string;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({
+    name: 'created_by',
+  })
+  createdBy: User;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({
+    name: 'updated_by',
+  })
+  updatedBy: User;
+
+  @CreateDateColumn({
+    name: 'created_at',
+    nullable: true,
+  })
+  createdAt: Date = undefined;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+    nullable: true,
+  })
+  updatedAt: Date = undefined;
 }

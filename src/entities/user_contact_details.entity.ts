@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -33,4 +35,28 @@ export class UserContactDetails {
     default: null,
   })
   contactValue: string;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({
+    name: 'created_by',
+  })
+  createdBy: User;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({
+    name: 'updated_by',
+  })
+  updatedBy: User;
+
+  @CreateDateColumn({
+    name: 'created_at',
+    nullable: true,
+  })
+  createdAt: Date = undefined;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+    nullable: true,
+  })
+  updatedAt: Date = undefined;
 }
