@@ -46,6 +46,7 @@ export class AuthenticationService {
       state,
       country,
       city,
+      zipcode,
       phoneNumber,
       roleId,
       created_by,
@@ -74,14 +75,13 @@ export class AuthenticationService {
       state,
       country,
       city,
+      zipcode: zipcode,
       password: hashedPassword,
       isActive: true,
       createdBy: created_by,
       updatedBy: updated_by,
       role: { id: roleId },
     });
-
-    await this.userRepository.save(user);
 
     const userContacts = [
       {
@@ -107,6 +107,7 @@ export class AuthenticationService {
     });
 
     await this.userPropertyRepository.save(userProperty);
+    await this.userRepository.save(user);
 
     const loginLink = `http://fraxionedOwners.com/login`;
 
@@ -143,6 +144,11 @@ export class AuthenticationService {
     if (!user) {
       this.logger.error(`User entity not found for email: ${email}`);
       throw new NotFoundException('User not found');
+    }
+
+    if (!user.isActive) {
+      this.logger.error(`User is not Active: ${email}`);
+      throw new UnauthorizedException('User is not Active');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);

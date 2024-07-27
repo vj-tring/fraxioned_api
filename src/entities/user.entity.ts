@@ -84,7 +84,7 @@ export class User {
   city: string;
 
   @Column({ type: 'int', nullable: true, default: null })
-  zipcode: number;
+  zipcode: string;
 
   @Column({
     name: 'reset_token',
