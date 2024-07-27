@@ -7,16 +7,16 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Roles } from './roles.entity';
+import { Role } from './role.entity';
 
 @Entity('fxn_users')
-export class Users {
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Roles, (role) => role.id)
+  @ManyToOne(() => Role, (role) => role.id)
   @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
-  role: Roles;
+  role: Role;
 
   @Column({
     name: 'first_name',

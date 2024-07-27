@@ -1,12 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { setupSwagger } from './swagger/swagger.config';
+import { seedRole } from './commons/seeds/roleSeed';
+import { DataSource } from 'typeorm';
+import { seedUser } from './commons/seeds/userSeed';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   // Swagger configuration
   setupSwagger(app);
+
+  const dataSource = app.get(DataSource);
+  await seedRole(dataSource);
+  await seedUser(dataSource);
 
   // Enabled the CORS
   app.enableCors();

@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { UserPropertyDto } from './userProperty.dto';
 
 export class InviteUserDto {
   @ApiProperty()
@@ -22,16 +24,19 @@ export class InviteUserDto {
   state: string;
 
   @ApiProperty()
+  country: string;
+
+  @ApiProperty()
   city: string;
 
   @ApiProperty()
-  zip: string;
+  zipcode: string;
 
   @ApiProperty()
-  @IsNotEmpty({ message: 'phoneNumber is required' })
   phoneNumber: string;
 
   @ApiProperty()
+  @IsNotEmpty({ message: 'roleID is required' })
   roleId: number;
 
   @ApiProperty()
@@ -41,4 +46,9 @@ export class InviteUserDto {
   @ApiProperty()
   @IsNotEmpty({ message: 'created_by is required' })
   created_by: number;
+
+  @ApiProperty({ type: UserPropertyDto })
+  @ValidateNested()
+  @Type(() => UserPropertyDto)
+  userPropertyDetails: UserPropertyDto;
 }
