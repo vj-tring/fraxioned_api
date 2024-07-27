@@ -10,7 +10,7 @@ import {
 import { Users } from './users.entity';
 
 @Entity('fxn_roles')
-export class Role {
+export class Roles {
   @PrimaryGeneratedColumn({
     name: 'id',
     comment: 'This is a unique identifier',
