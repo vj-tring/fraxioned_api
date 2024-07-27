@@ -8,7 +8,7 @@ import {
 import { Properties } from './properties.entity';
 
 @Entity('fxn_property_codes')
-export class PropertiesCodes {
+export class PropertyCodes {
   @PrimaryGeneratedColumn({
     name: 'id',
     comment: 'This is a unique identifier',

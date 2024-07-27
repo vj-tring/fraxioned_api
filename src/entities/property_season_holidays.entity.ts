@@ -9,7 +9,7 @@ import { Properties } from './properties.entity';
 import { Holidays } from './holidays.entity';
 
 @Entity('fxn_property_season_holidays')
-export class PropertiesSeasonHolidays {
+export class PropertySeasonHolidays {
   @PrimaryGeneratedColumn({
     name: 'id',
     comment: 'This is a unique identifier',

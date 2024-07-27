@@ -3,7 +3,7 @@ import { Properties } from './properties.entity';
 import { Amenities } from './amenities.entity';
 
 @Entity('fxn_property_amenities')
-export class PropertiesAmenities {
+export class PropertyAmenities {
   @PrimaryGeneratedColumn({
     name: 'id',
     comment: 'This is a unique identifier',
