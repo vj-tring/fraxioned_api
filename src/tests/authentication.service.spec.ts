@@ -148,7 +148,7 @@ describe('AuthenticationService', () => {
       userContactDetailsRepository.findOne.mockResolvedValue({});
 
       await expect(service.inviteUser(inviteUserDto)).resolves.toEqual(
-        new ConflictException('Email already exists')
+        new ConflictException('Email already exists'),
       );
     });
   });
@@ -183,8 +183,9 @@ describe('AuthenticationService', () => {
       const loginDto = { email: 'test@example.com', password: 'password' };
 
       userContactDetailsRepository.findOne.mockResolvedValue(null);
-      await expect(service.login(loginDto)).resolves.toEqual(new NotFoundException('User not found')
-    );
+      await expect(service.login(loginDto)).resolves.toEqual(
+        new NotFoundException('User not found'),
+      );
     });
 
     it('should return UnauthorizedException if password is invalid', async () => {
@@ -195,7 +196,8 @@ describe('AuthenticationService', () => {
       userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).resolves.toEqual(new UnauthorizedException('Invalid credentials'),
+      await expect(service.login(loginDto)).resolves.toEqual(
+        new UnauthorizedException('Invalid credentials'),
       );
     });
   });
@@ -229,7 +231,10 @@ describe('AuthenticationService', () => {
 
       userContactDetailsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.forgotPassword(forgotPasswordDto)).resolves.toEqual(new NotFoundException('The account associated with this user was not found'),
+      await expect(service.forgotPassword(forgotPasswordDto)).resolves.toEqual(
+        new NotFoundException(
+          'The account associated with this user was not found',
+        ),
       );
     });
   });
@@ -266,7 +271,11 @@ describe('AuthenticationService', () => {
 
       await expect(
         service.changePassword(reset_token, changePasswordDto),
-      ).resolves.toEqual(new NotFoundException('The account associated with this user was not found'));
+      ).resolves.toEqual(
+        new NotFoundException(
+          'The account associated with this user was not found',
+        ),
+      );
     });
 
     it('should return BadRequestException if reset token is expired', async () => {
@@ -282,7 +291,9 @@ describe('AuthenticationService', () => {
 
       await expect(
         service.changePassword(reset_token, changePasswordDto),
-      ).resolves.toEqual(new BadRequestException('The password reset token has expired'));
+      ).resolves.toEqual(
+        new BadRequestException('The password reset token has expired'),
+      );
     });
   });
 
@@ -314,7 +325,10 @@ describe('AuthenticationService', () => {
 
       userRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.resetPassword(resetPasswordDto)).resolves.toEqual(new NotFoundException('The account associated with this user was not found'),
+      await expect(service.resetPassword(resetPasswordDto)).resolves.toEqual(
+        new NotFoundException(
+          'The account associated with this user was not found',
+        ),
       );
     });
 
@@ -360,7 +374,6 @@ describe('AuthenticationService', () => {
       );
     });
 
-  
     it('should log error and return false if an error occurs', async () => {
       const userId = 1;
       const accessToken = 'accessToken';

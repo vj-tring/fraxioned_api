@@ -11,7 +11,6 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { resolve } from 'path';
 
 describe('AuthenticationController', () => {
   let controller: AuthenticationController;
