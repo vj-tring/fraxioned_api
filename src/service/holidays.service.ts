@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { CreateHolidayDto } from 'src/dto/create-holiday.dto';
+import { UpdateHolidayDto } from 'src/dto/update-holiday.dto';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Holidays } from 'src/entities/holidays.entity';
 import { Repository } from 'typeorm';
+import { Users } from 'src/entities/users.entity';
 
 @Injectable()
 export class HolidaysService {
   constructor(
     @InjectRepository(Holidays)
     private readonly holidayRepository: Repository<Holidays>,
+    @InjectRepository(Users)
+    private readonly usersRepository: Repository<Users>,
     private readonly logger: LoggerService,
   ) {}
 
@@ -35,6 +39,20 @@ export class HolidaysService {
           message: `Holiday ${createHolidayDto.name} for the year ${createHolidayDto.year} already exists`,
         };
       }
+
+      const user = await this.usersRepository.findOne({
+        where: {
+          id: createHolidayDto.createdBy.id,
+        },
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          message: `User with ID ${createHolidayDto.createdBy.id} does not exist`,
+        };
+      }
+
       const holiday = this.holidayRepository.create({
         ...createHolidayDto,
       });
@@ -74,6 +92,8 @@ export class HolidaysService {
         };
       }
 
+      this.logger.log(`Retrieved ${holidays.length} holidays successfully.`);
+
       return {
         success: true,
         message: 'Holidays retrieved successfully',
@@ -90,20 +110,22 @@ export class HolidaysService {
     }
   }
 
-  async findHolidayById(id: number): Promise<{
-    success: boolean;
-    message: string;
-    data?: Holidays;
-  }> {
+  async findHolidayByDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{ success: boolean; message: string; data?: Holidays }> {
     try {
       const holiday = await this.holidayRepository.findOne({
-        where: { id },
+        where: {
+          startDate: startDate,
+          endDate: endDate,
+        },
       });
 
       if (!holiday) {
         return {
-          success: false,
-          message: `Holiday with ID ${id} not found`,
+          success: true,
+          message: 'No holiday found with the exact start and end dates',
         };
       }
 
@@ -114,7 +136,7 @@ export class HolidaysService {
       };
     } catch (error) {
       this.logger.error(
-        `Error retrieving holiday with ID ${id}: ${error.message} - ${error.stack}`,
+        `Error retrieving holiday: ${error.message} - ${error.stack}`,
       );
       return {
         success: false,
@@ -179,6 +201,60 @@ export class HolidaysService {
       return {
         success: false,
         message: 'An error occurred while deleting the holiday',
+      };
+    }
+  }
+
+  async updateHolidayDetail(
+    id: number,
+    updateHolidayDto: UpdateHolidayDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: Holidays;
+  }> {
+    try {
+      const holiday = await this.holidayRepository.findOne({
+        where: { id },
+      });
+
+      if (!holiday) {
+        return {
+          success: false,
+          message: `Holiday with ID ${id} not found`,
+        };
+      }
+
+      const user = await this.usersRepository.findOne({
+        where: {
+          id: updateHolidayDto.updatedBy.id,
+        },
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          message: `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
+        };
+      }
+
+      Object.assign(holiday, updateHolidayDto);
+      const updatedHoliday = await this.holidayRepository.save(holiday);
+
+      this.logger.log(`Holiday with ID ${id} updated successfully`);
+
+      return {
+        success: true,
+        message: 'Holiday updated successfully',
+        data: updatedHoliday,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error updating holiday with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      return {
+        success: false,
+        message: 'An error occurred while updating the holiday',
       };
     }
   }

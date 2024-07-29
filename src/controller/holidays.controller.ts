@@ -4,13 +4,17 @@ import {
   Post,
   Body,
   Param,
+  Patch,
   Delete,
   UsePipes,
   ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { HolidaysService } from 'src/service/holidays.service';
 import { LoggerService } from 'src/service/logger.service';
 import { CreateHolidayDto } from 'src/dto/create-holiday.dto';
+import { UpdateHolidayDto } from 'src/dto/update-holiday.dto';
+import { Holidays } from 'src/entities/holidays.entity';
 
 @Controller('holidays')
 export class HolidaysController {
@@ -37,7 +41,7 @@ export class HolidaysController {
     };
   }
 
-  @Get()
+  @Get('all')
   @UsePipes(ValidationPipe)
   async getAllHolidays(): Promise<{
     success: boolean;
@@ -53,12 +57,34 @@ export class HolidaysController {
     return result;
   }
 
-  @Get(':id')
+  @Get()
   @UsePipes(ValidationPipe)
-  async getHoliday(
-    @Param('id') id: string,
+  async getHolidayByDate(
+    @Query('startDate') startDate: Date,
+    @Query('endDate') endDate: Date,
   ): Promise<{ success: boolean; message: string; data?: Holidays }> {
-    const result = await this.holidaysService.findHolidayById(+id);
+    const result = await this.holidaysService.findHolidayByDateRange(
+      startDate,
+      endDate,
+    );
+
+    if (!result.success) {
+      this.logger.error(result.message);
+    }
+
+    return result;
+  }
+
+  @Patch(':id')
+  @UsePipes(ValidationPipe)
+  async updateHolidayDetail(
+    @Param('id') id: string,
+    @Body() updateHolidayDto: UpdateHolidayDto,
+  ): Promise<{ success: boolean; message: string; data?: Holidays }> {
+    const result = await this.holidaysService.updateHolidayDetail(
+      +id,
+      updateHolidayDto,
+    );
 
     if (!result.success) {
       this.logger.error(result.message);
@@ -75,7 +101,6 @@ export class HolidaysController {
     if (!result.success) {
       this.logger.error(result.message);
     }
-
     return result;
   }
 
@@ -93,4 +118,3 @@ export class HolidaysController {
     return result;
   }
 }
-import { Holidays } from 'src/entities/holidays.entity';
