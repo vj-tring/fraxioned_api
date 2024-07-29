@@ -5,21 +5,21 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { InviteUserDto } from 'dto/inviteUser.dto';
-import { User } from 'entities/user.entity';
-import { UserContactDetails } from 'entities/user_contact_details.entity';
+import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
+import { User } from 'src/main/entities/user.entity';
+import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MailService } from 'src/service/mail.service';
+import { MailService } from 'src/main/service/mail.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from 'src/dto/login.dto';
-import { LoggerService } from 'src/service/logger.service';
-import { UserSessions } from 'entities/user_sessions.entity';
+import { LoginDto } from 'src/main/dto/login.dto';
+import { LoggerService } from 'src/main/service/logger.service';
+import { UserSessions } from 'src/main/entities/user_sessions.entity';
 import * as crypto from 'crypto';
-import { ForgotPasswordDto } from 'dto/forgotPassword.dto';
-import { ChangePasswordDto } from 'dto/recoverPassword.dto';
-import { ResetPasswordDto } from 'dto/resetPassword.dto';
-import { UserProperties } from 'src/entities/user_properties.entity';
+import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
+import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
+import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
+import { UserProperties } from 'src/main/entities/user_properties.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -196,12 +196,19 @@ export class AuthenticationService {
   async forgotPassword(
     forgotPasswordDto: ForgotPasswordDto,
   ): Promise<{ message: string }> {
+    this.logger.log(
+      `Forgot password request for email: ${forgotPasswordDto.email}`,
+    );
+
     const userEmail = await this.userContactRepository.findOne({
       where: { contactValue: forgotPasswordDto.email, contactType: 'email' },
       relations: ['user'],
     });
 
     if (!userEmail || !userEmail.user) {
+      this.logger.error(
+        `User not found with email: ${forgotPasswordDto.email}`,
+      );
       throw new NotFoundException(
         'The account associated with this user was not found',
       );
@@ -220,6 +227,9 @@ export class AuthenticationService {
 
     await this.mailService.sendMail(userEmail.contactValue, subject, text);
 
+    this.logger.log(
+      `Password reset email sent successfully to ${forgotPasswordDto.email}`,
+    );
     return { message: 'Password reset email sent successfully' };
   }
 
@@ -227,16 +237,22 @@ export class AuthenticationService {
     reset_token: string,
     changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
+    this.logger.log(`Change password request with reset token: ${reset_token}`);
+
     const user = await this.userRepository.findOne({
       where: { resetToken: reset_token },
     });
     if (!user) {
+      this.logger.error(`User not found with reset token: ${reset_token}`);
       throw new NotFoundException(
         'The account associated with this user was not found',
       );
     }
 
     if (user.resetTokenExpires < new Date()) {
+      this.logger.error(
+        `Reset token expired for user with reset token: ${reset_token}`,
+      );
       throw new BadRequestException('The password reset token has expired');
     }
 
@@ -246,21 +262,32 @@ export class AuthenticationService {
 
     await this.userRepository.save(user);
 
+    this.logger.log(
+      `Password has been reset successfully for user with reset token: ${reset_token}`,
+    );
     return { message: 'Password has been reset successfully' };
   }
 
   async resetPassword(
     resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
+    this.logger.log(
+      `Reset password request for user ID: ${resetPasswordDto.userId}`,
+    );
+
     const user = await this.userRepository.findOne({
       where: { id: resetPasswordDto.userId },
     });
     if (!user) {
+      this.logger.error(`User not found with ID: ${resetPasswordDto.userId}`);
       throw new NotFoundException(
         'The account associated with this user was not found',
       );
     }
     if (!user.isActive) {
+      this.logger.error(
+        `User account is inactive for user ID: ${resetPasswordDto.userId}`,
+      );
       throw new UnauthorizedException('The user account is currently inactive');
     }
     const isOldPasswordValid = await bcrypt.compare(
@@ -268,20 +295,32 @@ export class AuthenticationService {
       user.password,
     );
     if (!isOldPasswordValid) {
+      this.logger.error(
+        `Invalid old password for user ID: ${resetPasswordDto.userId}`,
+      );
       throw new UnauthorizedException('The provided old password is incorrect');
     }
     const updatedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
     await this.userRepository.update(user.id, { password: updatedPassword });
+
+    this.logger.log(
+      `Password reset successfully for user ID: ${resetPasswordDto.userId}`,
+    );
     return { message: 'Password reset successfully' };
   }
 
   async validateUser(userId: number, accessToken: string): Promise<boolean> {
+    this.logger.log(
+      `Validating user with ID: ${userId} and access token: ${accessToken}`,
+    );
+
     try {
       const session = await this.userSessionRepository.findOne({
         where: { user: { id: userId }, token: accessToken },
       });
 
       if (!session || session.expiresAt < new Date()) {
+        this.logger.warn(`Invalid or expired session for user ID: ${userId}`);
         return false;
       }
 
@@ -290,11 +329,16 @@ export class AuthenticationService {
       });
 
       if (!user || !user.isActive) {
+        this.logger.warn(`Invalid or inactive user with ID: ${userId}`);
         return false;
       }
 
+      this.logger.log(`User validated successfully with ID: ${userId}`);
       return true;
     } catch (error) {
+      this.logger.error(
+        `Validation failed for user ID: ${userId} with error: ${error.message}`,
+      );
       throw new UnauthorizedException(
         'The provided user ID or access token is invalid',
       );
@@ -302,12 +346,15 @@ export class AuthenticationService {
   }
 
   async logout(token: string): Promise<{ message: string }> {
+    this.logger.log(`Logout request with token: ${token}`);
+
     try {
       const session = await this.userSessionRepository.findOne({
         where: { token },
       });
 
       if (!session) {
+        this.logger.error(`Invalid or expired session for token: ${token}`);
         throw new UnauthorizedException(
           'The session has expired or is invalid',
         );
@@ -315,8 +362,12 @@ export class AuthenticationService {
 
       await this.userSessionRepository.delete({ token: session.token });
 
+      this.logger.log(`Logout successful for token: ${token}`);
       return { message: 'Logout successful' };
     } catch (error) {
+      this.logger.error(
+        `Logout failed for token: ${token} with error: ${error.message}`,
+      );
       throw error;
     }
   }

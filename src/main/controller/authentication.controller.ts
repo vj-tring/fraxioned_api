@@ -13,14 +13,14 @@ import {
   UnprocessableEntityException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { AuthenticationService } from 'src/service/authentication.service';
-import { InviteUserDto } from 'dto/inviteUser.dto';
-import { LoginDto } from 'src/dto/login.dto';
-import { ForgotPasswordDto } from 'dto/forgotPassword.dto';
-import { ResetPasswordDto } from 'dto/resetPassword.dto';
-import { ChangePasswordDto } from 'dto/recoverPassword.dto';
+import { AuthenticationService } from 'src/main/service/authentication.service';
+import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
+import { LoginDto } from 'src/main/dto/login.dto';
+import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
+import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
+import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { User } from 'src/entities/user.entity';
+import { User } from 'src/main/entities/user.entity';
 
 @ApiTags('Authentication')
 @Controller('api/authentication')

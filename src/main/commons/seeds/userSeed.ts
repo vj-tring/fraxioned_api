@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
-import { User } from 'entities/user.entity';
-import { Role } from 'entities/role.entity';
+import { User } from 'src/main/entities/user.entity';
+import { Role } from 'src/main/entities/role.entity';
 import * as bcrypt from 'bcrypt';
 
 export const seedUser = async (dataSource: DataSource): Promise<void> => {

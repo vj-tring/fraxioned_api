@@ -1,27 +1,39 @@
-import { CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Properties } from './properties.entity';
-import { Amenities } from './amenities.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 
-@Entity('fxn_property_amenities')
-export class PropertyAmenities {
+@Entity('fxn_amenities')
+export class Amenities {
   @PrimaryGeneratedColumn({
     name: 'id',
     comment: 'This is a unique identifier',
   })
   id: number;
 
-  @ManyToOne(() => Properties, (properties) => properties.id)
-  @JoinColumn({
-    name: 'property_id',
+  @Column({
+    name: 'name',
+    type: 'varchar',
   })
-  property: Properties;
+  amenityName: string;
 
-  @ManyToOne(() => Amenities, (amenities) => amenities.id)
-  @JoinColumn({
-    name: 'amenity_id',
+  @Column({
+    name: 'description',
+    type: 'varchar',
   })
-  amenity: Amenities;
+  amenityDescription: string;
+
+  @Column({
+    name: 'type',
+    type: 'varchar',
+  })
+  amenityType: string;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
