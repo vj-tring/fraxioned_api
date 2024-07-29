@@ -36,7 +36,7 @@ export class AuthenticationService {
     private readonly logger: LoggerService,
   ) {}
 
-  async inviteUser(inviteUserDto: InviteUserDto): Promise<{ message: string }> {
+  async inviteUser(inviteUserDto: InviteUserDto): Promise<object> {
     const {
       email,
       firstName,
@@ -61,7 +61,7 @@ export class AuthenticationService {
     });
     if (existingUserEmail) {
       this.logger.error(`Email already exists: ${email}`);
-      throw new ConflictException('Email already exists');
+      return new ConflictException('Email already exists');
     }
 
     const tempPassword = Math.random().toString(36).slice(-8);
@@ -121,11 +121,7 @@ export class AuthenticationService {
     return { message: 'Invite sent successfully' };
   }
 
-  async login(loginDto: LoginDto): Promise<{
-    message: string;
-    user: Partial<User>;
-    session: { token: string; expires_at: Date };
-  }> {
+  async login(loginDto: LoginDto): Promise<object> {
     const { email, password } = loginDto;
     this.logger.log(`User attempting to login with email: ${email}`);
 
@@ -136,31 +132,33 @@ export class AuthenticationService {
 
     if (!userEmail) {
       this.logger.error(`User not found with email: ${email}`);
-      throw new NotFoundException('User not found');
+      return new NotFoundException('User not found');
     }
 
     const user = userEmail.user;
 
     if (!user) {
       this.logger.error(`User entity not found for email: ${email}`);
-      throw new NotFoundException('User not found');
+      return new NotFoundException('User not found');
     }
 
     if (!user.isActive) {
       this.logger.error(`User is not Active: ${email}`);
-      throw new UnauthorizedException('User is not Active');
+      return new UnauthorizedException('User is not Active');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       this.logger.error(`Invalid credentials for email: ${email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      return new UnauthorizedException('Invalid credentials');
     }
 
     if (!user.isActive) {
       this.logger.error(`User account is inactive for email: ${email}`);
-      throw new UnauthorizedException('The user account is currently inactive');
+      return new UnauthorizedException(
+        'The user account is currently inactive',
+      );
     }
 
     user.lastLoginTime = new Date();
@@ -193,9 +191,7 @@ export class AuthenticationService {
     };
   }
 
-  async forgotPassword(
-    forgotPasswordDto: ForgotPasswordDto,
-  ): Promise<{ message: string }> {
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<object> {
     this.logger.log(
       `Forgot password request for email: ${forgotPasswordDto.email}`,
     );
@@ -209,7 +205,7 @@ export class AuthenticationService {
       this.logger.error(
         `User not found with email: ${forgotPasswordDto.email}`,
       );
-      throw new NotFoundException(
+      return new NotFoundException(
         'The account associated with this user was not found',
       );
     }
@@ -236,7 +232,7 @@ export class AuthenticationService {
   async changePassword(
     reset_token: string,
     changePasswordDto: ChangePasswordDto,
-  ): Promise<{ message: string }> {
+  ): Promise<object> {
     this.logger.log(`Change password request with reset token: ${reset_token}`);
 
     const user = await this.userRepository.findOne({
@@ -244,7 +240,7 @@ export class AuthenticationService {
     });
     if (!user) {
       this.logger.error(`User not found with reset token: ${reset_token}`);
-      throw new NotFoundException(
+      return new NotFoundException(
         'The account associated with this user was not found',
       );
     }
@@ -253,7 +249,7 @@ export class AuthenticationService {
       this.logger.error(
         `Reset token expired for user with reset token: ${reset_token}`,
       );
-      throw new BadRequestException('The password reset token has expired');
+      return new BadRequestException('The password reset token has expired');
     }
 
     user.password = await bcrypt.hash(changePasswordDto.newPassword, 10);
@@ -268,9 +264,7 @@ export class AuthenticationService {
     return { message: 'Password has been reset successfully' };
   }
 
-  async resetPassword(
-    resetPasswordDto: ResetPasswordDto,
-  ): Promise<{ message: string }> {
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<object> {
     this.logger.log(
       `Reset password request for user ID: ${resetPasswordDto.userId}`,
     );
@@ -280,7 +274,7 @@ export class AuthenticationService {
     });
     if (!user) {
       this.logger.error(`User not found with ID: ${resetPasswordDto.userId}`);
-      throw new NotFoundException(
+      return new NotFoundException(
         'The account associated with this user was not found',
       );
     }
@@ -288,7 +282,9 @@ export class AuthenticationService {
       this.logger.error(
         `User account is inactive for user ID: ${resetPasswordDto.userId}`,
       );
-      throw new UnauthorizedException('The user account is currently inactive');
+      return new UnauthorizedException(
+        'The user account is currently inactive',
+      );
     }
     const isOldPasswordValid = await bcrypt.compare(
       resetPasswordDto.oldPassword,
@@ -298,7 +294,9 @@ export class AuthenticationService {
       this.logger.error(
         `Invalid old password for user ID: ${resetPasswordDto.userId}`,
       );
-      throw new UnauthorizedException('The provided old password is incorrect');
+      return new UnauthorizedException(
+        'The provided old password is incorrect',
+      );
     }
     const updatedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
     await this.userRepository.update(user.id, { password: updatedPassword });
@@ -339,13 +337,11 @@ export class AuthenticationService {
       this.logger.error(
         `Validation failed for user ID: ${userId} with error: ${error.message}`,
       );
-      throw new UnauthorizedException(
-        'The provided user ID or access token is invalid',
-      );
+      return false;
     }
   }
 
-  async logout(token: string): Promise<{ message: string }> {
+  async logout(token: string): Promise<object> {
     this.logger.log(`Logout request with token: ${token}`);
 
     try {
@@ -355,7 +351,7 @@ export class AuthenticationService {
 
       if (!session) {
         this.logger.error(`Invalid or expired session for token: ${token}`);
-        throw new UnauthorizedException(
+        return new UnauthorizedException(
           'The session has expired or is invalid',
         );
       }
@@ -368,7 +364,7 @@ export class AuthenticationService {
       this.logger.error(
         `Logout failed for token: ${token} with error: ${error.message}`,
       );
-      throw error;
+      return error;
     }
   }
 }

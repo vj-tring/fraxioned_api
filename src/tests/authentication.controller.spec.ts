@@ -11,6 +11,7 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { resolve } from 'path';
 
 describe('AuthenticationController', () => {
   let controller: AuthenticationController;
@@ -107,7 +108,7 @@ describe('AuthenticationController', () => {
 
       await expect(
         controller.forgotPassword(forgotPasswordDto),
-      ).rejects.toThrow(NotFoundException);
+      ).resolves.toEqual(new NotFoundException('User not found'));
     });
   });
 
@@ -136,7 +137,7 @@ describe('AuthenticationController', () => {
 
       await expect(
         controller.recoverPassword(resetToken, changePasswordDto),
-      ).rejects.toThrow(BadRequestException);
+      ).resolves.toEqual(new BadRequestException('Reset token expired'));
     });
   });
 
@@ -163,8 +164,8 @@ describe('AuthenticationController', () => {
         .spyOn(service, 'resetPassword')
         .mockRejectedValue(new UnauthorizedException('Invalid reset token'));
 
-      await expect(controller.resetPassword(resetPasswordDto)).rejects.toThrow(
-        UnauthorizedException,
+      await expect(controller.resetPassword(resetPasswordDto)).resolves.toEqual(
+        new UnauthorizedException('Invalid reset token'),
       );
     });
   });
@@ -184,8 +185,8 @@ describe('AuthenticationController', () => {
         .spyOn(service, 'logout')
         .mockRejectedValue(new UnauthorizedException('Invalid token'));
 
-      await expect(controller.logout(token)).rejects.toThrow(
-        UnauthorizedException,
+      await expect(controller.logout(token)).resolves.toEqual(
+        new UnauthorizedException('Invalid token'),
       );
     });
   });

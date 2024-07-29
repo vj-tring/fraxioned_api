@@ -20,7 +20,6 @@ import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
 import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { User } from 'src/main/entities/user.entity';
 
 @ApiTags('Authentication')
 @Controller('api/authentication')
@@ -29,20 +28,15 @@ export class AuthenticationController {
 
   @Post('invite')
   @UsePipes(ValidationPipe)
-  inviteUser(
-    @Body() inviteUserDto: InviteUserDto,
-  ): Promise<{ message: string }> {
+  inviteUser(@Body() inviteUserDto: InviteUserDto): Promise<object> {
     return this.authenticationService.inviteUser(inviteUserDto);
   }
 
   @Post('login')
   @UsePipes(ValidationPipe)
-  login(@Body() loginDto: LoginDto): Promise<{
-    message: string;
-    user: Partial<User>;
-    session: { token: string; expires_at: Date };
-  }> {
-    return this.authenticationService.login(loginDto);
+  async login(@Body() loginDto: LoginDto): Promise<object> {
+    const result = await this.authenticationService.login(loginDto);
+    return result;
   }
 
   @Post('forgotPassword')
@@ -57,11 +51,11 @@ export class AuthenticationController {
       return result;
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
+        return new NotFoundException(error.message);
       } else if (error instanceof UnprocessableEntityException) {
-        throw new UnprocessableEntityException('User');
+        return new UnprocessableEntityException('User');
       } else {
-        throw new InternalServerErrorException('forgotPassword');
+        return new InternalServerErrorException('forgotPassword');
       }
     }
   }
@@ -81,11 +75,11 @@ export class AuthenticationController {
       return result;
     } catch (error) {
       if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
+        return new BadRequestException(error.message);
       } else if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
+        return new NotFoundException(error.message);
       } else {
-        throw new InternalServerErrorException('changePassword');
+        return new InternalServerErrorException('changePassword');
       }
     }
   }
@@ -102,13 +96,13 @@ export class AuthenticationController {
       return result;
     } catch (error) {
       if (error instanceof UnprocessableEntityException) {
-        throw new UnprocessableEntityException();
+        return new UnprocessableEntityException();
       } else if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
+        return new NotFoundException(error.message);
       } else if (error instanceof UnauthorizedException) {
-        throw new UnauthorizedException(error.message);
+        return new UnauthorizedException(error.message);
       } else {
-        throw new InternalServerErrorException('resetPassword');
+        return new InternalServerErrorException('resetPassword');
       }
     }
   }
@@ -121,9 +115,9 @@ export class AuthenticationController {
       return result;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
-        throw new UnauthorizedException(error.message);
+        return new UnauthorizedException(error.message);
       } else {
-        throw new InternalServerErrorException('logout');
+        return new InternalServerErrorException('logout');
       }
     }
   }

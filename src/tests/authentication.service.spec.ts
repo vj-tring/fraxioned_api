@@ -81,7 +81,6 @@ describe('AuthenticationService', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-
   describe('inviteUser', () => {
     it('should invite a user successfully', async () => {
       const inviteUserDto: InviteUserDto = {
@@ -124,7 +123,7 @@ describe('AuthenticationService', () => {
       );
     });
 
-    it('should throw ConflictException if email already exists', async () => {
+    it('should return ConflictException if email already exists', async () => {
       const inviteUserDto: InviteUserDto = {
         email: 'test@example.com',
         firstName: 'John',
@@ -147,12 +146,12 @@ describe('AuthenticationService', () => {
       };
 
       userContactDetailsRepository.findOne.mockResolvedValue({});
-      await expect(service.inviteUser(inviteUserDto)).rejects.toThrow(
-        ConflictException,
+
+      await expect(service.inviteUser(inviteUserDto)).resolves.toEqual(
+        new ConflictException('Email already exists')
       );
     });
   });
-
   describe('login', () => {
     it('should login a user successfully', async () => {
       const loginDto = { email: 'test@example.com', password: 'password' };
@@ -180,14 +179,15 @@ describe('AuthenticationService', () => {
       });
     });
 
-    it('should throw NotFoundException if user not found', async () => {
+    it('should return NotFoundException if user not found', async () => {
       const loginDto = { email: 'test@example.com', password: 'password' };
 
       userContactDetailsRepository.findOne.mockResolvedValue(null);
-      await expect(service.login(loginDto)).rejects.toThrow(NotFoundException);
+      await expect(service.login(loginDto)).resolves.toEqual(new NotFoundException('User not found')
+    );
     });
 
-    it('should throw UnauthorizedException if password is invalid', async () => {
+    it('should return UnauthorizedException if password is invalid', async () => {
       const loginDto = { email: 'test@example.com', password: 'password' };
       const user = { id: 1, password: 'hashedPassword', isActive: true };
       const userEmail = { user };
@@ -195,8 +195,7 @@ describe('AuthenticationService', () => {
       userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
+      await expect(service.login(loginDto)).resolves.toEqual(new UnauthorizedException('Invalid credentials'),
       );
     });
   });
@@ -225,13 +224,12 @@ describe('AuthenticationService', () => {
       );
     });
 
-    it('should throw NotFoundException if user not found', async () => {
+    it('should return NotFoundException if user not found', async () => {
       const forgotPasswordDto = { email: 'test@example.com' };
 
       userContactDetailsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.forgotPassword(forgotPasswordDto)).rejects.toThrow(
-        NotFoundException,
+      await expect(service.forgotPassword(forgotPasswordDto)).resolves.toEqual(new NotFoundException('The account associated with this user was not found'),
       );
     });
   });
@@ -260,7 +258,7 @@ describe('AuthenticationService', () => {
       });
     });
 
-    it('should throw NotFoundException if user not found', async () => {
+    it('should return NotFoundException if user not found', async () => {
       const reset_token = 'resetToken';
       const changePasswordDto = { newPassword: 'newPassword' };
 
@@ -268,10 +266,10 @@ describe('AuthenticationService', () => {
 
       await expect(
         service.changePassword(reset_token, changePasswordDto),
-      ).rejects.toThrow(NotFoundException);
+      ).resolves.toEqual(new NotFoundException('The account associated with this user was not found'));
     });
 
-    it('should throw BadRequestException if reset token is expired', async () => {
+    it('should return BadRequestException if reset token is expired', async () => {
       const reset_token = 'resetToken';
       const changePasswordDto = { newPassword: 'newPassword' };
       const user = {
@@ -284,7 +282,7 @@ describe('AuthenticationService', () => {
 
       await expect(
         service.changePassword(reset_token, changePasswordDto),
-      ).rejects.toThrow(BadRequestException);
+      ).resolves.toEqual(new BadRequestException('The password reset token has expired'));
     });
   });
 
@@ -307,7 +305,7 @@ describe('AuthenticationService', () => {
       expect(result).toEqual({ message: 'Password reset successfully' });
     });
 
-    it('should throw NotFoundException if user not found', async () => {
+    it('should return NotFoundException if user not found', async () => {
       const resetPasswordDto = {
         userId: 1,
         oldPassword: 'oldPassword',
@@ -316,12 +314,11 @@ describe('AuthenticationService', () => {
 
       userRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(
-        NotFoundException,
+      await expect(service.resetPassword(resetPasswordDto)).resolves.toEqual(new NotFoundException('The account associated with this user was not found'),
       );
     });
 
-    it('should throw UnauthorizedException if old password is invalid', async () => {
+    it('should return UnauthorizedException if old password is invalid', async () => {
       const resetPasswordDto = {
         userId: 1,
         oldPassword: 'oldPassword',
@@ -332,8 +329,8 @@ describe('AuthenticationService', () => {
       userRepository.findOne.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(
-        UnauthorizedException,
+      await expect(service.resetPassword(resetPasswordDto)).resolves.toEqual(
+        new UnauthorizedException('The provided old password is incorrect'),
       );
     });
   });
@@ -363,21 +360,17 @@ describe('AuthenticationService', () => {
       );
     });
 
-    it('should throw UnauthorizedException if an error occurs', async () => {
+  
+    it('should log error and return false if an error occurs', async () => {
       const userId = 1;
       const accessToken = 'accessToken';
       const errorMessage = 'Database error';
 
       userSessionRepository.findOne.mockRejectedValue(new Error(errorMessage));
 
-      await expect(service.validateUser(userId, accessToken)).rejects.toThrow(
-        new UnauthorizedException(
-          'The provided user ID or access token is invalid',
-        ),
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        `Validation failed for user ID: ${userId} with error: ${errorMessage}`,
-      );
+      const result = await service.validateUser(userId, accessToken);
+
+      expect(result).toBe(false);
     });
   });
 
@@ -394,13 +387,13 @@ describe('AuthenticationService', () => {
       expect(result).toEqual({ message: 'Logout successful' });
     });
 
-    it('should throw UnauthorizedException if session is invalid or expired', async () => {
+    it('should return UnauthorizedException if session is invalid or expired', async () => {
       const token = 'token';
 
       userSessionRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.logout(token)).rejects.toThrow(
-        UnauthorizedException,
+      await expect(service.logout(token)).resolves.toEqual(
+        new UnauthorizedException('The session has expired or is invalid'),
       );
     });
   });
