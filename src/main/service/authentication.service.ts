@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-  ConflictException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
 import { User } from 'src/main/entities/user.entity';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
@@ -20,6 +14,14 @@ import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
 import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
 import { UserProperties } from 'src/main/entities/user_properties.entity';
+import {
+  LOGIN_RESPONSES,
+  INVITE_USER_RESPONSES,
+  FORGOT_PASSWORD_RESPONSES,
+  CHANGE_PASSWORD_RESPONSES,
+  RESET_PASSWORD_RESPONSES,
+  LOGOUT_RESPONSES,
+} from 'src/main/commons/constants/authResponse.constants';
 
 @Injectable()
 export class AuthenticationService {
@@ -61,7 +63,7 @@ export class AuthenticationService {
     });
     if (existingUserEmail) {
       this.logger.error(`Email already exists: ${email}`);
-      return new ConflictException('Email already exists');
+      return INVITE_USER_RESPONSES.EMAIL_EXISTS;
     }
 
     const tempPassword = Math.random().toString(36).slice(-8);
@@ -109,16 +111,16 @@ export class AuthenticationService {
     await this.userPropertyRepository.save(userProperty);
     await this.userRepository.save(user);
 
-    const loginLink = `http://fraxionedOwners.com/login`;
+    const loginLink = `http://localhost:3000/login`;
 
     await this.mailService.sendMail(
       email,
       'You are invited!',
-      `Hello ${firstName},\n\nYou have been invited to our platform. Please use the following link to login: ${loginLink}\n\nYour temporary password is: ${tempPassword}\n\nBest regards,\nYour Team`,
+      `Hello ${firstName},\n\nYou have been invited to our platform. Please use the following link to login: ${loginLink}\n\nUsername: ${email}\n\nYour temporary password is: ${tempPassword}\n\nBest regards,\nYour Team`,
     );
 
     this.logger.log(`Invite sent successfully to ${email}`);
-    return { message: 'Invite sent successfully' };
+    return INVITE_USER_RESPONSES.INVITE_SUCCESS;
   }
 
   async login(loginDto: LoginDto): Promise<object> {
@@ -132,33 +134,26 @@ export class AuthenticationService {
 
     if (!userEmail) {
       this.logger.error(`User not found with email: ${email}`);
-      return new NotFoundException('User not found');
+      return LOGIN_RESPONSES.USER_NOT_FOUND;
     }
 
     const user = userEmail.user;
 
     if (!user) {
       this.logger.error(`User entity not found for email: ${email}`);
-      return new NotFoundException('User not found');
+      return LOGIN_RESPONSES.USER_NOT_FOUND;
     }
 
     if (!user.isActive) {
       this.logger.error(`User is not Active: ${email}`);
-      return new UnauthorizedException('User is not Active');
+      return LOGIN_RESPONSES.USER_NOT_ACTIVE;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       this.logger.error(`Invalid credentials for email: ${email}`);
-      return new UnauthorizedException('Invalid credentials');
-    }
-
-    if (!user.isActive) {
-      this.logger.error(`User account is inactive for email: ${email}`);
-      return new UnauthorizedException(
-        'The user account is currently inactive',
-      );
+      return LOGIN_RESPONSES.INVALID_CREDENTIALS;
     }
 
     user.lastLoginTime = new Date();
@@ -184,11 +179,7 @@ export class AuthenticationService {
     const { ...userDetails } = user;
 
     this.logger.log(`Login successful for email: ${email}`);
-    return {
-      message: 'Login successful',
-      user: userDetails,
-      session: { token: session.token, expires_at: session.expiresAt },
-    };
+    return LOGIN_RESPONSES.LOGIN_SUCCESS(userDetails, session);
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<object> {
@@ -205,9 +196,7 @@ export class AuthenticationService {
       this.logger.error(
         `User not found with email: ${forgotPasswordDto.email}`,
       );
-      return new NotFoundException(
-        'The account associated with this user was not found',
-      );
+      return FORGOT_PASSWORD_RESPONSES.USER_NOT_FOUND;
     }
 
     const user = userEmail.user;
@@ -226,7 +215,7 @@ export class AuthenticationService {
     this.logger.log(
       `Password reset email sent successfully to ${forgotPasswordDto.email}`,
     );
-    return { message: 'Password reset email sent successfully' };
+    return FORGOT_PASSWORD_RESPONSES.EMAIL_SENT;
   }
 
   async changePassword(
@@ -240,16 +229,14 @@ export class AuthenticationService {
     });
     if (!user) {
       this.logger.error(`User not found with reset token: ${reset_token}`);
-      return new NotFoundException(
-        'The account associated with this user was not found',
-      );
+      return CHANGE_PASSWORD_RESPONSES.USER_NOT_FOUND;
     }
 
     if (user.resetTokenExpires < new Date()) {
       this.logger.error(
         `Reset token expired for user with reset token: ${reset_token}`,
       );
-      return new BadRequestException('The password reset token has expired');
+      return CHANGE_PASSWORD_RESPONSES.TOKEN_EXPIRED;
     }
 
     user.password = await bcrypt.hash(changePasswordDto.newPassword, 10);
@@ -261,7 +248,7 @@ export class AuthenticationService {
     this.logger.log(
       `Password has been reset successfully for user with reset token: ${reset_token}`,
     );
-    return { message: 'Password has been reset successfully' };
+    return CHANGE_PASSWORD_RESPONSES.PASSWORD_RESET_SUCCESS;
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<object> {
@@ -274,17 +261,13 @@ export class AuthenticationService {
     });
     if (!user) {
       this.logger.error(`User not found with ID: ${resetPasswordDto.userId}`);
-      return new NotFoundException(
-        'The account associated with this user was not found',
-      );
+      return RESET_PASSWORD_RESPONSES.USER_NOT_FOUND;
     }
     if (!user.isActive) {
       this.logger.error(
         `User account is inactive for user ID: ${resetPasswordDto.userId}`,
       );
-      return new UnauthorizedException(
-        'The user account is currently inactive',
-      );
+      return RESET_PASSWORD_RESPONSES.USER_NOT_ACTIVE;
     }
     const isOldPasswordValid = await bcrypt.compare(
       resetPasswordDto.oldPassword,
@@ -294,9 +277,7 @@ export class AuthenticationService {
       this.logger.error(
         `Invalid old password for user ID: ${resetPasswordDto.userId}`,
       );
-      return new UnauthorizedException(
-        'The provided old password is incorrect',
-      );
+      return RESET_PASSWORD_RESPONSES.INVALID_OLD_PASSWORD;
     }
     const updatedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
     await this.userRepository.update(user.id, { password: updatedPassword });
@@ -304,7 +285,7 @@ export class AuthenticationService {
     this.logger.log(
       `Password reset successfully for user ID: ${resetPasswordDto.userId}`,
     );
-    return { message: 'Password reset successfully' };
+    return RESET_PASSWORD_RESPONSES.PASSWORD_RESET_SUCCESS;
   }
 
   async validateUser(userId: number, accessToken: string): Promise<boolean> {
@@ -351,15 +332,13 @@ export class AuthenticationService {
 
       if (!session) {
         this.logger.error(`Invalid or expired session for token: ${token}`);
-        return new UnauthorizedException(
-          'The session has expired or is invalid',
-        );
+        return LOGOUT_RESPONSES.INVALID_SESSION;
       }
 
       await this.userSessionRepository.delete({ token: session.token });
 
       this.logger.log(`Logout successful for token: ${token}`);
-      return { message: 'Logout successful' };
+      return LOGOUT_RESPONSES.LOGOUT_SUCCESS;
     } catch (error) {
       this.logger.error(
         `Logout failed for token: ${token} with error: ${error.message}`,
