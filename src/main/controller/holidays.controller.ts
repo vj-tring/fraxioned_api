@@ -17,8 +17,10 @@ import { LoggerService } from 'services/logger.service';
 import { CreateHolidayDto } from 'dto/create-holiday.dto';
 import { UpdateHolidayDto } from 'dto/update-holiday.dto';
 import { Holidays } from 'entities/holidays.entity';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('holidays')
+@ApiTags('Holidays')
 export class HolidaysController {
   constructor(
     private readonly holidaysService: HolidaysService,
