@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from './modules/database.module';
+import { DatabaseModule } from './main/modules/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfigAsync } from './database/typeorm.config';
-import { HolidaysModule } from './modules/holidays.module';
+import { HolidaysModule } from 'modules/holidays.module';
+import { typeOrmConfigAsync } from './main/database/typeorm.config';
+import { AuthenticationModule } from './main/modules/authentication.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { HolidaysModule } from './modules/holidays.module';
     TypeOrmModule.forRootAsync(typeOrmConfigAsync),
     DatabaseModule,
     HolidaysModule,
+    AuthenticationModule,
   ],
 })
 export class AppModule {}
