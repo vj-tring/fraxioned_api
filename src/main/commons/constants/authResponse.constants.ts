@@ -2,6 +2,16 @@ import { HttpStatus } from '@nestjs/common';
 import { User } from 'src/main/entities/user.entity';
 import { UserSessions } from 'src/main/entities/user_sessions.entity';
 
+interface LoginSuccessResponse {
+  status: number;
+  message: string;
+  user: Partial<User>;
+  session: {
+    token: string;
+    expires_at: Date;
+  };
+}
+
 export const LOGIN_RESPONSES = {
   USER_NOT_FOUND: {
     status: HttpStatus.NOT_FOUND,
@@ -18,7 +28,7 @@ export const LOGIN_RESPONSES = {
   LOGIN_SUCCESS: (
     userDetails: Partial<User>,
     session: Partial<UserSessions>,
-  ) => ({
+  ): LoginSuccessResponse => ({
     status: HttpStatus.OK,
     message: 'Login successful',
     user: userDetails,

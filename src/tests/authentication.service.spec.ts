@@ -2,12 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationService } from '../main/service/authentication.service';
 import { MailService } from '../main/service/mail.service';
 import { LoggerService } from '../main/service/logger.service';
-import {
-  NotFoundException,
-  UnauthorizedException,
-  ConflictException,
-  BadRequestException,
-} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
 import { Repository } from 'typeorm';
