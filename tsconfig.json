@@ -19,18 +19,17 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "src/*": ["src/*"],
-      "modules/*": ["src/modules/*"],
-      "services/*": ["src/service/*"],
-      "controllers/*": ["src/controller/*"],
-      "config/*": ["src/config/*"],
+      "modules/*": ["src/main/modules/*"],
+      "services/*": ["src/main/service/*"],
+      "controllers/*": ["src/main/controller/*"],
+      "config/*": ["src/main/config/*"],
       "swagger/*": ["src/swagger/*"],
       "tests/*": ["src/tests/*"],
-      "exception/*": ["src/exception/*"],
-      "commons/*": ["src/commons/*"],
-      "database/*": ["src/database/*"],
-      "dto/*": ["src/dto/*"],
-      "entities/*": ["src/entities/*"],
-
+      "exception/*": ["src/main/exception/*"],
+      "commons/*": ["src/main/commons/*"],
+      "database/*": ["src/main/database/*"],
+      "dto/*": ["src/main/dto/*"],
+      "entities/*": ["src/main/entities/*"]
     }
   }
 }
