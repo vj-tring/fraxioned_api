@@ -9,6 +9,8 @@ import {
   UsePipes,
   ValidationPipe,
   Query,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { HolidaysService } from 'src/service/holidays.service';
 import { LoggerService } from 'src/service/logger.service';
@@ -25,20 +27,28 @@ export class HolidaysController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  async createHoliday(
-    @Body() createHolidayDto: CreateHolidayDto,
-  ): Promise<{ success: boolean; message: string; data?: Holidays }> {
-    const result = await this.holidaysService.create(createHolidayDto);
+  async createHoliday(@Body() createHolidayDto: CreateHolidayDto): Promise<{
+    success: boolean;
+    message: string;
+    data?: Holidays;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result = await this.holidaysService.create(createHolidayDto);
 
-    if (!result.success) {
-      this.logger.error(`Error creating holiday: ${result.message}`);
+      if (!result.success) {
+        this.logger.error(`Error creating holiday: ${result.message}`);
+      }
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error creating holiday: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while creating the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    return {
-      success: result.success,
-      message: result.message,
-      data: result.data || null,
-    };
   }
 
   @Get('all')
@@ -47,14 +57,25 @@ export class HolidaysController {
     success: boolean;
     message: string;
     data?: Holidays[];
+    statusCode: HttpStatus;
   }> {
-    const result = await this.holidaysService.getAllHolidayRecords();
+    try {
+      const result = await this.holidaysService.getAllHolidayRecords();
 
-    if (!result.success) {
-      this.logger.error(result.message);
+      if (!result.success) {
+        this.logger.error(result.message);
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving all holidays: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving all holidays',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    return result;
   }
 
   @Get()
@@ -62,17 +83,32 @@ export class HolidaysController {
   async getHolidayByDate(
     @Query('startDate') startDate: Date,
     @Query('endDate') endDate: Date,
-  ): Promise<{ success: boolean; message: string; data?: Holidays }> {
-    const result = await this.holidaysService.findHolidayByDateRange(
-      startDate,
-      endDate,
-    );
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: Holidays;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result = await this.holidaysService.findHolidayByDateRange(
+        startDate,
+        endDate,
+      );
 
-    if (!result.success) {
-      this.logger.error(result.message);
+      if (!result.success) {
+        this.logger.error(result.message);
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving holiday: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    return result;
   }
 
   @Patch(':id')
@@ -80,41 +116,80 @@ export class HolidaysController {
   async updateHolidayDetail(
     @Param('id') id: string,
     @Body() updateHolidayDto: UpdateHolidayDto,
-  ): Promise<{ success: boolean; message: string; data?: Holidays }> {
-    const result = await this.holidaysService.updateHolidayDetail(
-      +id,
-      updateHolidayDto,
-    );
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: Holidays;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result = await this.holidaysService.updateHolidayDetail(
+        +id,
+        updateHolidayDto,
+      );
 
-    if (!result.success) {
-      this.logger.error(result.message);
+      if (!result.success) {
+        this.logger.error(result.message);
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error updating holiday: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while updating the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    return result;
   }
 
   @Delete()
   @UsePipes(ValidationPipe)
-  async deleteAllHolidays(): Promise<{ success: boolean; message: string }> {
-    const result = await this.holidaysService.deleteAllHolidays();
+  async deleteAllHolidays(): Promise<{
+    success: boolean;
+    message: string;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result = await this.holidaysService.deleteAllHolidays();
 
-    if (!result.success) {
-      this.logger.error(result.message);
+      if (!result.success) {
+        this.logger.error(result.message);
+      }
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error deleting all holidays: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting all holidays',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return result;
   }
 
   @Delete(':id')
   @UsePipes(ValidationPipe)
   async deleteHoliday(
     @Param('id') id: number,
-  ): Promise<{ success: boolean; message: string }> {
-    const result = await this.holidaysService.deleteHolidayById(id);
+  ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
+    try {
+      const result = await this.holidaysService.deleteHolidayById(id);
 
-    if (!result.success) {
-      this.logger.error(result.message);
+      if (!result.success) {
+        this.logger.error(result.message);
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error deleting holiday: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    return result;
   }
 }

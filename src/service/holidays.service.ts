@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateHolidayDto } from 'src/dto/create-holiday.dto';
 import { UpdateHolidayDto } from 'src/dto/update-holiday.dto';
 import { LoggerService } from './logger.service';
@@ -21,6 +21,7 @@ export class HolidaysService {
     success: boolean;
     message: string;
     data?: Holidays;
+    statusCode: number;
   }> {
     try {
       this.logger.log(
@@ -37,6 +38,7 @@ export class HolidaysService {
         return {
           success: false,
           message: `Holiday ${createHolidayDto.name} for the year ${createHolidayDto.year} already exists`,
+          statusCode: HttpStatus.CONFLICT,
         };
       }
 
@@ -50,6 +52,7 @@ export class HolidaysService {
         return {
           success: false,
           message: `User with ID ${createHolidayDto.createdBy.id} does not exist`,
+          statusCode: HttpStatus.NOT_FOUND,
         };
       }
 
@@ -64,15 +67,16 @@ export class HolidaysService {
         success: true,
         message: 'Holiday created successfully',
         data: savedHoliday,
+        statusCode: HttpStatus.CREATED,
       };
     } catch (error) {
       this.logger.error(
         `Error creating holiday: ${error.message} - ${error.stack}`,
       );
-      return {
-        success: false,
-        message: 'An error occurred while creating the holiday',
-      };
+      throw new HttpException(
+        'An error occurred while creating the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -80,6 +84,7 @@ export class HolidaysService {
     success: boolean;
     message: string;
     data?: Holidays[];
+    statusCode: number;
   }> {
     try {
       const holidays = await this.holidayRepository.find();
@@ -87,8 +92,9 @@ export class HolidaysService {
       if (holidays.length === 0) {
         return {
           success: true,
-          message: 'No holidays found',
+          message: 'No holidays are available',
           data: [],
+          statusCode: HttpStatus.OK,
         };
       }
 
@@ -98,22 +104,28 @@ export class HolidaysService {
         success: true,
         message: 'Holidays retrieved successfully',
         data: holidays,
+        statusCode: HttpStatus.OK,
       };
     } catch (error) {
       this.logger.error(
         `Error retrieving holidays: ${error.message} - ${error.stack}`,
       );
-      return {
-        success: false,
-        message: 'An error occurred while retrieving holidays',
-      };
+      throw new HttpException(
+        'An error occurred while retrieving the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async findHolidayByDateRange(
     startDate: Date,
     endDate: Date,
-  ): Promise<{ success: boolean; message: string; data?: Holidays }> {
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: Holidays;
+    statusCode: number;
+  }> {
     try {
       const holiday = await this.holidayRepository.findOne({
         where: {
@@ -126,6 +138,7 @@ export class HolidaysService {
         return {
           success: true,
           message: 'No holiday found with the exact start and end dates',
+          statusCode: HttpStatus.NOT_FOUND,
         };
       }
 
@@ -133,21 +146,23 @@ export class HolidaysService {
         success: true,
         message: 'Holiday retrieved successfully',
         data: holiday,
+        statusCode: HttpStatus.OK,
       };
     } catch (error) {
       this.logger.error(
         `Error retrieving holiday: ${error.message} - ${error.stack}`,
       );
-      return {
-        success: false,
-        message: 'An error occurred while retrieving the holiday',
-      };
+      throw new HttpException(
+        'An error occurred while retrieving the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async deleteAllHolidays(): Promise<{
     success: boolean;
     message: string;
+    statusCode: number;
   }> {
     try {
       const result = await this.holidayRepository.delete({});
@@ -156,6 +171,7 @@ export class HolidaysService {
         return {
           success: true,
           message: 'No holidays found to delete',
+          statusCode: HttpStatus.OK,
         };
       }
 
@@ -163,21 +179,23 @@ export class HolidaysService {
       return {
         success: true,
         message: `Deleted ${result.affected} holidays successfully`,
+        statusCode: HttpStatus.OK,
       };
     } catch (error) {
       this.logger.error(
         `Error deleting holidays: ${error.message} - ${error.stack}`,
       );
-      return {
-        success: false,
-        message: 'An error occurred while deleting holidays',
-      };
+      throw new HttpException(
+        'An error occurred while deleting the holidays',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async deleteHolidayById(id: number): Promise<{
     success: boolean;
     message: string;
+    statusCode: number;
   }> {
     try {
       const result = await this.holidayRepository.delete(id);
@@ -186,6 +204,7 @@ export class HolidaysService {
         return {
           success: false,
           message: `Holiday with ID ${id} not found`,
+          statusCode: HttpStatus.NOT_FOUND,
         };
       }
 
@@ -193,15 +212,16 @@ export class HolidaysService {
       return {
         success: true,
         message: `Holiday with ID ${id} deleted successfully`,
+        statusCode: HttpStatus.NO_CONTENT,
       };
     } catch (error) {
       this.logger.error(
         `Error deleting holiday with ID ${id}: ${error.message} - ${error.stack}`,
       );
-      return {
-        success: false,
-        message: 'An error occurred while deleting the holiday',
-      };
+      throw new HttpException(
+        'An error occurred while deleting the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -212,6 +232,7 @@ export class HolidaysService {
     success: boolean;
     message: string;
     data?: Holidays;
+    statusCode: number;
   }> {
     try {
       const holiday = await this.holidayRepository.findOne({
@@ -222,6 +243,7 @@ export class HolidaysService {
         return {
           success: false,
           message: `Holiday with ID ${id} not found`,
+          statusCode: HttpStatus.NOT_FOUND,
         };
       }
 
@@ -235,6 +257,7 @@ export class HolidaysService {
         return {
           success: false,
           message: `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
+          statusCode: HttpStatus.NOT_FOUND,
         };
       }
 
@@ -247,15 +270,16 @@ export class HolidaysService {
         success: true,
         message: 'Holiday updated successfully',
         data: updatedHoliday,
+        statusCode: HttpStatus.OK,
       };
     } catch (error) {
       this.logger.error(
         `Error updating holiday with ID ${id}: ${error.message} - ${error.stack}`,
       );
-      return {
-        success: false,
-        message: 'An error occurred while updating the holiday',
-      };
+      throw new HttpException(
+        'An error occurred while updating the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
