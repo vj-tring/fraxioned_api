@@ -83,7 +83,7 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: true, default: null })
   city: string;
 
-  @Column({ type: 'int', nullable: true, default: null })
+  @Column({ nullable: true, default: null })
   zipcode: string;
 
   @Column({

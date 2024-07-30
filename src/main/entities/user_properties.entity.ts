@@ -26,7 +26,7 @@ export class UserProperties {
   @Column({ name: 'no_of_share', type: 'int', nullable: false, default: 0 })
   noOfShare: number;
 
-  @Column({ name: 'acquisition_date', type: 'date', nullable: false })
+  @Column({ name: 'acquisition_date', type: 'timestamp', nullable: false })
   acquisitionDate: Date;
 
   @Column({ name: 'is_active', type: 'tinyint', nullable: false, default: 1 })
