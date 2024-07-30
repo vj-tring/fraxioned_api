@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { Users } from './users.entity';
 import { Properties } from './properties.entity';
 
 @Entity('fxn_user_documents')
@@ -15,9 +15,9 @@ export class UserDocuments {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: User;
+  user: Users;
 
   @ManyToOne(() => Properties, (property) => property.id)
   @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
@@ -41,17 +41,17 @@ export class UserDocuments {
   })
   documentURL: string;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({
     name: 'created_by',
   })
-  createdBy: User;
+  createdBy: Users;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({
     name: 'updated_by',
   })
-  updatedBy: User;
+  updatedBy: Users;
 
   @CreateDateColumn({
     name: 'created_at',

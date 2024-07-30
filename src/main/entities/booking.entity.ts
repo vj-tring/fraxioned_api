@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { Users } from './users.entity';
 import { Properties } from './properties.entity';
 
 @Entity('fxn_booking')
@@ -15,9 +15,9 @@ export class Booking {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: User;
+  user: Users;
 
   @ManyToOne(() => Properties, (property) => property.id)
   @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
@@ -89,11 +89,11 @@ export class Booking {
   @Column({ name: 'pet_fee', type: 'float', nullable: true, default: null })
   petFee: number;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
-  createdBy: User;
+  createdBy: Users;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
-  updatedBy: User;
+  updatedBy: Users;
 }

@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Properties } from './properties.entity';
 import { Amenities } from './amenities.entity';
-import { User } from './user.entity';
+import { Users } from './users.entity';
 
 @Entity('fxn_property_amenities')
 export class PropertyAmenities {
@@ -30,17 +30,17 @@ export class PropertyAmenities {
   })
   amenity: Amenities;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({
     name: 'created_by',
   })
-  createdBy: User;
+  createdBy: Users;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => Users, (user) => user.id)
   @JoinColumn({
     name: 'updated_by',
   })
-  updatedBy: User;
+  updatedBy: Users;
 
   @CreateDateColumn({
     name: 'created_at',
