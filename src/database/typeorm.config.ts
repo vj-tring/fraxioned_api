@@ -18,6 +18,7 @@ export default class TypeOrmConfig {
       synchronize: true,
       logging: true,
       logger: new QueryLogger(),
+      legacySpatialSupport: false,
     };
   }
 }
