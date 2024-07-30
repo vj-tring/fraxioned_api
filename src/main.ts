@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { setupSwagger } from './swagger/swagger.config';
 import { ValidationPipe } from '@nestjs/common';
-import { GlobalExceptionFilter } from './commons/exceptions/filters/http-exception.filter';
+import { GlobalExceptionFilter } from './main/commons/exceptions/filters/http-exception.filter';
 import { seedRole } from './main/commons/seeds/roleSeed';
 import { DataSource } from 'typeorm';
 import { seedUser } from './main/commons/seeds/userSeed';
@@ -29,10 +29,6 @@ async function bootstrap(): Promise<void> {
 
   // Swagger configuration
   setupSwagger(app);
-
-  const dataSource = app.get(DataSource);
-  await seedRole(dataSource);
-  await seedUser(dataSource);
 
   // Enabled the CORS
   app.enableCors();

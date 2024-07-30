@@ -12,13 +12,13 @@ import {
   //   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreatePropertiesDto } from 'src/dto/requests/create-properties.dto';
-import { UpdatePropertiesDto } from 'src/dto/requests/update-properties.dto';
-import { CommonPropertiesResponseDto } from 'src/dto/responses/common-properties.dto';
-import { CreatePropertiesResponseDto } from 'src/dto/responses/create-properties.dto';
-import { UpdatePropertiesResponseDto } from 'src/dto/responses/update-properties.dto';
+import { CreatePropertiesDto } from 'src/main/dto/requests/create-properties.dto';
+import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
+import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
+import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
+import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
 // import { ApiHeader } from '@nestjs/swagger';
-import { PropertiesService } from 'src/service/properties.service';
+import { PropertiesService } from 'src/main/service/properties.service';
 
 @ApiTags('Properties')
 @Controller('api/properties')

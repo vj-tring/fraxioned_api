@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { PropertiesController } from 'src/controller/properties.controller';
-import { CreatePropertiesDto } from 'src/dto/requests/create-properties.dto';
-import { Properties } from 'src/entities/properties.entity';
-import { PropertiesService } from 'src/service/properties.service';
+import { PropertiesController } from 'src/main/controller/properties.controller';
+import { CreatePropertiesDto } from 'src/main/dto/requests/create-properties.dto';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { UpdatePropertiesDto } from 'src/dto/requests/update-properties.dto';
+import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
 import { NotFoundException } from '@nestjs/common';
+import { Properties } from 'src/main/entities/properties.entity';
+import { PropertiesService } from 'src/main/service/properties.service';
+import * as bcrypt from 'bcrypt';
 
 describe('PropertiesController', () => {
   let controller: PropertiesController;
@@ -60,7 +60,7 @@ describe('PropertiesController', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -117,7 +117,7 @@ describe('PropertiesController', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -244,7 +244,7 @@ describe('PropertiesController', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -313,7 +313,7 @@ describe('PropertiesController', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),

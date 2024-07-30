@@ -7,9 +7,9 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { Users } from 'src/entities/users.entity';
+import { Users } from 'src/main/entities/users.entity';
 
-export class UpdatePropertiesResponseDto {
+export class UpdatePropertiesDto {
   @IsNotEmpty()
   @IsString()
   propertyName: string;

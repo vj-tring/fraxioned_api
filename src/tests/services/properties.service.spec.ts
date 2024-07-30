@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Properties } from 'src/entities/properties.entity';
-import { PropertiesService } from 'src/service/properties.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { NotFoundException } from '@nestjs/common';
-import { CreatePropertiesDto } from 'src/dto/requests/create-properties.dto';
-import { UpdatePropertiesDto } from 'src/dto/requests/update-properties.dto';
+import { CreatePropertiesDto } from 'src/main/dto/requests/create-properties.dto';
+import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
+import { Properties } from 'src/main/entities/properties.entity';
+import { PropertiesService } from 'src/main/service/properties.service';
 
 describe('PropertiesService', () => {
   let service: PropertiesService;
@@ -58,7 +58,7 @@ describe('PropertiesService', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -141,7 +141,7 @@ describe('PropertiesService', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -221,7 +221,7 @@ describe('PropertiesService', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -306,7 +306,7 @@ describe('PropertiesService', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -394,7 +394,7 @@ describe('PropertiesService', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -487,7 +487,7 @@ describe('PropertiesService', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),
@@ -544,7 +544,7 @@ describe('PropertiesService', () => {
         state: 'test state',
         country: 'test country',
         city: 'test city',
-        zipcode: 123456,
+        zipcode: '123456',
         resetToken: null,
         resetTokenExpires: new Date(Date.now()),
         lastLoginTime: new Date(Date.now()),

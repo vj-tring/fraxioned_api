@@ -7,7 +7,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { Users } from 'src/entities/users.entity';
+import { Users } from 'src/main/entities/users.entity';
 
 export class CreatePropertiesResponseDto {
   @IsNotEmpty()

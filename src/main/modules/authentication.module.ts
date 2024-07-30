@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthenticationService } from '../service/authentication.service';
 import { AuthenticationController } from '../controller/authentication.controller';
-import { User } from 'src/main/entities/user.entity';
+import { Users } from 'src/main/entities/users.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from 'src/main/entities/role.entity';
 import { MailModule } from 'src/main/modules/mail.module';
@@ -13,7 +13,7 @@ import { UserProperties } from 'src/main/entities/user_properties.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User,
+      Users,
       UserSessions,
       UserContactDetails,
       UserProperties,

@@ -1,11 +1,11 @@
 import { HttpStatus } from '@nestjs/common';
-import { User } from 'src/main/entities/user.entity';
+import { Users } from 'src/main/entities/users.entity';
 import { UserSessions } from 'src/main/entities/user_sessions.entity';
 
 interface LoginSuccessResponse {
   status: number;
   message: string;
-  user: Partial<User>;
+  user: Partial<Users>;
   session: {
     token: string;
     expires_at: Date;
@@ -26,7 +26,7 @@ export const LOGIN_RESPONSES = {
     message: 'Invalid credentials',
   },
   LOGIN_SUCCESS: (
-    userDetails: Partial<User>,
+    userDetails: Partial<Users>,
     session: Partial<UserSessions>,
   ): LoginSuccessResponse => ({
     status: HttpStatus.OK,

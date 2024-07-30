@@ -10,7 +10,7 @@ import {
 import { Role } from './role.entity';
 
 @Entity('fxn_users')
-export class User {
+export class Users {
   @PrimaryGeneratedColumn()
   id: number;
 

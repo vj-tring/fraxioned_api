@@ -7,9 +7,9 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { Users } from 'src/entities/users.entity';
+import { Users } from 'src/main/entities/users.entity';
 
-export class UpdatePropertiesDto {
+export class CreatePropertiesDto {
   @IsNotEmpty()
   @IsString()
   propertyName: string;
@@ -52,5 +52,5 @@ export class UpdatePropertiesDto {
 
   @IsInt()
   @Min(1)
-  updatedBy: Users;
+  createdBy: Users;
 }
