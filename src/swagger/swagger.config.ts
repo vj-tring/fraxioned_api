@@ -11,7 +11,6 @@ export const setupSwagger = (app: INestApplication): void => {
     .setTitle('Fraxioned API')
     .setDescription('Welcome to Fraxioned')
     .setVersion('1.0')
-    .addTag('Fraxioned')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);

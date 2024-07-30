@@ -23,7 +23,6 @@ describe('Swagger', () => {
         .setTitle('Fraxioned API')
         .setDescription('Welcome to Fraxioned')
         .setVersion('1.0')
-        .addTag('Fraxioned')
         .addBearerAuth()
         .build();
 
