@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
 import { Repository } from 'typeorm';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
-import { User } from 'src/main/entities/user.entity';
+import { User} from 'src/main/entities/user.entity';
 import { UserSessions } from 'src/main/entities/user_sessions.entity';
 import { UserProperties } from 'src/main/entities/user_properties.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';

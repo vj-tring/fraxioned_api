@@ -9,7 +9,7 @@ import { UpdateRoleDTO } from 'dto/updateRole.dto';
 import { RoleAlreadyExistsException } from 'src/main/exception/roleName_exists';
 import { NotFoundException } from '@nestjs/common';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/roleResponse.constants';
-import { User } from 'src/main/entities/user.entity';
+import { User } from 'entities/user.entity';
 
 describe('RoleService', () => {
   let service: RoleService;
