@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
 import { Repository } from 'typeorm';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
-import { Users } from 'src/main/entities/users.entity';
+import { User } from 'src/main/entities/user.entity';
 import { UserSessions } from 'src/main/entities/user_sessions.entity';
 import { UserProperties } from 'src/main/entities/user_properties.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -30,7 +30,7 @@ jest.mock('bcrypt', () => ({
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
-  let userRepository: MockRepository<Users>;
+  let userRepository: MockRepository<User>;
   let userSessionRepository: MockRepository<UserSessions>;
   let userPropertyRepository: MockRepository<UserProperties>;
   let userContactDetailsRepository: MockRepository<UserContactDetails>;
@@ -46,7 +46,7 @@ describe('AuthenticationService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
-        { provide: getRepositoryToken(Users), useValue: userRepository },
+        { provide: getRepositoryToken(User), useValue: userRepository },
         {
           provide: getRepositoryToken(UserContactDetails),
           useValue: userContactDetailsRepository,

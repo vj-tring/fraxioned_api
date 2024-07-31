@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Users } from './users.entity';
+import { User } from './user.entity';
 import { Properties } from './properties.entity';
 
 @Entity('fxn_user_properties')
@@ -15,9 +15,9 @@ export class UserProperties {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: Users;
+  user: User;
 
   @ManyToOne(() => Properties, (property) => property.id)
   @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
@@ -26,7 +26,7 @@ export class UserProperties {
   @Column({ name: 'no_of_share', type: 'int', nullable: false, default: 0 })
   noOfShare: number;
 
-  @Column({ name: 'acquisition_date', type: 'date', nullable: false })
+  @Column({ name: 'acquisition_date', type: 'timestamp', nullable: false })
   acquisitionDate: Date;
 
   @Column({ name: 'is_active', type: 'tinyint', nullable: false, default: 1 })
@@ -119,13 +119,13 @@ export class UserProperties {
   @Column({ name: 'lmbrn', type: 'int', nullable: true, default: null })
   lastMinuteRemainingNights: number;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
-  createdBy: Users;
+  createdBy: User;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
-  updatedBy: Users;
+  updatedBy: User;
 
   @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
   createdAt: Date;

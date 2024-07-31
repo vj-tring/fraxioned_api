@@ -6,7 +6,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { Users } from 'src/main/entities/users.entity';
+import { User } from 'src/main/entities/user.entity';
 
 export class CommonPropertiesResponseDto {
   @IsNotEmpty()
@@ -46,11 +46,11 @@ export class CommonPropertiesResponseDto {
 
   @IsInt()
   @Min(1)
-  createdBy: Users;
+  createdBy: User;
 
   @IsInt()
   @Min(1)
-  updatedBy: Users;
+  updatedBy: User;
 
   createdAt: Date;
 

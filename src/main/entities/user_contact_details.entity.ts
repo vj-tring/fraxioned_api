@@ -7,16 +7,16 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { Users } from './users.entity';
+import { User } from './user.entity';
 
 @Entity('fxn_user_contact_details')
 export class UserContactDetails {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: Users;
+  user: User;
 
   @Column({
     name: 'contact_type',
@@ -36,17 +36,17 @@ export class UserContactDetails {
   })
   contactValue: string;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'created_by',
   })
-  createdBy: Users;
+  createdBy: User;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'updated_by',
   })
-  updatedBy: Users;
+  updatedBy: User;
 
   @CreateDateColumn({
     name: 'created_at',

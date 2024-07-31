@@ -10,7 +10,7 @@ import {
 import { Role } from './role.entity';
 
 @Entity('fxn_users')
-export class Users {
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -83,7 +83,7 @@ export class Users {
   @Column({ type: 'varchar', length: 255, nullable: true, default: null })
   city: string;
 
-  @Column({ type: 'int', nullable: true, default: null })
+  @Column({ nullable: true, default: null })
   zipcode: string;
 
   @Column({

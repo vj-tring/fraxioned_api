@@ -1,12 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { IsInt, IsOptional } from 'class-validator';
 
 export class UserPropertyDto {
-  @ApiProperty()
+  @IsOptional()
+  @IsInt({ message: 'PropertyId must be an integer' })
   propertyID: number;
 
-  @ApiProperty()
+  @IsOptional()
   noOfShares: string;
 
-  @ApiProperty()
+  @IsOptional()
   acquisitionDate: Date;
 }

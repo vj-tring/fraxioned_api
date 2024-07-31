@@ -7,7 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Users } from './users.entity';
+import { User } from './user.entity';
 
 @Entity('fxn_roles')
 export class Role {
@@ -26,20 +26,21 @@ export class Role {
   @Column({
     name: 'description',
     type: 'varchar',
+    nullable: true,
   })
   roleDescription: string;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'created_by',
   })
-  createdBy: Users;
+  createdBy: User;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'updated_by',
   })
-  updatedBy: Users;
+  updatedBy: User;
 
   @CreateDateColumn({
     name: 'created_at',

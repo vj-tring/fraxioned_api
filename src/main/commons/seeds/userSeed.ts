@@ -1,10 +1,10 @@
 import { DataSource } from 'typeorm';
-import { Users } from 'src/main/entities/users.entity';
+import { User } from 'src/main/entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
 import * as bcrypt from 'bcrypt';
 
 export const seedUser = async (dataSource: DataSource): Promise<void> => {
-  const userRepository = dataSource.getRepository(Users);
+  const userRepository = dataSource.getRepository(User);
   const roleRepository = dataSource.getRepository(Role);
 
   const adminRole = await roleRepository.findOne({ where: { id: 1 } });

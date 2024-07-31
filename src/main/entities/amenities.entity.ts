@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Users } from './users.entity';
+import { User } from './user.entity';
 
 @Entity('fxn_amenities')
 export class Amenities {
@@ -35,17 +35,17 @@ export class Amenities {
   })
   amenityType: string;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'created_by',
   })
-  createdBy: Users;
+  createdBy: User;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'updated_by',
   })
-  updatedBy: Users;
+  updatedBy: User;
 
   @CreateDateColumn({
     name: 'created_at',

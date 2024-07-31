@@ -7,7 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Users } from './users.entity';
+import { User } from './user.entity';
 
 @Entity('fxn_properties')
 export class Properties {
@@ -78,17 +78,17 @@ export class Properties {
   })
   mapCoordinates: string;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'created_by',
   })
-  createdBy: Users;
+  createdBy: User;
 
-  @ManyToOne(() => Users, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'updated_by',
   })
-  updatedBy: Users;
+  updatedBy: User;
 
   @CreateDateColumn({
     name: 'created_at',

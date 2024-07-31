@@ -88,15 +88,15 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/$1",
-      "^services/(.*)$": "<rootDir>/service/$1",
-      "^entities/(.*)$": "<rootDir>/entities/$1",
-      "^config/(.*)$": "<rootDir>/config/$1",
-      "^controllers/(.*)$": "<rootDir>/controller/$1",
-      "^dto/(.*)$": "<rootDir>/dto/$1",
-      "^modules/(.*)$": "<rootDir>/modules/$1",
-      "^database/(.*)$": "<rootDir>/database/$1",
-      "^commons/(.*)$": "<rootDir>/commons/$1",
-      "^swagger/(.*)$": "<rootDir>/swagger/$1",
+      "^services/(.*)$": "<rootDir>/main/service/$1",
+      "^entities/(.*)$": "<rootDir>/main/entities/$1",
+      "^config/(.*)$": "<rootDir>/main/config/$1",
+      "^controllers/(.*)$": "<rootDir>/main/controller/$1",
+      "^dto/(.*)$": "<rootDir>/main/dto/$1",
+      "^modules/(.*)$": "<rootDir>/main/modules/$1",
+      "^database/(.*)$": "<rootDir>/main/database/$1",
+      "^commons/(.*)$": "<rootDir>/main/commons/$1",
+      "^swagger/(.*)$": "<rootDir>/main/swagger/$1",
       "^tests/(.*)$": "<rootDir>/tests/$1"
     }
   }

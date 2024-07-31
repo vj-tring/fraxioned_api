@@ -7,7 +7,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { Users } from 'src/main/entities/users.entity';
+import { User } from 'src/main/entities/user.entity';
 
 export class CreatePropertiesResponseDto {
   @IsNotEmpty()
@@ -52,5 +52,5 @@ export class CreatePropertiesResponseDto {
 
   @IsInt()
   @Min(1)
-  createdBy: Users;
+  createdBy: User;
 }
