@@ -6,8 +6,6 @@ import {
   Param,
   Patch,
   Delete,
-  UsePipes,
-  ValidationPipe,
   Query,
   HttpStatus,
   HttpException,
@@ -19,7 +17,7 @@ import { CreateHolidayDto } from '../dto/create-holiday.dto';
 import { UpdateHolidayDto } from '../dto/update-holiday.dto';
 import { Holidays } from '../entities/holidays.entity';
 
-@Controller('v1/holidays')
+@Controller('v1/holidays/holiday')
 @ApiTags('Holidays')
 export class HolidaysController {
   constructor(
@@ -28,7 +26,6 @@ export class HolidaysController {
   ) {}
 
   @Post()
-  @UsePipes(ValidationPipe)
   async createHoliday(@Body() createHolidayDto: CreateHolidayDto): Promise<{
     success: boolean;
     message: string;
@@ -47,7 +44,6 @@ export class HolidaysController {
   }
 
   @Get('all')
-  @UsePipes(ValidationPipe)
   async getAllHolidays(): Promise<{
     success: boolean;
     message: string;
@@ -66,7 +62,6 @@ export class HolidaysController {
   }
 
   @Get()
-  @UsePipes(ValidationPipe)
   async getHolidayByDate(
     @Query('startDate') startDate: Date,
     @Query('endDate') endDate: Date,
@@ -91,7 +86,6 @@ export class HolidaysController {
   }
 
   @Patch(':id')
-  @UsePipes(ValidationPipe)
   async updateHolidayDetail(
     @Param('id') id: string,
     @Body() updateHolidayDto: UpdateHolidayDto,
@@ -116,7 +110,6 @@ export class HolidaysController {
   }
 
   @Delete()
-  @UsePipes(ValidationPipe)
   async deleteAllHolidays(): Promise<{
     success: boolean;
     message: string;
@@ -134,7 +127,6 @@ export class HolidaysController {
   }
 
   @Delete(':id')
-  @UsePipes(ValidationPipe)
   async deleteHoliday(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
