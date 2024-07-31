@@ -30,8 +30,11 @@ async function bootstrap(): Promise<void> {
   // Swagger configuration
   setupSwagger(app);
 
-  // Enabled the CORS
+  // Enable CORS
   app.enableCors();
+
+  // Set global prefix for API endpoints
+  app.setGlobalPrefix('api');
 
   await app.listen(3008);
   console.log(

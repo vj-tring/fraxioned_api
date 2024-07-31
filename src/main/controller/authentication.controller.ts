@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   UnprocessableEntityException,
   InternalServerErrorException,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
@@ -18,14 +19,20 @@ import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
 import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../commons/gaurds/auth.gaurd';
+import { UserAuth } from '../commons/gaurds/user-auth.decorator';
 
 @ApiTags('Authentication')
-@Controller('api/authentication')
+@Controller('v1/authentication')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Post('invite')
-  inviteUser(@Body() inviteUserDto: InviteUserDto): Promise<object> {
+  @UseGuards(AuthGuard)
+  inviteUser(
+    @UserAuth() userAuth: { userId: number; accessToken: string },
+    @Body() inviteUserDto: InviteUserDto,
+  ): Promise<object> {
     return this.authenticationService.inviteUser(inviteUserDto);
   }
 
