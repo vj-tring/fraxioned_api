@@ -26,6 +26,7 @@ export class Role {
   @Column({
     name: 'description',
     type: 'varchar',
+    nullable: true,
   })
   roleDescription: string;
 

@@ -84,6 +84,7 @@ export class AuthenticationService {
       updatedBy: updated_by,
       role: { id: roleId },
     });
+    await this.userRepository.save(user);
 
     const userContacts = [
       {
@@ -109,7 +110,6 @@ export class AuthenticationService {
     });
 
     await this.userPropertyRepository.save(userProperty);
-    await this.userRepository.save(user);
 
     const loginLink = `http://localhost:3000/login`;
 
@@ -132,7 +132,7 @@ export class AuthenticationService {
       relations: ['user'],
     });
 
-    if (!userEmail) {
+    if (!userEmail || !userEmail.user) {
       this.logger.error(`User not found with email: ${email}`);
       return LOGIN_RESPONSES.USER_NOT_FOUND;
     }
@@ -205,8 +205,7 @@ export class AuthenticationService {
 
     await this.userRepository.save(user);
 
-    const link = `http://fraxioned.com/reset-password?resetToken=${user.resetToken}`;
-
+    const link = `http://localhost:3000/recover?resetToken=${user.resetToken}`;
     const subject = 'Password Reset Request';
     const text = `To reset your password, please click the following link: ${link}`;
 
