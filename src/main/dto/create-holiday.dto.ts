@@ -7,7 +7,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { User } from 'entities/user.entity';
+import { User } from '../entities/user.entity';
 
 export class CreateHolidayDto {
   @ApiProperty()

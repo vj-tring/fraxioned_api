@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from 'entities/user.entity';
+import { User } from './user.entity';
 
 @Entity('fxn_holidays')
 export class Holidays {

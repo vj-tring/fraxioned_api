@@ -12,14 +12,14 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
-import { HolidaysService } from 'services/holidays.service';
-import { LoggerService } from 'services/logger.service';
-import { CreateHolidayDto } from 'dto/create-holiday.dto';
-import { UpdateHolidayDto } from 'dto/update-holiday.dto';
-import { Holidays } from 'entities/holidays.entity';
 import { ApiTags } from '@nestjs/swagger';
+import { HolidaysService } from '../service/holidays.service';
+import { LoggerService } from '../service/logger.service';
+import { CreateHolidayDto } from '../dto/create-holiday.dto';
+import { UpdateHolidayDto } from '../dto/update-holiday.dto';
+import { Holidays } from '../entities/holidays.entity';
 
-@Controller('holidays')
+@Controller('v1/holidays')
 @ApiTags('Holidays')
 export class HolidaysController {
   constructor(
@@ -37,15 +37,8 @@ export class HolidaysController {
   }> {
     try {
       const result = await this.holidaysService.create(createHolidayDto);
-
-      if (!result.success) {
-        this.logger.error(`Error creating holiday: ${result.message}`);
-      }
       return result;
     } catch (error) {
-      this.logger.error(
-        `Error creating holiday: ${error.message} - ${error.stack}`,
-      );
       throw new HttpException(
         'An error occurred while creating the holiday',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -63,16 +56,8 @@ export class HolidaysController {
   }> {
     try {
       const result = await this.holidaysService.getAllHolidayRecords();
-
-      if (!result.success) {
-        this.logger.error(result.message);
-      }
-
       return result;
     } catch (error) {
-      this.logger.error(
-        `Error retrieving all holidays: ${error.message} - ${error.stack}`,
-      );
       throw new HttpException(
         'An error occurred while retrieving all holidays',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -96,16 +81,8 @@ export class HolidaysController {
         startDate,
         endDate,
       );
-
-      if (!result.success) {
-        this.logger.error(result.message);
-      }
-
       return result;
     } catch (error) {
-      this.logger.error(
-        `Error retrieving holiday: ${error.message} - ${error.stack}`,
-      );
       throw new HttpException(
         'An error occurred while retrieving the holiday',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -129,16 +106,8 @@ export class HolidaysController {
         +id,
         updateHolidayDto,
       );
-
-      if (!result.success) {
-        this.logger.error(result.message);
-      }
-
       return result;
     } catch (error) {
-      this.logger.error(
-        `Error updating holiday: ${error.message} - ${error.stack}`,
-      );
       throw new HttpException(
         'An error occurred while updating the holiday',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -155,15 +124,8 @@ export class HolidaysController {
   }> {
     try {
       const result = await this.holidaysService.deleteAllHolidays();
-
-      if (!result.success) {
-        this.logger.error(result.message);
-      }
       return result;
     } catch (error) {
-      this.logger.error(
-        `Error deleting all holidays: ${error.message} - ${error.stack}`,
-      );
       throw new HttpException(
         'An error occurred while deleting all holidays',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -178,16 +140,8 @@ export class HolidaysController {
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
     try {
       const result = await this.holidaysService.deleteHolidayById(id);
-
-      if (!result.success) {
-        this.logger.error(result.message);
-      }
-
       return result;
     } catch (error) {
-      this.logger.error(
-        `Error deleting holiday: ${error.message} - ${error.stack}`,
-      );
       throw new HttpException(
         'An error occurred while deleting the holiday',
         HttpStatus.INTERNAL_SERVER_ERROR,

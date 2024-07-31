@@ -8,7 +8,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { User } from 'entities/user.entity';
+import { User } from '../entities/user.entity';
 
 export class UpdateHolidayDto {
   @ApiProperty()
