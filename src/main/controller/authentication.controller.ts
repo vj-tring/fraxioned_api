@@ -27,13 +27,11 @@ export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Post('invite')
-  @UsePipes(ValidationPipe)
   inviteUser(@Body() inviteUserDto: InviteUserDto): Promise<object> {
     return this.authenticationService.inviteUser(inviteUserDto);
   }
 
   @Post('login')
-  @UsePipes(ValidationPipe)
   async login(@Body() loginDto: LoginDto): Promise<object> {
     const result = await this.authenticationService.login(loginDto);
     return result;
@@ -41,7 +39,6 @@ export class AuthenticationController {
 
   @Post('forgotPassword')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(ValidationPipe)
   async forgotPassword(
     @Body() forgotPasswordDto: ForgotPasswordDto,
   ): Promise<object> {
@@ -62,7 +59,6 @@ export class AuthenticationController {
 
   @Post('recoverPassword')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(ValidationPipe)
   async recoverPassword(
     @Headers('resetToken') resetToken: string,
     @Body() changePasswordDto: ChangePasswordDto,
@@ -86,7 +82,6 @@ export class AuthenticationController {
 
   @Post('resetPassword')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(ValidationPipe)
   async resetPassword(
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<object> {

@@ -205,8 +205,7 @@ export class AuthenticationService {
 
     await this.userRepository.save(user);
 
-    const link = `http://localhost:3002/reset-password?resetToken=${user.resetToken}`;
-
+    const link = `http://localhost:3000/recover?resetToken=${user.resetToken}`;
     const subject = 'Password Reset Request';
     const text = `To reset your password, please click the following link: ${link}`;
 

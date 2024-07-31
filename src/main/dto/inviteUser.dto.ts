@@ -1,53 +1,48 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserPropertyDto } from './userProperty.dto';
 
 export class InviteUserDto {
-  @ApiProperty()
   @IsNotEmpty({ message: 'email is required' })
   email: string;
 
-  @ApiProperty()
+  @IsNotEmpty({ message: 'firstName is required' })
   firstName: string;
 
-  @ApiProperty()
+  @IsNotEmpty({ message: 'firstName is required' })
   lastName: string;
 
-  @ApiProperty()
+  @IsNotEmpty({ message: 'addressLine1 is required' })
   addressLine1: string;
-
-  @ApiProperty()
+  
+  @IsOptional()
   addressLine2: string;
 
-  @ApiProperty()
+  @IsNotEmpty({ message: 'state is required' })
   state: string;
 
-  @ApiProperty()
+  @IsNotEmpty({ message: 'country is required' })
   country: string;
 
-  @ApiProperty()
+  @IsNotEmpty({ message: 'city is required' })
   city: string;
 
-  @ApiProperty()
+  @IsNotEmpty({ message: 'zipcode is required' })
   zipcode: string;
 
-  @ApiProperty()
+  @IsNotEmpty({ message: 'phoneNumber is required' })
   phoneNumber: string;
 
-  @ApiProperty()
   @IsNotEmpty({ message: 'roleID is required' })
   roleId: number;
 
-  @ApiProperty()
   @IsNotEmpty({ message: 'updated_by is required' })
   updated_by: number;
 
-  @ApiProperty()
   @IsNotEmpty({ message: 'created_by is required' })
   created_by: number;
 
-  @ApiProperty({ type: UserPropertyDto })
+  @IsOptional()
   @ValidateNested()
   @Type(() => UserPropertyDto)
   userPropertyDetails: UserPropertyDto;

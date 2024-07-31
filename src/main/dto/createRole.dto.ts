@@ -1,18 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsInt } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsOptional } from 'class-validator';
 
 export class CreateRoleDTO {
   @IsString()
   @IsNotEmpty({ message: 'role_name is required' })
-  @ApiProperty()
   roleName: string;
 
   @IsString()
-  @ApiProperty()
+  @IsOptional()
   roleDescription?: string;
 
   @IsInt()
   @IsNotEmpty({ message: 'created_by is required' })
-  @ApiProperty()
   createdBy: number;
 }
