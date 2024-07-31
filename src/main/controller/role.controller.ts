@@ -6,12 +6,10 @@ import {
   Body,
   Put,
   Delete,
-  NotFoundException,
 } from '@nestjs/common';
 import { RoleService } from 'services/role.service';
 import { CreateRoleDTO } from 'dto/createRole.dto';
 import { UpdateRoleDTO } from 'dto/updateRole.dto';
-import { Role } from 'entities/role.entity';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Role')
@@ -25,12 +23,12 @@ export class RoleController {
   }
 
   @Get()
-  async getRoles(): Promise<Role[] | NotFoundException> {
+  async getRoles(): Promise<object> {
     return this.roleService.getRoles();
   }
 
   @Get('role/:id')
-  async getRoleById(@Param('id') id: number): Promise<Role> {
+  async getRoleById(@Param('id') id: number): Promise<object> {
     return this.roleService.getRoleById(id);
   }
 
@@ -38,12 +36,12 @@ export class RoleController {
   async updateRole(
     @Param('id') id: number,
     @Body() updateRoleDto: UpdateRoleDTO,
-  ): Promise<Role> {
+  ): Promise<object> {
     return this.roleService.updateRole(id, updateRoleDto);
   }
 
   @Delete('role/:id')
-  async deleteRole(@Param('id') id: number): Promise<void> {
+  async deleteRole(@Param('id') id: number): Promise<object> {
     return this.roleService.deleteRole(id);
   }
 }

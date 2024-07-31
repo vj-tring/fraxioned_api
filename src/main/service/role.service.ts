@@ -5,8 +5,8 @@ import { Role } from 'entities/role.entity';
 import { CreateRoleDTO } from 'dto/createRole.dto';
 import { UpdateRoleDTO } from 'dto/updateRole.dto';
 import { LoggerService } from 'services/logger.service';
-import { RoleAlreadyExistsException } from 'src/main/exception/roleName_exists';
 import { User } from '../entities/user.entity';
+import { ROLE_RESPONSES } from 'src/main/commons/constants/roleResponse.constants';
 
 @Injectable()
 export class RoleService {
@@ -16,7 +16,7 @@ export class RoleService {
     private readonly logger: LoggerService,
   ) {}
 
-  async createRole(createRoleDto: CreateRoleDTO): Promise<Role | object> {
+  async createRole(createRoleDto: CreateRoleDTO): Promise<object> {
     const existingRole = await this.roleRepository.findOne({
       where: { roleName: createRoleDto.roleName },
     });
@@ -24,31 +24,28 @@ export class RoleService {
       this.logger.warn(
         `Role with name ${createRoleDto.roleName} already exists`,
       );
-      return new RoleAlreadyExistsException(createRoleDto.roleName);
+      return ROLE_RESPONSES.ROLE_ALREADY_EXISTS(createRoleDto.roleName);
     }
 
     const role = new Role();
     role.roleName = createRoleDto.roleName;
-    role.roleDescription = createRoleDto.description;
+    role.roleDescription = createRoleDto.roleDescription;
     role.createdBy = { id: createRoleDto.createdBy } as User;
 
-    this.logger.log(`Role created with ID ${role.id}`);
-    return await this.roleRepository.save(role);
+    const savedRole = await this.roleRepository.save(role);
+    this.logger.log(`Role created with ID ${savedRole.id}`);
+    return ROLE_RESPONSES.ROLE_CREATED(savedRole);
   }
 
-  async getRoles(): Promise<Role[] | NotFoundException> {
-    try {
-      this.logger.log('Fetching all roles');
-      const roles = await this.roleRepository.find();
-      if (roles.length === 0) {
-        return new NotFoundException();
-      }
-      return roles;
-    } catch (error) {
-      throw error;
+  async getRoles(): Promise<object> {
+    this.logger.log('Fetching all roles');
+    const roles = await this.roleRepository.find();
+    if (roles.length === 0) {
+      this.logger.warn('No roles found');
+      return ROLE_RESPONSES.ROLES_NOT_FOUND;
     }
+    return ROLE_RESPONSES.ROLES_FETCHED(roles);
   }
-
   async getRoleById(id: number): Promise<Role> {
     this.logger.log(`Fetching role with ID ${id}`);
     const role = await this.roleRepository.findOne({ where: { id } });
@@ -59,28 +56,25 @@ export class RoleService {
     return role;
   }
 
-  async updateRole(id: number, updateRoleDto: UpdateRoleDTO): Promise<Role> {
-    const existingRole = await this.roleRepository.findOne({
-      where: { roleName: updateRoleDto.roleName },
-    });
-    if (existingRole && existingRole.id !== id) {
-      this.logger.warn(
-        `Role with name ${updateRoleDto.roleName} already exists`,
-      );
-      throw new RoleAlreadyExistsException(updateRoleDto.roleName);
+  async updateRole(id: number, updateRoleDto: UpdateRoleDTO): Promise<object> {
+    const role = await this.roleRepository.findOne({ where: { id } });
+    if (!role) {
+      this.logger.warn(`Role with ID ${id} not found`);
+      throw new NotFoundException(`Role with ID ${id} not found`);
     }
-    const role = await this.getRoleById(id);
     Object.assign(role, updateRoleDto);
+    const updatedRole = await this.roleRepository.save(role);
     this.logger.log(`Role with ID ${id} updated`);
-    return await this.roleRepository.save(role);
+    return ROLE_RESPONSES.ROLE_UPDATED(updatedRole);
   }
 
-  async deleteRole(id: number): Promise<void> {
+  async deleteRole(id: number): Promise<object> {
     const result = await this.roleRepository.delete(id);
     if (result.affected === 0) {
       this.logger.warn(`Role with ID ${id} not found`);
       throw new NotFoundException(`Role with ID ${id} not found`);
     }
     this.logger.log(`Role with ID ${id} deleted`);
+    return ROLE_RESPONSES.ROLE_DELETED;
   }
 }

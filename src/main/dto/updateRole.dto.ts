@@ -10,7 +10,7 @@ export class UpdateRoleDTO {
   @IsString()
   @IsOptional()
   @ApiProperty()
-  description?: string;
+  roleDescription?: string;
 
   @IsInt()
   @IsNotEmpty({ message: 'updatedBy is required' })

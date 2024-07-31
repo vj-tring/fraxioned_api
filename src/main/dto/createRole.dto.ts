@@ -9,7 +9,7 @@ export class CreateRoleDTO {
 
   @IsString()
   @ApiProperty()
-  description?: string;
+  roleDescription?: string;
 
   @IsInt()
   @IsNotEmpty({ message: 'created_by is required' })
