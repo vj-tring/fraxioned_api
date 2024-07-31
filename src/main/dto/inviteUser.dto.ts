@@ -14,7 +14,7 @@ export class InviteUserDto {
 
   @IsNotEmpty({ message: 'addressLine1 is required' })
   addressLine1: string;
-  
+
   @IsOptional()
   addressLine2: string;
 
