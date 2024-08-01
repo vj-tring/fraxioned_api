@@ -31,9 +31,9 @@ export class AuthenticationController {
   @UseGuards(AuthGuard)
   @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
   @ApiHeader({
-   name: 'access-token',
-   required: true,
-   description: 'Access Token',
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
   })
   inviteUser(
     @UserAuth() userAuth: { userId: number; accessToken: string },
@@ -95,9 +95,9 @@ export class AuthenticationController {
   @UseGuards(AuthGuard)
   @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
   @ApiHeader({
-   name: 'access-token',
-   required: true,
-   description: 'Access Token',
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
   })
   @HttpCode(HttpStatus.OK)
   async resetPassword(

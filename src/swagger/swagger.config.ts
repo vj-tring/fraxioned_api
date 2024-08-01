@@ -6,7 +6,10 @@ import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 const fs = require('fs');
 
-export const setupSwagger = (app: INestApplication, globalPrefix: string): void => {
+export const setupSwagger = (
+  app: INestApplication,
+  globalPrefix: string,
+): void => {
   const options = new DocumentBuilder()
     .setTitle('Fraxioned API')
     .setDescription('Welcome to Fraxioned')
