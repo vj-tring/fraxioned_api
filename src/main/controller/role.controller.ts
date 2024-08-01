@@ -13,7 +13,7 @@ import { UpdateRoleDTO } from 'dto/updateRole.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Role')
-@Controller('roles')
+@Controller('api/roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
@@ -27,7 +27,7 @@ export class RoleController {
     return this.roleService.getRoles();
   }
 
-  @Get('api/role/:id')
+  @Get('role/:id')
   async getRoleById(@Param('id') id: number): Promise<object> {
     return this.roleService.getRoleById(id);
   }
