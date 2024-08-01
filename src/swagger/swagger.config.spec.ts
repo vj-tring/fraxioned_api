@@ -28,8 +28,7 @@ describe('Swagger', () => {
         .build();
 
       const setupSpy = jest.spyOn(SwaggerModule, 'setup');
-      const globalPrefix = 'api';
-      setupSwagger(app, globalPrefix);
+      setupSwagger(app);
 
       expect(setupSpy).toHaveBeenCalledWith(
         'api',

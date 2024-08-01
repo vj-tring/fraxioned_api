@@ -20,7 +20,7 @@ import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Authentication')
-@Controller('authentication')
+@Controller('api/authentication')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 

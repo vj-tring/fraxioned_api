@@ -4,12 +4,9 @@
 
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import fs from 'fs';
+const fs = require('fs');
 
-export const setupSwagger = (
-  app: INestApplication,
-  globalPrefix: string,
-): void => {
+export const setupSwagger = (app: INestApplication): void => {
   const options = new DocumentBuilder()
     .setTitle('Fraxioned API')
     .setDescription('Welcome to Fraxioned')
@@ -19,5 +16,5 @@ export const setupSwagger = (
     .build();
   const document = SwaggerModule.createDocument(app, options);
   fs.writeFileSync('./swagger-spec.json', JSON.stringify(document));
-  SwaggerModule.setup(`${globalPrefix}`, app, document);
+  SwaggerModule.setup('api', app, document);
 };
