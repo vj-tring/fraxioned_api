@@ -10,7 +10,6 @@ import {
   UnauthorizedException,
   UnprocessableEntityException,
   InternalServerErrorException,
-  UseGuards,
 } from '@nestjs/common';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
@@ -18,9 +17,7 @@ import { LoginDto } from 'src/main/dto/login.dto';
 import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
 import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '../commons/gaurds/auth.gaurd';
-import { UserAuth } from '../commons/gaurds/user-auth.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Authentication')
 @Controller('authentication')
