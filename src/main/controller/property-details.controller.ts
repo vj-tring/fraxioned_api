@@ -9,23 +9,21 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  //   UseGuards,
 } from '@nestjs/common';
+import { PropertyDetailsService } from '../service/property-details.service';
+import { CreatePropertyDetailsDto } from '../dto/requests/create-property-details.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { CreatePropertiesDto } from 'src/main/dto/requests/create-properties.dto';
-import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
-import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
-import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
-import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
-// import { ApiHeader } from '@nestjs/swagger';
-import { PropertiesService } from 'src/main/service/properties.service';
+import { UpdatePropertyDetailsDto } from '../dto/requests/update-property-details.dto';
+import { CreatePropertyDetailsResponseDto } from '../dto/responses/create-property-details.dto';
+import { UpdatePropertyDetailsResponseDto } from '../dto/responses/update-property-details.dto';
 
-@ApiTags('Properties')
-@Controller('api/v1/properties')
-export class PropertiesController {
-  constructor(private readonly propertiesService: PropertiesService) {}
-
-  @Post('property')
+@ApiTags('Property Details')
+@Controller('api/v1/property-details')
+export class PropertyDetailsController {
+  constructor(
+    private readonly propertyDetailsService: PropertyDetailsService,
+  ) {}
+  @Post('property-detail')
   @HttpCode(HttpStatus.CREATED)
   // @UseGuards(AuthGuard)
   // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
@@ -34,12 +32,14 @@ export class PropertiesController {
   //  required: true,
   //  description: 'Access Token',
   //})
-  async createProperties(
-    @Body() createPropertiesDto: CreatePropertiesDto,
+  async createPropertyDetails(
+    @Body() createPropertyDetailsDto: CreatePropertyDetailsDto,
     // @UserAuth() userAuth: { userId: number; accessToken: string },
-  ): Promise<CreatePropertiesResponseDto> {
+  ): Promise<CreatePropertyDetailsResponseDto> {
     try {
-      return await this.propertiesService.createProperties(createPropertiesDto);
+      return await this.propertyDetailsService.createPropertyDetails(
+        createPropertyDetailsDto,
+      );
     } catch (error) {
       throw error;
     }
@@ -54,16 +54,16 @@ export class PropertiesController {
   //  required: true,
   //  description: 'Access Token',
   //})
-  async getAllProperties(): Promise<CommonPropertiesResponseDto[]> {
+  async getAllPropertyDetails(): Promise<object[]> {
     // @UserAuth() userAuth: { userId: number; accessToken: string },
     try {
-      return await this.propertiesService.getAllProperties();
+      return await this.propertyDetailsService.getAllPropertyDetails();
     } catch (error) {
       throw error;
     }
   }
 
-  @Get('property/:id')
+  @Get('property-detail/:id')
   @HttpCode(HttpStatus.OK)
   // @UseGuards(AuthGuard)
   // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
@@ -72,18 +72,18 @@ export class PropertiesController {
   //  required: true,
   //  description: 'Access Token',
   //})
-  async getPropertiesById(
+  async getPropertyDetailsById(
     // @UserAuth() userAuth: { userId: number; accessToken: string },
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<CommonPropertiesResponseDto> {
+  ): Promise<object> {
     try {
-      return await this.propertiesService.getPropertiesById(id);
+      return await this.propertyDetailsService.getPropertyDetailsById(id);
     } catch (error) {
       throw error;
     }
   }
 
-  @Put('property/:id')
+  @Put('property-detail/:id')
   @HttpCode(HttpStatus.OK)
   // @UseGuards(AuthGuard)
   // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
@@ -92,22 +92,22 @@ export class PropertiesController {
   //  required: true,
   //  description: 'Access Token',
   //})
-  async updatePropertiesById(
+  async updatePropertyDetailsById(
     // @UserAuth() userAuth: { userId: number; accessToken: string },
     @Param('id', ParseIntPipe) id: number,
-    @Body() updatePropertiesDto: UpdatePropertiesDto,
-  ): Promise<UpdatePropertiesResponseDto> {
+    @Body() updatePropertyDetailsDto: UpdatePropertyDetailsDto,
+  ): Promise<UpdatePropertyDetailsResponseDto> {
     try {
-      return await this.propertiesService.updatePropertiesById(
+      return await this.propertyDetailsService.updatePropertyDetailsById(
         id,
-        updatePropertiesDto,
+        updatePropertyDetailsDto,
       );
     } catch (error) {
       throw error;
     }
   }
 
-  @Delete('property/:id')
+  @Delete('property-detail/:id')
   @HttpCode(HttpStatus.OK)
   // @UseGuards(AuthGuard)
   // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
@@ -116,12 +116,12 @@ export class PropertiesController {
   //  required: true,
   //  description: 'Access Token',
   //})
-  async deletePropertiesById(
+  async deletePropertyDetailsById(
     // @UserAuth() userAuth: { userId: number; accessToken: string },
     @Param('id', ParseIntPipe) id: number,
   ): Promise<unknown> {
     try {
-      return await this.propertiesService.deletePropertiesById(id);
+      return await this.propertyDetailsService.deletePropertyDetailsById(id);
     } catch (error) {
       throw error;
     }
