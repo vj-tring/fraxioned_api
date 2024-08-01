@@ -26,15 +26,14 @@ async function bootstrap(): Promise<void> {
 
   // Global Exception Filters
   app.useGlobalFilters(new GlobalExceptionFilter());
-
+  // Set global prefix for API endpoints
+  const globalPrefix = 'api';
+  app.setGlobalPrefix(globalPrefix);
   // Swagger configuration
-  setupSwagger(app);
+  setupSwagger(app, globalPrefix);
 
   // Enable CORS
   app.enableCors();
-
-  // Set global prefix for API endpoints
-  app.setGlobalPrefix('api');
 
   await app.listen(3008);
   console.log(

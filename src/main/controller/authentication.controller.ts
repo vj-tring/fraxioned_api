@@ -18,7 +18,7 @@ import { LoginDto } from 'src/main/dto/login.dto';
 import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
 import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/gaurds/auth.gaurd';
 import { UserAuth } from '../commons/gaurds/user-auth.decorator';
 
@@ -29,6 +29,12 @@ export class AuthenticationController {
 
   @Post('invite')
   @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+   name: 'access-token',
+   required: true,
+   description: 'Access Token',
+  })
   inviteUser(
     @UserAuth() userAuth: { userId: number; accessToken: string },
     @Body() inviteUserDto: InviteUserDto,
@@ -86,8 +92,16 @@ export class AuthenticationController {
   }
 
   @Post('resetPassword')
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+   name: 'access-token',
+   required: true,
+   description: 'Access Token',
+  })
   @HttpCode(HttpStatus.OK)
   async resetPassword(
+    @UserAuth() userAuth: { userId: number; accessToken: string },
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<object> {
     try {
