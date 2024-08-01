@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Delete,
-  Query,
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
@@ -61,21 +60,15 @@ export class HolidaysController {
     }
   }
 
-  @Get()
-  async getHolidayByDate(
-    @Query('startDate') startDate: Date,
-    @Query('endDate') endDate: Date,
-  ): Promise<{
+  @Get(':id')
+  async getHolidayById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
     data?: Holidays;
     statusCode: HttpStatus;
   }> {
     try {
-      const result = await this.holidaysService.findHolidayByDateRange(
-        startDate,
-        endDate,
-      );
+      const result = await this.holidaysService.findHolidayById(id);
       return result;
     } catch (error) {
       throw new HttpException(
@@ -104,23 +97,6 @@ export class HolidaysController {
     } catch (error) {
       throw new HttpException(
         'An error occurred while updating the holiday',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Delete()
-  async deleteAllHolidays(): Promise<{
-    success: boolean;
-    message: string;
-    statusCode: HttpStatus;
-  }> {
-    try {
-      const result = await this.holidaysService.deleteAllHolidays();
-      return result;
-    } catch (error) {
-      throw new HttpException(
-        'An error occurred while deleting all holidays',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

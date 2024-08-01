@@ -229,8 +229,8 @@ describe('HolidaysService', () => {
     });
   });
 
-  describe('findHolidayByDateRange', () => {
-    it('should find holiday by date range', async () => {
+  describe('findHolidayById', () => {
+    it('should find holiday by Id', async () => {
       const holiday = { id: 1 } as Holidays;
       const expectedResult = {
         success: true,
@@ -240,26 +240,22 @@ describe('HolidaysService', () => {
       };
 
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValue(holiday);
-
-      expect(
-        await service.findHolidayByDateRange(new Date(), new Date()),
-      ).toEqual(expectedResult);
+      const id = 1;
+      expect(await service.findHolidayById(id)).toEqual(expectedResult);
     });
 
-    it('should return no holiday exists for the given date range', async () => {
+    it('should return no holiday exists for the given id', async () => {
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
-
+      const id = 1;
       const expectedResult = {
         success: false,
-        message: `No holiday found with the exact start and end dates`,
+        message: `Holiday with ID ${id} not found`,
         statusCode: HttpStatus.NOT_FOUND,
       };
 
-      expect(
-        await service.findHolidayByDateRange(new Date(), new Date()),
-      ).toEqual(expectedResult);
+      expect(await service.findHolidayById(id)).toEqual(expectedResult);
       expect(logger.error).toHaveBeenCalledWith(
-        `No holiday found with the exact start and end dates`,
+        `Holiday with ID ${id} not found`,
       );
     });
 
@@ -267,10 +263,8 @@ describe('HolidaysService', () => {
       jest
         .spyOn(holidayRepository, 'findOne')
         .mockRejectedValueOnce(new Error('DB Error'));
-
-      await expect(
-        service.findHolidayByDateRange(new Date(), new Date()),
-      ).rejects.toThrow(HttpException);
+      const id = 1;
+      await expect(service.findHolidayById(id)).rejects.toThrow(HttpException);
       expect(logger.error).toHaveBeenCalled();
     });
   });
@@ -388,48 +382,6 @@ describe('HolidaysService', () => {
       await expect(
         service.updateHolidayDetail(1, updateHolidayDto),
       ).rejects.toThrow(HttpException);
-      expect(logger.error).toHaveBeenCalled();
-    });
-  });
-
-  describe('deleteAllHolidays', () => {
-    it('should delete all holidays', async () => {
-      const deleteResult = {
-        raw: {},
-        affected: 5,
-      };
-      const expectedResult = {
-        success: true,
-        message: `Deleted ${deleteResult.affected} holidays successfully`,
-        statusCode: HttpStatus.OK,
-      };
-
-      jest.spyOn(holidayRepository, 'delete').mockResolvedValue(deleteResult);
-
-      expect(await service.deleteAllHolidays()).toEqual(expectedResult);
-    });
-
-    it('should return no holidays found', async () => {
-      const deleteResult = {
-        raw: [],
-        affected: 0,
-      };
-      const expectedResult = {
-        success: true,
-        message: 'No holidays found to delete',
-        statusCode: HttpStatus.OK,
-      };
-
-      jest.spyOn(holidayRepository, 'delete').mockResolvedValue(deleteResult);
-
-      expect(await service.deleteAllHolidays()).toEqual(expectedResult);
-    });
-    it('should handle errors during deletion of all holidays', async () => {
-      jest
-        .spyOn(holidayRepository, 'delete')
-        .mockRejectedValueOnce(new Error('DB Error'));
-
-      await expect(service.deleteAllHolidays()).rejects.toThrow(HttpException);
       expect(logger.error).toHaveBeenCalled();
     });
   });

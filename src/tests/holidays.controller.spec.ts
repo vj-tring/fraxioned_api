@@ -22,9 +22,8 @@ describe('HolidaysController', () => {
           useValue: {
             create: jest.fn(),
             getAllHolidayRecords: jest.fn(),
-            findHolidayByDateRange: jest.fn(),
+            findHolidayById: jest.fn(),
             updateHolidayDetail: jest.fn(),
-            deleteAllHolidays: jest.fn(),
             deleteHolidayById: jest.fn(),
           },
         },
@@ -179,8 +178,8 @@ describe('HolidaysController', () => {
     });
   });
 
-  describe('getHolidayByDate', () => {
-    it('should get holiday by date range', async () => {
+  describe('getHolidayById', () => {
+    it('should get holiday by ID', async () => {
       const mockHoliday: Holidays = {
         id: 1,
         name: 'Test Holiday',
@@ -200,21 +199,19 @@ describe('HolidaysController', () => {
         statusCode: HttpStatus.OK,
       };
 
-      jest
-        .spyOn(service, 'findHolidayByDateRange')
-        .mockResolvedValue(expectedResult);
+      const id = 1;
+      jest.spyOn(service, 'findHolidayById').mockResolvedValue(expectedResult);
 
-      expect(await controller.getHolidayByDate(new Date(), new Date())).toEqual(
-        expectedResult,
-      );
+      expect(await controller.getHolidayById(id)).toEqual(expectedResult);
     });
 
     it('should throw an HttpException if an error occurs', async () => {
       const error = new Error('An error occurred');
-      jest.spyOn(service, 'findHolidayByDateRange').mockRejectedValue(error);
+      const id = 1;
+      jest.spyOn(service, 'findHolidayById').mockRejectedValue(error);
 
       try {
-        await controller.getHolidayByDate(new Date(), new Date());
+        await controller.getHolidayById(id);
       } catch (err) {
         expect(err).toBeInstanceOf(HttpException);
         expect(err.message).toBe(
@@ -280,37 +277,6 @@ describe('HolidaysController', () => {
         expect(err).toBeInstanceOf(HttpException);
         expect(err.message).toBe(
           'An error occurred while updating the holiday',
-        );
-        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    });
-  });
-
-  describe('deleteAllHolidays', () => {
-    it('should delete all holidays', async () => {
-      const expectedResult = {
-        success: true,
-        message: 'Deleted all holidays successfully',
-        statusCode: HttpStatus.OK,
-      };
-
-      jest
-        .spyOn(service, 'deleteAllHolidays')
-        .mockResolvedValue(expectedResult);
-
-      expect(await controller.deleteAllHolidays()).toEqual(expectedResult);
-    });
-
-    it('should throw an HttpException if an error occurs', async () => {
-      const error = new Error('An error occurred');
-      jest.spyOn(service, 'deleteAllHolidays').mockRejectedValue(error);
-
-      try {
-        await controller.deleteAllHolidays();
-      } catch (err) {
-        expect(err).toBeInstanceOf(HttpException);
-        expect(err.message).toBe(
-          'An error occurred while deleting all holidays',
         );
         expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
       }

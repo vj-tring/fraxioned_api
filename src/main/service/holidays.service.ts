@@ -127,10 +127,7 @@ export class HolidaysService {
     }
   }
 
-  async findHolidayByDateRange(
-    startDate: Date,
-    endDate: Date,
-  ): Promise<{
+  async findHolidayById(id: number): Promise<{
     success: boolean;
     message: string;
     data?: Holidays;
@@ -138,25 +135,18 @@ export class HolidaysService {
   }> {
     try {
       const holiday = await this.holidayRepository.findOne({
-        where: {
-          startDate: startDate,
-          endDate: endDate,
-        },
+        where: { id },
       });
 
       if (!holiday) {
-        this.logger.error(
-          `No holiday found with the exact start and end dates`,
-        );
-
+        this.logger.error(`Holiday with ID ${id} not found`);
         return {
           success: false,
-          message: 'No holiday found with the exact start and end dates',
+          message: `Holiday with ID ${id} not found`,
           statusCode: HttpStatus.NOT_FOUND,
         };
       }
-      this.logger.log(`Holiday retrieved successfully`);
-
+      this.logger.log(`Holiday with ID ${id} retrieved successfully`);
       return {
         success: true,
         message: 'Holiday retrieved successfully',
@@ -165,7 +155,7 @@ export class HolidaysService {
       };
     } catch (error) {
       this.logger.error(
-        `Error retrieving holiday: ${error.message} - ${error.stack}`,
+        `Error retrieving holiday with ID ${id}: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
         'An error occurred while retrieving the holiday',
@@ -231,40 +221,6 @@ export class HolidaysService {
       );
       throw new HttpException(
         'An error occurred while updating the holiday',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async deleteAllHolidays(): Promise<{
-    success: boolean;
-    message: string;
-    statusCode: number;
-  }> {
-    try {
-      const result = await this.holidayRepository.delete({});
-
-      if (result.affected === 0) {
-        this.logger.log(`No holidays found to delete`);
-        return {
-          success: true,
-          message: 'No holidays found to delete',
-          statusCode: HttpStatus.OK,
-        };
-      }
-
-      this.logger.log(`Deleted ${result.affected} holidays successfully`);
-      return {
-        success: true,
-        message: `Deleted ${result.affected} holidays successfully`,
-        statusCode: HttpStatus.OK,
-      };
-    } catch (error) {
-      this.logger.error(
-        `Error deleting holidays: ${error.message} - ${error.stack}`,
-      );
-      throw new HttpException(
-        'An error occurred while deleting the holidays',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
