@@ -7,8 +7,8 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
-  Put,
   //   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -83,7 +83,7 @@ export class PropertiesController {
     }
   }
 
-  @Put('property/:id')
+  @Patch('property/:id')
   @HttpCode(HttpStatus.OK)
   // @UseGuards(AuthGuard)
   // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })

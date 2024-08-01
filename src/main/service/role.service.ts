@@ -5,7 +5,6 @@ import { Role } from 'entities/role.entity';
 import { CreateRoleDTO } from 'dto/createRole.dto';
 import { UpdateRoleDTO } from 'dto/updateRole.dto';
 import { LoggerService } from 'services/logger.service';
-import { User } from '../entities/user.entity';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/roleResponse.constants';
 
 @Injectable()
@@ -30,7 +29,7 @@ export class RoleService {
     const role = new Role();
     role.roleName = createRoleDto.roleName;
     role.roleDescription = createRoleDto.roleDescription;
-    role.createdBy = { id: createRoleDto.createdBy } as User;
+    role.createdBy = createRoleDto.createdBy;
 
     const savedRole = await this.roleRepository.save(role);
     this.logger.log(`Role created with ID ${savedRole.id}`);

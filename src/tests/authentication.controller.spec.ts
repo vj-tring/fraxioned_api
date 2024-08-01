@@ -60,10 +60,13 @@ describe('AuthenticationController', () => {
           acquisitionDate: undefined,
         },
       };
+      const userAuth = { userId: 1, accessToken: 'someAccessToken' };
       const result = { message: 'Invite sent successfully' };
       jest.spyOn(service, 'inviteUser').mockResolvedValue(result);
 
-      expect(await controller.inviteUser(inviteUserDto)).toEqual(result);
+      expect(await controller.inviteUser(userAuth, inviteUserDto)).toEqual(
+        result,
+      );
     });
   });
 

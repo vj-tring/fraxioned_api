@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsOptional, Min } from 'class-validator';
+import { User } from '../entities/user.entity';
 
 export class CreateRoleDTO {
   @IsString()
@@ -9,7 +10,8 @@ export class CreateRoleDTO {
   @IsOptional()
   roleDescription?: string;
 
+  @IsNotEmpty({ message: 'created by is required' })
   @IsInt()
-  @IsNotEmpty({ message: 'created_by is required' })
-  createdBy: number;
+  @Min(1)
+  createdBy: User;
 }

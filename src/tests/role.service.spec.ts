@@ -48,7 +48,7 @@ describe('RoleService', () => {
       const createRoleDto: CreateRoleDTO = {
         roleName: 'Admin',
         roleDescription: 'Administrator role',
-        createdBy: 1,
+        createdBy: { id: 1 } as User,
       };
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);
@@ -73,7 +73,7 @@ describe('RoleService', () => {
       const createRoleDto: CreateRoleDTO = {
         roleName: 'Admin',
         roleDescription: 'Administrator role',
-        createdBy: 1,
+        createdBy: { id: 1 } as User,
       };
 
       jest
@@ -138,7 +138,7 @@ describe('RoleService', () => {
       const updateRoleDto: UpdateRoleDTO = {
         roleName: 'New Admin',
         roleDescription: 'Updated description',
-        updatedBy: 1,
+        updatedBy: { id: 1 } as User,
       };
       const user: User = {
         id: 1,
@@ -172,7 +172,7 @@ describe('RoleService', () => {
       const updateRoleDto: UpdateRoleDTO = {
         roleName: 'Updated Admin',
         roleDescription: 'Updated Administrator role',
-        updatedBy: 1,
+        updatedBy: { id: 1 } as User,
       };
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);

@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsInt, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, IsInt, IsNotEmpty, Min } from 'class-validator';
+import { User } from '../entities/user.entity';
 
 export class UpdateRoleDTO {
   @IsString()
@@ -9,7 +10,8 @@ export class UpdateRoleDTO {
   @IsOptional()
   roleDescription?: string;
 
-  @IsInt()
   @IsNotEmpty({ message: 'updatedBy is required' })
-  updatedBy: number;
+  @IsInt()
+  @Min(1)
+  updatedBy: User;
 }
