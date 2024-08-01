@@ -1,11 +1,14 @@
 import { DataSource } from 'typeorm';
 import { User } from 'src/main/entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
+import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
 import * as bcrypt from 'bcrypt';
 
 export const seedUser = async (dataSource: DataSource): Promise<void> => {
   const userRepository = dataSource.getRepository(User);
   const roleRepository = dataSource.getRepository(Role);
+  const userContactDetailsRepository =
+    dataSource.getRepository(UserContactDetails);
 
   const adminRole = await roleRepository.findOne({ where: { id: 1 } });
   const ownerRole = await roleRepository.findOne({ where: { id: 2 } });
@@ -41,5 +44,52 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
     });
 
     await userRepository.save([adminUser, ownerUser]);
+
+    const adminEmail = userContactDetailsRepository.create({
+      user: adminUser,
+      contactType: 'email',
+      contactValue: 'fraxionedownersportal@gmail.com',
+      createdBy: adminUser,
+      updatedBy: adminUser,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
+
+    const adminPhone = userContactDetailsRepository.create({
+      user: adminUser,
+      contactType: 'phone',
+      contactValue: '1234567890',
+      createdBy: adminUser,
+      updatedBy: adminUser,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
+
+    const ownerEmail = userContactDetailsRepository.create({
+      user: ownerUser,
+      contactType: 'email',
+      contactValue: 'owner@example.com',
+      createdBy: ownerUser,
+      updatedBy: ownerUser,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
+
+    const ownerPhone = userContactDetailsRepository.create({
+      user: ownerUser,
+      contactType: 'phone',
+      contactValue: '0987654321',
+      createdBy: ownerUser,
+      updatedBy: ownerUser,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
+
+    await userContactDetailsRepository.save([
+      adminEmail,
+      adminPhone,
+      ownerEmail,
+      ownerPhone,
+    ]);
   }
 };
