@@ -20,8 +20,8 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
   const existingUsers = await userRepository.find();
   if (existingUsers.length === 0) {
     const adminUser = userRepository.create({
-      firstName: 'Admin',
-      lastName: 'User',
+      firstName: 'Fraxioned',
+      lastName: 'Admin',
       password: await bcrypt.hash('Admin@123', 10),
       role: adminRole,
       isActive: true,
