@@ -13,7 +13,7 @@ import { UpdateRoleDTO } from 'dto/updateRole.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Role')
-@Controller('v1/roles')
+@Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 

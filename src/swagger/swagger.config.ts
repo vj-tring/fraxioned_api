@@ -4,7 +4,7 @@
 
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-const fs = require('fs');
+import fs from 'fs';
 
 export const setupSwagger = (
   app: INestApplication,

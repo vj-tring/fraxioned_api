@@ -21,7 +21,7 @@ import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-prope
 import { PropertiesService } from 'src/main/service/properties.service';
 
 @ApiTags('Properties')
-@Controller('/v1/properties')
+@Controller('/properties')
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
