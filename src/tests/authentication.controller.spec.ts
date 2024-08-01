@@ -60,13 +60,11 @@ describe('AuthenticationController', () => {
           acquisitionDate: undefined,
         },
       };
-      const userAuth = { userId: 1, accessToken: 'someAccessToken' };
+      // const userAuth = { userId: 1, accessToken: 'someAccessToken' };
       const result = { message: 'Invite sent successfully' };
       jest.spyOn(service, 'inviteUser').mockResolvedValue(result);
 
-      expect(await controller.inviteUser(userAuth, inviteUserDto)).toEqual(
-        result,
-      );
+      expect(await controller.inviteUser(inviteUserDto)).toEqual(result);
     });
   });
 
@@ -152,6 +150,7 @@ describe('AuthenticationController', () => {
       };
       const result = { message: 'Password reset successfully' };
       jest.spyOn(service, 'resetPassword').mockResolvedValue(result);
+      // const userAuth = { userId: 1, accessToken: 'someAccessToken' };
 
       expect(await controller.resetPassword(resetPasswordDto)).toEqual(result);
     });
@@ -165,6 +164,7 @@ describe('AuthenticationController', () => {
       jest
         .spyOn(service, 'resetPassword')
         .mockRejectedValue(new UnauthorizedException('Invalid reset token'));
+      // const userAuth = { userId: 1, accessToken: 'someAccessToken' };
 
       await expect(controller.resetPassword(resetPasswordDto)).resolves.toEqual(
         new UnauthorizedException('Invalid reset token'),
