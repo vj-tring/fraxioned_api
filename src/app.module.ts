@@ -10,7 +10,6 @@ import { RoleModule } from './main/modules/role.module';
 import { PropertySeasonHolidaysModule } from './main/modules/property-season-holidays.module';
 import { UserSessionModule } from './main/modules/user-session.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
