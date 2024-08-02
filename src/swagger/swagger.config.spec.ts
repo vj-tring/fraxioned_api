@@ -28,7 +28,6 @@ describe('Swagger', () => {
         .build();
 
       const setupSpy = jest.spyOn(SwaggerModule, 'setup');
-
       setupSwagger(app);
 
       expect(setupSpy).toHaveBeenCalledWith(

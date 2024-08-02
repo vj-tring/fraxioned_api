@@ -25,7 +25,17 @@ export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Post('invite')
-  inviteUser(@Body() inviteUserDto: InviteUserDto): Promise<object> {
+  // @UseGuards(AuthGuard)
+  // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  // @ApiHeader({
+  //   name: 'access-token',
+  //   required: true,
+  //   description: 'Access Token',
+  // })
+  inviteUser(
+    // @UserAuth() userAuth: { userId: number; accessToken: string },
+    @Body() inviteUserDto: InviteUserDto,
+  ): Promise<object> {
     return this.authenticationService.inviteUser(inviteUserDto);
   }
 
@@ -79,8 +89,16 @@ export class AuthenticationController {
   }
 
   @Post('resetPassword')
+  // @UseGuards(AuthGuard)
+  // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  // @ApiHeader({
+  //   name: 'access-token',
+  //   required: true,
+  //   description: 'Access Token',
+  // })
   @HttpCode(HttpStatus.OK)
   async resetPassword(
+    // @UserAuth() userAuth: { userId: number; accessToken: string },
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<object> {
     try {

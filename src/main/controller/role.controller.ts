@@ -4,8 +4,8 @@ import {
   Post,
   Param,
   Body,
-  Put,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { RoleService } from 'services/role.service';
 import { CreateRoleDTO } from 'dto/createRole.dto';
@@ -32,7 +32,7 @@ export class RoleController {
     return this.roleService.getRoleById(id);
   }
 
-  @Put('role/:id')
+  @Patch('role/:id')
   async updateRole(
     @Param('id') id: number,
     @Body() updateRoleDto: UpdateRoleDTO,
