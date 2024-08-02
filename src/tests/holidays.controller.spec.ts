@@ -2,12 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreateHolidayDto } from 'dto/create-holiday.dto';
 import { UpdateHolidayDto } from 'dto/update-holiday.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { Role } from 'src/main/entities/role.entity';
 import { Holidays } from 'src/main/entities/holidays.entity';
 import { HolidaysController } from 'src/main/controller/holidays.controller';
 import { HolidaysService } from 'src/main/service/holidays.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
+import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/holidays-response.constants';
 
 describe('HolidaysController', () => {
   let controller: HolidaysController;
@@ -52,28 +52,7 @@ describe('HolidaysController', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: {
-          id: 1,
-          role: new Role(),
-          firstName: '',
-          lastName: '',
-          password: '',
-          imageURL: '',
-          isActive: false,
-          addressLine1: '',
-          addressLine2: '',
-          state: '',
-          country: '',
-          city: '',
-          zipcode: '',
-          resetToken: '',
-          resetTokenExpires: undefined,
-          lastLoginTime: undefined,
-          createdBy: 0,
-          updatedBy: 0,
-          createdAt: undefined,
-          updatedAt: undefined,
-        },
+        createdBy: 1,
       };
 
       const expectedHoliday: Holidays = {
@@ -87,14 +66,8 @@ describe('HolidaysController', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-
-      const expectedResult = {
-        success: true,
-        message: 'Holiday created successfully',
-        data: expectedHoliday,
-        statusCode: HttpStatus.CREATED,
-      };
-
+      const expectedResult =
+        HOLIDAYS_RESPONSES.HOLIDAY_CREATED(expectedHoliday);
       jest.spyOn(service, 'create').mockResolvedValue(expectedResult);
 
       expect(await controller.createHoliday(createHolidayDto)).toEqual(
@@ -108,28 +81,7 @@ describe('HolidaysController', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: {
-          id: 1,
-          role: new Role(),
-          firstName: '',
-          lastName: '',
-          password: '',
-          imageURL: '',
-          isActive: false,
-          addressLine1: '',
-          addressLine2: '',
-          state: '',
-          country: '',
-          city: '',
-          zipcode: '',
-          resetToken: '',
-          resetTokenExpires: undefined,
-          lastLoginTime: undefined,
-          createdBy: 0,
-          updatedBy: 0,
-          createdAt: undefined,
-          updatedAt: undefined,
-        },
+        createdBy: 1,
       };
       const error = new Error('An error occurred');
       jest.spyOn(service, 'create').mockRejectedValue(error);
@@ -192,12 +144,7 @@ describe('HolidaysController', () => {
         updatedAt: new Date(),
       };
 
-      const expectedResult = {
-        success: true,
-        message: 'Holiday retrieved successfully',
-        data: mockHoliday,
-        statusCode: HttpStatus.OK,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_FETCHED(mockHoliday);
 
       const id = 1;
       jest.spyOn(service, 'findHolidayById').mockResolvedValue(expectedResult);
@@ -229,34 +176,10 @@ describe('HolidaysController', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: {
-          id: 1,
-          role: new Role(),
-          firstName: '',
-          lastName: '',
-          password: '',
-          imageURL: '',
-          isActive: false,
-          addressLine1: '',
-          addressLine2: '',
-          state: '',
-          country: '',
-          city: '',
-          zipcode: '',
-          resetToken: '',
-          resetTokenExpires: undefined,
-          lastLoginTime: undefined,
-          createdBy: 0,
-          updatedBy: 0,
-          createdAt: undefined,
-          updatedAt: undefined,
-        },
+        updatedBy: 1,
       };
-      const expectedResult = {
-        success: true,
-        message: 'Holiday updated successfully',
-        statusCode: HttpStatus.OK,
-      };
+      const holiday = { id: 1 } as Holidays;
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_UPDATED(holiday);
 
       jest
         .spyOn(service, 'updateHolidayDetail')
@@ -285,11 +208,13 @@ describe('HolidaysController', () => {
 
   describe('deleteHoliday', () => {
     it('should delete holiday by id', async () => {
-      const expectedResult = {
-        success: true,
-        message: 'Holiday deleted successfully',
-        statusCode: HttpStatus.NO_CONTENT,
+      const deleteResult = {
+        raw: {},
+        affected: 1,
       };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_DELETED(
+        deleteResult.affected,
+      );
 
       jest
         .spyOn(service, 'deleteHolidayById')

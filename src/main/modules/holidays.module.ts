@@ -6,12 +6,14 @@ import { LoggerModule } from './logger.module';
 import { UsersModule } from './users.module';
 import { Holidays } from 'entities/holidays.entity';
 import { User } from 'entities/user.entity';
+import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Holidays, User]),
+    TypeOrmModule.forFeature([Holidays, User, PropertySeasonHolidays]),
     LoggerModule,
     UsersModule,
+    PropertySeasonHolidays,
   ],
   controllers: [HolidaysController],
   providers: [HolidaysService],

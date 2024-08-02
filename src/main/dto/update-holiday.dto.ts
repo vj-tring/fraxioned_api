@@ -8,7 +8,6 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { User } from '../entities/user.entity';
 
 export class UpdateHolidayDto {
   @IsString()
@@ -32,5 +31,5 @@ export class UpdateHolidayDto {
   @IsNotEmpty({ message: 'updated by is required' })
   @IsInt()
   @Min(1)
-  updatedBy: User;
+  updatedBy: number;
 }

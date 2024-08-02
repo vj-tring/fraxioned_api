@@ -6,6 +6,8 @@ import { CreateHolidayDto } from '../dto/create-holiday.dto';
 import { UpdateHolidayDto } from '../dto/update-holiday.dto';
 import { Holidays } from '../entities/holidays.entity';
 import { User } from '../entities/user.entity';
+import { HOLIDAYS_RESPONSES } from '../commons/constants/holidays-response.constants';
+import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 
 @Injectable()
 export class HolidaysService {
@@ -14,6 +16,8 @@ export class HolidaysService {
     private readonly holidayRepository: Repository<Holidays>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(PropertySeasonHolidays)
+    private readonly propertySeasonHolidayRepository: Repository<PropertySeasonHolidays>,
     private readonly logger: LoggerService,
   ) {}
 
@@ -39,44 +43,35 @@ export class HolidaysService {
           `Error creating holiday: Holiday ${createHolidayDto.name} for the year ${createHolidayDto.year} already exists`,
         );
 
-        return {
-          success: false,
-          message: `Holiday ${createHolidayDto.name} for the year ${createHolidayDto.year} already exists`,
-          statusCode: HttpStatus.CONFLICT,
-        };
+        return HOLIDAYS_RESPONSES.HOLIDAY_ALREADY_EXISTS(
+          createHolidayDto.name,
+          createHolidayDto.year,
+        );
       }
 
       const user = await this.usersRepository.findOne({
         where: {
-          id: createHolidayDto.createdBy.id,
+          id: createHolidayDto.createdBy,
         },
       });
 
       if (!user) {
         this.logger.error(
-          `User with ID ${createHolidayDto.createdBy.id} does not exist`,
+          `User with ID ${createHolidayDto.createdBy} does not exist`,
         );
 
-        return {
-          success: false,
-          message: `User with ID ${createHolidayDto.createdBy.id} does not exist`,
-          statusCode: HttpStatus.NOT_FOUND,
-        };
+        return HOLIDAYS_RESPONSES.USER_NOT_FOUND(createHolidayDto.createdBy);
       }
 
       const holiday = this.holidayRepository.create({
         ...createHolidayDto,
+        createdBy: user,
       });
       const savedHoliday = await this.holidayRepository.save(holiday);
       this.logger.log(
         `Holiday ${createHolidayDto.name} created with ID ${savedHoliday.id}`,
       );
-      return {
-        success: true,
-        message: 'Holiday created successfully',
-        data: savedHoliday,
-        statusCode: HttpStatus.CREATED,
-      };
+      return HOLIDAYS_RESPONSES.HOLIDAY_CREATED(savedHoliday);
     } catch (error) {
       this.logger.error(
         `Error creating holiday: ${error.message} - ${error.stack}`,
@@ -100,22 +95,12 @@ export class HolidaysService {
       if (holidays.length === 0) {
         this.logger.log(`No holidays are available`);
 
-        return {
-          success: true,
-          message: 'No holidays are available',
-          data: [],
-          statusCode: HttpStatus.OK,
-        };
+        return HOLIDAYS_RESPONSES.HOLIDAYS_NOT_FOUND();
       }
 
       this.logger.log(`Retrieved ${holidays.length} holidays successfully.`);
 
-      return {
-        success: true,
-        message: 'Holidays retrieved successfully',
-        data: holidays,
-        statusCode: HttpStatus.OK,
-      };
+      return HOLIDAYS_RESPONSES.HOLIDAYS_FETCHED(holidays);
     } catch (error) {
       this.logger.error(
         `Error retrieving holidays: ${error.message} - ${error.stack}`,
@@ -140,19 +125,10 @@ export class HolidaysService {
 
       if (!holiday) {
         this.logger.error(`Holiday with ID ${id} not found`);
-        return {
-          success: false,
-          message: `Holiday with ID ${id} not found`,
-          statusCode: HttpStatus.NOT_FOUND,
-        };
+        return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
       }
       this.logger.log(`Holiday with ID ${id} retrieved successfully`);
-      return {
-        success: true,
-        message: 'Holiday retrieved successfully',
-        data: holiday,
-        statusCode: HttpStatus.OK,
-      };
+      return HOLIDAYS_RESPONSES.HOLIDAY_FETCHED(holiday);
     } catch (error) {
       this.logger.error(
         `Error retrieving holiday with ID ${id}: ${error.message} - ${error.stack}`,
@@ -180,28 +156,20 @@ export class HolidaysService {
 
       if (!holiday) {
         this.logger.error(`Holiday with ID ${id} not found`);
-        return {
-          success: false,
-          message: `Holiday with ID ${id} not found`,
-          statusCode: HttpStatus.NOT_FOUND,
-        };
+        return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
       }
 
       const user = await this.usersRepository.findOne({
         where: {
-          id: updateHolidayDto.updatedBy.id,
+          id: updateHolidayDto.updatedBy,
         },
       });
 
       if (!user) {
         this.logger.error(
-          `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
+          `User with ID ${updateHolidayDto.updatedBy} does not exist`,
         );
-        return {
-          success: false,
-          message: `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
-          statusCode: HttpStatus.NOT_FOUND,
-        };
+        return HOLIDAYS_RESPONSES.USER_NOT_FOUND(updateHolidayDto.updatedBy);
       }
 
       Object.assign(holiday, updateHolidayDto);
@@ -209,12 +177,7 @@ export class HolidaysService {
 
       this.logger.log(`Holiday with ID ${id} updated successfully`);
 
-      return {
-        success: true,
-        message: 'Holiday updated successfully',
-        data: updatedHoliday,
-        statusCode: HttpStatus.OK,
-      };
+      return HOLIDAYS_RESPONSES.HOLIDAY_UPDATED(updatedHoliday);
     } catch (error) {
       this.logger.error(
         `Error updating holiday with ID ${id}: ${error.message} - ${error.stack}`,
@@ -232,22 +195,24 @@ export class HolidaysService {
     statusCode: number;
   }> {
     try {
+      const propertySeasonHoliday =
+        await this.propertySeasonHolidayRepository.findOne({
+          where: { holiday: { id: id } },
+        });
+      if (propertySeasonHoliday) {
+        this.logger.log(
+          `Holiday ID ${id} exists and is mapped to property, hence cannot be deleted.`,
+        );
+        return HOLIDAYS_RESPONSES.HOLIDAY_FOREIGN_KEY_CONFLICT(id);
+      }
+
       const result = await this.holidayRepository.delete(id);
       this.logger.error(`Holiday with ID ${id} not found`);
       if (result.affected === 0) {
-        return {
-          success: false,
-          message: `Holiday with ID ${id} not found`,
-          statusCode: HttpStatus.NOT_FOUND,
-        };
+        return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
       }
-
       this.logger.log(`Holiday with ID ${id} deleted successfully`);
-      return {
-        success: true,
-        message: `Holiday with ID ${id} deleted successfully`,
-        statusCode: HttpStatus.NO_CONTENT,
-      };
+      return HOLIDAYS_RESPONSES.HOLIDAY_DELETED(id);
     } catch (error) {
       this.logger.error(
         `Error deleting holiday with ID ${id}: ${error.message} - ${error.stack}`,

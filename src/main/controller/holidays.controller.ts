@@ -42,7 +42,7 @@ export class HolidaysController {
     }
   }
 
-  @Get('all')
+  @Get()
   async getAllHolidays(): Promise<{
     success: boolean;
     message: string;

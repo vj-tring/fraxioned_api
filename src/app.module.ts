@@ -7,6 +7,7 @@ import { PropertiesModule } from './main/modules/properties.module';
 import { typeOrmConfigAsync } from './main/database/typeorm.config';
 import { AuthenticationModule } from './main/modules/authentication.module';
 import { RoleModule } from './main/modules/role.module';
+import { PropertySeasonHolidaysModule } from './main/modules/property-season-holidays.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RoleModule } from './main/modules/role.module';
     PropertiesModule,
     AuthenticationModule,
     RoleModule,
+    PropertySeasonHolidaysModule,
   ],
 })
 export class AppModule {}

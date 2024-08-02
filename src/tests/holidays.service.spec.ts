@@ -8,12 +8,14 @@ import { HolidaysService } from 'src/main/service/holidays.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import { Holidays } from 'src/main/entities/holidays.entity';
 import { User } from 'src/main/entities/user.entity';
-import { Role } from 'src/main/entities/role.entity';
+import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
+import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/holidays-response.constants';
 
 describe('HolidaysService', () => {
   let service: HolidaysService;
   let holidayRepository: Repository<Holidays>;
   let usersRepository: Repository<User>;
+  let propertySeasonHolidayRepository: Repository<PropertySeasonHolidays>;
   let logger: LoggerService;
 
   beforeEach(async () => {
@@ -26,6 +28,10 @@ describe('HolidaysService', () => {
         },
         {
           provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(PropertySeasonHolidays),
           useClass: Repository,
         },
         {
@@ -43,6 +49,9 @@ describe('HolidaysService', () => {
       getRepositoryToken(Holidays),
     );
     usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    propertySeasonHolidayRepository = module.get<
+      Repository<PropertySeasonHolidays>
+    >(getRepositoryToken(PropertySeasonHolidays));
     logger = module.get<LoggerService>(LoggerService);
   });
 
@@ -57,38 +66,11 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: {
-          id: 1,
-          role: new Role(),
-          firstName: '',
-          lastName: '',
-          password: '',
-          imageURL: '',
-          isActive: false,
-          addressLine1: '',
-          addressLine2: '',
-          state: '',
-          country: '',
-          city: '',
-          zipcode: '',
-          resetToken: '',
-          resetTokenExpires: undefined,
-          lastLoginTime: undefined,
-          createdBy: 0,
-          updatedBy: 0,
-          createdAt: undefined,
-          updatedAt: undefined,
-        },
+        createdBy: 1,
       };
       const user = { id: 1 } as User;
       const holiday = { id: 1 } as Holidays;
-      const expectedResult = {
-        success: true,
-        message: 'Holiday created successfully',
-        data: holiday,
-        statusCode: HttpStatus.CREATED,
-      };
-
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_CREATED(holiday);
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(user);
       jest.spyOn(holidayRepository, 'create').mockReturnValue(holiday);
@@ -103,7 +85,7 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: { id: 1 } as User,
+        createdBy: 1,
       };
       const existingHoliday = { id: 1 } as Holidays;
 
@@ -111,11 +93,10 @@ describe('HolidaysService', () => {
         .spyOn(holidayRepository, 'findOne')
         .mockResolvedValueOnce(existingHoliday);
 
-      const expectedResult = {
-        success: false,
-        message: `Holiday ${createHolidayDto.name} for the year ${createHolidayDto.year} already exists`,
-        statusCode: HttpStatus.CONFLICT,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_ALREADY_EXISTS(
+        createHolidayDto.name,
+        createHolidayDto.year,
+      );
       expect(await service.create(createHolidayDto)).toEqual(expectedResult);
       expect(logger.error).toHaveBeenCalledWith(
         `Error creating holiday: Holiday ${createHolidayDto.name} for the year ${createHolidayDto.year} already exists`,
@@ -128,20 +109,18 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: { id: 1 } as User,
+        createdBy: 1,
       };
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
 
-      const expectedResult = {
-        success: false,
-        message: `User with ID ${createHolidayDto.createdBy.id} does not exist`,
-        statusCode: HttpStatus.NOT_FOUND,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.USER_NOT_FOUND(
+        createHolidayDto.createdBy,
+      );
 
       expect(await service.create(createHolidayDto)).toEqual(expectedResult);
       expect(logger.error).toHaveBeenCalledWith(
-        `User with ID ${createHolidayDto.createdBy.id} does not exist`,
+        `User with ID ${createHolidayDto.createdBy} does not exist`,
       );
     });
 
@@ -151,7 +130,7 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: { id: 1 } as User,
+        createdBy: 1,
       };
 
       jest
@@ -191,12 +170,7 @@ describe('HolidaysService', () => {
           updatedBy: new User(),
         },
       ];
-      const expectedResult = {
-        success: true,
-        message: 'Holidays retrieved successfully',
-        data: holidays,
-        statusCode: HttpStatus.OK,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAYS_FETCHED(holidays);
 
       jest.spyOn(holidayRepository, 'find').mockResolvedValue(holidays);
 
@@ -205,12 +179,7 @@ describe('HolidaysService', () => {
 
     it('should return no holidays if no holidays found', async () => {
       const holidays: Holidays[] = [];
-      const expectedResult = {
-        success: true,
-        message: 'No holidays are available',
-        data: [],
-        statusCode: HttpStatus.OK,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAYS_NOT_FOUND();
 
       jest.spyOn(holidayRepository, 'find').mockResolvedValue(holidays);
 
@@ -232,12 +201,7 @@ describe('HolidaysService', () => {
   describe('findHolidayById', () => {
     it('should find holiday by Id', async () => {
       const holiday = { id: 1 } as Holidays;
-      const expectedResult = {
-        success: true,
-        message: 'Holiday retrieved successfully',
-        data: holiday,
-        statusCode: HttpStatus.OK,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_FETCHED(holiday);
 
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValue(holiday);
       const id = 1;
@@ -247,11 +211,7 @@ describe('HolidaysService', () => {
     it('should return no holiday exists for the given id', async () => {
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
       const id = 1;
-      const expectedResult = {
-        success: false,
-        message: `Holiday with ID ${id} not found`,
-        statusCode: HttpStatus.NOT_FOUND,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
 
       expect(await service.findHolidayById(id)).toEqual(expectedResult);
       expect(logger.error).toHaveBeenCalledWith(
@@ -276,37 +236,11 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: {
-          id: 1,
-          role: new Role(),
-          firstName: '',
-          lastName: '',
-          password: '',
-          imageURL: '',
-          isActive: false,
-          addressLine1: '',
-          addressLine2: '',
-          state: '',
-          country: '',
-          city: '',
-          zipcode: '',
-          resetToken: '',
-          resetTokenExpires: undefined,
-          lastLoginTime: undefined,
-          createdBy: 0,
-          updatedBy: 0,
-          createdAt: undefined,
-          updatedAt: undefined,
-        },
+        updatedBy: 1,
       };
       const holiday = { id: 1 } as Holidays;
       const user = { id: 1 } as User;
-      const expectedResult = {
-        success: true,
-        message: 'Holiday updated successfully',
-        data: holiday,
-        statusCode: HttpStatus.OK,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_UPDATED(holiday);
 
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(holiday);
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(user);
@@ -323,16 +257,12 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: { id: 1 } as User,
+        updatedBy: 1,
       };
-
+      const id = 1;
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
 
-      const expectedResult = {
-        success: false,
-        message: `Holiday with ID 1 not found`,
-        statusCode: HttpStatus.NOT_FOUND,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
 
       expect(await service.updateHolidayDetail(1, updateHolidayDto)).toEqual(
         expectedResult,
@@ -346,7 +276,7 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: { id: 1 } as User,
+        updatedBy: 1,
       };
 
       const holiday = { id: 1 } as Holidays;
@@ -354,17 +284,15 @@ describe('HolidaysService', () => {
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(holiday);
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
 
-      const expectedResult = {
-        success: false,
-        message: `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
-        statusCode: HttpStatus.NOT_FOUND,
-      };
+      const expectedResult = HOLIDAYS_RESPONSES.USER_NOT_FOUND(
+        updateHolidayDto.updatedBy,
+      );
 
       expect(await service.updateHolidayDetail(1, updateHolidayDto)).toEqual(
         expectedResult,
       );
       expect(logger.error).toHaveBeenCalledWith(
-        `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
+        `User with ID ${updateHolidayDto.updatedBy} does not exist`,
       );
     });
     it('should handle errors during update of a holiday', async () => {
@@ -373,7 +301,7 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: { id: 1 } as User,
+        updatedBy: 1,
       };
       jest
         .spyOn(holidayRepository, 'findOne')
@@ -387,46 +315,87 @@ describe('HolidaysService', () => {
   });
 
   describe('deleteHolidayById', () => {
-    it('should delete holiday by id', async () => {
-      const deleteResult = {
-        raw: {},
-        affected: 1,
-      };
-      const expectedResult = {
-        success: true,
-        message: `Holiday with ID ${deleteResult.affected} deleted successfully`,
-        statusCode: HttpStatus.NO_CONTENT,
-      };
+    it('should log a message and return foreign key conflict response if holiday is mapped to a property', async () => {
+      const holidayId = 1;
+      const mockPropertySeasonHoliday = new PropertySeasonHolidays();
+      mockPropertySeasonHoliday.id = holidayId;
 
-      jest.spyOn(holidayRepository, 'delete').mockResolvedValue(deleteResult);
+      jest
+        .spyOn(propertySeasonHolidayRepository, 'findOne')
+        .mockResolvedValue(mockPropertySeasonHoliday);
+      const loggerSpy = jest.spyOn(logger, 'log');
+      const expectedResponse =
+        HOLIDAYS_RESPONSES.HOLIDAY_FOREIGN_KEY_CONFLICT(holidayId);
 
-      expect(await service.deleteHolidayById(1)).toEqual(expectedResult);
-    });
+      const result = await service.deleteHolidayById(holidayId);
 
-    it('should return not found if holiday with the given ID does not exist', async () => {
-      const deleteResult = { raw: [], affected: 0 };
-      const id = 1;
-      const expectedResult = {
-        success: false,
-        message: `Holiday with ID ${id} not found`,
-        statusCode: HttpStatus.NOT_FOUND,
-      };
-
-      jest.spyOn(holidayRepository, 'delete').mockResolvedValue(deleteResult);
-
-      expect(await service.deleteHolidayById(id)).toEqual(expectedResult);
-      expect(logger.error).toHaveBeenCalledWith(
-        `Holiday with ID ${id} not found`,
+      expect(loggerSpy).toHaveBeenCalledWith(
+        `Holiday ID ${holidayId} exists and is mapped to property, hence cannot be deleted.`,
       );
+      expect(result).toEqual(expectedResponse);
     });
 
-    it('should handle errors during deletion of holiday by ID', async () => {
+    it('should log a message and return not found response if holiday is not found', async () => {
+      const holidayId = 1;
+
+      jest
+        .spyOn(propertySeasonHolidayRepository, 'findOne')
+        .mockResolvedValue(null);
       jest
         .spyOn(holidayRepository, 'delete')
-        .mockRejectedValueOnce(new Error('DB Error'));
+        .mockResolvedValue({ raw: {}, affected: 0 });
+      const loggerErrorSpy = jest.spyOn(logger, 'error');
+      const expectedResponse = HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(holidayId);
 
-      await expect(service.deleteHolidayById(1)).rejects.toThrow(HttpException);
-      expect(logger.error).toHaveBeenCalled();
+      const result = await service.deleteHolidayById(holidayId);
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        `Holiday with ID ${holidayId} not found`,
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should log a message and return success response if holiday is deleted successfully', async () => {
+      const holidayId = 1;
+
+      jest
+        .spyOn(propertySeasonHolidayRepository, 'findOne')
+        .mockResolvedValue(null);
+      jest
+        .spyOn(holidayRepository, 'delete')
+        .mockResolvedValue({ raw: {}, affected: 1 });
+      const loggerLogSpy = jest.spyOn(logger, 'log');
+      const expectedResponse = HOLIDAYS_RESPONSES.HOLIDAY_DELETED(holidayId);
+
+      const result = await service.deleteHolidayById(holidayId);
+
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        `Holiday with ID ${holidayId} deleted successfully`,
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an HttpException if an error occurs during deletion', async () => {
+      const holidayId = 1;
+      const error = new Error('An error occurred');
+
+      jest
+        .spyOn(propertySeasonHolidayRepository, 'findOne')
+        .mockRejectedValue(error);
+      const loggerErrorSpy = jest.spyOn(logger, 'error');
+
+      try {
+        await service.deleteHolidayById(holidayId);
+      } catch (err) {
+        expect(loggerErrorSpy).toHaveBeenCalledWith(
+          `Error deleting holiday with ID ${holidayId}: ${error.message} - ${error.stack}`,
+        );
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe(
+          'An error occurred while deleting the holiday',
+        );
+        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     });
   });
 });

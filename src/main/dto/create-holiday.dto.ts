@@ -7,7 +7,6 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { User } from '../entities/user.entity';
 
 export class CreateHolidayDto {
   @IsNotEmpty({ message: 'holiday name is required' })
@@ -31,5 +30,5 @@ export class CreateHolidayDto {
   @IsNotEmpty({ message: 'created by is required' })
   @IsInt()
   @Min(1)
-  createdBy: User;
+  createdBy: number;
 }
