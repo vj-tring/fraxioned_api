@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationService } from '../main/service/authentication.service';
-import { MailService } from '../main/service/mail.service';
-import { LoggerService } from '../main/service/logger.service';
+import { AuthenticationService } from '../../main/service/authentication.service';
+import { MailService } from 'src/main/service/mail.service';
+import { LoggerService } from '../../main/service/logger.service';
 import * as bcrypt from 'bcrypt';
-import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
+import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { Repository } from 'typeorm';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
 import { User } from 'src/main/entities/user.entity';
-import { UserSessions } from 'src/main/entities/user_sessions.entity';
+import { UserSession } from 'src/main/entities/user-session.entity';
 import { UserProperties } from 'src/main/entities/user_properties.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
@@ -21,8 +21,8 @@ const createMockRepository = <T>(): MockRepository<T> => ({
   delete: jest.fn(),
 });
 
-jest.mock('../main/service/mail.service');
-jest.mock('../main/service/logger.service');
+jest.mock('services/mail.service');
+jest.mock('services/logger.service');
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),
   hash: jest.fn(),
@@ -31,7 +31,7 @@ jest.mock('bcrypt', () => ({
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let userRepository: MockRepository<User>;
-  let userSessionRepository: MockRepository<UserSessions>;
+  let userSessionRepository: MockRepository<UserSession>;
   let userPropertyRepository: MockRepository<UserProperties>;
   let userContactDetailsRepository: MockRepository<UserContactDetails>;
   let mailService: MailService;
@@ -52,7 +52,7 @@ describe('AuthenticationService', () => {
           useValue: userContactDetailsRepository,
         },
         {
-          provide: getRepositoryToken(UserSessions),
+          provide: getRepositoryToken(UserSession),
           useValue: userSessionRepository,
         },
         {
@@ -90,8 +90,8 @@ describe('AuthenticationService', () => {
         zipcode: '10001',
         phoneNumber: '1234567890',
         roleId: 1,
-        created_by: 1,
-        updated_by: 1,
+        createdBy: 1,
+        updatedBy: 1,
         userPropertyDetails: {
           propertyID: 0,
           noOfShares: '',
@@ -134,8 +134,8 @@ describe('AuthenticationService', () => {
         zipcode: '10001',
         phoneNumber: '1234567890',
         roleId: 1,
-        created_by: 1,
-        updated_by: 1,
+        createdBy: 1,
+        updatedBy: 1,
         userPropertyDetails: {
           propertyID: 0,
           noOfShares: '',
