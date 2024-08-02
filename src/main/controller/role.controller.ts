@@ -8,12 +8,12 @@ import {
   Patch,
 } from '@nestjs/common';
 import { RoleService } from 'services/role.service';
-import { CreateRoleDTO } from 'dto/createRole.dto';
-import { UpdateRoleDTO } from 'dto/updateRole.dto';
+import { CreateRoleDTO } from 'src/main/dto/requests/createRole.dto';
+import { UpdateRoleDTO } from 'src/main/dto/requests/updateRole.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Role')
-@Controller('api/roles')
+@Controller('v1/roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 

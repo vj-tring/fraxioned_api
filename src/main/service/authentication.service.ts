@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
+import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { User } from 'src/main/entities/user.entity';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/main/service/mail.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from 'src/main/dto/login.dto';
+import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { LoggerService } from 'src/main/service/logger.service';
-import { UserSessions } from 'src/main/entities/user_sessions.entity';
+import { UserSession } from 'src/main/entities/user-session.entity';
 import * as crypto from 'crypto';
-import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
-import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
-import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
+import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
+import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
+import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
 import { UserProperties } from 'src/main/entities/user_properties.entity';
 import {
   LOGIN_RESPONSES,
@@ -21,7 +21,7 @@ import {
   CHANGE_PASSWORD_RESPONSES,
   RESET_PASSWORD_RESPONSES,
   LOGOUT_RESPONSES,
-} from 'src/main/commons/constants/authResponse.constants';
+} from 'src/main/commons/constants/auth.response.constant';
 
 @Injectable()
 export class AuthenticationService {
@@ -30,8 +30,8 @@ export class AuthenticationService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(UserContactDetails)
     private readonly userContactRepository: Repository<UserContactDetails>,
-    @InjectRepository(UserSessions)
-    private readonly userSessionRepository: Repository<UserSessions>,
+    @InjectRepository(UserSession)
+    private readonly userSessionRepository: Repository<UserSession>,
     @InjectRepository(UserProperties)
     private readonly userPropertyRepository: Repository<UserProperties>,
     private readonly mailService: MailService,
@@ -51,8 +51,8 @@ export class AuthenticationService {
       zipcode,
       phoneNumber,
       roleId,
-      created_by,
-      updated_by,
+      createdBy,
+      updatedBy,
       userPropertyDetails,
     } = inviteUserDto;
 
@@ -80,8 +80,8 @@ export class AuthenticationService {
       zipcode: zipcode,
       password: hashedPassword,
       isActive: true,
-      createdBy: created_by,
-      updatedBy: updated_by,
+      createdBy: createdBy,
+      updatedBy: updatedBy,
       role: { id: roleId },
     });
     await this.userRepository.save(user);

@@ -10,7 +10,7 @@ import { User } from './user.entity';
 
 @Entity('fxn_user_sessions')
 @Unique(['token'])
-export class UserSessions {
+export class UserSession {
   @PrimaryGeneratedColumn()
   id: number;
 

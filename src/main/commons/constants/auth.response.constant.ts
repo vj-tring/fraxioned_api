@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { User } from 'src/main/entities/user.entity';
-import { UserSessions } from 'src/main/entities/user_sessions.entity';
+import { UserSession } from 'entities/user-session.entity';
 
 interface LoginSuccessResponse {
   status: number;
@@ -27,7 +27,7 @@ export const LOGIN_RESPONSES = {
   },
   LOGIN_SUCCESS: (
     userDetails: Partial<User>,
-    session: Partial<UserSessions>,
+    session: Partial<UserSession>,
   ): LoginSuccessResponse => ({
     status: HttpStatus.OK,
     message: 'Login successful',

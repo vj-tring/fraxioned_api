@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationController } from 'src/main/controller/authentication.controller';
 import { AuthenticationService } from 'src/main/service/authentication.service';
-import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
-import { LoginDto } from 'src/main/dto/login.dto';
-import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
-import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
-import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
+import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
+import { LoginDto } from 'src/main/dto/requests/login.dto';
+import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
+import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
+import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
 import {
   NotFoundException,
   BadRequestException,
@@ -52,19 +52,21 @@ describe('AuthenticationController', () => {
         zipcode: '10001',
         phoneNumber: '1234567890',
         roleId: 1,
-        created_by: 1,
-        updated_by: 1,
+        createdBy: 1,
+        updatedBy: 1,
         userPropertyDetails: {
           propertyID: 0,
           noOfShares: '',
           acquisitionDate: undefined,
         },
       };
-      // const userAuth = { userId: 1, accessToken: 'someAccessToken' };
+      const userAuth = { userId: 1, accessToken: 'someAccessToken' };
       const result = { message: 'Invite sent successfully' };
       jest.spyOn(service, 'inviteUser').mockResolvedValue(result);
 
-      expect(await controller.inviteUser(inviteUserDto)).toEqual(result);
+      expect(await controller.inviteUser(userAuth, inviteUserDto)).toEqual(
+        result,
+      );
     });
   });
 
@@ -150,9 +152,11 @@ describe('AuthenticationController', () => {
       };
       const result = { message: 'Password reset successfully' };
       jest.spyOn(service, 'resetPassword').mockResolvedValue(result);
-      // const userAuth = { userId: 1, accessToken: 'someAccessToken' };
+      const userAuth = { userId: 1, accessToken: 'someAccessToken' };
 
-      expect(await controller.resetPassword(resetPasswordDto)).toEqual(result);
+      expect(
+        await controller.resetPassword(userAuth, resetPasswordDto),
+      ).toEqual(result);
     });
 
     it('should throw UnauthorizedException if reset token is invalid', async () => {
@@ -164,11 +168,11 @@ describe('AuthenticationController', () => {
       jest
         .spyOn(service, 'resetPassword')
         .mockRejectedValue(new UnauthorizedException('Invalid reset token'));
-      // const userAuth = { userId: 1, accessToken: 'someAccessToken' };
+      const userAuth = { userId: 1, accessToken: 'someAccessToken' };
 
-      await expect(controller.resetPassword(resetPasswordDto)).resolves.toEqual(
-        new UnauthorizedException('Invalid reset token'),
-      );
+      await expect(
+        controller.resetPassword(userAuth, resetPasswordDto),
+      ).resolves.toEqual(new UnauthorizedException('Invalid reset token'));
     });
   });
 
