@@ -51,21 +51,20 @@ export class HolidaysService {
 
       const user = await this.usersRepository.findOne({
         where: {
-          id: createHolidayDto.createdBy,
+          id: createHolidayDto.createdBy.id,
         },
       });
 
       if (!user) {
         this.logger.error(
-          `User with ID ${createHolidayDto.createdBy} does not exist`,
+          `User with ID ${createHolidayDto.createdBy.id} does not exist`,
         );
 
-        return HOLIDAYS_RESPONSES.USER_NOT_FOUND(createHolidayDto.createdBy);
+        return HOLIDAYS_RESPONSES.USER_NOT_FOUND(createHolidayDto.createdBy.id);
       }
 
       const holiday = this.holidayRepository.create({
         ...createHolidayDto,
-        createdBy: user,
       });
       const savedHoliday = await this.holidayRepository.save(holiday);
       this.logger.log(
@@ -161,15 +160,15 @@ export class HolidaysService {
 
       const user = await this.usersRepository.findOne({
         where: {
-          id: updateHolidayDto.updatedBy,
+          id: updateHolidayDto.updatedBy.id,
         },
       });
 
       if (!user) {
         this.logger.error(
-          `User with ID ${updateHolidayDto.updatedBy} does not exist`,
+          `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
         );
-        return HOLIDAYS_RESPONSES.USER_NOT_FOUND(updateHolidayDto.updatedBy);
+        return HOLIDAYS_RESPONSES.USER_NOT_FOUND(updateHolidayDto.updatedBy.id);
       }
 
       Object.assign(holiday, updateHolidayDto);

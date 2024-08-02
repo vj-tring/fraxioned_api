@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { HolidaysService } from '../service/holidays.service';
-import { LoggerService } from '../service/logger.service';
 import { CreateHolidayDto } from '../dto/create-holiday.dto';
 import { UpdateHolidayDto } from '../dto/update-holiday.dto';
 import { Holidays } from '../entities/holidays.entity';
@@ -19,10 +18,7 @@ import { Holidays } from '../entities/holidays.entity';
 @Controller('v1/holidays/holiday')
 @ApiTags('Holidays')
 export class HolidaysController {
-  constructor(
-    private readonly holidaysService: HolidaysService,
-    private readonly logger: LoggerService,
-  ) {}
+  constructor(private readonly holidaysService: HolidaysService) {}
 
   @Post()
   async createHoliday(@Body() createHolidayDto: CreateHolidayDto): Promise<{

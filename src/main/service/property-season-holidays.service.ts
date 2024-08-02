@@ -48,11 +48,6 @@ export class PropertySeasonHolidaysService {
         return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_NOT_FOUND(
           createPropertySeasonHolidayDto.property.id,
         );
-        // return {
-        //   success: false,
-        //   message: `Property with ID ${createPropertySeasonHolidayDto.property.id} does not exist`,
-        //   statusCode: HttpStatus.NOT_FOUND,
-        // };
       }
 
       const existingHoliday = await this.holidayRepository.findOne({
@@ -67,11 +62,6 @@ export class PropertySeasonHolidaysService {
         return PROPERTY_SEASON_HOLIDAY_RESPONSES.HOLIDAY_NOT_FOUND(
           createPropertySeasonHolidayDto.holiday.id,
         );
-        // return {
-        //   success: false,
-        //   message: `Holiday with ID ${createPropertySeasonHolidayDto.holiday.id} does not exist`,
-        //   statusCode: HttpStatus.NOT_FOUND,
-        // };
       }
 
       const user = await this.usersRepository.findOne({
@@ -86,11 +76,6 @@ export class PropertySeasonHolidaysService {
         return PROPERTY_SEASON_HOLIDAY_RESPONSES.USER_NOT_FOUND(
           createPropertySeasonHolidayDto.createdBy.id,
         );
-        // return {
-        //   success: false,
-        //   message: `User with ID ${createPropertySeasonHolidayDto.createdBy.id} does not exist`,
-        //   statusCode: HttpStatus.NOT_FOUND,
-        // };
       }
 
       const existingPropertySeasonHoliday =
@@ -113,12 +98,6 @@ export class PropertySeasonHolidaysService {
           createPropertySeasonHolidayDto.property.id,
           createPropertySeasonHolidayDto.holiday.id,
         );
-
-        // return {
-        //   success: false,
-        //   message: `Property ID ${createPropertySeasonHolidayDto.property.id} with Holiday ID ${createPropertySeasonHolidayDto.holiday.id} already exists`,
-        //   statusCode: HttpStatus.CONFLICT,
-        // };
       }
 
       const propertySeasonHoliday = this.propertySeasonHolidayRepository.create(
@@ -134,12 +113,6 @@ export class PropertySeasonHolidaysService {
       return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_CREATED(
         savedPropertySeasonHoliday,
       );
-      // return {
-      //   success: true,
-      //   message: 'Property Season Holiday created successfully',
-      //   data: savedPropertySeasonHoliday,
-      //   statusCode: HttpStatus.CREATED,
-      // };
     } catch (error) {
       this.logger.error(
         `Error creating property season holiday: ${error.message} - ${error.stack}`,
@@ -150,13 +123,80 @@ export class PropertySeasonHolidaysService {
       );
     }
   }
-  // findAllPropertySeasonHolidays() {
-  //   return `This action returns all propertySeasonHolidays`;
-  // }
 
-  // findPropertySeasonHolidayById(id: number) {
-  //   return `This action returns a #${id} propertySeasonHoliday`;
-  // }
+  async findAllPropertySeasonHolidays(): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays[];
+    statusCode: number;
+  }> {
+    try {
+      const propertySeasonHolidays =
+        await this.propertySeasonHolidayRepository.find();
+
+      if (propertySeasonHolidays.length === 0) {
+        this.logger.log(`No property season holidays are available`);
+
+        return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAYS_NOT_FOUND();
+      }
+
+      this.logger.log(
+        `Retrieved ${propertySeasonHolidays.length} holidays successfully.`,
+      );
+
+      return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAYS_FETCHED(
+        propertySeasonHolidays,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property season holidays: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the property season holidays',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findPropertySeasonHolidayById(id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays;
+    statusCode: number;
+  }> {
+    try {
+      const propertySeasonHoliday =
+        await this.propertySeasonHolidayRepository.findOne({
+          relations: {
+            property: true,
+            holiday: true,
+          },
+          where: { id },
+        });
+
+      if (!propertySeasonHoliday) {
+        this.logger.error(`Property Season Holiday with ID ${id} not found`);
+        return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_NOT_FOUND(
+          id,
+        );
+      }
+      this.logger.log(
+        `Property Season Holiday with ID ${id} retrieved successfully`,
+      );
+      return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_FETCHED(
+        propertySeasonHoliday,
+        id,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving holiday with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   // updatePropertySeasonHoliday(
   //   id: number,

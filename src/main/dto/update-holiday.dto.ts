@@ -4,10 +4,10 @@ import {
   IsDate,
   IsNotEmpty,
   IsOptional,
-  IsInt,
-  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { User } from '../entities/user.entity';
+import { IsValidId } from '../commons/gaurds/is-valid-id.decorator';
 
 export class UpdateHolidayDto {
   @IsString()
@@ -29,7 +29,8 @@ export class UpdateHolidayDto {
   endDate: Date;
 
   @IsNotEmpty({ message: 'updated by is required' })
-  @IsInt()
-  @Min(1)
-  updatedBy: number;
+  @IsValidId({
+    message: 'updatedBy must be an object with a valid id where (id >= 1)',
+  })
+  updatedBy: User;
 }

@@ -4,6 +4,8 @@ import {
   Body,
   HttpStatus,
   HttpException,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { PropertySeasonHolidaysService } from '../service/property-season-holidays.service';
 import { CreatePropertySeasonHolidayDto } from '../dto/create-property-season-holiday.dto';
@@ -40,41 +42,45 @@ export class PropertySeasonHolidaysController {
     }
   }
 
-  // @Get()
-  // async getAllPropertySeasonHolidays(): Promise<{
-  //   success: boolean;
-  //   message: string;
-  //   data?: PropertySeasonHolidays[];
-  //   statusCode: HttpStatus;
-  // }> {
-  //   try {
-  //     const result = await this.propertySeasonHolidaysService.findAllPropertySeasonHolidays();
-  //     return result;
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       'An error occurred while retrieving all property season holidays',
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+  @Get()
+  async getAllPropertySeasonHolidays(): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertySeasonHolidaysService.findAllPropertySeasonHolidays();
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving all property season holidays',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
-  // @Get(':id')
-  // async getPropertySeasonHolidayById(@Param('id') id: number): Promise<{
-  //   success: boolean;
-  //   message: string;
-  //   data?: PropertySeasonHolidays;
-  //   statusCode: HttpStatus;
-  // }>  {
-  //   try {
-  //     const result = await this.propertySeasonHolidaysService.findPropertySeasonHolidayById(id);
-  //     return result;
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       'An error occurred while retrieving the property season holiday',
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+  @Get(':id')
+  async getPropertySeasonHolidayById(@Param('id') id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertySeasonHolidaysService.findPropertySeasonHolidayById(
+          id,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the property season holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   // @Patch(':id')
   // async updatePropertySeasonHolidayDetail(

@@ -1,12 +1,7 @@
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  Min,
-} from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { User } from '../entities/user.entity';
+import { IsValidId } from '../commons/gaurds/is-valid-id.decorator';
 
 export class CreateHolidayDto {
   @IsNotEmpty({ message: 'holiday name is required' })
@@ -28,7 +23,8 @@ export class CreateHolidayDto {
   endDate: Date;
 
   @IsNotEmpty({ message: 'created by is required' })
-  @IsInt()
-  @Min(1)
-  createdBy: number;
+  @IsValidId({
+    message: 'createdBy must be an object with a valid id property (id >= 1)',
+  })
+  createdBy: User;
 }

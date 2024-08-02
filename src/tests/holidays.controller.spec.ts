@@ -8,6 +8,7 @@ import { HolidaysService } from 'src/main/service/holidays.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
 import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/holidays-response.constants';
+import { Role } from 'src/main/entities/role.entity';
 
 describe('HolidaysController', () => {
   let controller: HolidaysController;
@@ -52,7 +53,28 @@ describe('HolidaysController', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: 1,
+        createdBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
 
       const expectedHoliday: Holidays = {
@@ -81,7 +103,28 @@ describe('HolidaysController', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: 1,
+        createdBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
       const error = new Error('An error occurred');
       jest.spyOn(service, 'create').mockRejectedValue(error);
@@ -176,7 +219,28 @@ describe('HolidaysController', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: 1,
+        updatedBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
       const holiday = { id: 1 } as Holidays;
       const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_UPDATED(holiday);

@@ -1,17 +1,20 @@
-import { IsBoolean, IsInt, IsNotEmpty, Min } from 'class-validator';
-import { User } from '../entities/user.entity';
+import { IsBoolean, IsNotEmpty } from 'class-validator';
 import { Properties } from '../entities/properties.entity';
 import { Holidays } from '../entities/holidays.entity';
+import { IsValidId } from '../commons/gaurds/is-valid-id.decorator';
+import { User } from '../entities/user.entity';
 
 export class CreatePropertySeasonHolidayDto {
   @IsNotEmpty({ message: 'property ID is required' })
-  @IsInt()
-  @Min(1)
+  @IsValidId({
+    message: 'property must be an object with a valid id where (id >= 1)',
+  })
   property: Properties;
 
   @IsNotEmpty({ message: 'holiday ID is required' })
-  @IsInt()
-  @Min(1)
+  @IsValidId({
+    message: 'holiday must be an object with a valid id where (id >= 1)',
+  })
   holiday: Holidays;
 
   @IsNotEmpty({ message: 'Is peak season setting is required' })
@@ -19,7 +22,8 @@ export class CreatePropertySeasonHolidayDto {
   isPeakSeason: boolean;
 
   @IsNotEmpty({ message: 'created by is required' })
-  @IsInt()
-  @Min(1)
+  @IsValidId({
+    message: 'createdBy must be an object with a valid id where (id >= 1)',
+  })
   createdBy: User;
 }

@@ -10,6 +10,7 @@ import { Holidays } from 'src/main/entities/holidays.entity';
 import { User } from 'src/main/entities/user.entity';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
 import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/holidays-response.constants';
+import { Role } from 'src/main/entities/role.entity';
 
 describe('HolidaysService', () => {
   let service: HolidaysService;
@@ -66,7 +67,28 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: 1,
+        createdBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
       const user = { id: 1 } as User;
       const holiday = { id: 1 } as Holidays;
@@ -85,7 +107,28 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: 1,
+        createdBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
       const existingHoliday = { id: 1 } as Holidays;
 
@@ -109,18 +152,39 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: 1,
+        createdBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
 
       const expectedResult = HOLIDAYS_RESPONSES.USER_NOT_FOUND(
-        createHolidayDto.createdBy,
+        createHolidayDto.createdBy.id,
       );
 
       expect(await service.create(createHolidayDto)).toEqual(expectedResult);
       expect(logger.error).toHaveBeenCalledWith(
-        `User with ID ${createHolidayDto.createdBy} does not exist`,
+        `User with ID ${createHolidayDto.createdBy.id} does not exist`,
       );
     });
 
@@ -130,7 +194,28 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        createdBy: 1,
+        createdBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
 
       jest
@@ -236,7 +321,28 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: 1,
+        updatedBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
       const holiday = { id: 1 } as Holidays;
       const user = { id: 1 } as User;
@@ -257,7 +363,28 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: 1,
+        updatedBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
       const id = 1;
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
@@ -276,7 +403,28 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: 1,
+        updatedBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
 
       const holiday = { id: 1 } as Holidays;
@@ -285,14 +433,14 @@ describe('HolidaysService', () => {
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
 
       const expectedResult = HOLIDAYS_RESPONSES.USER_NOT_FOUND(
-        updateHolidayDto.updatedBy,
+        updateHolidayDto.updatedBy.id,
       );
 
       expect(await service.updateHolidayDetail(1, updateHolidayDto)).toEqual(
         expectedResult,
       );
       expect(logger.error).toHaveBeenCalledWith(
-        `User with ID ${updateHolidayDto.updatedBy} does not exist`,
+        `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
       );
     });
     it('should handle errors during update of a holiday', async () => {
@@ -301,7 +449,28 @@ describe('HolidaysService', () => {
         year: 2023,
         startDate: new Date(),
         endDate: new Date(),
-        updatedBy: 1,
+        updatedBy: {
+          id: 1,
+          role: new Role(),
+          firstName: '',
+          lastName: '',
+          password: '',
+          imageURL: '',
+          isActive: false,
+          addressLine1: '',
+          addressLine2: '',
+          state: '',
+          country: '',
+          city: '',
+          zipcode: '',
+          resetToken: '',
+          resetTokenExpires: undefined,
+          lastLoginTime: undefined,
+          createdBy: 0,
+          updatedBy: 0,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
       };
       jest
         .spyOn(holidayRepository, 'findOne')
