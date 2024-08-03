@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreatePropertySeasonHolidayDto } from '../dto/create-property-season-holiday.dto';
+import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

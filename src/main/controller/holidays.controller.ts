@@ -12,8 +12,8 @@ import {
 } from '@nestjs/common';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { HolidaysService } from '../service/holidays.service';
-import { CreateHolidayDto } from '../dto/create-holiday.dto';
-import { UpdateHolidayDto } from '../dto/update-holiday.dto';
+import { CreateHolidayDto } from '../dto/requests/create-holiday.dto';
+import { UpdateHolidayDto } from '../dto/requests/update-holiday.dto';
 import { Holidays } from '../entities/holidays.entity';
 import { AuthGuard } from '../commons/guards/auth.guard';
 

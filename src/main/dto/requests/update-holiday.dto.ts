@@ -6,8 +6,8 @@ import {
   IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { User } from '../entities/user.entity';
-import { IsValidId } from '../commons/guards/is-valid-id.decorator';
+import { User } from 'entities/user.entity';
+import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 
 export class UpdateHolidayDto {
   @IsString()

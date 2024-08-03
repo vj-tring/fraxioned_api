@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { User } from '../entities/user.entity';
-import { IsValidId } from '../commons/guards/is-valid-id.decorator';
+import { User } from 'entities/user.entity';
+import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 
 export class CreateHolidayDto {
   @IsNotEmpty({ message: 'holiday name is required' })

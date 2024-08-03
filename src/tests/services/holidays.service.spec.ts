@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateHolidayDto } from 'dto/create-holiday.dto';
-import { UpdateHolidayDto } from 'dto/update-holiday.dto';
+import { CreateHolidayDto } from 'dto/requests/create-holiday.dto';
+import { UpdateHolidayDto } from 'dto/requests/update-holiday.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { HolidaysService } from 'src/main/service/holidays.service';
 import { LoggerService } from 'src/main/service/logger.service';

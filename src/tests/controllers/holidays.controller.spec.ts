@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateHolidayDto } from 'dto/create-holiday.dto';
-import { UpdateHolidayDto } from 'dto/update-holiday.dto';
+import { CreateHolidayDto } from 'dto/requests/create-holiday.dto';
+import { UpdateHolidayDto } from 'dto/requests/update-holiday.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Holidays } from 'src/main/entities/holidays.entity';
 import { HolidaysController } from 'src/main/controller/holidays.controller';

@@ -8,7 +8,7 @@ import {
   Param,
 } from '@nestjs/common';
 import { PropertySeasonHolidaysService } from '../service/property-season-holidays.service';
-import { CreatePropertySeasonHolidayDto } from '../dto/create-property-season-holiday.dto';
+import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 
