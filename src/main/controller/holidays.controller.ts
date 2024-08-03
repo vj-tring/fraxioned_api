@@ -8,12 +8,14 @@ import {
   Delete,
   HttpStatus,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { HolidaysService } from '../service/holidays.service';
 import { CreateHolidayDto } from '../dto/create-holiday.dto';
 import { UpdateHolidayDto } from '../dto/update-holiday.dto';
 import { Holidays } from '../entities/holidays.entity';
+import { AuthGuard } from '../commons/guards/auth.guard';
 
 @Controller('v1/holidays/holiday')
 @ApiTags('Holidays')
@@ -21,6 +23,13 @@ export class HolidaysController {
   constructor(private readonly holidaysService: HolidaysService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
+  })
   async createHoliday(@Body() createHolidayDto: CreateHolidayDto): Promise<{
     success: boolean;
     message: string;
@@ -39,6 +48,13 @@ export class HolidaysController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
+  })
   async getAllHolidays(): Promise<{
     success: boolean;
     message: string;
@@ -57,6 +73,13 @@ export class HolidaysController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
+  })
   async getHolidayById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -75,6 +98,13 @@ export class HolidaysController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
+  })
   async updateHolidayDetail(
     @Param('id') id: string,
     @Body() updateHolidayDto: UpdateHolidayDto,
@@ -99,6 +129,13 @@ export class HolidaysController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
+  })
   async deleteHoliday(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {

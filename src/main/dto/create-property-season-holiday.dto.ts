@@ -1,7 +1,7 @@
 import { IsBoolean, IsNotEmpty } from 'class-validator';
 import { Properties } from '../entities/properties.entity';
 import { Holidays } from '../entities/holidays.entity';
-import { IsValidId } from '../commons/gaurds/is-valid-id.decorator';
+import { IsValidId } from '../commons/guards/is-valid-id.decorator';
 import { User } from '../entities/user.entity';
 
 export class CreatePropertySeasonHolidayDto {

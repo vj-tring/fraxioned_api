@@ -9,6 +9,8 @@ import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
 import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/holidays-response.constants';
 import { Role } from 'src/main/entities/role.entity';
+import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('HolidaysController', () => {
   let controller: HolidaysController;
@@ -29,12 +31,21 @@ describe('HolidaysController', () => {
           },
         },
         {
+          provide: AuthenticationService,
+          useValue: {
+            validateUser: jest.fn(),
+            login: jest.fn(),
+            logout: jest.fn(),
+          },
+        },
+        {
           provide: LoggerService,
           useValue: {
             log: jest.fn(),
             error: jest.fn(),
           },
         },
+        AuthGuard,
       ],
     }).compile();
 
