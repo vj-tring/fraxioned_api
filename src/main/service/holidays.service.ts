@@ -6,7 +6,7 @@ import { CreateHolidayDto } from '../dto/requests/create-holiday.dto';
 import { UpdateHolidayDto } from '../dto/requests/update-holiday.dto';
 import { Holidays } from '../entities/holidays.entity';
 import { User } from '../entities/user.entity';
-import { HOLIDAYS_RESPONSES } from '../commons/constants/holidays-response.constants';
+import { HOLIDAYS_RESPONSES } from '../commons/constants/response-constants/holidays-response.constants';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 
 @Injectable()

@@ -13,7 +13,7 @@ import * as crypto from 'crypto';
 import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
 import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
-import { UserProperties } from 'src/main/entities/user_properties.entity';
+import { UserProperties } from 'src/main/entities/user-properties.entity';
 import {
   LOGIN_RESPONSES,
   INVITE_USER_RESPONSES,
@@ -21,7 +21,7 @@ import {
   CHANGE_PASSWORD_RESPONSES,
   RESET_PASSWORD_RESPONSES,
   LOGOUT_RESPONSES,
-} from 'src/main/commons/constants/auth.response.constant';
+} from 'src/main/commons/constants/response-constants/auth.response.constant';
 
 @Injectable()
 export class AuthenticationService {

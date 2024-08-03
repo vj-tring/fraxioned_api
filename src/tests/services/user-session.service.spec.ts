@@ -6,7 +6,7 @@ import { UserSession } from 'entities/user-session.entity';
 import { LoggerService } from 'services/logger.service';
 import { CreateUserSessionDTO } from 'dto/requests/create-user-session.dto';
 import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
-import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/user-session.response.constant';
+import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/response-constants/user-session.response.constant';
 import { NotFoundException } from '@nestjs/common';
 import { User } from 'entities/user.entity';
 
@@ -51,6 +51,7 @@ describe('UserSessionService', () => {
         token: 'test-token',
         expiresAt: new Date(),
         createdBy: new User(),
+        updatedBy: new User(),
       };
 
       const savedUserSession = {

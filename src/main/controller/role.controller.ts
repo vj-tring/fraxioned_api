@@ -7,7 +7,7 @@ import {
   Delete,
   Patch,
 } from '@nestjs/common';
-import { RoleService } from 'services/role.service';
+import { RoleService } from 'src/main/service/role.service';
 import { CreateRoleDTO } from 'src/main/dto/requests/createRole.dto';
 import { UpdateRoleDTO } from 'src/main/dto/requests/updateRole.dto';
 import { ApiTags } from '@nestjs/swagger';

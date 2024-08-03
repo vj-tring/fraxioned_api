@@ -3,7 +3,7 @@ import { UserSessionController } from 'controllers/user-session.controller';
 import { UserSessionService } from 'services/user-session.service';
 import { CreateUserSessionDTO } from 'dto/requests/create-user-session.dto';
 import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
-import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/user-session.response.constant';
+import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/response-constants/user-session.response.constant';
 import { User } from 'entities/user.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
 
@@ -43,6 +43,7 @@ describe('UserSessionController', () => {
         token: 'test-token',
         expiresAt: new Date(),
         createdBy: new User(),
+        updatedBy: new User(),
       };
 
       const response = USER_SESSION_RESPONSES.USER_SESSION_CREATED({

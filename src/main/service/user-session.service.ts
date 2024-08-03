@@ -5,7 +5,7 @@ import { UserSession } from 'entities/user-session.entity';
 import { CreateUserSessionDTO } from 'dto/requests/create-user-session.dto';
 import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
 import { LoggerService } from 'services/logger.service';
-import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/user-session.response.constant';
+import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/response-constants/user-session.response.constant';
 
 @Injectable()
 export class UserSessionService {
