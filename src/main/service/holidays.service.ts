@@ -89,7 +89,17 @@ export class HolidaysService {
     statusCode: number;
   }> {
     try {
-      const holidays = await this.holidayRepository.find();
+      const holidays = await this.holidayRepository.find({
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
 
       if (holidays.length === 0) {
         this.logger.log(`No holidays are available`);
@@ -119,6 +129,15 @@ export class HolidaysService {
   }> {
     try {
       const holiday = await this.holidayRepository.findOne({
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
         where: { id },
       });
 
@@ -150,6 +169,15 @@ export class HolidaysService {
   }> {
     try {
       const holiday = await this.holidayRepository.findOne({
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
         where: { id },
       });
 
