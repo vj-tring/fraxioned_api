@@ -9,6 +9,8 @@ import { Role } from 'src/main/entities/role.entity';
 import { User } from 'src/main/entities/user.entity';
 import { UserProperties } from 'entities/user-properties.entity';
 import { Properties } from 'src/main/entities/properties.entity';
+import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('UserPropertyController', () => {
   let controller: UserPropertyController;
@@ -28,6 +30,15 @@ describe('UserPropertyController', () => {
             deleteUserProperty: jest.fn(),
           },
         },
+        {
+          provide: AuthenticationService,
+          useValue: {
+            validateUser: jest.fn(),
+            login: jest.fn(),
+            logout: jest.fn(),
+          },
+        },
+        AuthGuard,
       ],
     }).compile();
 
