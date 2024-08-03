@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 import { User } from 'entities/user.entity';
-import { IsValidId } from 'src/main/commons/guards/is-valid-user-id.decorator';
+import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 
 export class CreateUserSessionDTO {
   @IsNotEmpty({ message: 'user by is required' })

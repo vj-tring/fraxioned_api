@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { IsValidId } from 'src/main/commons/guards/is-valid-user-id.decorator';
+import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { User } from 'src/main/entities/user.entity';
 
 export class UpdateUserSessionDTO {
