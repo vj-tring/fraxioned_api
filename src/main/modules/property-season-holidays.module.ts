@@ -7,6 +7,7 @@ import { User } from '../entities/user.entity';
 import { LoggerModule } from './logger.module';
 import { Holidays } from '../entities/holidays.entity';
 import { Properties } from '../entities/properties.entity';
+import { AuthenticationModule } from './authentication.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { Properties } from '../entities/properties.entity';
       Properties,
     ]),
     LoggerModule,
+    AuthenticationModule,
   ],
   controllers: [PropertySeasonHolidaysController],
   providers: [PropertySeasonHolidaysService],

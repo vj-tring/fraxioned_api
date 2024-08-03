@@ -8,6 +8,7 @@ import { LoggerService } from './logger.service';
 import { Holidays } from '../entities/holidays.entity';
 import { Properties } from '../entities/properties.entity';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from '../commons/constants/property-season-holidays-response.constants';
+import { UpdatePropertySeasonHolidayDto } from '../dto/requests/update-property-season-holiday.dto';
 
 @Injectable()
 export class PropertySeasonHolidaysService {
@@ -132,7 +133,23 @@ export class PropertySeasonHolidaysService {
   }> {
     try {
       const propertySeasonHolidays =
-        await this.propertySeasonHolidayRepository.find();
+        await this.propertySeasonHolidayRepository.find({
+          relations: ['property', 'holiday', 'createdBy', 'updatedBy'],
+          select: {
+            property: {
+              id: true,
+            },
+            holiday: {
+              id: true,
+            },
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
+          },
+        });
 
       if (propertySeasonHolidays.length === 0) {
         this.logger.log(`No property season holidays are available`);
@@ -167,9 +184,20 @@ export class PropertySeasonHolidaysService {
     try {
       const propertySeasonHoliday =
         await this.propertySeasonHolidayRepository.findOne({
-          relations: {
-            property: true,
-            holiday: true,
+          relations: ['property', 'holiday', 'createdBy', 'updatedBy'],
+          select: {
+            property: {
+              id: true,
+            },
+            holiday: {
+              id: true,
+            },
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
           },
           where: { id },
         });
@@ -198,14 +226,144 @@ export class PropertySeasonHolidaysService {
     }
   }
 
-  // updatePropertySeasonHoliday(
-  //   id: number,
-  //   updatePropertySeasonHolidayDto: UpdatePropertySeasonHolidayDto,
-  // ) {
-  //   return `This action updates a #${id} propertySeasonHoliday`;
-  // }
+  async updatePropertySeasonHoliday(
+    id: number,
+    updatePropertySeasonHolidayDto: UpdatePropertySeasonHolidayDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays;
+    statusCode: number;
+  }> {
+    try {
+      const propertySeasonHoliday =
+        await this.propertySeasonHolidayRepository.findOne({
+          relations: ['property', 'holiday', 'createdBy', 'updatedBy'],
+          select: {
+            property: {
+              id: true,
+            },
+            holiday: {
+              id: true,
+            },
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
+          },
+          where: { id },
+        });
 
-  // removePropertySeasonHoliday(id: number) {
-  //   return `This action removes a #${id} propertySeasonHoliday`;
-  // }
+      if (!propertySeasonHoliday) {
+        this.logger.error(
+          `Property Season Holiday with ID ${id} does not exist`,
+        );
+        return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_NOT_FOUND(
+          id,
+        );
+      }
+
+      const user = await this.usersRepository.findOne({
+        where: {
+          id: updatePropertySeasonHolidayDto.updatedBy.id,
+        },
+      });
+      if (!user) {
+        this.logger.error(
+          `User with ID ${updatePropertySeasonHolidayDto.updatedBy.id} does not exist`,
+        );
+        return PROPERTY_SEASON_HOLIDAY_RESPONSES.USER_NOT_FOUND(
+          updatePropertySeasonHolidayDto.updatedBy.id,
+        );
+      }
+
+      if (
+        updatePropertySeasonHolidayDto.property &&
+        updatePropertySeasonHolidayDto.property.id
+      ) {
+        const property = await this.propertiesRepository.findOne({
+          where: { id: updatePropertySeasonHolidayDto.property.id },
+        });
+        if (!property) {
+          this.logger.error(
+            `Property with ID ${updatePropertySeasonHolidayDto.property.id} does not exist`,
+          );
+          return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_NOT_FOUND(
+            updatePropertySeasonHolidayDto.property.id,
+          );
+        }
+      }
+
+      if (
+        updatePropertySeasonHolidayDto.holiday &&
+        updatePropertySeasonHolidayDto.holiday.id
+      ) {
+        const holiday = await this.holidayRepository.findOne({
+          where: { id: updatePropertySeasonHolidayDto.holiday.id },
+        });
+        if (!holiday) {
+          this.logger.error(
+            `Holiday with ID ${updatePropertySeasonHolidayDto.holiday.id} does not exist`,
+          );
+          return PROPERTY_SEASON_HOLIDAY_RESPONSES.HOLIDAY_NOT_FOUND(
+            updatePropertySeasonHolidayDto.holiday.id,
+          );
+        }
+      }
+
+      Object.assign(propertySeasonHoliday, updatePropertySeasonHolidayDto);
+      const updatedPropertySeasonHoliday =
+        await this.propertySeasonHolidayRepository.save(propertySeasonHoliday);
+
+      this.logger.log(
+        `Property Season Holiday with ID ${id} updated successfully`,
+      );
+
+      return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_UPDATED(
+        updatedPropertySeasonHoliday,
+        id,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error updating property season holiday with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while updating the property season holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async removePropertySeasonHoliday(id: number): Promise<{
+    success: boolean;
+    message: string;
+    statusCode: number;
+  }> {
+    try {
+      const result = await this.propertySeasonHolidayRepository.delete(id);
+
+      if (result.affected === 0) {
+        this.logger.error(`Property Season Holiday with ID ${id} not found`);
+        return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_NOT_FOUND(
+          id,
+        );
+      }
+      this.logger.log(
+        `Property Season Holiday with ID ${id} deleted successfully`,
+      );
+      return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_DELETED(
+        id,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error deleting property season holiday with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting the property season holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

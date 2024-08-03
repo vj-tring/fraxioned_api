@@ -234,8 +234,9 @@ export class HolidaysService {
       }
 
       const result = await this.holidayRepository.delete(id);
-      this.logger.error(`Holiday with ID ${id} not found`);
+
       if (result.affected === 0) {
+        this.logger.error(`Holiday with ID ${id} not found`);
         return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
       }
       this.logger.log(`Holiday with ID ${id} deleted successfully`);
