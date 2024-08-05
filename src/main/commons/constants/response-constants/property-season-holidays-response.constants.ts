@@ -94,4 +94,29 @@ export const PROPERTY_SEASON_HOLIDAY_RESPONSES = {
     data: propertySeasonHoliday,
     statusCode: HttpStatus.OK,
   }),
+  PROPERTY_SEASON_HOLIDAY_UPDATED: (
+    updatedPropertySeasonHoliday: PropertySeasonHolidays,
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Property Season Holiday with ID ${id} updated successfully`,
+    data: updatedPropertySeasonHoliday,
+    statusCode: HttpStatus.OK,
+  }),
+  PROPERTY_SEASON_HOLIDAY_DELETED: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Property Season Holiday with ID ${id} deleted successfully`,
+    statusCode: HttpStatus.NO_CONTENT,
+  }),
 };
