@@ -117,15 +117,4 @@ describe('UserController', () => {
       expect(result).toEqual(USER_RESPONSES.USER_UPDATED(updatedUser));
     });
   });
-
-  describe('deactivateUser', () => {
-    it('should deactivate a user', async () => {
-      jest
-        .spyOn(service, 'deactivateUser')
-        .mockResolvedValue(USER_RESPONSES.USER_DEACTIVATED);
-
-      const result = await controller.deactivateUser(1);
-      expect(result).toEqual(USER_RESPONSES.USER_DEACTIVATED);
-    });
-  });
 });

@@ -9,6 +9,7 @@ import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/us
 import { CreateUserDTO } from 'dto/requests/create-user.dto';
 import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.response.constant';
 
 describe('UserService', () => {
   let service: UserService;
@@ -53,58 +54,113 @@ describe('UserService', () => {
   });
 
   describe('createUser', () => {
-    it('should return USER_NOT_FOUND if role does not exist', async () => {
+    it('should return ROLE_NOT_FOUND if role does not exist', async () => {
       jest.spyOn(roleRepository, 'findOne').mockResolvedValue(null);
 
       const createUserDto: CreateUserDTO = {
         firstName: 'John',
         lastName: 'Doe',
+        password: 'password',
         role: { id: 1 },
+        createdBy: 1,
         contactDetails: [],
       } as CreateUserDTO;
 
       const result = await service.createUser(createUserDto);
       expect(result).toEqual(
-        USER_RESPONSES.USER_NOT_FOUND(createUserDto.role.id),
+        ROLE_RESPONSES.ROLE_NOT_FOUND(createUserDto.role.id),
       );
     });
 
-    it('should return USER_ALREADY_EXISTS if user already exists', async () => {
+    it('should return USER_NOT_FOUND if createdBy user does not exist', async () => {
       jest.spyOn(roleRepository, 'findOne').mockResolvedValue(new Role());
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockResolvedValue({ id: 1 } as User);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
 
       const createUserDto: CreateUserDTO = {
         firstName: 'John',
         lastName: 'Doe',
+        password: 'password',
         role: { id: 1 },
+        createdBy: 1,
         contactDetails: [],
       } as CreateUserDTO;
 
       const result = await service.createUser(createUserDto);
-      expect(result).toEqual(USER_RESPONSES.USER_ALREADY_EXISTS(1));
-      expect(logger.warn).toHaveBeenCalled();
+      expect(result).toEqual(
+        USER_RESPONSES.USER_NOT_FOUND(createUserDto.createdBy),
+      );
     });
 
-    it('should create a new user and return USER_CREATED', async () => {
+    it('should create a user successfully', async () => {
       jest.spyOn(roleRepository, 'findOne').mockResolvedValue(new Role());
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(new User());
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
       jest.spyOn(userRepository, 'save').mockResolvedValue({ id: 1 } as User);
       jest
         .spyOn(userContactDetailsRepository, 'save')
-        .mockResolvedValue({ id: 1 } as UserContactDetails);
+        .mockResolvedValue([] as unknown as UserContactDetails);
 
       const createUserDto: CreateUserDTO = {
         firstName: 'John',
         lastName: 'Doe',
+        password: 'password',
         role: { id: 1 },
+        createdBy: 1,
         contactDetails: [],
       } as CreateUserDTO;
 
       const result = await service.createUser(createUserDto);
-      expect(result).toEqual(USER_RESPONSES.USER_CREATED({ id: 1 }));
-      expect(logger.log).toHaveBeenCalled();
+      expect(result).toEqual(USER_RESPONSES.USER_CREATED({ id: 1 } as User));
+      expect(logger.log).toHaveBeenCalledWith('User created with ID 1');
+    });
+
+    it('should hash the password before saving the user', async () => {
+      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(new Role());
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(new User());
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
+      jest.spyOn(userRepository, 'save').mockResolvedValue({ id: 1 } as User);
+      jest
+        .spyOn(userContactDetailsRepository, 'save')
+        .mockResolvedValue([] as unknown as UserContactDetails);
+
+      const createUserDto: CreateUserDTO = {
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'password',
+        role: { id: 1 },
+        createdBy: 1,
+        contactDetails: [],
+      } as CreateUserDTO;
+
+      await service.createUser(createUserDto);
+    });
+
+    it('should save contact details correctly', async () => {
+      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(new Role());
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(new User());
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
+      jest.spyOn(userRepository, 'save').mockResolvedValue({ id: 1 } as User);
+      const saveContactDetailsSpy = jest
+        .spyOn(userContactDetailsRepository, 'save')
+        .mockResolvedValue([] as unknown as UserContactDetails);
+
+      const createUserDto: CreateUserDTO = {
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'password',
+        role: { id: 1 },
+        createdBy: 1,
+        contactDetails: [{ type: 'email', value: 'john.doe@example.com' }],
+      } as unknown as CreateUserDTO;
+
+      await service.createUser(createUserDto);
+      expect(saveContactDetailsSpy).toHaveBeenCalledWith([
+        expect.objectContaining({
+          user: expect.objectContaining({ id: 1 }),
+          type: 'email',
+          value: 'john.doe@example.com',
+        }),
+      ]);
     });
   });
 
@@ -182,7 +238,7 @@ describe('UserService', () => {
 
       const result = await service.updateUser(1, updateUserDto);
       expect(result).toEqual(
-        USER_RESPONSES.USER_NOT_FOUND(updateUserDto.role.id),
+        ROLE_RESPONSES.ROLE_NOT_FOUND(updateUserDto.role.id),
       );
     });
 
@@ -216,24 +272,51 @@ describe('UserService', () => {
     });
   });
 
-  describe('deactivateUser', () => {
+  describe('setActiveStatus', () => {
     it('should return USER_NOT_FOUND if user does not exist', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await service.deactivateUser(1);
+      const result = await service.setActiveStatus(1, false);
       expect(result).toEqual(USER_RESPONSES.USER_NOT_FOUND(1));
       expect(logger.warn).toHaveBeenCalledWith('User with ID 1 not found');
     });
 
-    it('should deactivate the user and return USER_DEACTIVATED', async () => {
+    it('should return USER_ALREADY_IN_STATE if user is already in the desired state', async () => {
+      const user = { id: 1, isActive: false } as User;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+
+      const result = await service.setActiveStatus(1, false);
+      expect(result).toEqual(
+        USER_RESPONSES.USER_ALREADY_IN_STATE(1, 'inactive'),
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'User with ID 1 is already inactive',
+      );
+    });
+
+    it('should activate the user and return USER_STATE_CHANGED', async () => {
+      const user = { id: 1, isActive: false } as User;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest
+        .spyOn(userRepository, 'save')
+        .mockResolvedValue({ ...user, isActive: true });
+
+      const result = await service.setActiveStatus(1, true);
+      expect(result).toEqual(USER_RESPONSES.USER_STATE_CHANGED(1, 'activated'));
+      expect(logger.log).toHaveBeenCalledWith('User with ID 1 activated');
+    });
+
+    it('should deactivate the user and return USER_STATE_CHANGED', async () => {
       const user = { id: 1, isActive: true } as User;
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
       jest
         .spyOn(userRepository, 'save')
         .mockResolvedValue({ ...user, isActive: false });
 
-      const result = await service.deactivateUser(1);
-      expect(result).toEqual(USER_RESPONSES.USER_DEACTIVATED(1));
+      const result = await service.setActiveStatus(1, false);
+      expect(result).toEqual(
+        USER_RESPONSES.USER_STATE_CHANGED(1, 'deactivated'),
+      );
       expect(logger.log).toHaveBeenCalledWith('User with ID 1 deactivated');
     });
   });

@@ -8,6 +8,8 @@ import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/us
 import { CreateUserDTO } from 'dto/requests/create-user.dto';
 import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { Role } from 'src/main/entities/role.entity';
+import { ROLE_RESPONSES } from '../commons/constants/response-constants/role.response.constant';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -22,12 +24,18 @@ export class UserService {
   ) {}
 
   async createUser(createUserDto: CreateUserDTO): Promise<object> {
-    // Validate role existence
     const role = await this.roleRepository.findOne({
       where: { id: createUserDto.role.id },
     });
     if (!role) {
-      return USER_RESPONSES.USER_NOT_FOUND(createUserDto.role.id);
+      return ROLE_RESPONSES.ROLE_NOT_FOUND(createUserDto.role.id);
+    }
+
+    const createdByUser = await this.userRepository.findOne({
+      where: { id: createUserDto.createdBy },
+    });
+    if (!createdByUser) {
+      return USER_RESPONSES.USER_NOT_FOUND(createUserDto.createdBy);
     }
 
     const existingUser = await this.userRepository.findOne({
@@ -46,9 +54,10 @@ export class UserService {
     const user = new User();
     Object.assign(user, createUserDto);
 
+    user.password = await bcrypt.hash(createUserDto.password, 10);
+
     const savedUser = await this.userRepository.save(user);
 
-    // Save contact details
     const contactDetails = createUserDto.contactDetails.map((detail) => {
       const contactDetail = new UserContactDetails();
       contactDetail.user = savedUser;
@@ -60,6 +69,7 @@ export class UserService {
     this.logger.log(`User created with ID ${savedUser.id}`);
     return USER_RESPONSES.USER_CREATED(savedUser);
   }
+
   async getUsers(): Promise<object> {
     this.logger.log('Fetching all users');
     const users = await this.userRepository.find({
@@ -95,20 +105,30 @@ export class UserService {
       return USER_RESPONSES.USER_NOT_FOUND(id);
     }
 
-    // Validate role existence
     if (updateUserDto.role) {
       const role = await this.roleRepository.findOne({
         where: { id: updateUserDto.role.id },
       });
       if (!role) {
-        return USER_RESPONSES.USER_NOT_FOUND(updateUserDto.role.id);
+        return ROLE_RESPONSES.ROLE_NOT_FOUND(updateUserDto.role.id);
       }
     }
 
+    const updatedByUser = await this.userRepository.findOne({
+      where: { id: updateUserDto.updatedBy },
+    });
+    if (!updatedByUser) {
+      return USER_RESPONSES.USER_NOT_FOUND(updateUserDto.updatedBy);
+    }
+
     Object.assign(user, updateUserDto);
+
+    if (updateUserDto.password) {
+      user.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
     const updatedUser = await this.userRepository.save(user);
 
-    // Update contact details
     if (updateUserDto.contactDetails) {
       await this.userContactDetailsRepository.delete({ user: { id } });
       const contactDetails = updateUserDto.contactDetails.map((detail) => {
@@ -123,17 +143,25 @@ export class UserService {
     this.logger.log(`User with ID ${id} updated`);
     return USER_RESPONSES.USER_UPDATED(updatedUser);
   }
-  async deactivateUser(id: number): Promise<object> {
+
+  async setActiveStatus(id: number, isActive: boolean): Promise<object> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
       return USER_RESPONSES.USER_NOT_FOUND(id);
     }
 
-    user.isActive = false;
+    if (user.isActive === isActive) {
+      const status = isActive ? 'active' : 'inactive';
+      this.logger.warn(`User with ID ${id} is already ${status}`);
+      return USER_RESPONSES.USER_ALREADY_IN_STATE(id, status);
+    }
+
+    user.isActive = isActive;
     await this.userRepository.save(user);
 
-    this.logger.log(`User with ID ${id} deactivated`);
-    return USER_RESPONSES.USER_DEACTIVATED(id);
+    const action = isActive ? 'activated' : 'deactivated';
+    this.logger.log(`User with ID ${id} ${action}`);
+    return USER_RESPONSES.USER_STATE_CHANGED(id, action);
   }
 }

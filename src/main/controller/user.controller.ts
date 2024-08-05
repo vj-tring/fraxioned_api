@@ -69,7 +69,7 @@ export class UserController {
     return this.userService.updateUser(id, updateUserDto);
   }
 
-  @Patch('user/:id/deactivate')
+  @Patch('user/:id/set-active-status')
   @UseGuards(AuthGuard)
   @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
   @ApiHeader({
@@ -77,7 +77,10 @@ export class UserController {
     required: true,
     description: 'Access Token',
   })
-  async deactivateUser(@Param('id') id: number): Promise<object> {
-    return this.userService.deactivateUser(id);
+  async setActiveStatus(
+    @Param('id') id: number,
+    @Body('isActive') isActive: boolean,
+  ): Promise<object> {
+    return this.userService.setActiveStatus(id, isActive);
   }
 }
