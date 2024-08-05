@@ -123,7 +123,7 @@ describe('PropertySeasonHolidaysService', () => {
       updatedBy: 0,
       createdAt: undefined,
       updatedAt: undefined,
-    },
+    } as User,
   };
 
   const updatePropertySeasonHolidayDto: UpdatePropertySeasonHolidayDto = {
@@ -177,7 +177,7 @@ describe('PropertySeasonHolidaysService', () => {
       updatedBy: 0,
       createdAt: undefined,
       updatedAt: undefined,
-    },
+    } as User,
   };
 
   describe('createPropertySeasonHoliday', () => {

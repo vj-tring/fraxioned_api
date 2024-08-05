@@ -216,26 +216,25 @@ describe('UserService', () => {
     });
   });
 
-  describe('deleteUser', () => {
+  describe('deactivateUser', () => {
     it('should return USER_NOT_FOUND if user does not exist', async () => {
-      const deleteResult: DeleteResult = { affected: 0, raw: [] };
-      jest.spyOn(userRepository, 'delete').mockResolvedValue(deleteResult);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await service.deleteUser(1);
+      const result = await service.deactivateUser(1);
       expect(result).toEqual(USER_RESPONSES.USER_NOT_FOUND(1));
-      expect(logger.warn).toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith('User with ID 1 not found');
     });
 
-    it('should delete the user and return USER_DELETED', async () => {
-      const deleteResult: DeleteResult = { affected: 1, raw: [] };
-      jest.spyOn(userRepository, 'delete').mockResolvedValue(deleteResult);
+    it('should deactivate the user and return USER_DEACTIVATED', async () => {
+      const user = { id: 1, isActive: true } as User;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
       jest
-        .spyOn(userContactDetailsRepository, 'delete')
-        .mockResolvedValue({ affected: 1 } as DeleteResult);
+        .spyOn(userRepository, 'save')
+        .mockResolvedValue({ ...user, isActive: false });
 
-      const result = await service.deleteUser(1);
-      expect(result).toEqual(USER_RESPONSES.USER_DELETED);
-      expect(logger.log).toHaveBeenCalled();
+      const result = await service.deactivateUser(1);
+      expect(result).toEqual(USER_RESPONSES.USER_DEACTIVATED(1));
+      expect(logger.log).toHaveBeenCalledWith('User with ID 1 deactivated');
     });
   });
 });

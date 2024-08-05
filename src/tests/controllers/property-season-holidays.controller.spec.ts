@@ -106,7 +106,7 @@ describe('PropertySeasonHolidaysController', () => {
       updatedBy: 0,
       createdAt: undefined,
       updatedAt: undefined,
-    },
+    } as User,
   };
 
   describe('createPropertySeasonHoliday', () => {
@@ -294,7 +294,7 @@ describe('PropertySeasonHolidaysController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       const propertySeasonHoliday = { id: 1 } as PropertySeasonHolidays;
       const expectedResult =

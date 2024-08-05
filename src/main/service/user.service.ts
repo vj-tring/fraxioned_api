@@ -60,7 +60,6 @@ export class UserService {
     this.logger.log(`User created with ID ${savedUser.id}`);
     return USER_RESPONSES.USER_CREATED(savedUser);
   }
-
   async getUsers(): Promise<object> {
     this.logger.log('Fetching all users');
     const users = await this.userRepository.find({
@@ -124,18 +123,17 @@ export class UserService {
     this.logger.log(`User with ID ${id} updated`);
     return USER_RESPONSES.USER_UPDATED(updatedUser);
   }
-
-  async deleteUser(id: number): Promise<object> {
-    const result = await this.userRepository.delete(id);
-    if (result.affected === 0) {
+  async deactivateUser(id: number): Promise<object> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
       return USER_RESPONSES.USER_NOT_FOUND(id);
     }
 
-    // Delete contact details
-    await this.userContactDetailsRepository.delete({ user: { id } });
+    user.isActive = false;
+    await this.userRepository.save(user);
 
-    this.logger.log(`User with ID ${id} deleted`);
-    return USER_RESPONSES.USER_DELETED;
+    this.logger.log(`User with ID ${id} deactivated`);
+    return USER_RESPONSES.USER_DEACTIVATED(id);
   }
 }

@@ -47,4 +47,9 @@ export const USER_RESPONSES = {
     message: 'User fetched successfully',
     user,
   }),
+
+  USER_DEACTIVATED: (id: number): { status: number; message: string } => ({
+    status: HttpStatus.NOT_FOUND,
+    message: `User with ID: ${id} is Deactivated`,
+  }),
 };

@@ -118,14 +118,14 @@ describe('UserController', () => {
     });
   });
 
-  describe('deleteUser', () => {
-    it('should delete a user', async () => {
+  describe('deactivateUser', () => {
+    it('should deactivate a user', async () => {
       jest
-        .spyOn(service, 'deleteUser')
-        .mockResolvedValue(USER_RESPONSES.USER_DELETED);
+        .spyOn(service, 'deactivateUser')
+        .mockResolvedValue(USER_RESPONSES.USER_DEACTIVATED);
 
-      const result = await controller.deleteUser(1);
-      expect(result).toEqual(USER_RESPONSES.USER_DELETED);
+      const result = await controller.deactivateUser(1);
+      expect(result).toEqual(USER_RESPONSES.USER_DEACTIVATED);
     });
   });
 });

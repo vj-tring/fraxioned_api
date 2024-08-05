@@ -6,8 +6,10 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Role } from './role.entity';
+import { UserContactDetails } from './user_contact_details.entity';
 
 @Entity('fxn_users')
 export class User {
@@ -132,4 +134,7 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at', nullable: true, default: null })
   updatedAt: Date;
+
+  @OneToMany(() => UserContactDetails, (contactDetail) => contactDetail.user)
+  contactDetails: UserContactDetails[];
 }

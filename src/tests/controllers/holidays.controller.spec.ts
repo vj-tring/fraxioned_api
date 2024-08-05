@@ -85,7 +85,7 @@ describe('HolidaysController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
 
       const expectedHoliday: Holidays = {
@@ -135,7 +135,7 @@ describe('HolidaysController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       const error = new Error('An error occurred');
       jest.spyOn(service, 'create').mockRejectedValue(error);
@@ -251,7 +251,7 @@ describe('HolidaysController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       const holiday = { id: 1 } as Holidays;
       const expectedResult = HOLIDAYS_RESPONSES.HOLIDAY_UPDATED(holiday);

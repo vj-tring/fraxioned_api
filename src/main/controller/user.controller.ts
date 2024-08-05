@@ -4,7 +4,6 @@ import {
   Post,
   Param,
   Body,
-  Delete,
   Patch,
   UseGuards,
 } from '@nestjs/common';
@@ -70,7 +69,7 @@ export class UserController {
     return this.userService.updateUser(id, updateUserDto);
   }
 
-  @Delete('user/:id')
+  @Patch('user/:id/deactivate')
   @UseGuards(AuthGuard)
   @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
   @ApiHeader({
@@ -78,7 +77,7 @@ export class UserController {
     required: true,
     description: 'Access Token',
   })
-  async deleteUser(@Param('id') id: number): Promise<object> {
-    return this.userService.deleteUser(id);
+  async deactivateUser(@Param('id') id: number): Promise<object> {
+    return this.userService.deactivateUser(id);
   }
 }

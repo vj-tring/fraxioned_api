@@ -11,16 +11,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'entities/role.entity';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { Type } from 'class-transformer';
-
-class UserContactDetailsDTO {
-  @IsString()
-  @IsNotEmpty({ message: 'contactType is required' })
-  contactType: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'contactValue is required' })
-  contactValue: string;
-}
+import { UserContactDetailsDTO } from './user-contact-details.dto';
 
 export class CreateUserDTO {
   @ApiProperty({ example: { id: 1 } })
