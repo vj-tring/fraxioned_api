@@ -7,8 +7,8 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
-  Put,
 } from '@nestjs/common';
 import { PropertyDetailsService } from '../service/property-details.service';
 import { CreatePropertyDetailsDto } from '../dto/requests/create-property-details.dto';
@@ -83,7 +83,7 @@ export class PropertyDetailsController {
     }
   }
 
-  @Put('property-detail/:id')
+  @Patch('property-detail/:id')
   @HttpCode(HttpStatus.OK)
   // @UseGuards(AuthGuard)
   // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })

@@ -444,6 +444,7 @@ describe('PropertiesService', () => {
       jest
         .spyOn(propertiesRepository, 'merge')
         .mockReturnValue({ ...mockProperties, ...mockUpdatePropertiesDto });
+      jest.spyOn(propertiesRepository, 'save').mockResolvedValue(null);
 
       const result = await service.updatePropertiesById(
         mockPropertyId,
@@ -459,6 +460,7 @@ describe('PropertiesService', () => {
         mockProperties,
         mockUpdatePropertiesDto,
       );
+      expect(propertiesRepository.save).toHaveBeenCalled();
     });
 
     it('should return NotFoundException if no properties found', async () => {

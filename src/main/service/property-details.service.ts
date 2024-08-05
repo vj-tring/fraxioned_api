@@ -26,7 +26,7 @@ export class PropertyDetailsService {
   ): Promise<CreatePropertyDetailsResponseDto> {
     try {
       const existingProperties = await this.propertiesRepository.findOne({
-        where: { id: createPropertyDetailsDto.property.id },
+        where: { id: createPropertyDetailsDto.property as unknown as number },
       });
 
       if (!existingProperties) {
@@ -110,7 +110,7 @@ export class PropertyDetailsService {
       }
       if (
         existingPropertyDetails.property.id !=
-        (updatePropertyDetailsDto.property as unknown as number)
+        updatePropertyDetailsDto.property.id
       ) {
         throw new BadRequestException('Property ID does not match');
       }

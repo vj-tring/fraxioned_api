@@ -4,7 +4,6 @@ import { User } from 'src/main/entities/user.entity';
 
 export class UpdatePropertyDetailsDto {
   @IsNotEmpty()
-  @IsInt()
   property: Properties;
 
   @IsOptional()
