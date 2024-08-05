@@ -10,6 +10,7 @@ import { RoleModule } from './main/modules/role.module';
 import { PropertySeasonHolidaysModule } from './main/modules/property-season-holidays.module';
 import { UserSessionModule } from './main/modules/user-session.module';
 import { UserPropertyModule } from './main/modules/user-property.module';
+import { UserModule } from './main/modules/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserPropertyModule } from './main/modules/user-property.module';
     PropertySeasonHolidaysModule,
     UserSessionModule,
     UserPropertyModule,
+    UserModule,
   ],
 })
 export class AppModule {}
