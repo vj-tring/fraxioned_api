@@ -137,7 +137,11 @@ export class AuthenticationService {
       return LOGIN_RESPONSES.USER_NOT_FOUND;
     }
 
-    const user = userEmail.user;
+    const user = await this.userRepository.findOne({
+      where: { id: userEmail.user.id },
+      relations: ['role'],
+      select: { role: { id: true, roleName: true } },
+    });
 
     if (!user) {
       this.logger.error(`User entity not found for email: ${email}`);
@@ -150,7 +154,6 @@ export class AuthenticationService {
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
     if (!isPasswordValid) {
       this.logger.error(`Invalid credentials for email: ${email}`);
       return LOGIN_RESPONSES.INVALID_CREDENTIALS;
@@ -177,9 +180,11 @@ export class AuthenticationService {
     await this.userSessionRepository.save(session);
 
     const { ...userDetails } = user;
-
     this.logger.log(`Login successful for email: ${email}`);
-    return LOGIN_RESPONSES.LOGIN_SUCCESS(userDetails, session);
+    return LOGIN_RESPONSES.LOGIN_SUCCESS(
+      { ...userDetails, role: user.role },
+      session,
+    );
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<object> {
