@@ -151,11 +151,4 @@ export class CreateUserPropertyDTO {
     message: 'createdBy must be an object with a valid id where (id >= 1)',
   })
   createdBy: User;
-
-  @ApiProperty({ example: { id: 1 } })
-  @IsNotEmpty({ message: 'updatedBy is required' })
-  @IsValidId({
-    message: 'updatedBy must be an object with a valid id where (id >= 1)',
-  })
-  updatedBy: User;
 }

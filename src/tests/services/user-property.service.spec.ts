@@ -80,7 +80,6 @@ describe('UserPropertyService', () => {
         lastMinuteBookedNights: 2,
         lastMinuteRemainingNights: 3,
         createdBy: { id: 1 } as User,
-        updatedBy: { id: 1 } as User,
       };
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);
@@ -139,7 +138,6 @@ describe('UserPropertyService', () => {
         lastMinuteBookedNights: 2,
         lastMinuteRemainingNights: 3,
         createdBy: { id: 1 } as User,
-        updatedBy: { id: 1 } as User,
       };
 
       jest

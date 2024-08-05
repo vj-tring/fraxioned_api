@@ -142,28 +142,6 @@ describe('UserPropertyController', () => {
           createdAt: undefined,
           updatedAt: undefined,
         },
-        updatedBy: {
-          id: 1,
-          role: new Role(),
-          firstName: '',
-          lastName: '',
-          password: '',
-          imageURL: '',
-          isActive: false,
-          addressLine1: '',
-          addressLine2: '',
-          state: '',
-          country: '',
-          city: '',
-          zipcode: '',
-          resetToken: '',
-          resetTokenExpires: undefined,
-          lastLoginTime: undefined,
-          createdBy: 0,
-          updatedBy: 0,
-          createdAt: undefined,
-          updatedAt: undefined,
-        },
       };
 
       jest.spyOn(service, 'createUserProperty').mockResolvedValue(

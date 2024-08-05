@@ -10,9 +10,9 @@ import {
 } from '@nestjs/common';
 import { UserPropertyService } from 'services/user-property.service';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
-import { CreateUserPropertyDTO } from '../dto/requests/create-user-property.dto';
-import { UpdateUserPropertyDTO } from '../dto/requests/update-user-property.dto';
-import { AuthGuard } from '../commons/guards/auth.guard';
+import { CreateUserPropertyDTO } from 'dto/requests/create-user-property.dto';
+import { UpdateUserPropertyDTO } from 'dto/requests/update-user-property.dto';
+import { AuthGuard } from 'commons/guards/auth.guard';
 
 @ApiTags('UserProperty')
 @Controller('v1/user-properties')
