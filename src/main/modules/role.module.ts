@@ -5,9 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'modules/logger.module';
 import { RoleController } from 'controllers/role.controller';
 import { User } from '../entities/user.entity';
+import { AuthenticationModule } from './authentication.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Role, User]), LoggerModule],
+  imports: [
+    TypeOrmModule.forFeature([Role, User]),
+    LoggerModule,
+    AuthenticationModule,
+  ],
   controllers: [RoleController],
   providers: [RoleService],
 })

@@ -6,6 +6,8 @@ import { Role } from 'entities/role.entity';
 import { LoggerService } from 'services/logger.service';
 import { User } from 'entities/user.entity';
 import { Repository } from 'typeorm';
+import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('RoleController', () => {
   let controller: RoleController;
@@ -31,6 +33,15 @@ describe('RoleController', () => {
             warn: jest.fn(),
           },
         },
+        {
+          provide: AuthenticationService,
+          useValue: {
+            validateUser: jest.fn(),
+            login: jest.fn(),
+            logout: jest.fn(),
+          },
+        },
+        AuthGuard,
       ],
     }).compile();
 
