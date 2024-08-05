@@ -186,6 +186,7 @@ export class AuthenticationService {
       session,
     );
   }
+
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<object> {
     this.logger.log(
       `Forgot password request for email: ${forgotPasswordDto.email}`,
