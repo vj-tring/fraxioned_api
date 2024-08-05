@@ -1,37 +1,27 @@
-import { IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
-import { Properties } from 'entities/properties.entity';
-import { Holidays } from 'entities/holidays.entity';
-import { IsValidId } from 'commons/guards/is-valid-id.decorator';
-import { User } from 'entities/user.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
+import { Holidays } from 'src/main/entities/holidays.entity';
+import { Properties } from 'src/main/entities/properties.entity';
+import { User } from 'src/main/entities/user.entity';
 
 export class UpdatePropertySeasonHolidayDto {
-  @ApiProperty({
-    example: { id: 1 },
-  })
-  @IsOptional()
+  @IsNotEmpty({ message: 'property ID is required' })
   @IsValidId({
     message: 'property must be an object with a valid id where (id >= 1)',
   })
   property: Properties;
 
-  @ApiProperty({
-    example: { id: 1 },
-  })
-  @IsOptional()
+  @IsNotEmpty({ message: 'holiday ID is required' })
   @IsValidId({
     message: 'holiday must be an object with a valid id where (id >= 1)',
   })
   holiday: Holidays;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'Is peak season setting is required' })
   @IsBoolean()
   isPeakSeason: boolean;
 
-  @ApiProperty({
-    example: { id: 1 },
-  })
-  @IsNotEmpty({ message: 'updated by is required' })
+  @IsNotEmpty({ message: 'updatedBy is required' })
   @IsValidId({
     message: 'updatedBy must be an object with a valid id where (id >= 1)',
   })

@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -17,7 +17,6 @@ export class CreateHolidayDto {
     example: '2024-08-03',
   })
   @IsNotEmpty({ message: 'start date is required' })
-  @IsDate()
   @Type(() => Date)
   startDate: Date;
 
@@ -25,7 +24,6 @@ export class CreateHolidayDto {
     example: '2024-08-03',
   })
   @IsNotEmpty({ message: 'end date is required' })
-  @IsDate()
   @Type(() => Date)
   endDate: Date;
 

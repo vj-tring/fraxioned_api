@@ -32,10 +32,10 @@ export class UserProperties {
   @Column({ name: 'is_active', type: 'tinyint', nullable: false, default: 1 })
   isActive: boolean;
 
-  @Column({ name: 'year', type: 'int', nullable: true, default: null })
+  @Column({ name: 'year', type: 'int', nullable: false, default: null })
   year: number;
 
-  @Column({ name: 'psan', type: 'int', nullable: true, default: null })
+  @Column({ name: 'psan', type: 'int', nullable: false, default: null })
   peakAllottedNights: number;
 
   @Column({ name: 'psun', type: 'int', nullable: false, default: 0 })
@@ -53,7 +53,7 @@ export class UserProperties {
   @Column({ name: 'psrn', type: 'int', nullable: false, default: 0 })
   peakRemainingNights: number;
 
-  @Column({ name: 'psahn', type: 'int', nullable: true, default: null })
+  @Column({ name: 'psahn', type: 'int', nullable: false, default: null })
   peakAllottedHolidayNights: number;
 
   @Column({ name: 'psuhn', type: 'int', nullable: false, default: 0 })
@@ -65,13 +65,13 @@ export class UserProperties {
   @Column({ name: 'psrhn', type: 'int', nullable: false, default: 0 })
   peakRemainingHolidayNights: number;
 
-  @Column({ name: 'pschn', type: 'int', nullable: true, default: null })
+  @Column({ name: 'pschn', type: 'int', nullable: false, default: null })
   peakCancelledHolidayNights: number;
 
-  @Column({ name: 'pslhn', type: 'int', nullable: true, default: null })
+  @Column({ name: 'pslhn', type: 'int', nullable: false, default: null })
   peakLostHolidayNights: number;
 
-  @Column({ name: 'osan', type: 'int', nullable: true, default: null })
+  @Column({ name: 'osan', type: 'int', nullable: false, default: null })
   offAllottedNights: number;
 
   @Column({ name: 'osun', type: 'int', nullable: false, default: 0 })
@@ -89,7 +89,7 @@ export class UserProperties {
   @Column({ name: 'osrn', type: 'int', nullable: false, default: 0 })
   offRemainingNights: number;
 
-  @Column({ name: 'osahn', type: 'int', nullable: true, default: null })
+  @Column({ name: 'osahn', type: 'int', nullable: false, default: null })
   offAllottedHolidayNights: number;
 
   @Column({ name: 'osuhn', type: 'int', nullable: false, default: 0 })
@@ -101,22 +101,22 @@ export class UserProperties {
   @Column({ name: 'osrhn', type: 'int', nullable: false, default: 0 })
   offRemainingHolidayNights: number;
 
-  @Column({ name: 'oschn', type: 'int', nullable: true, default: null })
+  @Column({ name: 'oschn', type: 'int', nullable: false, default: null })
   offCancelledHolidayNights: number;
 
-  @Column({ name: 'oslhn', type: 'int', nullable: true, default: null })
+  @Column({ name: 'oslhn', type: 'int', nullable: false, default: null })
   offLostHolidayNights: number;
 
-  @Column({ name: 'lmban', type: 'int', nullable: true, default: null })
+  @Column({ name: 'lmban', type: 'int', nullable: false, default: null })
   lastMinuteAllottedNights: number;
 
-  @Column({ name: 'lmbun', type: 'int', nullable: true, default: null })
+  @Column({ name: 'lmbun', type: 'int', nullable: false, default: null })
   lastMinuteUsedNights: number;
 
-  @Column({ name: 'lmbbn', type: 'int', nullable: true, default: null })
+  @Column({ name: 'lmbbn', type: 'int', nullable: false, default: null })
   lastMinuteBookedNights: number;
 
-  @Column({ name: 'lmbrn', type: 'int', nullable: true, default: null })
+  @Column({ name: 'lmbrn', type: 'int', nullable: false, default: null })
   lastMinuteRemainingNights: number;
 
   @ManyToOne(() => User, (user) => user.id)
@@ -127,9 +127,9 @@ export class UserProperties {
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
 
-  @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
+  @CreateDateColumn({ name: 'created_at', nullable: false, default: null })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', nullable: true, default: null })
+  @UpdateDateColumn({ name: 'updated_at', nullable: false, default: null })
   updatedAt: Date;
 }

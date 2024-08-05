@@ -11,7 +11,7 @@ import { AuthenticationService } from 'src/main/service/authentication.service';
 import { User } from 'src/main/entities/user.entity';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
-import { UserProperties } from 'src/main/entities/user_properties.entity';
+import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { Role } from 'src/main/entities/role.entity';
 import { MailService } from 'src/main/service/mail.service';
 import { LoggerService } from 'src/main/service/logger.service';

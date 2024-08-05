@@ -101,7 +101,6 @@ export class AuthenticationController {
   })
   @HttpCode(HttpStatus.OK)
   async resetPassword(
-    @UserAuth() userAuth: { userId: number; accessToken: string },
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<object> {
     try {

@@ -3,6 +3,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   Min,
 } from 'class-validator';
@@ -52,7 +53,9 @@ export class CommonPropertiesResponseDto {
   @Min(1)
   updatedBy: User;
 
+  @IsOptional()
   createdAt: Date;
 
+  @IsOptional()
   updatedAt: Date;
 }
