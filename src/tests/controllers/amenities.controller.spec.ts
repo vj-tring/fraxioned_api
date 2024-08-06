@@ -1,13 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateHolidayDto } from 'dto/requests/create-holiday.dto';
-import { UpdateHolidayDto } from 'dto/requests/update-holiday.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { Holidays } from 'src/main/entities/holidays.entity';
-import { HolidaysController } from 'src/main/controller/holidays.controller';
-import { HolidaysService } from 'src/main/service/holidays.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
-import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/response-constants/holiday.constants';
 import { Role } from 'src/main/entities/role.entity';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
@@ -93,7 +87,6 @@ describe('AmenitiesController', () => {
 
   describe('createHolcreateAmenityiday', () => {
     it('should create an amenity', async () => {
-      
       const expectedAmenity: Amenities = {
         id: 1,
         amenityName: 'Test Amenity',
@@ -104,8 +97,11 @@ describe('AmenitiesController', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const expectedResult =
-        AMENITIES_RESPONSES.AMENITY_CREATED(expectedAmenity, createAmenityDto.amenityName, 1);
+      const expectedResult = AMENITIES_RESPONSES.AMENITY_CREATED(
+        expectedAmenity,
+        createAmenityDto.amenityName,
+        1,
+      );
       jest.spyOn(service, 'createAmenity').mockResolvedValue(expectedResult);
 
       expect(await controller.createAmenity(createAmenityDto)).toEqual(
@@ -114,7 +110,6 @@ describe('AmenitiesController', () => {
     });
 
     it('should throw an HttpException if an error occurs', async () => {
-      
       const error = new Error('An error occurred');
       jest.spyOn(service, 'createAmenity').mockRejectedValue(error);
 
@@ -132,11 +127,8 @@ describe('AmenitiesController', () => {
 
   describe('getAllAmenities', () => {
     it('should get all amenities', async () => {
-   
-    const expectedResult = AMENITIES_RESPONSES.AMENITIES_FETCHED([]);
-      jest
-        .spyOn(service, 'findAllAmenities')
-        .mockResolvedValue(expectedResult);
+      const expectedResult = AMENITIES_RESPONSES.AMENITIES_FETCHED([]);
+      jest.spyOn(service, 'findAllAmenities').mockResolvedValue(expectedResult);
 
       expect(await controller.getAllAmenities()).toEqual(expectedResult);
     });
@@ -170,7 +162,10 @@ describe('AmenitiesController', () => {
         updatedAt: new Date(),
       };
 
-      const expectedResult = AMENITIES_RESPONSES.AMENITY_FETCHED(mockAmenity, mockAmenity.id);
+      const expectedResult = AMENITIES_RESPONSES.AMENITY_FETCHED(
+        mockAmenity,
+        mockAmenity.id,
+      );
 
       const id = 1;
       jest.spyOn(service, 'findAmenityById').mockResolvedValue(expectedResult);
@@ -225,7 +220,10 @@ describe('AmenitiesController', () => {
         } as User,
       };
       const amenity = { id: 1 } as Amenities;
-      const expectedResult = AMENITIES_RESPONSES.AMENITY_UPDATED(amenity, amenity.id);
+      const expectedResult = AMENITIES_RESPONSES.AMENITY_UPDATED(
+        amenity,
+        amenity.id,
+      );
 
       jest
         .spyOn(service, 'updateAmenityDetailById')
