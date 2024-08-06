@@ -7,6 +7,7 @@ import { PropertiesModule } from './main/modules/properties.module';
 import { typeOrmConfigAsync } from './main/database/typeorm.config';
 import { AuthenticationModule } from './main/modules/authentication.module';
 import { RoleModule } from './main/modules/role.module';
+import { PropertyDetailsModule } from './main/modules/property-details.module';
 import { PropertySeasonHolidaysModule } from './main/modules/property-season-holidays.module';
 import { UserSessionModule } from './main/modules/user-session.module';
 import { UserPropertyModule } from './main/modules/user-property.module';
@@ -21,6 +22,7 @@ import { UserDocumentModule } from './main/modules/user-document.module';
     DatabaseModule,
     HolidaysModule,
     PropertiesModule,
+    PropertyDetailsModule,
     AuthenticationModule,
     RoleModule,
     PropertySeasonHolidaysModule,
