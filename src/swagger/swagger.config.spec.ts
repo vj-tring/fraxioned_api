@@ -26,9 +26,9 @@ describe('Swagger', () => {
         .addTag('Fraxioned')
         .addBearerAuth()
         .build();
-
+      const globalPrefix = 'api';
       const setupSpy = jest.spyOn(SwaggerModule, 'setup');
-      setupSwagger(app);
+      setupSwagger(app, globalPrefix);
 
       expect(setupSpy).toHaveBeenCalledWith(
         'api',

@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
+import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { User } from 'src/main/entities/user.entity';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/main/service/mail.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from 'src/main/dto/login.dto';
+import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { LoggerService } from 'src/main/service/logger.service';
-import { UserSessions } from 'src/main/entities/user_sessions.entity';
+import { UserSession } from 'src/main/entities/user-session.entity';
 import * as crypto from 'crypto';
-import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
-import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
-import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
-import { UserProperties } from 'src/main/entities/user_properties.entity';
+import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
+import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
+import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
+import { UserProperties } from 'src/main/entities/user-properties.entity';
 import {
   LOGIN_RESPONSES,
   INVITE_USER_RESPONSES,
@@ -21,7 +21,7 @@ import {
   CHANGE_PASSWORD_RESPONSES,
   RESET_PASSWORD_RESPONSES,
   LOGOUT_RESPONSES,
-} from 'src/main/commons/constants/authResponse.constants';
+} from 'src/main/commons/constants/response-constants/auth.response.constant';
 
 @Injectable()
 export class AuthenticationService {
@@ -30,8 +30,8 @@ export class AuthenticationService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(UserContactDetails)
     private readonly userContactRepository: Repository<UserContactDetails>,
-    @InjectRepository(UserSessions)
-    private readonly userSessionRepository: Repository<UserSessions>,
+    @InjectRepository(UserSession)
+    private readonly userSessionRepository: Repository<UserSession>,
     @InjectRepository(UserProperties)
     private readonly userPropertyRepository: Repository<UserProperties>,
     private readonly mailService: MailService,
@@ -51,8 +51,8 @@ export class AuthenticationService {
       zipcode,
       phoneNumber,
       roleId,
-      created_by,
-      updated_by,
+      createdBy,
+      updatedBy,
       userPropertyDetails,
     } = inviteUserDto;
 
@@ -80,8 +80,8 @@ export class AuthenticationService {
       zipcode: zipcode,
       password: hashedPassword,
       isActive: true,
-      createdBy: created_by,
-      updatedBy: updated_by,
+      createdBy: createdBy,
+      updatedBy: updatedBy,
       role: { id: roleId },
     });
     await this.userRepository.save(user);
@@ -111,7 +111,7 @@ export class AuthenticationService {
 
     await this.userPropertyRepository.save(userProperty);
 
-    const loginLink = `http://localhost:3000/login`;
+    const loginLink = `http://localhost:3002/login`;
 
     await this.mailService.sendMail(
       email,
@@ -137,7 +137,11 @@ export class AuthenticationService {
       return LOGIN_RESPONSES.USER_NOT_FOUND;
     }
 
-    const user = userEmail.user;
+    const user = await this.userRepository.findOne({
+      where: { id: userEmail.user.id },
+      relations: ['role'],
+      select: { role: { id: true, roleName: true } },
+    });
 
     if (!user) {
       this.logger.error(`User entity not found for email: ${email}`);
@@ -150,7 +154,6 @@ export class AuthenticationService {
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
     if (!isPasswordValid) {
       this.logger.error(`Invalid credentials for email: ${email}`);
       return LOGIN_RESPONSES.INVALID_CREDENTIALS;
@@ -177,9 +180,11 @@ export class AuthenticationService {
     await this.userSessionRepository.save(session);
 
     const { ...userDetails } = user;
-
     this.logger.log(`Login successful for email: ${email}`);
-    return LOGIN_RESPONSES.LOGIN_SUCCESS(userDetails, session);
+    return LOGIN_RESPONSES.LOGIN_SUCCESS(
+      { ...userDetails, role: user.role },
+      session,
+    );
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<object> {
@@ -205,7 +210,7 @@ export class AuthenticationService {
 
     await this.userRepository.save(user);
 
-    const link = `http://localhost:3000/recover?resetToken=${user.resetToken}`;
+    const link = `http://localhost:3002/recover?resetToken=${user.resetToken}`;
     const subject = 'Password Reset Request';
     const text = `To reset your password, please click the following link: ${link}`;
 

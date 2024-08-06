@@ -10,30 +10,33 @@ import {
   UnauthorizedException,
   UnprocessableEntityException,
   InternalServerErrorException,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthenticationService } from 'src/main/service/authentication.service';
-import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
-import { LoginDto } from 'src/main/dto/login.dto';
-import { ForgotPasswordDto } from 'src/main/dto/forgotPassword.dto';
-import { ResetPasswordDto } from 'src/main/dto/resetPassword.dto';
-import { ChangePasswordDto } from 'src/main/dto/recoverPassword.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
+import { LoginDto } from 'src/main/dto/requests/login.dto';
+import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
+import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
+import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../commons/guards/auth.guard';
+import { UserAuth } from '../commons/guards/user-auth.decorator';
 
 @ApiTags('Authentication')
-@Controller('api/authentication')
+@Controller('v1/authentication')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Post('invite')
-  // @UseGuards(AuthGuard)
-  // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  // @ApiHeader({
-  //   name: 'access-token',
-  //   required: true,
-  //   description: 'Access Token',
-  // })
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
+  })
   inviteUser(
-    // @UserAuth() userAuth: { userId: number; accessToken: string },
+    @UserAuth() userAuth: { userId: number; accessToken: string },
     @Body() inviteUserDto: InviteUserDto,
   ): Promise<object> {
     return this.authenticationService.inviteUser(inviteUserDto);
@@ -89,16 +92,15 @@ export class AuthenticationController {
   }
 
   @Post('resetPassword')
-  // @UseGuards(AuthGuard)
-  // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  // @ApiHeader({
-  //   name: 'access-token',
-  //   required: true,
-  //   description: 'Access Token',
-  // })
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
+  })
   @HttpCode(HttpStatus.OK)
   async resetPassword(
-    // @UserAuth() userAuth: { userId: number; accessToken: string },
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<object> {
     try {

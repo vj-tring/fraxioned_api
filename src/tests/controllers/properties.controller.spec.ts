@@ -7,7 +7,16 @@ import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto
 import { NotFoundException } from '@nestjs/common';
 import { Properties } from 'src/main/entities/properties.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
+import { AuthenticationService } from 'src/main/service/authentication.service';
+import { User } from 'src/main/entities/user.entity';
+import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
+import { UserSession } from 'src/main/entities/user-session.entity';
+import { UserProperties } from 'src/main/entities/user-properties.entity';
+import { Role } from 'src/main/entities/role.entity';
+import { MailService } from 'src/main/service/mail.service';
+import { LoggerService } from 'src/main/service/logger.service';
 import * as bcrypt from 'bcrypt';
+import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('PropertiesController', () => {
   let controller: PropertiesController;
@@ -22,6 +31,49 @@ describe('PropertiesController', () => {
           provide: getRepositoryToken(Properties),
           useClass: Repository,
         },
+        {
+          provide: AuthenticationService,
+          useValue: {
+            validateUser: jest.fn(),
+            login: jest.fn(),
+            logout: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserContactDetails),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserSession),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserProperties),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Role),
+          useClass: Repository,
+        },
+        {
+          provide: MailService,
+          useValue: {
+            sendMail: jest.fn(),
+          },
+        },
+        {
+          provide: LoggerService,
+          useValue: {
+            log: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+          },
+        },
+        AuthGuard,
       ],
     }).compile();
 
@@ -216,7 +268,6 @@ describe('PropertiesController', () => {
       expect(service.getPropertiesById).toHaveBeenCalled();
     });
   });
-
   describe('updatePropertiesById', () => {
     it('should return a updated property of respective id', async () => {
       const mockProperties = new Properties();

@@ -1,15 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationService } from '../main/service/authentication.service';
-import { MailService } from '../main/service/mail.service';
-import { LoggerService } from '../main/service/logger.service';
+import { AuthenticationService } from '../../main/service/authentication.service';
+import { MailService } from 'src/main/service/mail.service';
+import { LoggerService } from '../../main/service/logger.service';
 import * as bcrypt from 'bcrypt';
-import { InviteUserDto } from 'src/main/dto/inviteUser.dto';
+import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { Repository } from 'typeorm';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
 import { User } from 'src/main/entities/user.entity';
-import { UserSessions } from 'src/main/entities/user_sessions.entity';
-import { UserProperties } from 'src/main/entities/user_properties.entity';
+import { UserSession } from 'src/main/entities/user-session.entity';
+import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { LOGIN_RESPONSES } from 'src/main/commons/constants/response-constants/auth.response.constant';
+import { LoginDto } from 'src/main/dto/requests/login.dto';
+import { Role } from 'src/main/entities/role.entity';
 
 type MockRepository<T> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
@@ -21,8 +24,8 @@ const createMockRepository = <T>(): MockRepository<T> => ({
   delete: jest.fn(),
 });
 
-jest.mock('../main/service/mail.service');
-jest.mock('../main/service/logger.service');
+jest.mock('services/mail.service');
+jest.mock('services/logger.service');
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),
   hash: jest.fn(),
@@ -31,7 +34,7 @@ jest.mock('bcrypt', () => ({
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let userRepository: MockRepository<User>;
-  let userSessionRepository: MockRepository<UserSessions>;
+  let userSessionRepository: MockRepository<UserSession>;
   let userPropertyRepository: MockRepository<UserProperties>;
   let userContactDetailsRepository: MockRepository<UserContactDetails>;
   let mailService: MailService;
@@ -52,7 +55,7 @@ describe('AuthenticationService', () => {
           useValue: userContactDetailsRepository,
         },
         {
-          provide: getRepositoryToken(UserSessions),
+          provide: getRepositoryToken(UserSession),
           useValue: userSessionRepository,
         },
         {
@@ -90,8 +93,8 @@ describe('AuthenticationService', () => {
         zipcode: '10001',
         phoneNumber: '1234567890',
         roleId: 1,
-        created_by: 1,
-        updated_by: 1,
+        createdBy: 1,
+        updatedBy: 1,
         userPropertyDetails: {
           propertyID: 0,
           noOfShares: '',
@@ -134,8 +137,8 @@ describe('AuthenticationService', () => {
         zipcode: '10001',
         phoneNumber: '1234567890',
         roleId: 1,
-        created_by: 1,
-        updated_by: 1,
+        createdBy: 1,
+        updatedBy: 1,
         userPropertyDetails: {
           propertyID: 0,
           noOfShares: '',
@@ -153,58 +156,119 @@ describe('AuthenticationService', () => {
   });
 
   describe('login', () => {
-    it('should login a user successfully', async () => {
-      const loginDto = { email: 'test@example.com', password: 'password' };
+    it('should login successfully', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
       const user = {
         id: 1,
         password: 'hashedPassword',
         isActive: true,
-        lastLoginTime: null,
+        role: {
+          id: 1,
+          roleName: 'User',
+        } as Role,
+        lastLoginTime: new Date(),
       };
-      const userEmail = { user };
-      const session = { token: 'token', expiresAt: new Date() };
+      const userEmail = { user, contactValue: 'test@example.com' };
+      const session = {
+        token: 'token',
+        expiresAt: new Date(Date.now() + 10000),
+      };
 
       userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
+      userRepository.findOne.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      userRepository.save.mockResolvedValue(user);
       userSessionRepository.findOne.mockResolvedValue(session);
       userSessionRepository.save.mockResolvedValue(session);
 
       const result = await service.login(loginDto);
 
-      expect(result).toEqual({
-        message: 'Login successful',
-        status: 200,
-        user,
-        session: { token: session.token, expires_at: session.expiresAt },
-      });
+      expect(result).toEqual(
+        LOGIN_RESPONSES.LOGIN_SUCCESS({ ...user, role: user.role }, session),
+      );
+      expect(logger.log).toHaveBeenCalledWith(
+        `User attempting to login with email: ${loginDto.email}`,
+      );
+      expect(logger.log).toHaveBeenCalledWith(
+        `Login successful for email: ${loginDto.email}`,
+      );
     });
 
-    it('should return NotFoundException if user not found', async () => {
-      const loginDto = { email: 'test@example.com', password: 'password' };
+    it('should return USER_NOT_FOUND if email is not found', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
 
       userContactDetailsRepository.findOne.mockResolvedValue(null);
-      await expect(service.login(loginDto)).resolves.toEqual({
-        message: 'User not found',
-        status: 404,
-      });
+
+      const result = await service.login(loginDto);
+
+      expect(result).toEqual(LOGIN_RESPONSES.USER_NOT_FOUND);
+      expect(logger.error).toHaveBeenCalledWith(
+        `User not found with email: ${loginDto.email}`,
+      );
     });
 
-    it('should return UnauthorizedException if password is invalid', async () => {
-      const loginDto = { email: 'test@example.com', password: 'password' };
-      const user = { id: 1, password: 'hashedPassword', isActive: true };
-      const userEmail = { user };
+    it('should return USER_NOT_FOUND if user entity is not found', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+      const userEmail = { user: { id: 1 }, contactValue: 'test@example.com' };
 
       userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
+      userRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.login(loginDto);
+
+      expect(result).toEqual(LOGIN_RESPONSES.USER_NOT_FOUND);
+      expect(logger.error).toHaveBeenCalledWith(
+        `User entity not found for email: ${loginDto.email}`,
+      );
+    });
+
+    it('should return USER_NOT_ACTIVE if user is not active', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+      const user = { id: 1, isActive: false };
+      const userEmail = { user, contactValue: 'test@example.com' };
+
+      userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
+      userRepository.findOne.mockResolvedValue(user);
+
+      const result = await service.login(loginDto);
+
+      expect(result).toEqual(LOGIN_RESPONSES.USER_NOT_ACTIVE);
+      expect(logger.error).toHaveBeenCalledWith(
+        `User is not Active: ${loginDto.email}`,
+      );
+    });
+
+    it('should return INVALID_CREDENTIALS if password is invalid', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+      const user = { id: 1, password: 'hashedPassword', isActive: true };
+      const userEmail = { user, contactValue: 'test@example.com' };
+
+      userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
+      userRepository.findOne.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).resolves.toEqual({
-        message: 'Invalid credentials',
-        status: 401,
-      });
+      const result = await service.login(loginDto);
+
+      expect(result).toEqual(LOGIN_RESPONSES.INVALID_CREDENTIALS);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Invalid credentials for email: ${loginDto.email}`,
+      );
     });
   });
-
   describe('forgotPassword', () => {
     it('should send a password reset email successfully', async () => {
       const forgotPasswordDto = { email: 'test@example.com' };

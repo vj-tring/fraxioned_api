@@ -6,6 +6,7 @@ import { GlobalExceptionFilter } from './main/commons/exceptions/filters/http-ex
 import { seedRole } from './main/commons/seeds/roleSeed';
 import { DataSource } from 'typeorm';
 import { seedUser } from './main/commons/seeds/userSeed';
+import { seedProperties } from './main/commons/seeds/propertySeed';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,7 @@ async function bootstrap(): Promise<void> {
   const dataSource = app.get(DataSource);
   await seedRole(dataSource);
   await seedUser(dataSource);
+  await seedProperties(dataSource);
 
   // Global Pipes
   app.useGlobalPipes(
@@ -27,11 +29,11 @@ async function bootstrap(): Promise<void> {
   // Global Exception Filters
   app.useGlobalFilters(new GlobalExceptionFilter());
   // Set global prefix for API endpoints
-  // const globalPrefix = 'api';
-  // app.setGlobalPrefix(globalPrefix);
+  const globalPrefix = 'api';
+  app.setGlobalPrefix(globalPrefix);
 
   // Swagger configuration
-  setupSwagger(app);
+  setupSwagger(app, globalPrefix);
 
   // Enable CORS
   app.enableCors();

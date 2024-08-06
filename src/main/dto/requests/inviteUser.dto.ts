@@ -37,10 +37,10 @@ export class InviteUserDto {
   roleId: number;
 
   @IsNotEmpty({ message: 'updated_by is required' })
-  updated_by: number;
+  updatedBy: number;
 
   @IsNotEmpty({ message: 'created_by is required' })
-  created_by: number;
+  createdBy: number;
 
   @IsOptional()
   @ValidateNested()

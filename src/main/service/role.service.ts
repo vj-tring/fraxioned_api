@@ -2,16 +2,19 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from 'entities/role.entity';
-import { CreateRoleDTO } from 'dto/createRole.dto';
-import { UpdateRoleDTO } from 'dto/updateRole.dto';
+import { CreateRoleDTO } from 'src/main/dto/requests/createRole.dto';
+import { UpdateRoleDTO } from 'src/main/dto/requests/updateRole.dto';
 import { LoggerService } from 'services/logger.service';
-import { ROLE_RESPONSES } from 'src/main/commons/constants/roleResponse.constants';
+import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.response.constant';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class RoleService {
   constructor(
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly logger: LoggerService,
   ) {}
 
@@ -38,7 +41,17 @@ export class RoleService {
 
   async getRoles(): Promise<object> {
     this.logger.log('Fetching all roles');
-    const roles = await this.roleRepository.find();
+    const roles = await this.roleRepository.find({
+      relations: ['createdBy', 'updatedBy'],
+      select: {
+        createdBy: {
+          id: true,
+        },
+        updatedBy: {
+          id: true,
+        },
+      },
+    });
     if (roles.length === 0) {
       this.logger.warn('No roles found');
       return ROLE_RESPONSES.ROLES_NOT_FOUND;
@@ -47,7 +60,18 @@ export class RoleService {
   }
   async getRoleById(id: number): Promise<Role> {
     this.logger.log(`Fetching role with ID ${id}`);
-    const role = await this.roleRepository.findOne({ where: { id } });
+    const role = await this.roleRepository.findOne({
+      relations: ['createdBy', 'updatedBy'],
+      select: {
+        createdBy: {
+          id: true,
+        },
+        updatedBy: {
+          id: true,
+        },
+      },
+      where: { id },
+    });
     if (!role) {
       this.logger.warn(`Role with ID ${id} not found`);
       throw new NotFoundException(`Role with ID ${id} not found`);

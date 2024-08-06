@@ -6,15 +6,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from 'src/main/entities/role.entity';
 import { MailModule } from 'src/main/modules/mail.module';
 import { LoggerModule } from 'src/main/modules/logger.module';
-import { UserSessions } from 'src/main/entities/user_sessions.entity';
+import { UserSession } from 'entities/user-session.entity';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
-import { UserProperties } from 'src/main/entities/user_properties.entity';
+import { UserProperties } from 'src/main/entities/user-properties.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       User,
-      UserSessions,
+      UserSession,
       UserContactDetails,
       UserProperties,
       Role,
@@ -24,5 +24,6 @@ import { UserProperties } from 'src/main/entities/user_properties.entity';
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService],
+  exports: [AuthenticationService],
 })
 export class AuthenticationModule {}
