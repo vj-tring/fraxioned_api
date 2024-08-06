@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { User } from 'src/main/entities/user.entity';
