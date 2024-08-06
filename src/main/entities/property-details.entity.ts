@@ -57,15 +57,15 @@ export class PropertyDetails {
 
   @Column({
     name: 'check_in_time',
-    type: 'time',
+    type: 'timestamp',
   })
-  checkInTime: string;
+  checkInTime: Date;
 
   @Column({
     name: 'check_out_time',
-    type: 'time',
+    type: 'timestamp',
   })
-  checkOutTime: string;
+  checkOutTime: Date;
 
   @Column({
     name: 'pet_policy',
@@ -87,13 +87,13 @@ export class PropertyDetails {
 
   @Column({
     name: 'peak_season_start_date',
-    type: 'date',
+    type: 'timestamp',
   })
   peakSeasonStartDate: Date = undefined;
 
   @Column({
     name: 'peak_season_end_date',
-    type: 'date',
+    type: 'timestamp',
   })
   peakSeasonEndDate: Date = undefined;
 

@@ -87,6 +87,7 @@ export class PropertiesService {
         existingProperties,
         updatePropertiesDto,
       );
+      await this.propertiesRepository.save(updatedProperties);
       return updatedProperties;
     } catch (error) {
       throw error;
