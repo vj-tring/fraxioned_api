@@ -3,7 +3,7 @@ import { UserPropertyController } from 'controllers/user-property.controller';
 import { UserPropertyService } from 'services/user-property.service';
 import { CreateUserPropertyDTO } from 'dto/requests/create-user-property.dto';
 import { UpdateUserPropertyDTO } from 'dto/requests/update-user-property.dto';
-import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.response.constant';
+import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { NotFoundException } from '@nestjs/common';
 import { Role } from 'src/main/entities/role.entity';
 import { User } from 'src/main/entities/user.entity';
@@ -70,7 +70,7 @@ describe('UserPropertyController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
         property: {
           id: 1,
           propertyName: '',
@@ -87,7 +87,7 @@ describe('UserPropertyController', () => {
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as Properties,
         noOfShare: 1,
         acquisitionDate: new Date(),
         isActive: true,
@@ -141,7 +141,7 @@ describe('UserPropertyController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
 
       jest.spyOn(service, 'createUserProperty').mockResolvedValue(
@@ -317,7 +317,7 @@ describe('UserPropertyController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       const updatedUserProperty: UserProperties = {
         id: 1,
@@ -377,7 +377,7 @@ describe('UserPropertyController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -425,7 +425,7 @@ describe('UserPropertyController', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       jest
         .spyOn(service, 'updateUserProperty')

@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserProperties } from 'entities/user-properties.entity';
 import { LoggerService } from 'services/logger.service';
-import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.response.constant';
+import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { CreateUserPropertyDTO } from '../dto/requests/create-user-property.dto';
 import { UpdateUserPropertyDTO } from '../dto/requests/update-user-property.dto';
 import { User } from 'src/main/entities/user.entity';
@@ -29,8 +29,8 @@ export class UserPropertyService {
       where: { id: createUserPropertyDto.user.id },
     });
     if (!user) {
-      throw new NotFoundException(
-        `User with ID ${createUserPropertyDto.user.id} not found`,
+      return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
+        createUserPropertyDto.user.id,
       );
     }
 
@@ -39,8 +39,8 @@ export class UserPropertyService {
       where: { id: createUserPropertyDto.property.id },
     });
     if (!property) {
-      throw new NotFoundException(
-        `Property with ID ${createUserPropertyDto.property.id} not found`,
+      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
+        createUserPropertyDto.property.id,
       );
     }
 
@@ -49,10 +49,11 @@ export class UserPropertyService {
       where: { id: createUserPropertyDto.createdBy.id },
     });
     if (!createdBy) {
-      throw new NotFoundException(
-        `User with ID ${createUserPropertyDto.createdBy.id} not found`,
+      return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
+        createUserPropertyDto.createdBy.id,
       );
     }
+
     const existingUserProperty = await this.userPropertyRepository.findOne({
       where: {
         user: createUserPropertyDto.user,
@@ -98,7 +99,7 @@ export class UserPropertyService {
     return USER_PROPERTY_RESPONSES.USER_PROPERTIES_FETCHED(userProperties);
   }
 
-  async getUserPropertyById(id: number): Promise<UserProperties> {
+  async getUserPropertyById(id: number): Promise<object> {
     this.logger.log(`Fetching user property with ID ${id}`);
     const userProperty = await this.userPropertyRepository.findOne({
       relations: ['user', 'property', 'createdBy', 'updatedBy'],
@@ -112,9 +113,9 @@ export class UserPropertyService {
     });
     if (!userProperty) {
       this.logger.warn(`User property with ID ${id} not found`);
-      throw new NotFoundException(`User property with ID ${id} not found`);
+      return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(id);
     }
-    return userProperty;
+    return USER_PROPERTY_RESPONSES.USER_PROPERTY_FETCHED(userProperty);
   }
 
   async updateUserProperty(
@@ -126,7 +127,7 @@ export class UserPropertyService {
     });
     if (!userProperty) {
       this.logger.warn(`User property with ID ${id} not found`);
-      throw new NotFoundException(`User property with ID ${id} not found`);
+      return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(id);
     }
 
     // Validate user existence
@@ -135,8 +136,8 @@ export class UserPropertyService {
         where: { id: updateUserPropertyDto.user.id },
       });
       if (!user) {
-        throw new NotFoundException(
-          `User with ID ${updateUserPropertyDto.user.id} not found`,
+        return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
+          updateUserPropertyDto.user.id,
         );
       }
     }
@@ -147,8 +148,8 @@ export class UserPropertyService {
         where: { id: updateUserPropertyDto.property.id },
       });
       if (!property) {
-        throw new NotFoundException(
-          `Property with ID ${updateUserPropertyDto.property.id} not found`,
+        return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
+          updateUserPropertyDto.property.id,
         );
       }
     }
@@ -159,8 +160,8 @@ export class UserPropertyService {
         where: { id: updateUserPropertyDto.updatedBy.id },
       });
       if (!updatedBy) {
-        throw new NotFoundException(
-          `User with ID ${updateUserPropertyDto.updatedBy.id} not found`,
+        return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
+          updateUserPropertyDto.updatedBy.id,
         );
       }
     }
@@ -176,7 +177,7 @@ export class UserPropertyService {
     const result = await this.userPropertyRepository.delete(id);
     if (result.affected === 0) {
       this.logger.warn(`User property with ID ${id} not found`);
-      throw new NotFoundException(`User property with ID ${id} not found`);
+      return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(id);
     }
     this.logger.log(`User property with ID ${id} deleted`);
     return USER_PROPERTY_RESPONSES.USER_PROPERTY_DELETED;
