@@ -8,6 +8,8 @@ import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
 import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
 import { User } from 'src/main/entities/user.entity';
 import { Properties } from 'src/main/entities/properties.entity';
+import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
+import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 
 @Injectable()
 export class UserDocumentService {
@@ -28,18 +30,23 @@ export class UserDocumentService {
       where: { id: createUserDocumentDto.user.id },
     });
     if (!user) {
-      return USER_DOCUMENT_RESPONSES.DOCUMENT_NOT_FOUND(
-        createUserDocumentDto.user.id,
-      );
+      return USER_RESPONSES.USER_NOT_FOUND(createUserDocumentDto.user.id);
     }
 
     const property = await this.propertyRepository.findOne({
       where: { id: createUserDocumentDto.property.id },
     });
     if (!property) {
-      return USER_DOCUMENT_RESPONSES.DOCUMENT_NOT_FOUND(
+      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
         createUserDocumentDto.property.id,
       );
+    }
+
+    const createdBy = await this.userRepository.findOne({
+      where: { id: createUserDocumentDto.createdBy.id },
+    });
+    if (!createdBy) {
+      return USER_RESPONSES.USER_NOT_FOUND(createUserDocumentDto.createdBy.id);
     }
 
     const document = this.userDocumentRepository.create({
@@ -57,6 +64,10 @@ export class UserDocumentService {
     this.logger.log('Fetching all documents');
     const documents = await this.userDocumentRepository.find({
       relations: ['user', 'property'],
+      select: {
+        user: { id: true },
+        property: { id: true },
+      },
     });
     if (documents.length === 0) {
       this.logger.warn('No documents found');
@@ -70,6 +81,10 @@ export class UserDocumentService {
     const document = await this.userDocumentRepository.findOne({
       where: { id },
       relations: ['user', 'property'],
+      select: {
+        user: { id: true },
+        property: { id: true },
+      },
     });
     if (!document) {
       this.logger.warn(`Document with ID ${id} not found`);
@@ -96,23 +111,33 @@ export class UserDocumentService {
         where: { id: updateUserDocumentDto.user.id },
       });
       if (!user) {
-        return USER_DOCUMENT_RESPONSES.DOCUMENT_NOT_FOUND(
-          updateUserDocumentDto.user.id,
-        );
+        return USER_RESPONSES.USER_NOT_FOUND(updateUserDocumentDto.user.id);
       }
       document.user = user;
     }
 
-    if (updateUserDocumentDto.user.id) {
+    if (updateUserDocumentDto.property.id) {
       const property = await this.propertyRepository.findOne({
         where: { id: updateUserDocumentDto.property.id },
       });
       if (!property) {
-        return USER_DOCUMENT_RESPONSES.DOCUMENT_NOT_FOUND(
+        return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
           updateUserDocumentDto.property.id,
         );
       }
       document.property = property;
+    }
+
+    if (updateUserDocumentDto.updatedBy.id) {
+      const updatedBy = await this.userRepository.findOne({
+        where: { id: updateUserDocumentDto.updatedBy.id },
+      });
+      if (!updatedBy) {
+        return USER_RESPONSES.USER_NOT_FOUND(
+          updateUserDocumentDto.updatedBy.id,
+        );
+      }
+      document.updatedBy = updatedBy;
     }
 
     Object.assign(document, updateUserDocumentDto);
