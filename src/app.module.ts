@@ -27,6 +27,6 @@ import { AmenitiesModule } from './main/modules/amenities.module';
     UserPropertyModule,
     UserModule,
     AmenitiesModule,
-],
+  ],
 })
 export class AppModule {}
