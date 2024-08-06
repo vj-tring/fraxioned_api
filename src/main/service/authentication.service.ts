@@ -232,20 +232,11 @@ export class AuthenticationService {
     user.lastLoginTime = new Date();
     await this.userRepository.save(user);
 
-    let session = await this.userSessionRepository.findOne({
-      where: { user: { id: user.id } },
+    const session = this.userSessionRepository.create({
+      user,
+      token: crypto.randomBytes(50).toString('hex'),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
-
-    if (!session) {
-      session = this.userSessionRepository.create({
-        user,
-        token: crypto.randomBytes(50).toString('hex'),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      });
-    } else {
-      session.token = crypto.randomBytes(50).toString('hex');
-      session.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    }
 
     await this.userSessionRepository.save(session);
 
