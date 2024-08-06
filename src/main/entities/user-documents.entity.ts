@@ -11,7 +11,7 @@ import { User } from './user.entity';
 import { Properties } from './properties.entity';
 
 @Entity('fxn_user_documents')
-export class UserDocuments {
+export class UserDocument {
   @PrimaryGeneratedColumn()
   id: number;
 

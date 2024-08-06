@@ -9,7 +9,7 @@ import { Properties } from 'src/main/entities/properties.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { User } from 'src/main/entities/user.entity';
-import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { Role } from 'src/main/entities/role.entity';

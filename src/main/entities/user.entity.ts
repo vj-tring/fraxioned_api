@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Role } from './role.entity';
-import { UserContactDetails } from './user_contact_details.entity';
+import { UserContactDetails } from './user-contact-details.entity';
 
 @Entity('fxn_users')
 export class User {
