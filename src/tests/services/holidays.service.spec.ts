@@ -9,7 +9,7 @@ import { LoggerService } from 'src/main/service/logger.service';
 import { Holidays } from 'src/main/entities/holidays.entity';
 import { User } from 'src/main/entities/user.entity';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
-import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/response-constants/holidays-response.constants';
+import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/response-constants/holiday.constants';
 import { Role } from 'src/main/entities/role.entity';
 
 describe('HolidaysService', () => {
@@ -88,7 +88,7 @@ describe('HolidaysService', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       const user = { id: 1 } as User;
       const holiday = { id: 1 } as Holidays;
@@ -128,7 +128,7 @@ describe('HolidaysService', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       const existingHoliday = { id: 1 } as Holidays;
 
@@ -173,7 +173,7 @@ describe('HolidaysService', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
@@ -215,7 +215,7 @@ describe('HolidaysService', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
 
       jest
@@ -342,7 +342,7 @@ describe('HolidaysService', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       const holiday = { id: 1 } as Holidays;
       const user = { id: 1 } as User;
@@ -384,7 +384,7 @@ describe('HolidaysService', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       const id = 1;
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
@@ -424,7 +424,7 @@ describe('HolidaysService', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
 
       const holiday = { id: 1 } as Holidays;
@@ -470,7 +470,7 @@ describe('HolidaysService', () => {
           updatedBy: 0,
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as User,
       };
       jest
         .spyOn(holidayRepository, 'findOne')

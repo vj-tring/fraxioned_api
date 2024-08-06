@@ -9,6 +9,7 @@ import { LoggerModule } from 'src/main/modules/logger.module';
 import { UserSession } from 'entities/user-session.entity';
 import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
+import { Properties } from '../entities/properties.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserProperties } from 'src/main/entities/user-properties.entity';
       UserContactDetails,
       UserProperties,
       Role,
+      Properties,
     ]),
     MailModule,
     LoggerModule,

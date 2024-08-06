@@ -11,6 +11,8 @@ import { PropertyDetailsModule } from './main/modules/property-details.module';
 import { PropertySeasonHolidaysModule } from './main/modules/property-season-holidays.module';
 import { UserSessionModule } from './main/modules/user-session.module';
 import { UserPropertyModule } from './main/modules/user-property.module';
+import { UserModule } from './main/modules/user.module';
+import { AmenitiesModule } from './main/modules/amenities.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { UserPropertyModule } from './main/modules/user-property.module';
     PropertySeasonHolidaysModule,
     UserSessionModule,
     UserPropertyModule,
+    UserModule,
+    AmenitiesModule,
   ],
 })
 export class AppModule {}

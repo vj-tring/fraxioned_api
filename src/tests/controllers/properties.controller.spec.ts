@@ -120,7 +120,7 @@ describe('PropertiesController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
-      };
+      } as User;
 
       const mockCreatePropertiesDto: CreatePropertiesDto = {
         propertyName: 'test property',
@@ -177,7 +177,7 @@ describe('PropertiesController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
-      };
+      } as User;
 
       const mockCreatePropertiesDto: CreatePropertiesDto = {
         propertyName: 'test property',
@@ -303,7 +303,7 @@ describe('PropertiesController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
-      };
+      } as User;
 
       const mockUpdatePropertiesDto: UpdatePropertiesDto = {
         propertyName: 'test property',
@@ -372,7 +372,7 @@ describe('PropertiesController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
-      };
+      } as User;
 
       const mockUpdatePropertiesDto: UpdatePropertiesDto = {
         propertyName: 'test property',

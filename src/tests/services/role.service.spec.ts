@@ -8,7 +8,7 @@ import { CreateRoleDTO } from 'src/main/dto/requests/createRole.dto';
 import { UpdateRoleDTO } from 'src/main/dto/requests/updateRole.dto';
 import { RoleAlreadyExistsException } from 'src/main/exception/roleName_exists';
 import { NotFoundException } from '@nestjs/common';
-import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.response.constant';
+import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 import { User } from 'entities/user.entity';
 
 describe('RoleService', () => {

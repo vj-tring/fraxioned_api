@@ -23,6 +23,16 @@ export const USER_PROPERTY_RESPONSES = {
     status: HttpStatus.NOT_FOUND,
     message: `User property with ID ${userPropertyId} not found`,
   }),
+  PROPERTY_NOT_FOUND: (
+    propertyId: number,
+  ): { status: number; message: string } => ({
+    status: HttpStatus.NOT_FOUND,
+    message: `Property with ID ${propertyId} not found`,
+  }),
+  USER_NOT_FOUND: (userId: number): { status: number; message: string } => ({
+    status: HttpStatus.NOT_FOUND,
+    message: `User with ID ${userId} not found`,
+  }),
   USER_PROPERTIES_NOT_FOUND: (): { status: number; message: string } => ({
     status: HttpStatus.NOT_FOUND,
     message: `User properties not found`,

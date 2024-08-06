@@ -21,7 +21,12 @@ import {
   CHANGE_PASSWORD_RESPONSES,
   RESET_PASSWORD_RESPONSES,
   LOGOUT_RESPONSES,
-} from 'src/main/commons/constants/response-constants/auth.response.constant';
+} from 'src/main/commons/constants/response-constants/auth.constant';
+import { Role } from '../entities/role.entity';
+import { Properties } from '../entities/properties.entity';
+import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
+import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
+import { ROLE_RESPONSES } from '../commons/constants/response-constants/role.constant';
 
 @Injectable()
 export class AuthenticationService {
@@ -34,6 +39,10 @@ export class AuthenticationService {
     private readonly userSessionRepository: Repository<UserSession>,
     @InjectRepository(UserProperties)
     private readonly userPropertyRepository: Repository<UserProperties>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(Properties)
+    private readonly propertyRepository: Repository<Properties>,
     private readonly mailService: MailService,
     private readonly logger: LoggerService,
   ) {}
@@ -66,6 +75,41 @@ export class AuthenticationService {
       return INVITE_USER_RESPONSES.EMAIL_EXISTS;
     }
 
+    // Validate createdBy user
+    const createdByUser = await this.userRepository.findOne({
+      where: { id: createdBy },
+    });
+    if (!createdByUser) {
+      this.logger.error(`CreatedBy user not found with ID: ${createdBy}`);
+      return USER_RESPONSES.USER_NOT_FOUND(createdBy);
+    }
+
+    // Validate updatedBy user
+    const updatedByUser = await this.userRepository.findOne({
+      where: { id: updatedBy },
+    });
+    if (!updatedByUser) {
+      this.logger.error(`UpdatedBy user not found with ID: ${updatedBy}`);
+      return USER_RESPONSES.USER_NOT_FOUND(updatedBy);
+    }
+
+    // Validate role
+    const role = await this.roleRepository.findOne({ where: { id: roleId } });
+    if (!role) {
+      this.logger.error(`Role not found with ID: ${roleId}`);
+      return ROLE_RESPONSES.ROLE_NOT_FOUND(roleId);
+    }
+
+    // Validate property
+    const propertyId = userPropertyDetails.propertyID;
+    const userProperty = await this.propertyRepository.findOne({
+      where: { id: propertyId },
+    });
+    if (!userProperty) {
+      this.logger.error(`Property not found with ID: ${propertyId}`);
+      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
+    }
+
     const tempPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
@@ -80,9 +124,9 @@ export class AuthenticationService {
       zipcode: zipcode,
       password: hashedPassword,
       isActive: true,
-      createdBy: createdBy,
-      updatedBy: updatedBy,
-      role: { id: roleId },
+      createdBy: createdByUser.id,
+      updatedBy: updatedByUser.id,
+      role: role,
     });
     await this.userRepository.save(user);
 
@@ -91,11 +135,15 @@ export class AuthenticationService {
         user,
         contactType: 'email',
         contactValue: email,
+        createdBy: createdByUser,
+        updatedBy: updatedByUser,
       },
       {
         user,
         contactType: 'phone',
         contactValue: phoneNumber,
+        createdBy: createdByUser,
+        updatedBy: updatedByUser,
       },
     ];
 
@@ -104,12 +152,34 @@ export class AuthenticationService {
       await this.userContactRepository.save(userContact);
     }
 
-    const userProperty = this.userPropertyRepository.create({
-      ...userPropertyDetails,
-      user,
-    });
+    const currentYear = new Date().getFullYear();
+    const userPropertyEntities = [
+      this.userPropertyRepository.create({
+        ...userPropertyDetails,
+        user,
+        year: currentYear,
+        createdBy: createdByUser,
+        updatedBy: updatedByUser,
+      }),
+      this.userPropertyRepository.create({
+        ...userPropertyDetails,
+        user,
+        year: currentYear + 1,
+        createdBy: createdByUser,
+        updatedBy: updatedByUser,
+      }),
+      this.userPropertyRepository.create({
+        ...userPropertyDetails,
+        user,
+        year: currentYear + 2,
+        createdBy: createdByUser,
+        updatedBy: updatedByUser,
+      }),
+    ];
 
-    await this.userPropertyRepository.save(userProperty);
+    for (const userPropertyEntity of userPropertyEntities) {
+      await this.userPropertyRepository.save(userPropertyEntity);
+    }
 
     const loginLink = `http://localhost:3002/login`;
 
@@ -162,20 +232,11 @@ export class AuthenticationService {
     user.lastLoginTime = new Date();
     await this.userRepository.save(user);
 
-    let session = await this.userSessionRepository.findOne({
-      where: { user: { id: user.id } },
+    const session = this.userSessionRepository.create({
+      user,
+      token: crypto.randomBytes(50).toString('hex'),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
-
-    if (!session) {
-      session = this.userSessionRepository.create({
-        user,
-        token: crypto.randomBytes(50).toString('hex'),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      });
-    } else {
-      session.token = crypto.randomBytes(50).toString('hex');
-      session.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    }
 
     await this.userSessionRepository.save(session);
 

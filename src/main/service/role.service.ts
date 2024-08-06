@@ -5,7 +5,7 @@ import { Role } from 'entities/role.entity';
 import { CreateRoleDTO } from 'src/main/dto/requests/createRole.dto';
 import { UpdateRoleDTO } from 'src/main/dto/requests/updateRole.dto';
 import { LoggerService } from 'services/logger.service';
-import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.response.constant';
+import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 import { User } from '../entities/user.entity';
 
 @Injectable()
