@@ -242,7 +242,7 @@ describe('AuthenticationService', () => {
       userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
       userRepository.findOne.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      userSessionRepository.findOne.mockResolvedValue(session);
+      userSessionRepository.create.mockReturnValue(session);
       userSessionRepository.save.mockResolvedValue(session);
 
       const result = await service.login(loginDto);
@@ -308,6 +308,65 @@ describe('AuthenticationService', () => {
       expect(result).toEqual(LOGIN_RESPONSES.USER_NOT_ACTIVE);
       expect(logger.error).toHaveBeenCalledWith(
         `User is not Active: ${loginDto.email}`,
+      );
+    });
+
+    it('should return INVALID_CREDENTIALS if password is invalid', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+      const user = { id: 1, password: 'hashedPassword', isActive: true };
+      const userEmail = { user, contactValue: 'test@example.com' };
+
+      userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
+      userRepository.findOne.mockResolvedValue(user);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      const result = await service.login(loginDto);
+
+      expect(result).toEqual(LOGIN_RESPONSES.INVALID_CREDENTIALS);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Invalid credentials for email: ${loginDto.email}`,
+      );
+    });
+
+    it('should return USER_NOT_ACTIVE if user is not active', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+      const user = { id: 1, isActive: false };
+      const userEmail = { user, contactValue: 'test@example.com' };
+
+      userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
+      userRepository.findOne.mockResolvedValue(user);
+
+      const result = await service.login(loginDto);
+
+      expect(result).toEqual(LOGIN_RESPONSES.USER_NOT_ACTIVE);
+      expect(logger.error).toHaveBeenCalledWith(
+        `User is not Active: ${loginDto.email}`,
+      );
+    });
+
+    it('should return INVALID_CREDENTIALS if password is invalid', async () => {
+      const loginDto: LoginDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+      const user = { id: 1, password: 'hashedPassword', isActive: true };
+      const userEmail = { user, contactValue: 'test@example.com' };
+
+      userContactDetailsRepository.findOne.mockResolvedValue(userEmail);
+      userRepository.findOne.mockResolvedValue(user);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      const result = await service.login(loginDto);
+
+      expect(result).toEqual(LOGIN_RESPONSES.INVALID_CREDENTIALS);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Invalid credentials for email: ${loginDto.email}`,
       );
     });
 
