@@ -10,9 +10,16 @@ import { User } from 'src/main/entities/user.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { LOGIN_RESPONSES } from 'src/main/commons/constants/response-constants/auth.constant';
+import {
+  INVITE_USER_RESPONSES,
+  LOGIN_RESPONSES,
+} from 'src/main/commons/constants/response-constants/auth.constant';
 import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { Role } from 'src/main/entities/role.entity';
+import { Properties } from 'src/main/entities/properties.entity';
+import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
+import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
+import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 
 type MockRepository<T> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
@@ -37,6 +44,8 @@ describe('AuthenticationService', () => {
   let userSessionRepository: MockRepository<UserSession>;
   let userPropertyRepository: MockRepository<UserProperties>;
   let userContactDetailsRepository: MockRepository<UserContactDetails>;
+  let roleRepository: MockRepository<Role>;
+  let propertyRepository: MockRepository<Properties>;
   let mailService: MailService;
   let logger: LoggerService;
 
@@ -45,6 +54,8 @@ describe('AuthenticationService', () => {
     userSessionRepository = createMockRepository();
     userPropertyRepository = createMockRepository();
     userContactDetailsRepository = createMockRepository();
+    roleRepository = createMockRepository();
+    propertyRepository = createMockRepository();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -61,6 +72,14 @@ describe('AuthenticationService', () => {
         {
           provide: getRepositoryToken(UserProperties),
           useValue: userPropertyRepository,
+        },
+        {
+          provide: getRepositoryToken(Role),
+          useValue: roleRepository,
+        },
+        {
+          provide: getRepositoryToken(Properties),
+          useValue: propertyRepository,
         },
         { provide: MailService, useValue: { sendMail: jest.fn() } },
         {
@@ -80,29 +99,32 @@ describe('AuthenticationService', () => {
   });
 
   describe('inviteUser', () => {
-    it('should invite a user successfully', async () => {
-      const inviteUserDto: InviteUserDto = {
-        email: 'test@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        addressLine1: '123 Main St',
-        addressLine2: '',
-        state: 'NY',
-        country: 'USA',
-        city: 'New York',
-        zipcode: '10001',
-        phoneNumber: '1234567890',
-        roleId: 1,
-        createdBy: 1,
-        updatedBy: 1,
-        userPropertyDetails: {
-          propertyID: 0,
-          noOfShares: '',
-          acquisitionDate: undefined,
-        },
-      };
+    const inviteUserDto: InviteUserDto = {
+      email: 'test@example.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      addressLine1: '123 Main St',
+      addressLine2: '',
+      state: 'NY',
+      country: 'USA',
+      city: 'New York',
+      zipcode: '10001',
+      phoneNumber: '1234567890',
+      roleId: 1,
+      createdBy: 1,
+      updatedBy: 1,
+      userPropertyDetails: {
+        propertyID: 0,
+        noOfShares: '',
+        acquisitionDate: undefined,
+      },
+    };
 
+    it('should invite a user successfully', async () => {
       userContactDetailsRepository.findOne.mockResolvedValue(null);
+      userRepository.findOne.mockResolvedValue({ id: 1 });
+      roleRepository.findOne.mockResolvedValue({ id: 1 });
+      propertyRepository.findOne.mockResolvedValue({ id: 0 });
       userRepository.create.mockReturnValue({});
       userRepository.save.mockResolvedValue({});
       userContactDetailsRepository.create.mockReturnValue({});
@@ -113,10 +135,7 @@ describe('AuthenticationService', () => {
 
       const result = await service.inviteUser(inviteUserDto);
 
-      expect(result).toEqual({
-        message: 'Invite sent successfully',
-        status: 200,
-      });
+      expect(result).toEqual(INVITE_USER_RESPONSES.INVITE_SUCCESS);
       expect(mailService.sendMail).toHaveBeenCalledWith(
         inviteUserDto.email,
         'You are invited!',
@@ -124,34 +143,77 @@ describe('AuthenticationService', () => {
       );
     });
 
-    it('should return ConflictException if email already exists', async () => {
-      const inviteUserDto: InviteUserDto = {
-        email: 'test@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        addressLine1: '123 Main St',
-        addressLine2: '',
-        state: 'NY',
-        country: 'USA',
-        city: 'New York',
-        zipcode: '10001',
-        phoneNumber: '1234567890',
-        roleId: 1,
-        createdBy: 1,
-        updatedBy: 1,
-        userPropertyDetails: {
-          propertyID: 0,
-          noOfShares: '',
-          acquisitionDate: undefined,
-        },
-      };
-
+    it('should return EMAIL_EXISTS if email already exists', async () => {
       userContactDetailsRepository.findOne.mockResolvedValue({});
 
-      await expect(service.inviteUser(inviteUserDto)).resolves.toEqual({
-        message: 'Email already exists',
-        status: 409,
-      });
+      const result = await service.inviteUser(inviteUserDto);
+
+      expect(result).toEqual(INVITE_USER_RESPONSES.EMAIL_EXISTS);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Email already exists: ${inviteUserDto.email}`,
+      );
+    });
+
+    it('should return USER_NOT_FOUND if createdBy user is not found', async () => {
+      userContactDetailsRepository.findOne.mockResolvedValue(null);
+      userRepository.findOne.mockResolvedValueOnce(null);
+
+      const result = await service.inviteUser(inviteUserDto);
+
+      expect(result).toEqual(
+        USER_RESPONSES.USER_NOT_FOUND(inviteUserDto.createdBy),
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        `CreatedBy user not found with ID: ${inviteUserDto.createdBy}`,
+      );
+    });
+
+    it('should return USER_NOT_FOUND if updatedBy user is not found', async () => {
+      userContactDetailsRepository.findOne.mockResolvedValue(null);
+      userRepository.findOne.mockResolvedValueOnce({ id: 1 });
+      userRepository.findOne.mockResolvedValueOnce(null);
+
+      const result = await service.inviteUser(inviteUserDto);
+
+      expect(result).toEqual(
+        USER_RESPONSES.USER_NOT_FOUND(inviteUserDto.updatedBy),
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        `UpdatedBy user not found with ID: ${inviteUserDto.updatedBy}`,
+      );
+    });
+
+    it('should return ROLE_NOT_FOUND if role is not found', async () => {
+      userContactDetailsRepository.findOne.mockResolvedValue(null);
+      userRepository.findOne.mockResolvedValue({ id: 1 });
+      roleRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.inviteUser(inviteUserDto);
+
+      expect(result).toEqual(
+        ROLE_RESPONSES.ROLE_NOT_FOUND(inviteUserDto.roleId),
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        `Role not found with ID: ${inviteUserDto.roleId}`,
+      );
+    });
+
+    it('should return PROPERTY_NOT_FOUND if property is not found', async () => {
+      userContactDetailsRepository.findOne.mockResolvedValue(null);
+      userRepository.findOne.mockResolvedValue({ id: 1 });
+      roleRepository.findOne.mockResolvedValue({ id: 1 });
+      propertyRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.inviteUser(inviteUserDto);
+
+      expect(result).toEqual(
+        USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
+          inviteUserDto.userPropertyDetails.propertyID,
+        ),
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        `Property not found with ID: ${inviteUserDto.userPropertyDetails.propertyID}`,
+      );
     });
   });
 
