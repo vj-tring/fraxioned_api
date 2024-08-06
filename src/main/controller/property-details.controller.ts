@@ -18,7 +18,7 @@ import { CreatePropertyDetailsResponseDto } from '../dto/responses/create-proper
 import { UpdatePropertyDetailsResponseDto } from '../dto/responses/update-property-details.dto';
 
 @ApiTags('Property Details')
-@Controller('api/v1/property-details')
+@Controller('v1/property-details')
 export class PropertyDetailsController {
   constructor(
     private readonly propertyDetailsService: PropertyDetailsService,
