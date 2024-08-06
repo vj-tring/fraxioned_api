@@ -75,6 +75,7 @@ describe('PropertyDetailsService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
@@ -206,6 +207,7 @@ describe('PropertyDetailsService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
@@ -521,6 +523,7 @@ describe('PropertyDetailsService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
@@ -655,6 +658,7 @@ describe('PropertyDetailsService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
@@ -742,6 +746,7 @@ describe('PropertyDetailsService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {

@@ -73,6 +73,7 @@ describe('PropertyDetailsController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
@@ -188,6 +189,7 @@ describe('PropertyDetailsController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
@@ -361,6 +363,7 @@ describe('PropertyDetailsController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
@@ -455,6 +458,7 @@ describe('PropertyDetailsController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
@@ -550,6 +554,7 @@ describe('PropertyDetailsController', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
+        contactDetails: null,
       };
 
       const mockProperties = {
