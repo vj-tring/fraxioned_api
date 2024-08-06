@@ -7,7 +7,7 @@ import { Role } from 'src/main/entities/role.entity';
 import { MailModule } from 'src/main/modules/mail.module';
 import { LoggerModule } from 'src/main/modules/logger.module';
 import { UserSession } from 'entities/user-session.entity';
-import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { Properties } from '../entities/properties.entity';
 

@@ -12,7 +12,7 @@ import { CreateUserDTO } from 'dto/requests/create-user.dto';
 import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { AuthenticationService } from 'src/main/service/authentication.service';
-import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 
 describe('UserController', () => {
   let controller: UserController;

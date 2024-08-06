@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { User } from 'src/main/entities/user.entity';
-import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/main/service/mail.service';

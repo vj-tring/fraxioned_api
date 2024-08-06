@@ -12,6 +12,7 @@ import { UserSessionModule } from './main/modules/user-session.module';
 import { UserPropertyModule } from './main/modules/user-property.module';
 import { UserModule } from './main/modules/user.module';
 import { AmenitiesModule } from './main/modules/amenities.module';
+import { UserDocumentModule } from './main/modules/user-document.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AmenitiesModule } from './main/modules/amenities.module';
     UserPropertyModule,
     UserModule,
     AmenitiesModule,
+    UserDocumentModule,
   ],
 })
 export class AppModule {}
