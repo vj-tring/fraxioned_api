@@ -61,6 +61,8 @@ export class UserService {
     const contactDetails = createUserDto.contactDetails.map((detail) => {
       const contactDetail = new UserContactDetails();
       contactDetail.user = savedUser;
+      contactDetail.createdBy = createdByUser;
+      contactDetail.updatedBy = createdByUser;
       Object.assign(contactDetail, detail);
       return contactDetail;
     });
@@ -134,6 +136,8 @@ export class UserService {
       const contactDetails = updateUserDto.contactDetails.map((detail) => {
         const contactDetail = new UserContactDetails();
         contactDetail.user = updatedUser;
+        contactDetail.createdBy = updatedByUser;
+        contactDetail.updatedBy = updatedByUser;
         Object.assign(contactDetail, detail);
         return contactDetail;
       });
@@ -151,7 +155,7 @@ export class UserService {
       return USER_RESPONSES.USER_NOT_FOUND(id);
     }
 
-    if (user.isActive === isActive) {
+    if (user.isActive == isActive) {
       const status = isActive ? 'active' : 'inactive';
       this.logger.warn(`User with ID ${id} is already ${status}`);
       return USER_RESPONSES.USER_ALREADY_IN_STATE(id, status);

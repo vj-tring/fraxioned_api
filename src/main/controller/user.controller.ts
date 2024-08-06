@@ -12,6 +12,7 @@ import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { CreateUserDTO } from 'dto/requests/create-user.dto';
 import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { AuthGuard } from 'commons/guards/auth.guard';
+import { SetActiveStatusDTO } from '../dto/requests/set-active.dto';
 
 @ApiTags('User')
 @Controller('v1/users')
@@ -79,8 +80,8 @@ export class UserController {
   })
   async setActiveStatus(
     @Param('id') id: number,
-    @Body('isActive') isActive: boolean,
+    @Body() setActiveStatusDto: SetActiveStatusDTO,
   ): Promise<object> {
-    return this.userService.setActiveStatus(id, isActive);
+    return this.userService.setActiveStatus(id, setActiveStatusDto.isActive);
   }
 }
