@@ -34,7 +34,7 @@ export const USER_DOCUMENT_RESPONSES = {
     document,
   }),
   DOCUMENT_DELETED: {
-    status: HttpStatus.OK,
+    status: HttpStatus.NOT_FOUND,
     message: 'Document deleted successfully',
   } as { status: number; message: string },
   DOCUMENTS_FETCHED: (

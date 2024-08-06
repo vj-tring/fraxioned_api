@@ -52,7 +52,7 @@ export const USER_PROPERTY_RESPONSES = {
     userProperty,
   }),
   USER_PROPERTY_DELETED: {
-    status: HttpStatus.OK,
+    status: HttpStatus.NOT_FOUND,
     message: 'User property deleted successfully',
   } as { status: number; message: string },
   USER_PROPERTIES_FETCHED: (

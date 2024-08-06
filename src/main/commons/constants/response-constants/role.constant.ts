@@ -32,7 +32,7 @@ export const ROLE_RESPONSES = {
     role,
   }),
   ROLE_DELETED: {
-    status: HttpStatus.OK,
+    status: HttpStatus.NOT_FOUND,
     message: 'Role deleted successfully',
   } as { status: number; message: string },
   ROLES_FETCHED: (roles: Partial<Role[]>): RoleSuccessResponse => ({

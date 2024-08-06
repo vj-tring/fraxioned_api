@@ -34,7 +34,7 @@ export const USER_RESPONSES = {
     user,
   }),
   USER_DELETED: {
-    status: HttpStatus.OK,
+    status: HttpStatus.NOT_FOUND,
     message: 'User deleted successfully',
   } as { status: number; message: string },
   USERS_FETCHED: (users: Partial<User[]>): UserSuccessResponse => ({
