@@ -5,7 +5,7 @@ import { LoggerService } from '../../main/service/logger.service';
 import * as bcrypt from 'bcrypt';
 import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { Repository } from 'typeorm';
-import { UserContactDetails } from 'src/main/entities/user_contact_details.entity';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';

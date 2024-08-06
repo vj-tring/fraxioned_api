@@ -3,7 +3,7 @@ import { UserService } from 'services/user.service';
 import { Repository, DeleteResult } from 'typeorm';
 import { User } from 'entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
-import { UserContactDetails } from 'entities/user_contact_details.entity';
+import { UserContactDetails } from 'entities/user-contact-details.entity';
 import { LoggerService } from 'services/logger.service';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 import { CreateUserDTO } from 'dto/requests/create-user.dto';
