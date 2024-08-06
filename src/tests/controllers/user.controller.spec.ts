@@ -7,7 +7,7 @@ import { Role } from 'entities/role.entity';
 import { LoggerService } from 'services/logger.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Reflector } from '@nestjs/core';
-import { USER_RESPONSES } from 'commons/constants/response-constants/user.response.constant';
+import { USER_RESPONSES } from 'commons/constants/response-constants/user.constant';
 import { CreateUserDTO } from 'dto/requests/create-user.dto';
 import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';

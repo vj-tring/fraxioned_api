@@ -3,7 +3,7 @@ import { UserPropertyController } from 'controllers/user-property.controller';
 import { UserPropertyService } from 'services/user-property.service';
 import { CreateUserPropertyDTO } from 'dto/requests/create-user-property.dto';
 import { UpdateUserPropertyDTO } from 'dto/requests/update-user-property.dto';
-import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.response.constant';
+import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { NotFoundException } from '@nestjs/common';
 import { Role } from 'src/main/entities/role.entity';
 import { User } from 'src/main/entities/user.entity';

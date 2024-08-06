@@ -7,7 +7,7 @@ import { Properties } from 'entities/properties.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from 'services/logger.service';
 import { CreateUserPropertyDTO } from 'src/main/dto/requests/create-user-property.dto';
-import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.response.constant';
+import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { UpdateUserPropertyDTO } from 'src/main/dto/requests/update-user-property.dto';
 
 describe('UserPropertyService', () => {

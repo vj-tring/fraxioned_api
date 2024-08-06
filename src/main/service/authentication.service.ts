@@ -21,7 +21,7 @@ import {
   CHANGE_PASSWORD_RESPONSES,
   RESET_PASSWORD_RESPONSES,
   LOGOUT_RESPONSES,
-} from 'src/main/commons/constants/response-constants/auth.response.constant';
+} from 'src/main/commons/constants/response-constants/auth.constant';
 
 @Injectable()
 export class AuthenticationService {

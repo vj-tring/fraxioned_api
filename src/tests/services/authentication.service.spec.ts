@@ -10,7 +10,7 @@ import { User } from 'src/main/entities/user.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { LOGIN_RESPONSES } from 'src/main/commons/constants/response-constants/auth.response.constant';
+import { LOGIN_RESPONSES } from 'src/main/commons/constants/response-constants/auth.constant';
 import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { Role } from 'src/main/entities/role.entity';
 

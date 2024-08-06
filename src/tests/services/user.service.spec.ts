@@ -5,11 +5,11 @@ import { User } from 'entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
 import { UserContactDetails } from 'entities/user_contact_details.entity';
 import { LoggerService } from 'services/logger.service';
-import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.response.constant';
+import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 import { CreateUserDTO } from 'dto/requests/create-user.dto';
 import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.response.constant';
+import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 
 describe('UserService', () => {
   let service: UserService;

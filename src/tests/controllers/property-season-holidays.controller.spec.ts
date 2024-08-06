@@ -10,7 +10,7 @@ import { PropertySeasonHolidaysService } from 'src/main/service/property-season-
 import { CreatePropertySeasonHolidayDto } from 'src/main/dto/requests/create-property-season-holiday.dto';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
 import { Properties } from 'src/main/entities/properties.entity';
-import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from 'src/main/commons/constants/response-constants/property-season-holidays-response.constants';
+import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from 'src/main/commons/constants/response-constants/property-season-holidays.constants';
 import { UpdatePropertySeasonHolidayDto } from 'src/main/dto/requests/update-property-season-holiday.dto';
 
 describe('PropertySeasonHolidaysController', () => {

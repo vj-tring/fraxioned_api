@@ -9,7 +9,7 @@ import { LoggerService } from 'src/main/service/logger.service';
 import { Holidays } from 'src/main/entities/holidays.entity';
 import { User } from 'src/main/entities/user.entity';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
-import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/response-constants/holidays-response.constants';
+import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/response-constants/holiday.constants';
 import { Role } from 'src/main/entities/role.entity';
 
 describe('HolidaysService', () => {
