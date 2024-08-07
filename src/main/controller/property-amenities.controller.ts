@@ -10,28 +10,24 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { PropertyAmenitiesService } from '../service/property-amenities.service';
 import { CreatePropertyAmenitiesDto } from '../dto/requests/create-property-amenities.dto';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
 import { UpdatePropertyAmenitiesDto } from '../dto/requests/update-property-amenities.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Property Amenities')
 @Controller('v1/property-amenities/property-amenity')
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class PropertyAmenitiesController {
   constructor(
     private readonly propertyAmenitiesService: PropertyAmenitiesService,
   ) {}
 
   @Post()
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async createPropertyAmenity(
     @Body() createPropertyAmenityDto: CreatePropertyAmenitiesDto,
   ): Promise<{
@@ -54,13 +50,6 @@ export class PropertyAmenitiesController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async getAllPropertyAmenities(): Promise<{
     success: boolean;
     message: string;
@@ -80,13 +69,6 @@ export class PropertyAmenitiesController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async getPropertyAmenityById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -106,13 +88,6 @@ export class PropertyAmenitiesController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async updatePropertyAmenityDetail(
     @Param('id') id: string,
     @Body() updatePropertyAmenitiesDto: UpdatePropertyAmenitiesDto,
@@ -138,13 +113,6 @@ export class PropertyAmenitiesController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async deletePropertyAmenity(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
