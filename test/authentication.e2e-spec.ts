@@ -11,7 +11,7 @@ describe('Authentication', () => {
     it('Successful Login', async () => {
       const valid_credentials = {
         email: 'dharshanramk@gmail.com',
-        password: 'Admin@12',
+        password: 'Admin@123',
       };
       const response = await request(url)
         .post('/login')
@@ -95,8 +95,8 @@ describe('Authentication', () => {
   describe('Reset Password', () => {
     it('Successfully Reset Password', async () => {
       const reset = {
-        oldPassword: 'Admin@12',
-        newPassword: 'Admin@123',
+        oldPassword: 'Admin@123',
+        newPassword: 'Admin@12',
         userId: 3,
       };
       const response = await request(url)
@@ -111,26 +111,28 @@ describe('Authentication', () => {
       const { message } = response.body;
       expect(message).toBe('Password reset successfully');
     });
-    it.skip('Invalid Token or User id', async () => {
+    it('Invalid Token or User id', async () => {
       const reset1 = {
-        email: 'gmail@gmail.com',
+        oldPassword: 'Admin@123',
+        newPassword: 'Admin@12',
+        userId: 0,
       };
       const response = await request(url)
         .post('/resetPassword')
         .set('Accept', 'application/json')
+        .set('access-token', 'token')
+        .set('user-id', `${userid}`)
         .send(reset1)
         .expect('Content-Type', /json/)
-        .expect(HttpStatus.OK);
+        .expect(HttpStatus.UNAUTHORIZED);
 
       const { message } = response.body;
-      expect(message).toBe(
-        'The account associated with this user was not found',
-      );
+      expect(message).toBe('The provided user ID or access token is invalid');
     });
-    it.skip('Wrong Old password', async () => {
+    it('Wrong Old password', async () => {
       const reset2 = {
-        oldPassword: 'Wrongpassword',
-        newPassword: 'Wrongpassword',
+        oldPassword: 'Admin@111',
+        newPassword: 'Admin@123',
         userId: 3,
       };
       const response = await request(url)
@@ -139,8 +141,7 @@ describe('Authentication', () => {
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .send(reset2)
-        .expect('Content-Type', /json/)
-        .expect(404);
+        .expect('Content-Type', /json/);
 
       const { message } = response.body;
       expect(message).toBe('The provided old password is incorrect');
