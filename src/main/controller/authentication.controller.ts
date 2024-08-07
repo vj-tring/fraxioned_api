@@ -20,7 +20,6 @@ import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
-import { UserAuth } from '../commons/guards/user-auth.decorator';
 
 @ApiTags('Authentication')
 @Controller('v1/authentication')
@@ -35,14 +34,12 @@ export class AuthenticationController {
     required: true,
     description: 'Access Token',
   })
-  inviteUser(
-    @UserAuth() userAuth: { userId: number; accessToken: string },
-    @Body() inviteUserDto: InviteUserDto,
-  ): Promise<object> {
+  inviteUser(@Body() inviteUserDto: InviteUserDto): Promise<object> {
     return this.authenticationService.inviteUser(inviteUserDto);
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<object> {
     const result = await this.authenticationService.login(loginDto);
     return result;

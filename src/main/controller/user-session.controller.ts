@@ -6,14 +6,19 @@ import {
   Body,
   Delete,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { UserSessionService } from 'services/user-session.service';
 import { CreateUserSessionDTO } from 'dto/requests/create-user-session.dto';
 import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { AuthGuard } from '../commons/guards/auth.guard';
 
 @ApiTags('UserSession')
 @Controller('v1/user-sessions')
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class UserSessionController {
   constructor(private readonly userSessionService: UserSessionService) {}
 
