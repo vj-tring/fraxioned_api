@@ -10,26 +10,22 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { AmenitiesService } from '../service/amenities.service';
 import { CreateAmenitiesDto } from '../dto/requests/create-amenities.dto';
 import { Amenities } from '../entities/amenities.entity';
 import { UpdateAmenitiesDto } from '../dto/requests/update-amenities.dto';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Amenities')
 @Controller('v1/amenities/amenity')
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class AmenitiesController {
   constructor(private readonly amenitiesService: AmenitiesService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async createAmenity(@Body() createAmenitiesDto: CreateAmenitiesDto): Promise<{
     success: boolean;
     message: string;
@@ -49,13 +45,6 @@ export class AmenitiesController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async getAllAmenities(): Promise<{
     success: boolean;
     message: string;
@@ -74,13 +63,6 @@ export class AmenitiesController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async getAmenityById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -99,13 +81,6 @@ export class AmenitiesController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async updateAmenityDetail(
     @Param('id') id: string,
     @Body() updateAmenitiesDto: UpdateAmenitiesDto,
@@ -130,13 +105,6 @@ export class AmenitiesController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async deleteAmenity(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {

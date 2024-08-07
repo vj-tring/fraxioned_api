@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { UpdatePropertyDetailsDto } from 'src/main/dto/requests/update-property-details.dto';
+import { AuthGuard } from 'src/main/commons/guards/auth.guard';
+import { AuthenticationService } from 'src/main/service/authentication.service';
 
 describe('PropertyDetailsController', () => {
   let controller: PropertyDetailsController;
@@ -27,6 +29,15 @@ describe('PropertyDetailsController', () => {
           provide: getRepositoryToken(Properties),
           useClass: Repository,
         },
+        {
+          provide: AuthenticationService,
+          useValue: {
+            validateUser: jest.fn(),
+            login: jest.fn(),
+            logout: jest.fn(),
+          },
+        },
+        AuthGuard,
       ],
     }).compile();
 
