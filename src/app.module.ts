@@ -11,6 +11,7 @@ import { UserPropertyModule } from './main/modules/user-property.module';
 import { UserModule } from './main/modules/user.module';
 import { AmenitiesModule } from './main/modules/amenities.module';
 import { UserDocumentModule } from './main/modules/user-document.module';
+import { PropertyAmenitiesModule } from './main/modules/property-amenities.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UserDocumentModule } from './main/modules/user-document.module';
     UserModule,
     AmenitiesModule,
     UserDocumentModule,
+    PropertyAmenitiesModule,
   ],
 })
 export class AppModule {}
