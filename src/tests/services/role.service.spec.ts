@@ -6,10 +6,10 @@ import { Role } from 'entities/role.entity';
 import { LoggerService } from 'services/logger.service';
 import { CreateRoleDTO } from 'src/main/dto/requests/createRole.dto';
 import { UpdateRoleDTO } from 'src/main/dto/requests/updateRole.dto';
-import { RoleAlreadyExistsException } from 'src/main/exception/roleName_exists';
 import { NotFoundException } from '@nestjs/common';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 import { User } from 'entities/user.entity';
+import { RoleAlreadyExistsException } from 'src/main/commons/exceptions/roleName_exists';
 
 describe('RoleService', () => {
   let service: RoleService;

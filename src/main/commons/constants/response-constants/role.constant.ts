@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { Role } from 'entities/role.entity';
-import { RoleAlreadyExistsException } from 'src/main/exception/roleName_exists';
+import { RoleAlreadyExistsException } from 'src/main/commons/exceptions/roleName_exists';
 
 interface RoleSuccessResponse {
   status: number;
