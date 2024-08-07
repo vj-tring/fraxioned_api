@@ -119,9 +119,12 @@ export class AuthenticationController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Headers('Authorization') token: string): Promise<object> {
+  async logout(
+    @Headers('user-id') userId: number,
+    @Headers('access-token') token: string,
+  ): Promise<object> {
     try {
-      const result = await this.authenticationService.logout(token);
+      const result = await this.authenticationService.logout(userId, token);
       return result;
     } catch (error) {
       if (error instanceof UnauthorizedException) {

@@ -387,26 +387,39 @@ export class AuthenticationService {
     }
   }
 
-  async logout(token: string): Promise<object> {
-    this.logger.log(`Logout request with token: ${token}`);
+  async logout(userId: number, token: string): Promise<object> {
+    this.logger.log(
+      `Logout request for user ID: ${userId} with token: ${token}`,
+    );
 
     try {
+      // Validate if the user exists
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        this.logger.error(`User not found with ID: ${userId}`);
+        return LOGOUT_RESPONSES.USER_NOT_FOUND(userId);
+      }
+
       const session = await this.userSessionRepository.findOne({
-        where: { token },
+        where: { user: { id: userId }, token },
       });
 
       if (!session) {
-        this.logger.error(`Invalid or expired session for token: ${token}`);
-        return LOGOUT_RESPONSES.INVALID_SESSION;
+        this.logger.error(
+          `Invalid or expired session for user ID: ${userId} with token: ${token}`,
+        );
+        return LOGOUT_RESPONSES.INVALID_SESSION(userId, token);
       }
 
       await this.userSessionRepository.delete({ token: session.token });
 
-      this.logger.log(`Logout successful for token: ${token}`);
-      return LOGOUT_RESPONSES.LOGOUT_SUCCESS;
+      this.logger.log(
+        `Logout successful for user ID: ${userId} with token: ${token}`,
+      );
+      return LOGOUT_RESPONSES.LOGOUT_SUCCESS(userId);
     } catch (error) {
       this.logger.error(
-        `Logout failed for token: ${token} with error: ${error.message}`,
+        `Logout failed for user ID: ${userId} with token: ${token} with error: ${error.message}`,
       );
       return error;
     }
