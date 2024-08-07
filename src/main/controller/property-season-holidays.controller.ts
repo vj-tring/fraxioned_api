@@ -12,26 +12,22 @@ import {
 } from '@nestjs/common';
 import { PropertySeasonHolidaysService } from '../service/property-season-holidays.service';
 import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 import { UpdatePropertySeasonHolidayDto } from '../dto/requests/update-property-season-holiday.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Property Season Holidays')
 @Controller('v1/property-season-holidays/property-season-holiday')
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class PropertySeasonHolidaysController {
   constructor(
     private readonly propertySeasonHolidaysService: PropertySeasonHolidaysService,
   ) {}
 
   @Post()
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async createPropertySeasonHoliday(
     @Body() createPropertySeasonHolidayDto: CreatePropertySeasonHolidayDto,
   ): Promise<{
@@ -55,13 +51,6 @@ export class PropertySeasonHolidaysController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async getAllPropertySeasonHolidays(): Promise<{
     success: boolean;
     message: string;
@@ -81,13 +70,6 @@ export class PropertySeasonHolidaysController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async getPropertySeasonHolidayById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -109,13 +91,6 @@ export class PropertySeasonHolidaysController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async updatePropertySeasonHolidayDetail(
     @Param('id') id: string,
     @Body() updatePropertySeasonHolidayDto: UpdatePropertySeasonHolidayDto,
@@ -141,13 +116,6 @@ export class PropertySeasonHolidaysController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
   async deletePropertySeasonHoliday(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
