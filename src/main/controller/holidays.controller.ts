@@ -10,7 +10,7 @@ import {
   HttpException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { HolidaysService } from '../service/holidays.service';
 import { CreateHolidayDto } from '../dto/requests/create-holiday.dto';
 import { UpdateHolidayDto } from '../dto/requests/update-holiday.dto';
