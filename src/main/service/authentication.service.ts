@@ -181,7 +181,7 @@ export class AuthenticationService {
       await this.userPropertyRepository.save(userPropertyEntity);
     }
 
-    const loginLink = `http://localhost:3002/login`;
+    const loginLink = `http://192.168.1.47:3002/login`;
 
     await this.mailService.sendMail(
       email,
@@ -271,7 +271,7 @@ export class AuthenticationService {
 
     await this.userRepository.save(user);
 
-    const link = `http://localhost:3002/recover?resetToken=${user.resetToken}`;
+    const link = `http://192.168.1.47:3002/recover?resetToken=${user.resetToken}`;
     const subject = 'Password Reset Request';
     const text = `To reset your password, please click the following link: ${link}`;
 
