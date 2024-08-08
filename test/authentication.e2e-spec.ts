@@ -7,6 +7,7 @@ describe('Authentication', () => {
   let token: string;
   let userid: number;
   let resetToken: string;
+  let roleid: string;
 
   describe('Login', () => {
     it('Successful Login', async () => {
@@ -27,6 +28,7 @@ describe('Authentication', () => {
       expect(status).toBe(200);
       token = session.token;
       userid = user.id;
+      roleid = user.role.id;
     });
 
     it('Unsuccessful Login', async () => {
@@ -61,6 +63,111 @@ describe('Authentication', () => {
       expect(status).toBe(404);
     });
   });
+  describe('Invite User', () => {
+    it('Send Invite Successfully', async () => {
+      const invite = {
+        email: 'newemail@email.com',
+        firstName: 'fname',
+        lastName: 'lname',
+        addressLine1: 'address1',
+        addressLine2: 'address2',
+        state: 'state',
+        country: 'country',
+        city: 'city',
+        zipcode: 'code',
+        phoneNumber: 'phonenumber',
+        roleId: roleid,
+        updatedBy: 1,
+        createdBy: 1,
+        userPropertyDetails: {
+          propertyID: 1,
+          noOfShares: 'string',
+          acquisitionDate: '2024-08-08T11:36:22.849Z',
+        },
+      };
+
+      const response = await request(url)
+        .post('/invite')
+        .set('Accept', 'application/json')
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .send(invite)
+        .expect('Content-Type', /json/)
+        .expect(HttpStatus.CREATED);
+
+      const { message } = response.body;
+      expect(message).toBe('Invite sent successfully');
+    });
+    it('Invite already sended', async () => {
+      const invite = {
+        email: 'fraxionedownersportal@gmail.com',
+        firstName: 'fname',
+        lastName: 'lname',
+        addressLine1: 'address1',
+        addressLine2: 'address2',
+        state: 'state',
+        country: 'country',
+        city: 'city',
+        zipcode: 'code',
+        phoneNumber: 'phonenumber',
+        roleId: roleid,
+        updatedBy: 1,
+        createdBy: 1,
+        userPropertyDetails: {
+          propertyID: 1,
+          noOfShares: 'string',
+          acquisitionDate: '2024-08-08T11:36:22.849Z',
+        },
+      };
+
+      const response = await request(url)
+        .post('/invite')
+        .set('Accept', 'application/json')
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .send(invite)
+        .expect('Content-Type', /json/)
+        .expect(201);
+
+      const { message } = response.body;
+      expect(message).toBe('Email already exists');
+    });
+    it('Invalid token or user id', async () => {
+      const invite = {
+        email: 'email@email.com',
+        firstName: 'fname',
+        lastName: 'lname',
+        addressLine1: 'address1',
+        addressLine2: 'address2',
+        state: 'state',
+        country: 'country',
+        city: 'city',
+        zipcode: 'code',
+        phoneNumber: 'phonenumber',
+        roleId: roleid,
+        updatedBy: 1,
+        createdBy: 1,
+        userPropertyDetails: {
+          propertyID: 1,
+          noOfShares: 'string',
+          acquisitionDate: '2024-08-08T11:36:22.849Z',
+        },
+      };
+
+      const response = await request(url)
+        .post('/invite')
+        .set('Accept', 'application/json')
+        .set('access-token', 'token')
+        .set('user-id', `${userid}`)
+        .send(invite)
+        .expect('Content-Type', /json/)
+        .expect(401);
+
+      const { message } = response.body;
+      expect(message).toBe('The provided user ID or access token is invalid');
+    });
+  });
+
   describe('Forget Password', () => {
     it('Send Link Successfully', async () => {
       const forgotmail = {
