@@ -6,19 +6,20 @@ describe('Authentication', () => {
   const url = `${baseurl}/authentication`;
   let token: string;
   let userid: number;
+  let resetToken: string;
 
   describe('Login', () => {
     it('Successful Login', async () => {
       const valid_credentials = {
         email: 'dharshanramk@gmail.com',
-        password: 'Admin@123',
+        password: 'Admin@12',
       };
       const response = await request(url)
         .post('/login')
         .set('Accept', 'application/json')
         .send(valid_credentials)
         .expect('Content-Type', /json/)
-        .expect(HttpStatus.CREATED);
+        .expect(HttpStatus.OK);
 
       const { message, session, status, user } = response.body;
       expect(message).toBe('Login successful');
@@ -31,7 +32,7 @@ describe('Authentication', () => {
     it('Unsuccessful Login', async () => {
       const invalid_credentials = {
         email: 'dharshanramk@gmail.com',
-        password: 'Admin',
+        password: 'password',
       };
       const response = await request(url)
         .post('/login')
@@ -75,6 +76,17 @@ describe('Authentication', () => {
       const { message } = response.body;
       expect(message).toBe('Password reset email sent successfully');
     });
+    it('Login again to get Reset Token', async () => {
+      const valid_credentials = {
+        email: 'dharshanramk@gmail.com',
+        password: 'Admin@12',
+      };
+      const response = await request(url)
+        .post('/login')
+        .set('Accept', 'application/json')
+        .send(valid_credentials);
+      resetToken = response.body.user.resetToken;
+    });
     it('User Not Found', async () => {
       const forgotinvalidmail = {
         email: 'gmail@gmail.com',
@@ -85,18 +97,16 @@ describe('Authentication', () => {
         .send(forgotinvalidmail)
         .expect('Content-Type', /json/)
         .expect(HttpStatus.OK);
-
-      const { message } = response.body;
-      expect(message).toBe(
+      expect(response.body.message).toBe(
         'The account associated with this user was not found',
       );
     });
   });
   describe('Reset Password', () => {
-    it('Successfully Reset Password', async () => {
+    it('Reset Password Successfully', async () => {
       const reset = {
-        oldPassword: 'Admin@123',
-        newPassword: 'Admin@12',
+        oldPassword: 'Admin',
+        newPassword: 'Admin@123',
         userId: 3,
       };
       const response = await request(url)
@@ -147,12 +157,45 @@ describe('Authentication', () => {
       expect(message).toBe('The provided old password is incorrect');
     });
   });
+  describe('Recover Password', () => {
+    it('Successfully Change Password', async () => {
+      const recover = {
+        newPassword: 'Admin@12',
+      };
+      const response = await request(url)
+        .post('/recoverPassword')
+        .set('Accept', 'application/json')
+        .set('resetToken', `${resetToken}`)
+        .send(recover)
+        .expect('Content-Type', /json/)
+        .expect(HttpStatus.OK);
+
+      const { message } = response.body;
+      expect(message).toBe('Password has been reset successfully');
+    });
+
+    it('Invalid Reset Token', async () => {
+      const recover = {
+        newPassword: 'Admin@123',
+      };
+      const response = await request(url)
+        .post('/recoverPassword')
+        .set('Accept', 'application/json')
+        .set('resetToken', `${resetToken}`)
+        .send(recover)
+        .expect('Content-Type', /json/);
+
+      const { message } = response.body;
+      expect(message).toBe(
+        'The account associated with this user was not found',
+      );
+    });
+  });
   describe('Logout', () => {
     it('Logout Successful', async () => {
       await request(url)
         .post('/logout')
         .set('Accept', 'application/json')
-        .set('Authorization', `${token}`)
         .expect('Content-Type', /json/)
         .expect(200);
     });
