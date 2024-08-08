@@ -6,7 +6,6 @@ import { LoggerService } from 'src/main/service/logger.service';
 import { Holidays } from 'src/main/entities/holidays.entity';
 import { User } from 'src/main/entities/user.entity';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
-import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/response-constants/holiday.constants';
 import { Role } from 'src/main/entities/role.entity';
 import { PropertySeasonHolidaysService } from 'src/main/service/property-season-holidays.service';
 import { Properties } from 'src/main/entities/properties.entity';
@@ -317,7 +316,7 @@ describe('PropertySeasonHolidaysService', () => {
   });
 
   describe('findAllPropertySeasonHolidays', () => {
-    it('should get all propety season holiday records', async () => {
+    it('should get all property season holiday records', async () => {
       const propertySeasonHolidays: PropertySeasonHolidays[] = [
         {
           id: 1,
@@ -478,7 +477,7 @@ describe('PropertySeasonHolidaysService', () => {
         .mockResolvedValueOnce(propertySeasonHoliday);
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
 
-      const expectedResult = HOLIDAYS_RESPONSES.USER_NOT_FOUND(
+      const expectedResult = PROPERTY_SEASON_HOLIDAY_RESPONSES.USER_NOT_FOUND(
         updatePropertySeasonHolidayDto.updatedBy.id,
       );
 

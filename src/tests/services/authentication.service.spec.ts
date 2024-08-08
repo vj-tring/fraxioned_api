@@ -13,6 +13,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import {
   INVITE_USER_RESPONSES,
   LOGIN_RESPONSES,
+  LOGOUT_RESPONSES,
 } from 'src/main/commons/constants/response-constants/auth.constant';
 import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { Role } from 'src/main/entities/role.entity';
@@ -581,29 +582,66 @@ describe('AuthenticationService', () => {
 
   describe('logout', () => {
     it('should logout successfully', async () => {
+      const userId = 1;
       const token = 'token';
+      const user = { id: userId };
       const session = { token };
 
+      userRepository.findOne.mockResolvedValue(user);
       userSessionRepository.findOne.mockResolvedValue(session);
       userSessionRepository.delete.mockResolvedValue({});
 
-      const result = await service.logout(token);
+      const result = await service.logout(userId, token);
 
-      expect(result).toEqual({
-        message: 'Logout successful',
-        status: 200,
-      });
+      expect(result).toEqual(LOGOUT_RESPONSES.LOGOUT_SUCCESS(userId));
+      expect(logger.log).toHaveBeenCalledWith(
+        `Logout successful for user ID: ${userId} with token: ${token}`,
+      );
     });
 
-    it('should return UnauthorizedException if session is invalid or expired', async () => {
+    it('should return USER_NOT_FOUND if user is not found', async () => {
+      const userId = 1;
       const token = 'token';
 
+      userRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.logout(userId, token);
+
+      expect(result).toEqual(LOGOUT_RESPONSES.USER_NOT_FOUND(userId));
+      expect(logger.error).toHaveBeenCalledWith(
+        `User not found with ID: ${userId}`,
+      );
+    });
+
+    it('should return INVALID_SESSION if session is invalid or expired', async () => {
+      const userId = 1;
+      const token = 'token';
+      const user = { id: userId };
+
+      userRepository.findOne.mockResolvedValue(user);
       userSessionRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.logout(token)).resolves.toEqual({
-        message: 'The session has expired or is invalid',
-        status: 401,
-      });
+      const result = await service.logout(userId, token);
+
+      expect(result).toEqual(LOGOUT_RESPONSES.INVALID_SESSION(userId, token));
+      expect(logger.error).toHaveBeenCalledWith(
+        `Invalid or expired session for user ID: ${userId} with token: ${token}`,
+      );
+    });
+
+    it('should handle errors gracefully', async () => {
+      const userId = 1;
+      const token = 'token';
+      const errorMessage = 'Database error';
+
+      userRepository.findOne.mockRejectedValue(new Error(errorMessage));
+
+      const result = await service.logout(userId, token);
+
+      expect(result).toEqual(new Error(errorMessage));
+      expect(logger.error).toHaveBeenCalledWith(
+        `Logout failed for user ID: ${userId} with token: ${token} with error: ${errorMessage}`,
+      );
     });
   });
 });

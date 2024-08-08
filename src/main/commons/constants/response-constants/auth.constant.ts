@@ -12,6 +12,11 @@ interface LoginSuccessResponse {
   };
 }
 
+interface ErrorResponse {
+  status: number;
+  message: string;
+}
+
 export const LOGIN_RESPONSES = {
   USER_NOT_FOUND: {
     status: HttpStatus.NOT_FOUND,
@@ -108,12 +113,16 @@ export const VALIDATE_USER_RESPONSES = {
 };
 
 export const LOGOUT_RESPONSES = {
-  INVALID_SESSION: {
+  USER_NOT_FOUND: (userId: number): ErrorResponse => ({
+    status: HttpStatus.NOT_FOUND,
+    message: `User with ID ${userId} not found`,
+  }),
+  INVALID_SESSION: (userId: number, token: string): ErrorResponse => ({
     status: HttpStatus.UNAUTHORIZED,
-    message: 'The session has expired or is invalid',
-  },
-  LOGOUT_SUCCESS: {
+    message: `The session for user ID ${userId} with token ${token} has expired or is invalid`,
+  }),
+  LOGOUT_SUCCESS: (userId: number): ErrorResponse => ({
     status: HttpStatus.OK,
-    message: 'Logout successful',
-  },
+    message: `Logout successful for user ID ${userId}`,
+  }),
 };
