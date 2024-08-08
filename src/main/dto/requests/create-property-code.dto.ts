@@ -1,9 +1,10 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty, Min } from 'class-validator';
 import { Properties } from 'src/main/entities/properties.entity';
 import { User } from 'src/main/entities/user.entity';
 
 export class CreatePropertyCodeDto {
   @IsNotEmpty()
+  @IsInt()
   property: Properties;
 
   @IsNotEmpty()
@@ -13,5 +14,7 @@ export class CreatePropertyCodeDto {
   propertyCode: string;
 
   @IsNotEmpty()
+  @IsInt()
+  @Min(1)
   createdBy: User;
 }

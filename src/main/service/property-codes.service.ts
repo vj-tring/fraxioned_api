@@ -1,20 +1,36 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePropertyCodeDto } from '../dto/requests/create-property-code.dto';
 import { UpdatePropertyCodeDto } from '../dto/requests/update-property-code.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PropertyCodes } from '../entities/property_codes.entity';
 import { Repository } from 'typeorm';
+import { Properties } from '../entities/properties.entity';
 
 @Injectable()
 export class PropertyCodesService {
   constructor(
     @InjectRepository(PropertyCodes)
     private propertyCodesRepository: Repository<PropertyCodes>,
+    @InjectRepository(Properties)
+    private propertiesRepository: Repository<Properties>,
   ) {}
   async createPropertyCodes(
     createPropertyCodeDto: CreatePropertyCodeDto,
   ): Promise<object> {
     try {
+      const existingProperties = await this.propertiesRepository.findOne({
+        where: { id: createPropertyCodeDto.property as unknown as number },
+      });
+
+      if (!existingProperties) {
+        throw new NotFoundException(
+          `Properties with ID ${createPropertyCodeDto.property} not found`,
+        );
+      }
       const propertyCodes = this.propertyCodesRepository.create(
         createPropertyCodeDto,
       );
@@ -84,9 +100,17 @@ export class PropertyCodesService {
     try {
       const existingPropertyCodes = await this.propertyCodesRepository.findOne({
         where: { id },
+        relations: ['createdBy', 'property', 'updatedBy'],
       });
       if (!existingPropertyCodes) {
         throw new NotFoundException(`Property Codes with ID ${id} not found`);
+      }
+      if (
+        existingPropertyCodes.property.id !=
+        (updatePropertyCodeDto.property.id |
+          (updatePropertyCodeDto.property as unknown as number))
+      ) {
+        throw new BadRequestException('Property ID does not match');
       }
       const updatedPropertyCodes = this.propertyCodesRepository.merge(
         existingPropertyCodes,

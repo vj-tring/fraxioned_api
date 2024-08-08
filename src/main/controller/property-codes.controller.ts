@@ -10,17 +10,19 @@ import {
 import { CreatePropertyCodeDto } from '../dto/requests/create-property-code.dto';
 import { UpdatePropertyCodeDto } from '../dto/requests/update-property-code.dto';
 import { PropertyCodesService } from '../service/property-codes.service';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('property-codes')
+@ApiTags('Property Codes')
+@Controller('v1/property-codes')
 export class PropertyCodesController {
   constructor(private readonly propertyCodesService: PropertyCodesService) {}
 
-  @Post()
+  @Post('property-code')
   async createPropertyCodes(
     @Body() createPropertyCodeDto: CreatePropertyCodeDto,
   ): Promise<object> {
     try {
-      return this.propertyCodesService.createPropertyCodes(
+      return await this.propertyCodesService.createPropertyCodes(
         createPropertyCodeDto,
       );
     } catch (error) {
@@ -37,8 +39,8 @@ export class PropertyCodesController {
     }
   }
 
-  @Get(':id')
-  async getPropertyCodesById(@Param('id') id: string): Promise<object> {
+  @Get('property-code/:id')
+  async getPropertyCodesById(@Param('id') id: number): Promise<object> {
     try {
       return await this.propertyCodesService.getPropertyCodesById(+id);
     } catch (error) {
@@ -46,9 +48,9 @@ export class PropertyCodesController {
     }
   }
 
-  @Patch(':id')
+  @Patch('property-code/:id')
   async updatePropertyCodesById(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updatePropertyCodeDto: UpdatePropertyCodeDto,
   ): Promise<object> {
     try {
@@ -61,8 +63,8 @@ export class PropertyCodesController {
     }
   }
 
-  @Delete(':id')
-  async deletePropertyCodesById(@Param('id') id: string): Promise<unknown> {
+  @Delete('property-code/:id')
+  async deletePropertyCodesById(@Param('id') id: number): Promise<unknown> {
     try {
       return await this.propertyCodesService.deletePropertyCodesById(+id);
     } catch (error) {

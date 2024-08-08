@@ -3,9 +3,10 @@ import { PropertyCodesController } from '../controller/property-codes.controller
 import { PropertyCodesService } from '../service/property-codes.service';
 import { PropertyCodes } from '../entities/property_codes.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Properties } from '../entities/properties.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PropertyCodes])],
+  imports: [TypeOrmModule.forFeature([PropertyCodes, Properties])],
   controllers: [PropertyCodesController],
   providers: [PropertyCodesService],
 })
