@@ -8,7 +8,7 @@ import { DataSource } from 'typeorm';
 import { seedUser } from './main/commons/seeds/userSeed';
 import { seedProperties } from './main/commons/seeds/propertySeed';
 
-async function bootstrap(): Promise<void> {
+export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   // Seeder
@@ -28,6 +28,7 @@ async function bootstrap(): Promise<void> {
 
   // Global Exception Filters
   app.useGlobalFilters(new GlobalExceptionFilter());
+
   // Set global prefix for API endpoints
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);

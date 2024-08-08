@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
-import { Holidays } from 'src/main/entities/holidays.entity';
+import { Amenities } from 'src/main/entities/amenities.entity';
 import { Properties } from 'src/main/entities/properties.entity';
 import { User } from 'src/main/entities/user.entity';
 
-export class UpdatePropertySeasonHolidayDto {
+export class UpdatePropertyAmenitiesDto {
   @ApiProperty({
     example: { id: 1 },
   })
@@ -18,15 +18,11 @@ export class UpdatePropertySeasonHolidayDto {
   @ApiProperty({
     example: { id: 1 },
   })
-  @IsNotEmpty({ message: 'holiday ID is required' })
+  @IsNotEmpty({ message: 'amenity ID is required' })
   @IsValidId({
-    message: 'holiday must be an object with a valid id where (id >= 1)',
+    message: 'amenity must be an object with a valid id where (id >= 1)',
   })
-  holiday: Holidays;
-
-  @IsNotEmpty({ message: 'Is peak season setting is required' })
-  @IsBoolean()
-  isPeakSeason: boolean;
+  amenity: Amenities;
 
   @ApiProperty({
     example: { id: 1 },

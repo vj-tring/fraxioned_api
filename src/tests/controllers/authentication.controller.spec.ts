@@ -60,13 +60,10 @@ describe('AuthenticationController', () => {
           acquisitionDate: undefined,
         },
       };
-      const userAuth = { userId: 1, accessToken: 'someAccessToken' };
       const result = { message: 'Invite sent successfully' };
       jest.spyOn(service, 'inviteUser').mockResolvedValue(result);
 
-      expect(await controller.inviteUser(userAuth, inviteUserDto)).toEqual(
-        result,
-      );
+      expect(await controller.inviteUser(inviteUserDto)).toEqual(result);
     });
   });
 
@@ -174,19 +171,21 @@ describe('AuthenticationController', () => {
   describe('logout', () => {
     it('should logout successfully', async () => {
       const token = 'Bearer token';
+      const userId = 1;
       const result = { message: 'Logout successful' };
       jest.spyOn(service, 'logout').mockResolvedValue(result);
 
-      expect(await controller.logout(token)).toEqual(result);
+      expect(await controller.logout(userId, token)).toEqual(result);
     });
 
     it('should throw UnauthorizedException if token is invalid', async () => {
       const token = 'Bearer invalidToken';
+      const userId = 0;
       jest
         .spyOn(service, 'logout')
         .mockRejectedValue(new UnauthorizedException('Invalid token'));
 
-      await expect(controller.logout(token)).resolves.toEqual(
+      await expect(controller.logout(userId, token)).resolves.toEqual(
         new UnauthorizedException('Invalid token'),
       );
     });
