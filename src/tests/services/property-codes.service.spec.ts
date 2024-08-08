@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { UpdatePropertyCodeDto } from 'src/main/dto/requests/update-property-code.dto';
+import { AuthenticationService } from 'src/main/service/authentication.service';
 
 describe('PropertyCodesService', () => {
   let service: PropertyCodesService;
@@ -18,6 +19,7 @@ describe('PropertyCodesService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PropertyCodesService,
+        AuthenticationService,
         {
           provide: getRepositoryToken(PropertyCodes),
           useClass: Repository,
