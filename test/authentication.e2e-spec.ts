@@ -49,7 +49,7 @@ describe('Authentication', () => {
 
     it('User Not Found', async () => {
       const invalid_credentials2 = {
-        email: 'email@email.com',
+        email: 'test@email.com',
         password: 'Password',
       };
       const response = await request(url)
@@ -66,7 +66,7 @@ describe('Authentication', () => {
   describe('Invite User', () => {
     it('Send Invite Successfully', async () => {
       const invite = {
-        email: 'newemail@email.com',
+        email: 'email2@email.com',
         firstName: 'fname',
         lastName: 'lname',
         addressLine1: 'address1',
@@ -212,8 +212,8 @@ describe('Authentication', () => {
   describe('Reset Password', () => {
     it('Reset Password Successfully', async () => {
       const reset = {
-        oldPassword: 'Admin',
-        newPassword: 'Admin@123',
+        oldPassword: 'Admin@12',
+        newPassword: 'Admin@12',
         userId: 3,
       };
       const response = await request(url)
