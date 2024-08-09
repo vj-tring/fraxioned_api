@@ -13,6 +13,8 @@ import { AmenitiesModule } from './main/modules/amenities.module';
 import { UserDocumentModule } from './main/modules/user-document.module';
 import { PropertyAmenitiesModule } from './main/modules/property-amenities.module';
 import { PropertyCodesModule } from './main/modules/property-codes.module';
+import { CronEmailsModule } from './main/modules/cron-emails.module';
+// import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { PropertyCodesModule } from './main/modules/property-codes.module';
     UserDocumentModule,
     PropertyAmenitiesModule,
     PropertyCodesModule,
+    CronEmailsModule,
+    // ScheduleModule.forRoot()
   ],
 })
 export class AppModule {}
