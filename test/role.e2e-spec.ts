@@ -24,7 +24,7 @@ describe('E2E test for Role', () => {
     it('Successful role creation', async () => {
       const credentials = {
         createdBy: { id: 1 },
-        roleName: 'Admin6',
+        roleName: 'Admin0',
         roleDescription: 'description',
       };
       const response = await request(url)
@@ -123,10 +123,40 @@ describe('E2E test for Role', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
+  describe('Update Specific Role', () => {
+    it('Successful role update', async () => {
+      const credentials = {
+        updatedBy: { id: 1 },
+        roleName: 'Admin',
+        roleDescription: 'admin-role',
+      };
+      const response = await request(url)
+        .patch('/role/1')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/)
+        .expect(200);
+      const { message } = response.body;
+      expect(message).toBe('Role updated successfully');
+    });
+    it('Invalid token or user id', async () => {
+      const response = await request(url)
+        .delete('/role/3')
+        .set('Accept', 'application/json')
+        .set('access-token', 'token')
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/)
+        .expect(401);
+      const { message } = response.body;
+      expect(message).toBe('The provided user ID or access token is invalid');
+    });
+  });
   describe('Delete Specific Role', () => {
     it('Successful role deletion', async () => {
       const response = await request(url)
-        .delete('/role/5')
+        .delete('/role/9')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
