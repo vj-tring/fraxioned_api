@@ -8,6 +8,10 @@ import { Holidays } from '../entities/holidays.entity';
 import { User } from '../entities/user.entity';
 import { HOLIDAYS_RESPONSES } from '../commons/constants/response-constants/holiday.constants';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
+import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
+import { PropertySeasonHolidaysService } from './property-season-holidays.service';
+import { PropertyDetails } from '../entities/property-details.entity';
+// import { PropertyDetailsModule } from '../modules/property-details.module';
 
 @Injectable()
 export class HolidaysService {
@@ -18,6 +22,9 @@ export class HolidaysService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(PropertySeasonHolidays)
     private readonly propertySeasonHolidayRepository: Repository<PropertySeasonHolidays>,
+    @InjectRepository(PropertyDetails)
+    private readonly propertyDetailsRepository: Repository<PropertyDetails>,
+    private readonly propertySeasonHolidayService: PropertySeasonHolidaysService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -70,6 +77,43 @@ export class HolidaysService {
       this.logger.log(
         `Holiday ${createHolidayDto.name} created with ID ${savedHoliday.id}`,
       );
+
+      if (
+        savedHoliday &&
+        createHolidayDto.properties &&
+        createHolidayDto.properties.length > 0
+      ) {
+        for (const property of createHolidayDto.properties) {
+          const propertyDetails = await this.propertyDetailsRepository.findOne({
+            where: { property: { id: property.id } },
+          });
+
+          if (!propertyDetails) {
+            throw new HttpException(
+              `Property details not found for property with ID ${property.id}`,
+              HttpStatus.NOT_FOUND,
+            );
+          }
+
+          const isPeakSeason = await this.isHolidayInPeakSeason(
+            createHolidayDto.startDate,
+            createHolidayDto.endDate,
+            propertyDetails,
+          );
+
+          const createPropertySeasonHolidayDto: CreatePropertySeasonHolidayDto =
+            {
+              property: property,
+              holiday: { id: savedHoliday.id } as Holidays,
+              isPeakSeason: isPeakSeason,
+              createdBy: createHolidayDto.createdBy,
+            };
+
+          await this.propertySeasonHolidayService.createPropertySeasonHoliday(
+            createPropertySeasonHolidayDto,
+          );
+        }
+      }
       return HOLIDAYS_RESPONSES.HOLIDAY_CREATED(savedHoliday);
     } catch (error) {
       this.logger.error(
@@ -80,6 +124,21 @@ export class HolidaysService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async isHolidayInPeakSeason(
+    holidayStartDate: Date,
+    holidayEndDate: Date,
+    propertyDetails: PropertyDetails,
+  ): Promise<boolean> {
+    const { peakSeasonStartDate, peakSeasonEndDate } = propertyDetails;
+
+    return (
+      holidayStartDate >= peakSeasonStartDate &&
+      holidayStartDate <= peakSeasonEndDate &&
+      holidayEndDate >= peakSeasonStartDate &&
+      holidayEndDate <= peakSeasonEndDate
+    );
   }
 
   async getAllHolidayRecords(): Promise<{

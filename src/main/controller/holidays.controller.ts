@@ -8,20 +8,20 @@ import {
   Delete,
   HttpStatus,
   HttpException,
-  UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { HolidaysService } from '../service/holidays.service';
 import { CreateHolidayDto } from '../dto/requests/create-holiday.dto';
 import { UpdateHolidayDto } from '../dto/requests/update-holiday.dto';
 import { Holidays } from '../entities/holidays.entity';
-import { AuthGuard } from '../commons/guards/auth.guard';
-import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+// import { AuthGuard } from '../commons/guards/auth.guard';
+// import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Holiday')
 @Controller('v1/holidays/holiday')
-@UseGuards(AuthGuard)
-@ApiHeadersForAuth()
+// @UseGuards(AuthGuard)
+// @ApiHeadersForAuth()
 export class HolidaysController {
   constructor(private readonly holidaysService: HolidaysService) {}
 

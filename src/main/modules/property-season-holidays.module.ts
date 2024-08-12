@@ -22,5 +22,6 @@ import { AuthenticationModule } from './authentication.module';
   ],
   controllers: [PropertySeasonHolidaysController],
   providers: [PropertySeasonHolidaysService],
+  exports: [PropertySeasonHolidaysService],
 })
 export class PropertySeasonHolidaysModule {}

@@ -20,10 +20,20 @@ export class Holidays {
   @Column({ type: 'int', nullable: true, default: null })
   year: number;
 
-  @Column({ name: 'start_date', nullable: true, default: null })
+  @Column({
+    name: 'start_date',
+    type: 'timestamp',
+    nullable: true,
+    default: null,
+  })
   startDate: Date;
 
-  @Column({ name: 'end_date', nullable: true, default: null })
+  @Column({
+    name: 'end_date',
+    type: 'timestamp',
+    nullable: true,
+    default: null,
+  })
   endDate: Date;
 
   @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
