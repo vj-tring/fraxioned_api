@@ -6,7 +6,7 @@ import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
 import { AuthGuard } from 'commons/guards/auth.guard';
 import { Reflector } from '@nestjs/core';
 import { USER_DOCUMENT_RESPONSES } from 'src/main/commons/constants/response-constants/user-document.constant';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 import { UserDocument } from 'src/main/entities/user-documents.entity';
 import { Repository } from 'typeorm';

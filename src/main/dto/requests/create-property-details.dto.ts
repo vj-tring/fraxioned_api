@@ -22,6 +22,12 @@ export class CreatePropertyDetailsDto {
   noOfBathrooms?: number;
 
   @IsOptional()
+  noOfBathroomsFull?: number;
+
+  @IsOptional()
+  noOfBathroomsHalf?: number;
+
+  @IsOptional()
   squareFootage?: string;
 
   @IsOptional()

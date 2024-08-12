@@ -98,14 +98,7 @@ describe('PropertyCodesService', () => {
         country: 'test country',
         zipcode: 123456,
         houseDescription: 'test description',
-        isExclusive: true,
-        propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
-        createdBy: mockUser,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyCodes = {
         id: 1,
@@ -198,12 +191,11 @@ describe('PropertyCodesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockCreatePropertyCodeDto: CreatePropertyCodeDto = {
         property: mockProperties,
@@ -267,12 +259,11 @@ describe('PropertyCodesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyCodes = [
         {
@@ -367,12 +358,11 @@ describe('PropertyCodesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyCodes = {
         id: 1,
@@ -470,12 +460,11 @@ describe('PropertyCodesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyCodes = {
         id: 1,
@@ -573,12 +562,11 @@ describe('PropertyCodesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyCodeDto: UpdatePropertyCodeDto = {
         property: mockProperties,
@@ -645,12 +633,11 @@ describe('PropertyCodesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyCodes = {
         id: 1,

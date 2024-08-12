@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { LoggerService } from './logger.service';
 import { Holidays } from '../entities/holidays.entity';
-import { Property } from '../entities/Property.entity';
+import { Property } from '../entities/property.entity';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from '../commons/constants/response-constants/property-season-holidays.constants';
 import { UpdatePropertySeasonHolidayDto } from '../dto/requests/update-property-season-holiday.dto';
 

@@ -56,7 +56,6 @@ describe('PropertyDetailsService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: null,
         updatedBy: null,
         createdAt: new Date(Date.now()),
@@ -75,12 +74,14 @@ describe('PropertyDetailsService', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+          latitude: 0,
+          longitude: 0,
+          isActive: false,
+        } as Property,
         noOfGuestsAllowed: 1,
         noOfBedrooms: 1,
         noOfBathrooms: 1,
@@ -149,12 +150,14 @@ describe('PropertyDetailsService', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+          latitude: 0,
+          longitude: 0,
+          isActive: false,
+        } as Property,
         noOfGuestsAllowed: 1,
         noOfBedrooms: 1,
         noOfBathrooms: 1,
@@ -236,12 +239,11 @@ describe('PropertyDetailsService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyDetails = [
         {
@@ -350,12 +352,11 @@ describe('PropertyDetailsService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyDetails = {
         id: 1,
@@ -468,12 +469,11 @@ describe('PropertyDetailsService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyDetailsDto: UpdatePropertyDetailsDto = {
         property: mockProperties,
@@ -603,12 +603,11 @@ describe('PropertyDetailsService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyDetailsDto: UpdatePropertyDetailsDto = {
         property: mockProperties,
@@ -691,12 +690,11 @@ describe('PropertyDetailsService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyDetails = {
         id: 1,
@@ -819,29 +817,7 @@ describe('PropertyDetailsService', () => {
       const mockPropertyDetails = {
         id: 1,
         property: mockProperties,
-        noOfGuestsAllowed: 1,
-        noOfBedrooms: 1,
-        noOfBathrooms: 1,
-        squareFootage: '100 x 100',
-        checkInTime: 4,
-        checkOutTime: 11,
-        cleaningFee: 100,
-        noOfPetsAllowed: 2,
-        petPolicy: 'allowed',
-        feePerPet: 100,
-        peakSeasonStartDate: null,
-        peakSeasonEndDate: null,
-        peakSeasonAllottedNights: 2,
-        offSeasonAllottedNights: 2,
-        peakSeasonAllottedHolidayNights: 2,
-        offSeasonAllottedHolidayNights: 2,
-        lastMinuteBookingAllottedNights: 2,
-        wifiNetwork: 'we23456',
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-      } as PropertyDetails;
+      } as unknown as PropertyDetails;
 
       jest
         .spyOn(propertyDetailsRepository, 'findOne')

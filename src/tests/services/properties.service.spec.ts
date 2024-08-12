@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { NotFoundException } from '@nestjs/common';
 import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
 import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { User } from 'src/main/entities/user.entity';
 
@@ -79,8 +79,12 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
+        latitude: 0,
+        longitude: 0,
+        isActive: false,
+        ownerRezPropId: 0,
+        displayOrder: 0,
       };
 
       const mockProperties = {
@@ -94,7 +98,6 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
@@ -162,8 +165,12 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
+        latitude: 0,
+        longitude: 0,
+        isActive: false,
+        ownerRezPropId: 0,
+        displayOrder: 0,
       };
 
       const mockProperties = {
@@ -177,7 +184,6 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
@@ -244,7 +250,6 @@ describe('PropertiesService', () => {
           houseDescription: 'test description',
           isExclusive: true,
           propertyShare: 1,
-          mapCoordinates: 'POINT (0 0)',
           createdBy: mockUser,
           updatedBy: null,
           createdAt: new Date(Date.now()),
@@ -328,7 +333,6 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
@@ -415,8 +419,12 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         updatedBy: mockUser,
+        latitude: 0,
+        longitude: 0,
+        isActive: false,
+        ownerRezPropId: 0,
+        displayOrder: 0,
       };
 
       const mockProperties = {
@@ -430,12 +438,11 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyId = 1;
 
@@ -510,9 +517,8 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         updatedBy: mockUser,
-      };
+      } as Property;
 
       jest.spyOn(propertiesRepository, 'findOne').mockResolvedValue(null);
 
@@ -568,7 +574,6 @@ describe('PropertiesService', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),

@@ -1,6 +1,6 @@
 import { IsOptional, IsInt, IsNotEmpty } from 'class-validator';
 import { User } from 'entities/user.entity';
-import { Property } from 'entities/Property.entity';
+import { Property } from 'entities/property.entity';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 

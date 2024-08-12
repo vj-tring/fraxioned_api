@@ -8,7 +8,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Role } from 'src/main/entities/role.entity';
 import { User } from 'src/main/entities/user.entity';
 import { UserProperties } from 'entities/user-properties.entity';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
@@ -82,7 +82,6 @@ describe('UserPropertyController', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,

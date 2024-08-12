@@ -1,7 +1,7 @@
 import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 
 export class UpdateUserDocumentDTO {

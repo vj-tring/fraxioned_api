@@ -98,12 +98,11 @@ describe('PropertyDetailsController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyDetails = {
         id: 1,
@@ -214,12 +213,11 @@ describe('PropertyDetailsController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockCreatePropertyDetailsDto: CreatePropertyDetailsDto = {
         property: mockProperties,
@@ -388,12 +386,11 @@ describe('PropertyDetailsController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyDetailsDto: UpdatePropertyDetailsDto = {
         property: mockProperties,
@@ -483,12 +480,11 @@ describe('PropertyDetailsController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyDetailsDto: UpdatePropertyDetailsDto = {
         property: mockProperties,
@@ -579,12 +575,11 @@ describe('PropertyDetailsController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyDetailsDto: UpdatePropertyDetailsDto = {
         property: mockProperties,

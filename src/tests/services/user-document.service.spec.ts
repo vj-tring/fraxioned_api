@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserDocument } from 'entities/user-documents.entity';
 import { User } from 'entities/user.entity';
-import { Property } from 'entities/Property.entity';
+import { Property } from 'entities/property.entity';
 import { LoggerService } from 'services/logger.service';
 import { Repository } from 'typeorm';
 import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
@@ -93,12 +93,15 @@ describe('UserDocumentService', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+          latitude: 0,
+          longitude: 0,
+          isActive: false,
+          displayOrder: 0,
+        } as Property,
         createdBy: {
           id: 1,
           role: new Role(),
@@ -187,12 +190,15 @@ describe('UserDocumentService', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+          latitude: 0,
+          longitude: 0,
+          isActive: false,
+          displayOrder: 0,
+        } as Property,
         createdBy: {
           id: 1,
           role: new Role(),
@@ -319,12 +325,15 @@ describe('UserDocumentService', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+          latitude: 0,
+          longitude: 0,
+          isActive: false,
+          displayOrder: 0,
+        } as Property,
         updatedBy: {
           id: 1,
           role: new Role(),
@@ -410,12 +419,15 @@ describe('UserDocumentService', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+          latitude: 0,
+          longitude: 0,
+          isActive: false,
+          displayOrder: 0,
+        } as Property,
         updatedBy: {
           id: 1,
           role: new Role(),

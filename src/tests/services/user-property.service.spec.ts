@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserPropertyService } from 'services/user-property.service';
 import { UserProperties } from 'entities/user-properties.entity';
 import { User } from 'entities/user.entity';
-import { Property } from 'entities/Property.entity';
+import { Property } from 'entities/property.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from 'services/logger.service';
 import { CreateUserPropertyDTO } from 'src/main/dto/requests/create-user-property.dto';

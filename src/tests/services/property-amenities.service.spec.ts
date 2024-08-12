@@ -5,7 +5,7 @@ import { HttpException } from '@nestjs/common';
 import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertyAmenitiesService } from 'src/main/service/property-amenities.service';
 import { PropertyAmenities } from 'src/main/entities/property_amenities.entity';
 import { Amenities } from 'src/main/entities/amenities.entity';
@@ -81,12 +81,14 @@ describe('PropertyAmenitiesService', () => {
       houseDescription: '',
       isExclusive: false,
       propertyShare: 0,
-      mapCoordinates: '',
       createdBy: new User(),
       updatedBy: new User(),
       createdAt: undefined,
       updatedAt: undefined,
-    },
+      latitude: 0,
+      longitude: 0,
+      isActive: false,
+    } as Property,
     amenity: {
       id: 1,
       amenityName: '',
@@ -133,12 +135,14 @@ describe('PropertyAmenitiesService', () => {
       houseDescription: '',
       isExclusive: false,
       propertyShare: 0,
-      mapCoordinates: '',
       createdBy: new User(),
       updatedBy: new User(),
       createdAt: undefined,
       updatedAt: undefined,
-    },
+      latitude: 0,
+      longitude: 0,
+      isActive: false,
+    } as Property,
     amenity: {
       id: 1,
       amenityName: '',

@@ -21,6 +21,12 @@ export class UpdatePropertyDetailsDto {
   noOfBathrooms?: number;
 
   @IsOptional()
+  noOfBathroomsFull?: number;
+
+  @IsOptional()
+  noOfBathroomsHalf?: number;
+
+  @IsOptional()
   squareFootage?: string;
 
   @IsOptional()

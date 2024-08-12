@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNotEmpty } from 'class-validator';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { Holidays } from 'src/main/entities/holidays.entity';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 
 export class UpdatePropertySeasonHolidayDto {

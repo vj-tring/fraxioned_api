@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { Property } from 'entities/Property.entity';
+import { Property } from 'entities/property.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { User } from 'entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';

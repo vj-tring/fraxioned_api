@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -10,9 +11,12 @@ import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { User } from 'src/main/entities/user.entity';
 
 export class UpdatePropertiesDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   propertyName: string;
+
+  @IsInt()
+  ownerRezPropId: number;
 
   @IsOptional()
   @IsString()
@@ -47,8 +51,17 @@ export class UpdatePropertiesDto {
   propertyShare?: number;
 
   @IsOptional()
-  @IsString()
-  mapCoordinates?: string = 'POINT (0 0)';
+  latitude: number;
+
+  @IsOptional()
+  longitude: number;
+
+  @IsOptional()
+  isActive: boolean;
+
+  @IsOptional()
+  @IsInt({ message: 'displayOrder should be int' })
+  displayOrder: number;
 
   @ApiProperty({
     example: { id: 1 },

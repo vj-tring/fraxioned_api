@@ -13,6 +13,12 @@ export class UpdatePropertyDetailsResponseDto {
   noOfBathrooms?: number;
 
   @IsOptional()
+  noOfBathroomsFull?: number;
+
+  @IsOptional()
+  noOfBathroomsHalf?: number;
+
+  @IsOptional()
   squareFootage?: string;
 
   @IsOptional()
@@ -57,9 +63,9 @@ export class UpdatePropertyDetailsResponseDto {
   @IsOptional()
   wifiNetwork?: string;
 
-  @IsNotEmpty({ message: 'created by is required' })
+  @IsNotEmpty({ message: 'updatedBy is required' })
   @IsValidId({
-    message: 'createdBy must be an object with a valid id where (id >= 1)',
+    message: 'updatedBy must be an object with a valid id where (id >= 1)',
   })
   updatedBy: User;
 }

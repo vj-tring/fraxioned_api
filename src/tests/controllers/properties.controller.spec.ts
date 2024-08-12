@@ -5,7 +5,7 @@ import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
 import { Repository } from 'typeorm';
 import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
 import { NotFoundException } from '@nestjs/common';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { User } from 'src/main/entities/user.entity';
@@ -132,9 +132,8 @@ describe('PropertiesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
-      };
+      } as Property;
 
       jest.spyOn(service, 'createProperties').mockResolvedValue(mockProperties);
 
@@ -189,9 +188,8 @@ describe('PropertiesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
-      };
+      } as Property;
 
       jest
         .spyOn(service, 'createProperties')
@@ -315,9 +313,8 @@ describe('PropertiesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         updatedBy: mockUser,
-      };
+      } as Property;
 
       const mockPropertyId = 1;
 
@@ -384,9 +381,8 @@ describe('PropertiesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         updatedBy: mockUser,
-      };
+      } as Property;
 
       jest
         .spyOn(service, 'updatePropertiesById')

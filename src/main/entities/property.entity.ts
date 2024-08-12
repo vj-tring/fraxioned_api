@@ -18,6 +18,11 @@ export class Property {
   id: number;
 
   @Column({
+    name: 'ownerRez_prop_id',
+  })
+  ownerRezPropId: number;
+
+  @Column({
     name: 'property_name',
     type: 'varchar',
   })
@@ -73,10 +78,33 @@ export class Property {
   propertyShare: number;
 
   @Column({
-    name: 'map_coordinates',
-    type: 'point',
+    name: 'latitude',
+    type: 'double',
+    precision: 10,
+    scale: 6,
   })
-  mapCoordinates: string;
+  latitude: number;
+
+  @Column({
+    name: 'longitude',
+    type: 'double',
+    precision: 10,
+    scale: 6,
+  })
+  longitude: number;
+
+  @Column({
+    name: 'is_active',
+    type: 'boolean',
+    default: true,
+  })
+  isActive: boolean;
+
+  @Column({
+    name: 'display_order',
+    nullable: true,
+  })
+  displayOrder: number;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({

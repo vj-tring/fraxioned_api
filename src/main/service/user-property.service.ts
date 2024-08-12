@@ -7,7 +7,7 @@ import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-con
 import { CreateUserPropertyDTO } from '../dto/requests/create-user-property.dto';
 import { UpdateUserPropertyDTO } from '../dto/requests/update-user-property.dto';
 import { User } from 'src/main/entities/user.entity';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 
 @Injectable()
 export class UserPropertyService {

@@ -7,7 +7,7 @@ import { USER_DOCUMENT_RESPONSES } from 'src/main/commons/constants/response-con
 import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
 import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
 import { User } from 'src/main/entities/user.entity';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 

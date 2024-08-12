@@ -68,7 +68,7 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
     const ownerEmail = userContactDetailsRepository.create({
       user: ownerUser,
       contactType: 'email',
-      contactValue: 'owner@example.com',
+      contactValue: 'owner@fraxioned.com',
       createdBy: ownerUser,
       updatedBy: ownerUser,
       createdAt: new Date(Date.now()),

@@ -8,7 +8,7 @@ import { User } from 'src/main/entities/user.entity';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
 import { Role } from 'src/main/entities/role.entity';
 import { PropertySeasonHolidaysService } from 'src/main/service/property-season-holidays.service';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { CreatePropertySeasonHolidayDto } from 'src/main/dto/requests/create-property-season-holiday.dto';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from 'src/main/commons/constants/response-constants/property-season-holidays.constants';
 import { UpdatePropertySeasonHolidayDto } from 'src/main/dto/requests/update-property-season-holiday.dto';
@@ -83,12 +83,15 @@ describe('PropertySeasonHolidaysService', () => {
       houseDescription: '',
       isExclusive: false,
       propertyShare: 0,
-      mapCoordinates: '',
       createdBy: new User(),
       updatedBy: new User(),
       createdAt: undefined,
       updatedAt: undefined,
-    },
+      latitude: 0,
+      longitude: 0,
+      isActive: false,
+      displayOrder: 0,
+    } as Property,
     holiday: {
       id: 1,
       name: '',
@@ -137,12 +140,15 @@ describe('PropertySeasonHolidaysService', () => {
       houseDescription: '',
       isExclusive: false,
       propertyShare: 0,
-      mapCoordinates: '',
       createdBy: new User(),
       updatedBy: new User(),
       createdAt: undefined,
       updatedAt: undefined,
-    },
+      latitude: 0,
+      longitude: 0,
+      isActive: false,
+      displayOrder: 0,
+    } as Property,
     holiday: {
       id: 1,
       name: '',

@@ -4,7 +4,7 @@ import { User } from 'src/main/entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertyAmenitiesController } from 'src/main/controller/property-amenities.controller';
 import { PropertyAmenitiesService } from 'src/main/service/property-amenities.service';
 import { CreatePropertyAmenitiesDto } from 'src/main/dto/requests/create-property-amenities.dto';
@@ -65,12 +65,11 @@ describe('PropertyAmenitiesController', () => {
       houseDescription: '',
       isExclusive: false,
       propertyShare: 0,
-      mapCoordinates: '',
       createdBy: new User(),
       updatedBy: new User(),
       createdAt: undefined,
       updatedAt: undefined,
-    },
+    } as Property,
     amenity: {
       id: 1,
       amenityName: '',
@@ -233,12 +232,11 @@ describe('PropertyAmenitiesController', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+        } as Property,
         amenity: {
           id: 1,
           amenityName: '',

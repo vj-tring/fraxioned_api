@@ -39,9 +39,21 @@ export class PropertyDetails {
 
   @Column({
     name: 'no_of_bathrooms',
-    type: 'float',
+    default: 0,
   })
   noOfBathrooms: number;
+
+  @Column({
+    name: 'no_of_bathrooms_full',
+    default: 0,
+  })
+  noOfBathroomsFull: number;
+
+  @Column({
+    name: 'no_of_bathrooms_half',
+    default: 0,
+  })
+  noOfBathroomsHalf: number;
 
   @Column({
     name: 'no_of_pets_allowed',

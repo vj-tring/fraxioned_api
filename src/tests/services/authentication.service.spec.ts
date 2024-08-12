@@ -17,7 +17,7 @@ import {
 } from 'src/main/commons/constants/response-constants/auth.constant';
 import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { Role } from 'src/main/entities/role.entity';
-import { Property } from 'src/main/entities/Property.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
