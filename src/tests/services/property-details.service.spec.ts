@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { PropertyDetailsService } from 'src/main/service/property-details.service';
 import { Repository } from 'typeorm';
@@ -8,10 +8,11 @@ import * as bcrypt from 'bcrypt';
 import { CreatePropertyDetailsDto } from 'src/main/dto/requests/create-property-details.dto';
 import { UpdatePropertyDetailsDto } from 'src/main/dto/requests/update-property-details.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { User } from 'src/main/entities/user.entity';
 
 describe('PropertyDetailsService', () => {
   let service: PropertyDetailsService;
-  let propertiesRepository: Repository<Properties>;
+  let propertiesRepository: Repository<Property>;
   let propertyDetailsRepository: Repository<PropertyDetails>;
 
   beforeEach(async () => {
@@ -23,15 +24,15 @@ describe('PropertyDetailsService', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
       ],
     }).compile();
 
     service = module.get<PropertyDetailsService>(PropertyDetailsService);
-    propertiesRepository = module.get<Repository<Properties>>(
-      getRepositoryToken(Properties),
+    propertiesRepository = module.get<Repository<Property>>(
+      getRepositoryToken(Property),
     );
     propertyDetailsRepository = module.get<Repository<PropertyDetails>>(
       getRepositoryToken(PropertyDetails),
@@ -44,40 +45,6 @@ describe('PropertyDetailsService', () => {
 
   describe('createPropertyDetails', () => {
     it('should create and return a new property detail', async () => {
-      const mockRole = {
-        id: 1,
-        roleName: 'Admin',
-        roleDescription: 'admin-role',
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-      };
-
-      const mockUser = {
-        id: 1,
-        firstName: 'admin',
-        lastName: 'user',
-        password: await bcrypt.hash('Admin@123', 10),
-        imageURL: 'www.example.com/images',
-        role: mockRole,
-        isActive: true,
-        addressLine1: 'address line 1',
-        addressLine2: 'address line 2',
-        state: 'test state',
-        country: 'test country',
-        city: 'test city',
-        zipcode: '123456',
-        resetToken: null,
-        resetTokenExpires: new Date(Date.now()),
-        lastLoginTime: new Date(Date.now()),
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-        contactDetails: null,
-      };
-
       const mockProperties = {
         id: 1,
         propertyName: 'test property',
@@ -90,21 +57,36 @@ describe('PropertyDetailsService', () => {
         isExclusive: true,
         propertyShare: 1,
         mapCoordinates: 'POINT (0 0)',
-        createdBy: mockUser,
+        createdBy: null,
         updatedBy: null,
         createdAt: new Date(Date.now()),
-        updatedAt: null,
-      };
+        updatedAt: new Date(Date.now()),
+      } as Property;
 
-      const mockPropertyDetails = {
-        id: 1,
-        property: mockProperties,
+      const mockCreatePropertyDetailsDto: CreatePropertyDetailsDto = {
+        property: {
+          id: 1,
+          propertyName: '',
+          address: '',
+          city: '',
+          state: '',
+          country: '',
+          zipcode: 0,
+          houseDescription: '',
+          isExclusive: false,
+          propertyShare: 0,
+          mapCoordinates: '',
+          createdBy: new User(),
+          updatedBy: new User(),
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
         noOfGuestsAllowed: 1,
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -118,33 +100,14 @@ describe('PropertyDetailsService', () => {
         lastMinuteBookingAllottedNights: 2,
         wifiNetwork: 'we23456',
         createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
       };
 
-      const mockCreatePropertyDetailsDto: CreatePropertyDetailsDto = {
-        property: mockProperties,
-        noOfGuestsAllowed: 1,
-        noOfBedrooms: 1,
-        noOfBathrooms: 1,
-        squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
-        cleaningFee: 100,
-        noOfPetsAllowed: 2,
-        petPolicy: 'allowed',
-        feePerPet: 100,
-        peakSeasonStartDate: null,
-        peakSeasonEndDate: null,
-        peakSeasonAllottedNights: 2,
-        offSeasonAllottedNights: 2,
-        peakSeasonAllottedHolidayNights: 2,
-        offSeasonAllottedHolidayNights: 2,
-        lastMinuteBookingAllottedNights: 2,
-        wifiNetwork: 'we23456',
-        createdBy: mockUser,
-      };
+      const mockPropertyDetails = {
+        id: 1,
+        ...mockCreatePropertyDetailsDto,
+        createdAt: new Date(Date.now()),
+        updatedAt: new Date(Date.now()),
+      } as PropertyDetails;
 
       jest
         .spyOn(propertiesRepository, 'findOne')
@@ -163,9 +126,7 @@ describe('PropertyDetailsService', () => {
       expect(result).toBeDefined();
       expect(result).toEqual(mockPropertyDetails);
       expect(propertiesRepository.findOne).toHaveBeenCalledWith({
-        where: {
-          id: mockCreatePropertyDetailsDto.property as unknown as number,
-        },
+        where: { id: mockCreatePropertyDetailsDto.property },
       });
       expect(propertyDetailsRepository.create).toHaveBeenCalledWith(
         mockCreatePropertyDetailsDto,
@@ -175,67 +136,31 @@ describe('PropertyDetailsService', () => {
       );
     });
 
-    it('should return NotFoundException if no properties found', async () => {
-      const mockRole = {
-        id: 1,
-        roleName: 'Admin',
-        roleDescription: 'admin-role',
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-      };
-
-      const mockUser = {
-        id: 1,
-        firstName: 'admin',
-        lastName: 'user',
-        password: await bcrypt.hash('Admin@123', 10),
-        imageURL: 'www.example.com/images',
-        role: mockRole,
-        isActive: true,
-        addressLine1: 'address line 1',
-        addressLine2: 'address line 2',
-        state: 'test state',
-        country: 'test country',
-        city: 'test city',
-        zipcode: '123456',
-        resetToken: null,
-        resetTokenExpires: new Date(Date.now()),
-        lastLoginTime: new Date(Date.now()),
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-        contactDetails: null,
-      };
-
-      const mockProperties = {
-        id: 1,
-        propertyName: 'test property',
-        address: 'test address',
-        city: 'test city',
-        state: 'test state',
-        country: 'test country',
-        zipcode: 123456,
-        houseDescription: 'test description',
-        isExclusive: true,
-        propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
-        createdBy: mockUser,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-      };
-
+    it('should throw NotFoundException if property not found', async () => {
       const mockCreatePropertyDetailsDto: CreatePropertyDetailsDto = {
-        property: mockProperties,
+        property: {
+          id: 1,
+          propertyName: '',
+          address: '',
+          city: '',
+          state: '',
+          country: '',
+          zipcode: 0,
+          houseDescription: '',
+          isExclusive: false,
+          propertyShare: 0,
+          mapCoordinates: '',
+          createdBy: new User(),
+          updatedBy: new User(),
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
         noOfGuestsAllowed: 1,
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -248,14 +173,20 @@ describe('PropertyDetailsService', () => {
         offSeasonAllottedHolidayNights: 2,
         lastMinuteBookingAllottedNights: 2,
         wifiNetwork: 'we23456',
-        createdBy: mockUser,
+        createdBy: null,
       };
 
       jest.spyOn(propertiesRepository, 'findOne').mockResolvedValue(null);
 
       await expect(
         service.createPropertyDetails(mockCreatePropertyDetailsDto),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(
+        new NotFoundException(`Properties with ID 1 not found`),
+      );
+
+      expect(propertiesRepository.findOne).toHaveBeenCalledWith({
+        where: { id: mockCreatePropertyDetailsDto.property },
+      });
     });
   });
 
@@ -320,8 +251,8 @@ describe('PropertyDetailsService', () => {
           noOfBedrooms: 1,
           noOfBathrooms: 1,
           squareFootage: '100 x 100',
-          checkInTime: new Date(Date.now()),
-          checkOutTime: new Date(Date.now()),
+          checkInTime: 4,
+          checkOutTime: 11,
           cleaningFee: 100,
           noOfPetsAllowed: 2,
           petPolicy: 'allowed',
@@ -433,8 +364,8 @@ describe('PropertyDetailsService', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -550,8 +481,8 @@ describe('PropertyDetailsService', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -574,8 +505,8 @@ describe('PropertyDetailsService', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -685,8 +616,8 @@ describe('PropertyDetailsService', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -769,13 +700,13 @@ describe('PropertyDetailsService', () => {
 
       const mockPropertyDetails = {
         id: 1,
-        property: new Properties(),
+        property: new Property(),
         noOfGuestsAllowed: 1,
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -800,8 +731,8 @@ describe('PropertyDetailsService', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -892,8 +823,8 @@ describe('PropertyDetailsService', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',

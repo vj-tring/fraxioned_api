@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNotEmpty } from 'class-validator';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { Holidays } from 'src/main/entities/holidays.entity';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/Property.entity';
 import { User } from 'src/main/entities/user.entity';
 
 export class UpdatePropertySeasonHolidayDto {
@@ -13,7 +13,7 @@ export class UpdatePropertySeasonHolidayDto {
   @IsValidId({
     message: 'property must be an object with a valid id where (id >= 1)',
   })
-  property: Properties;
+  property: Property;
 
   @ApiProperty({
     example: { id: 1 },

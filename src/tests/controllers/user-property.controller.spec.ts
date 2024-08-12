@@ -8,7 +8,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Role } from 'src/main/entities/role.entity';
 import { User } from 'src/main/entities/user.entity';
 import { UserProperties } from 'entities/user-properties.entity';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/Property.entity';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
@@ -87,7 +87,7 @@ describe('UserPropertyController', () => {
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        } as Properties,
+        } as Property,
         noOfShare: 1,
         acquisitionDate: new Date(),
         isActive: true,
@@ -171,7 +171,7 @@ describe('UserPropertyController', () => {
         {
           id: 1,
           user: new User(),
-          property: new Properties(),
+          property: new Property(),
           noOfShare: 1,
           acquisitionDate: new Date(),
           isActive: true,
@@ -230,7 +230,7 @@ describe('UserPropertyController', () => {
       const userProperty: UserProperties = {
         id: 1,
         user: new User(),
-        property: new Properties(),
+        property: new Property(),
         noOfShare: 1,
         acquisitionDate: new Date(),
         isActive: true,
@@ -322,7 +322,7 @@ describe('UserPropertyController', () => {
       const updatedUserProperty: UserProperties = {
         id: 1,
         user: new User(),
-        property: new Properties(),
+        property: new Property(),
         noOfShare: 2,
         acquisitionDate: new Date(),
         isActive: true,

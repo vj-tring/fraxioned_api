@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Properties } from './properties.entity';
+import { Property } from './property.entity';
 import { User } from './user.entity';
 
 @Entity('fxn_property_details')
@@ -19,11 +19,11 @@ export class PropertyDetails {
   })
   id: number;
 
-  @OneToOne(() => Properties, (properties) => properties.id)
+  @OneToOne(() => Property, (property) => property.id)
   @JoinColumn({
     name: 'property_id',
   })
-  property: Properties;
+  property: Property;
 
   @Column({
     name: 'no_of_guests_allowed',
@@ -33,13 +33,13 @@ export class PropertyDetails {
 
   @Column({
     name: 'no_of_bedrooms',
-    type: 'integer',
+    type: 'float',
   })
   noOfBedrooms: number;
 
   @Column({
     name: 'no_of_bathrooms',
-    type: 'integer',
+    type: 'float',
   })
   noOfBathrooms: number;
 
@@ -57,15 +57,13 @@ export class PropertyDetails {
 
   @Column({
     name: 'check_in_time',
-    type: 'timestamp',
   })
-  checkInTime: Date;
+  checkInTime: number;
 
   @Column({
     name: 'check_out_time',
-    type: 'timestamp',
   })
-  checkOutTime: Date;
+  checkOutTime: number;
 
   @Column({
     name: 'pet_policy',

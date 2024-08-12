@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserDocument } from 'entities/user-documents.entity';
 import { User } from 'entities/user.entity';
-import { Properties } from 'entities/properties.entity';
+import { Property } from 'entities/Property.entity';
 import { LoggerService } from 'services/logger.service';
 import { Repository } from 'typeorm';
 import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
@@ -16,7 +16,7 @@ describe('UserDocumentService', () => {
   let service: UserDocumentService;
   let userDocumentRepository: Repository<UserDocument>;
   let userRepository: Repository<User>;
-  let propertyRepository: Repository<Properties>;
+  let propertyRepository: Repository<Property>;
   let logger: LoggerService;
 
   beforeEach(async () => {
@@ -32,7 +32,7 @@ describe('UserDocumentService', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
         {
@@ -50,8 +50,8 @@ describe('UserDocumentService', () => {
       getRepositoryToken(UserDocument),
     );
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    propertyRepository = module.get<Repository<Properties>>(
-      getRepositoryToken(Properties),
+    propertyRepository = module.get<Repository<Property>>(
+      getRepositoryToken(Property),
     );
     logger = module.get<LoggerService>(LoggerService);
   });
@@ -127,7 +127,7 @@ describe('UserDocumentService', () => {
       };
 
       const user = { id: 1 } as User;
-      const property = { id: 1 } as Properties;
+      const property = { id: 1 } as Property;
       const createdBy = { id: 1 } as User;
       const savedDocument = { id: 1 } as UserDocument;
 
@@ -352,7 +352,7 @@ describe('UserDocumentService', () => {
 
       const document = { id: 1 } as UserDocument;
       const user = { id: 1 } as User;
-      const property = { id: 1 } as Properties;
+      const property = { id: 1 } as Property;
       const updatedBy = { id: 1 } as User;
       const updatedDocument = { id: 1 } as UserDocument;
 

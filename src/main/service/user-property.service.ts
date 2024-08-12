@@ -7,7 +7,7 @@ import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-con
 import { CreateUserPropertyDTO } from '../dto/requests/create-user-property.dto';
 import { UpdateUserPropertyDTO } from '../dto/requests/update-user-property.dto';
 import { User } from 'src/main/entities/user.entity';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/Property.entity';
 
 @Injectable()
 export class UserPropertyService {
@@ -16,8 +16,8 @@ export class UserPropertyService {
     private readonly userPropertyRepository: Repository<UserProperties>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Properties)
-    private readonly propertyRepository: Repository<Properties>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
     private readonly logger: LoggerService,
   ) {}
 

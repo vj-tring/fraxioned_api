@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Properties } from './properties.entity';
+import { Property } from './property.entity';
 import { Holidays } from './holidays.entity';
 import { User } from './user.entity';
 
@@ -19,11 +19,11 @@ export class PropertySeasonHolidays {
   })
   id: number;
 
-  @ManyToOne(() => Properties, (properties) => properties.id)
+  @ManyToOne(() => Property, (properties) => properties.id)
   @JoinColumn({
     name: 'property_id',
   })
-  property: Properties;
+  property: Property;
 
   @ManyToOne(() => Holidays, (holidays) => holidays.id)
   @JoinColumn({

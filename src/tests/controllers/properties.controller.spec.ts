@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertiesController } from 'src/main/controller/properties.controller';
-import { CreatePropertiesDto } from 'src/main/dto/requests/create-properties.dto';
+import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
 import { Repository } from 'typeorm';
 import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
 import { NotFoundException } from '@nestjs/common';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/Property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { User } from 'src/main/entities/user.entity';
@@ -28,7 +28,7 @@ describe('PropertiesController', () => {
       providers: [
         PropertiesService,
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
         {
@@ -87,7 +87,7 @@ describe('PropertiesController', () => {
 
   describe('createProperties', () => {
     it('should return a created property', async () => {
-      const mockProperties = new Properties();
+      const mockProperties = new Property();
 
       const mockRole = {
         id: 1,
@@ -207,7 +207,7 @@ describe('PropertiesController', () => {
 
   describe('getAllProperties', () => {
     it('should return all the properties', async () => {
-      const mockProperties = [new Properties(), new Properties()];
+      const mockProperties = [new Property(), new Property()];
 
       jest.spyOn(service, 'getAllProperties').mockResolvedValue(mockProperties);
 
@@ -233,7 +233,7 @@ describe('PropertiesController', () => {
 
   describe('getPropertiesById', () => {
     it('should return a property of respective id', async () => {
-      const mockProperties = new Properties();
+      const mockProperties = new Property();
 
       const mockPropertyId = 1;
 
@@ -270,7 +270,7 @@ describe('PropertiesController', () => {
   });
   describe('updatePropertiesById', () => {
     it('should return a updated property of respective id', async () => {
-      const mockProperties = new Properties();
+      const mockProperties = new Property();
 
       const mockRole = {
         id: 1,
@@ -411,7 +411,7 @@ describe('PropertiesController', () => {
     it('should returen a deleted property of respective id', async () => {
       const mockPropertyId = 1;
 
-      const mockProperties = new Properties();
+      const mockProperties = new Property();
 
       jest
         .spyOn(service, 'deletePropertiesById')

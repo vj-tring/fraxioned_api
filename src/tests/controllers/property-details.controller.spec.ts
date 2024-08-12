@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertyDetailsController } from 'src/main/controller/property-details.controller';
 import { CreatePropertyDetailsDto } from 'src/main/dto/requests/create-property-details.dto';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { PropertyDetailsService } from 'src/main/service/property-details.service';
 import { Repository } from 'typeorm';
@@ -26,7 +26,7 @@ describe('PropertyDetailsController', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
         {
@@ -112,8 +112,8 @@ describe('PropertyDetailsController', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -138,8 +138,8 @@ describe('PropertyDetailsController', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -227,8 +227,8 @@ describe('PropertyDetailsController', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -401,8 +401,8 @@ describe('PropertyDetailsController', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -496,8 +496,8 @@ describe('PropertyDetailsController', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',
@@ -592,8 +592,8 @@ describe('PropertyDetailsController', () => {
         noOfBedrooms: 1,
         noOfBathrooms: 1,
         squareFootage: '100 x 100',
-        checkInTime: new Date(Date.now()),
-        checkOutTime: new Date(Date.now()),
+        checkInTime: 4,
+        checkOutTime: 11,
         cleaningFee: 100,
         noOfPetsAllowed: 2,
         petPolicy: 'allowed',

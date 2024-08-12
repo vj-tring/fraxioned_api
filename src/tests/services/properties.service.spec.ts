@@ -3,30 +3,30 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { NotFoundException } from '@nestjs/common';
-import { CreatePropertiesDto } from 'src/main/dto/requests/create-properties.dto';
+import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
 import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/Property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { User } from 'src/main/entities/user.entity';
 
 describe('PropertiesService', () => {
   let service: PropertiesService;
-  let propertiesRepository: Repository<Properties>;
+  let propertiesRepository: Repository<Property>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PropertiesService,
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
       ],
     }).compile();
 
     service = module.get<PropertiesService>(PropertiesService);
-    propertiesRepository = module.get<Repository<Properties>>(
-      getRepositoryToken(Properties),
+    propertiesRepository = module.get<Repository<Property>>(
+      getRepositoryToken(Property),
     );
   });
 
@@ -99,7 +99,7 @@ describe('PropertiesService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      } as Properties;
+      } as Property;
 
       jest
         .spyOn(propertiesRepository, 'create')
@@ -182,7 +182,7 @@ describe('PropertiesService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      } as Properties;
+      } as Property;
 
       jest
         .spyOn(propertiesRepository, 'create')
@@ -249,7 +249,7 @@ describe('PropertiesService', () => {
           updatedBy: null,
           createdAt: new Date(Date.now()),
           updatedAt: null,
-        } as Properties,
+        } as Property,
       ];
 
       jest
@@ -333,7 +333,7 @@ describe('PropertiesService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      } as Properties;
+      } as Property;
 
       const mockPropertyId = 1;
 
@@ -573,7 +573,7 @@ describe('PropertiesService', () => {
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      } as Properties;
+      } as Property;
 
       const mockPropertyId = 1;
 

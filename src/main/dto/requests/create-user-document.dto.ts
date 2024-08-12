@@ -2,7 +2,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { User } from 'src/main/entities/user.entity';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/Property.entity';
 
 export class CreateUserDocumentDTO {
   @ApiProperty({ example: { id: 1 } })
@@ -17,7 +17,7 @@ export class CreateUserDocumentDTO {
   @IsValidId({
     message: 'property must be an object with a valid id where (id >= 1)',
   })
-  property: Properties;
+  property: Property;
 
   @IsString()
   @IsNotEmpty({ message: 'documentName is required' })

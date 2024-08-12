@@ -17,7 +17,7 @@ import {
 } from 'src/main/commons/constants/response-constants/auth.constant';
 import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { Role } from 'src/main/entities/role.entity';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/Property.entity';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
@@ -46,7 +46,7 @@ describe('AuthenticationService', () => {
   let userPropertyRepository: MockRepository<UserProperties>;
   let userContactDetailsRepository: MockRepository<UserContactDetails>;
   let roleRepository: MockRepository<Role>;
-  let propertyRepository: MockRepository<Properties>;
+  let propertyRepository: MockRepository<Property>;
   let mailService: MailService;
   let logger: LoggerService;
 
@@ -79,7 +79,7 @@ describe('AuthenticationService', () => {
           useValue: roleRepository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useValue: propertyRepository,
         },
         { provide: MailService, useValue: { sendMail: jest.fn() } },

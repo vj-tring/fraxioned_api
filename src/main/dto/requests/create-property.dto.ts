@@ -1,12 +1,12 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  Min,
 } from 'class-validator';
+import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { User } from 'src/main/entities/user.entity';
 
 export class CreatePropertiesDto {
@@ -50,7 +50,12 @@ export class CreatePropertiesDto {
   @IsString()
   mapCoordinates?: string = 'POINT (0 0)';
 
-  @IsInt()
-  @Min(1)
+  @ApiProperty({
+    example: { id: 1 },
+  })
+  @IsNotEmpty({ message: 'created by is required' })
+  @IsValidId({
+    message: 'createdBy must be an object with a valid id where (id >= 1)',
+  })
   createdBy: User;
 }

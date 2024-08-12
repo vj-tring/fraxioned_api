@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreatePropertyCodeDto } from 'src/main/dto/requests/create-property-code.dto';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertyCodes } from 'src/main/entities/property_codes.entity';
 import { PropertyCodesService } from 'src/main/service/property-codes.service';
 import { Repository } from 'typeorm';
@@ -13,7 +13,7 @@ import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('PropertyCodesService', () => {
   let service: PropertyCodesService;
-  let propertiesRepository: Repository<Properties>;
+  let propertiesRepository: Repository<Property>;
   let propertyCodesRepository: Repository<PropertyCodes>;
 
   beforeEach(async () => {
@@ -34,15 +34,15 @@ describe('PropertyCodesService', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
       ],
     }).compile();
 
     service = module.get<PropertyCodesService>(PropertyCodesService);
-    propertiesRepository = module.get<Repository<Properties>>(
-      getRepositoryToken(Properties),
+    propertiesRepository = module.get<Repository<Property>>(
+      getRepositoryToken(Property),
     );
     propertyCodesRepository = module.get<Repository<PropertyCodes>>(
       getRepositoryToken(PropertyCodes),
@@ -654,7 +654,7 @@ describe('PropertyCodesService', () => {
 
       const mockPropertyCodes = {
         id: 1,
-        property: new Properties(),
+        property: new Property(),
         propertyCodeType: 'locker',
         propertyCode: '12345',
         createdBy: mockUser,
@@ -723,7 +723,7 @@ describe('PropertyCodesService', () => {
 
       const mockPropertyCodes = {
         id: 1,
-        property: new Properties(),
+        property: new Property(),
         propertyCodeType: 'locker',
         propertyCode: '12345',
         createdBy: mockUser,

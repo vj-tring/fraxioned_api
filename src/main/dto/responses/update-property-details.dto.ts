@@ -1,14 +1,8 @@
-// import { IsInt, IsNotEmpty, IsOptional, Min } from 'class-validator';
-// import { Properties } from 'src/main/entities/properties.entity';
-// import { User } from 'src/main/entities/user.entity';
-
-import { IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
+import { User } from 'src/main/entities/user.entity';
 
 export class UpdatePropertyDetailsResponseDto {
-  // @IsNotEmpty()
-  // @IsInt()
-  // property: Properties;
-
   @IsOptional()
   noOfGuestsAllowed?: number;
 
@@ -22,10 +16,10 @@ export class UpdatePropertyDetailsResponseDto {
   squareFootage?: string;
 
   @IsOptional()
-  checkInTime?: Date;
+  checkInTime?: number;
 
   @IsOptional()
-  checkOutTime?: Date;
+  checkOutTime?: number;
 
   @IsOptional()
   cleaningFee?: number;
@@ -63,8 +57,9 @@ export class UpdatePropertyDetailsResponseDto {
   @IsOptional()
   wifiNetwork?: string;
 
-  // @IsNotEmpty()
-  // @IsInt()
-  // @Min(1)
-  // updatedBy: User;
+  @IsNotEmpty({ message: 'created by is required' })
+  @IsValidId({
+    message: 'createdBy must be an object with a valid id where (id >= 1)',
+  })
+  updatedBy: User;
 }

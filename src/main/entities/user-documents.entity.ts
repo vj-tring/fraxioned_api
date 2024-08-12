@@ -8,7 +8,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Properties } from './properties.entity';
+import { Property } from './property.entity';
 
 @Entity('fxn_user_documents')
 export class UserDocument {
@@ -19,9 +19,9 @@ export class UserDocument {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: User;
 
-  @ManyToOne(() => Properties, (property) => property.id)
+  @ManyToOne(() => Property, (property) => property.id)
   @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
-  property: Properties;
+  property: Property;
 
   @Column({
     name: 'document_name',

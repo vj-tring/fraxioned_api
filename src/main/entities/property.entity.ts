@@ -10,7 +10,7 @@ import {
 import { User } from './user.entity';
 
 @Entity('fxn_properties')
-export class Properties {
+export class Property {
   @PrimaryGeneratedColumn({
     name: 'id',
     comment: 'This is a unique identifier',

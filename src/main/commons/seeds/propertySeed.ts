@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/Property.entity';
 import { User } from 'src/main/entities/user.entity';
 
 export const seedProperties = async (dataSource: DataSource): Promise<void> => {
-  const propertiesRepository = dataSource.getRepository(Properties);
+  const propertiesRepository = dataSource.getRepository(Property);
   const userRepository = dataSource.getRepository(User);
 
   const adminUser = await userRepository.findOne({ where: { id: 1 } });
