@@ -9,10 +9,16 @@ import { Property } from 'src/main/entities/property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { User } from 'src/main/entities/user.entity';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
+import axios from 'axios';
+import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
+
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('PropertiesService', () => {
   let service: PropertiesService;
   let propertiesRepository: Repository<Property>;
+  let propertyDetailsRepository: Repository<PropertyDetails>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,6 +38,9 @@ describe('PropertiesService', () => {
     service = module.get<PropertiesService>(PropertiesService);
     propertiesRepository = module.get<Repository<Property>>(
       getRepositoryToken(Property),
+    );
+    propertyDetailsRepository = module.get<Repository<PropertyDetails>>(
+      getRepositoryToken(PropertyDetails),
     );
   });
 
@@ -613,6 +622,310 @@ describe('PropertiesService', () => {
       await expect(
         service.deletePropertiesById(mockPropertyId),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('compareAndUpdateProperties', () => {
+    it('should compare and update properties', async () => {
+      const mockExternalProperties = {
+        items: [
+          {
+            id: 1,
+            address: {
+              street1: 'test address',
+              city: 'test city',
+              state: 'test state',
+              country: 'test country',
+              postal_code: '123456',
+            },
+            latitude: 0,
+            longitude: 0,
+            display_order: 0,
+            active: true,
+            bathrooms: 1,
+            bathrooms_full: 1,
+            bathrooms_half: 0,
+            bedrooms: 1,
+            max_guests: 1,
+            max_pets: 1,
+          },
+        ],
+      };
+
+      const mockProperties = {
+        id: 1,
+        address: 'old address',
+        city: 'old city',
+        state: 'old state',
+        country: 'old country',
+        zipcode: '654321',
+        latitude: 1,
+        longitude: 1,
+        displayOrder: 1,
+        isActive: false,
+      } as unknown as Property;
+
+      const mockPropertyDetails = {
+        id: 1,
+        noOfBathrooms: 0,
+        noOfBathroomsFull: 0,
+        noOfBathroomsHalf: 0,
+        noOfBedrooms: 0,
+        noOfGuestsAllowed: 0,
+        noOfPetsAllowed: 0,
+      } as PropertyDetails;
+
+      mockedAxios.get.mockResolvedValue({ data: mockExternalProperties });
+      jest
+        .spyOn(propertiesRepository, 'findOne')
+        .mockResolvedValue(mockProperties);
+      jest
+        .spyOn(propertyDetailsRepository, 'findOne')
+        .mockResolvedValue(mockPropertyDetails);
+      jest
+        .spyOn(propertiesRepository, 'save')
+        .mockResolvedValue(mockProperties);
+      jest
+        .spyOn(propertyDetailsRepository, 'save')
+        .mockResolvedValue(mockPropertyDetails);
+
+      const result = await service.compareAndUpdateProperties();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual([mockProperties]);
+      expect(axios.get).toHaveBeenCalledWith(
+        'https://api.ownerrez.com/v2/properties',
+        {
+          auth: {
+            username: 'invoice@fraxioned.com',
+            password: 'pt_82y3fsmphj7gc0kze0u0p16gp2yn6pap',
+          },
+        },
+      );
+      expect(propertiesRepository.findOne).toHaveBeenCalledWith({
+        where: { ownerRezPropId: 1 },
+      });
+      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
+        where: { property: { id: mockProperties.id } },
+      });
+      expect(propertiesRepository.save).toHaveBeenCalledWith(mockProperties);
+      expect(propertyDetailsRepository.save).toHaveBeenCalledWith(
+        mockPropertyDetails,
+      );
+    });
+
+    it('should return an empty array if no properties are found', async () => {
+      mockedAxios.get.mockResolvedValue({ data: { items: [] } });
+
+      const result = await service.compareAndUpdateProperties();
+
+      expect(result).toEqual([]);
+      expect(axios.get).toHaveBeenCalledWith(
+        'https://api.ownerrez.com/v2/properties',
+        {
+          auth: {
+            username: 'invoice@fraxioned.com',
+            password: 'pt_82y3fsmphj7gc0kze0u0p16gp2yn6pap',
+          },
+        },
+      );
+    });
+  });
+
+  describe('getPropertyWithDetailsById', () => {
+    it('should return property with details', async () => {
+      const mockProperty = {
+        id: 1,
+      } as Property;
+
+      const mockPropertyDetails = {
+        id: 1,
+      } as PropertyDetails;
+
+      jest
+        .spyOn(propertiesRepository, 'findOne')
+        .mockResolvedValue(mockProperty);
+      jest
+        .spyOn(propertyDetailsRepository, 'findOne')
+        .mockResolvedValue(mockPropertyDetails);
+
+      const result = await service.getPropertyWithDetailsById(1);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual({
+        propertyId: 1,
+        propertyDetailsId: 1,
+      });
+      expect(propertiesRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
+        where: { property: { id: 1 } },
+      });
+    });
+
+    it('should return PROPERTY_NOT_FOUND if property is not found', async () => {
+      jest.spyOn(propertiesRepository, 'findOne').mockResolvedValue(null);
+
+      const result = await service.getPropertyWithDetailsById(1);
+
+      expect(result).toEqual(USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(1));
+      expect(propertiesRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+    });
+
+    it('should return PROPERTY_DETAIL_NOT_FOUND if property details are not found', async () => {
+      const mockProperty = {
+        id: 1,
+        createdBy: { id: 1 },
+        updatedBy: { id: 1 },
+      } as Property;
+
+      jest
+        .spyOn(propertiesRepository, 'findOne')
+        .mockResolvedValue(mockProperty);
+      jest.spyOn(propertyDetailsRepository, 'findOne').mockResolvedValue(null);
+
+      const result = await service.getPropertyWithDetailsById(1);
+
+      expect(result).toEqual(
+        USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(1),
+      );
+      expect(propertiesRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
+        where: { property: { id: 1 } },
+      });
+    });
+  });
+
+  describe('getAllPropertiesWithDetails', () => {
+    it('should return all properties with details', async () => {
+      const mockProperty = {
+        id: 1,
+      } as Property;
+
+      const mockPropertyDetails = {
+        id: 1,
+      } as PropertyDetails;
+
+      jest
+        .spyOn(propertiesRepository, 'find')
+        .mockResolvedValue([mockProperty]);
+      jest
+        .spyOn(propertyDetailsRepository, 'findOne')
+        .mockResolvedValue(mockPropertyDetails);
+
+      const result = await service.getAllPropertiesWithDetails();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual([
+        {
+          propertyId: 1,
+          propertyDetailsId: 1,
+        },
+      ]);
+      expect(propertiesRepository.find).toHaveBeenCalledWith({
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          id: true,
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
+        where: { property: { id: 1 } },
+      });
+    });
+
+    it('should return PROPERTIES_NOT_FOUND if no properties are found', async () => {
+      jest.spyOn(propertiesRepository, 'find').mockResolvedValue([]);
+
+      const result = await service.getAllPropertiesWithDetails();
+
+      expect(result).toEqual(USER_PROPERTY_RESPONSES.PROPERTIES_NOT_FOUND);
+      expect(propertiesRepository.find).toHaveBeenCalledWith({
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          id: true,
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+    });
+
+    it('should handle properties without details', async () => {
+      const mockProperty = {
+        id: 1,
+      } as Property;
+
+      jest
+        .spyOn(propertiesRepository, 'find')
+        .mockResolvedValue([mockProperty]);
+      jest.spyOn(propertyDetailsRepository, 'findOne').mockResolvedValue(null);
+
+      const result = await service.getAllPropertiesWithDetails();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual([
+        {
+          id: 1,
+          propertyId: 1,
+          propertyDetailsId: null,
+        },
+      ]);
+      expect(propertiesRepository.find).toHaveBeenCalledWith({
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          id: true,
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
+        where: { property: { id: 1 } },
+      });
     });
   });
 });
