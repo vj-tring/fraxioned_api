@@ -17,6 +17,7 @@ import { MailService } from 'src/main/service/mail.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import * as bcrypt from 'bcrypt';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
+import { PropertyDetails } from 'src/main/entities/property-details.entity';
 
 describe('PropertiesController', () => {
   let controller: PropertiesController;
@@ -29,6 +30,10 @@ describe('PropertiesController', () => {
         PropertiesService,
         {
           provide: getRepositoryToken(Property),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(PropertyDetails),
           useClass: Repository,
         },
         {

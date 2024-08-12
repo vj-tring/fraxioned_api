@@ -8,6 +8,7 @@ import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto
 import { Property } from 'src/main/entities/property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { User } from 'src/main/entities/user.entity';
+import { PropertyDetails } from 'src/main/entities/property-details.entity';
 
 describe('PropertiesService', () => {
   let service: PropertiesService;
@@ -19,6 +20,10 @@ describe('PropertiesService', () => {
         PropertiesService,
         {
           provide: getRepositoryToken(Property),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(PropertyDetails),
           useClass: Repository,
         },
       ],

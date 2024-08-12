@@ -127,7 +127,7 @@ describe('PropertyDetailsService', () => {
       expect(result).toBeDefined();
       expect(result).toEqual(mockPropertyDetails);
       expect(propertiesRepository.findOne).toHaveBeenCalledWith({
-        where: { id: mockCreatePropertyDetailsDto.property },
+        where: { id: mockCreatePropertyDetailsDto.property.id },
       });
       expect(propertyDetailsRepository.create).toHaveBeenCalledWith(
         mockCreatePropertyDetailsDto,
@@ -188,7 +188,7 @@ describe('PropertyDetailsService', () => {
       );
 
       expect(propertiesRepository.findOne).toHaveBeenCalledWith({
-        where: { id: mockCreatePropertyDetailsDto.property },
+        where: { id: mockCreatePropertyDetailsDto.property.id },
       });
     });
   });
