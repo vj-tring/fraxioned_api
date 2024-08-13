@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { AppModule } from 'src/app.module';
 import { GlobalExceptionFilter } from 'src/main/commons/exceptions/filters/http-exception.filter';
-import { seedProperties } from 'src/main/commons/seeds/propertySeed';
 import { seedRole } from 'src/main/commons/seeds/roleSeed';
 import { seedUser } from 'src/main/commons/seeds/userSeed';
 import { setupSwagger } from 'src/swagger/swagger.config';
@@ -83,7 +82,6 @@ describe('Bootstrap', () => {
     expect(app.listen).toHaveBeenCalledWith(3008);
     expect(seedRole).toHaveBeenCalledWith(mockDataSource);
     expect(seedUser).toHaveBeenCalledWith(mockDataSource);
-    expect(seedProperties).toHaveBeenCalledWith(mockDataSource);
 
     const url = await app.getUrl();
     expect(url.replace('[::1]', 'localhost')).toBe('http://localhost:3008/api');

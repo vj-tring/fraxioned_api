@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserPropertyService } from 'services/user-property.service';
 import { UserProperties } from 'entities/user-properties.entity';
 import { User } from 'entities/user.entity';
-import { Properties } from 'entities/properties.entity';
+import { Property } from 'entities/property.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from 'services/logger.service';
 import { CreateUserPropertyDTO } from 'src/main/dto/requests/create-user-property.dto';
@@ -14,7 +14,7 @@ describe('UserPropertyService', () => {
   let service: UserPropertyService;
   let userPropertyRepository: Repository<UserProperties>;
   let userRepository: Repository<User>;
-  let propertyRepository: Repository<Properties>;
+  let propertyRepository: Repository<Property>;
   let logger: LoggerService;
 
   beforeEach(async () => {
@@ -30,7 +30,7 @@ describe('UserPropertyService', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
         {
@@ -48,8 +48,8 @@ describe('UserPropertyService', () => {
       getRepositoryToken(UserProperties),
     );
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    propertyRepository = module.get<Repository<Properties>>(
-      getRepositoryToken(Properties),
+    propertyRepository = module.get<Repository<Property>>(
+      getRepositoryToken(Property),
     );
     logger = module.get<LoggerService>(LoggerService);
   });
@@ -58,7 +58,7 @@ describe('UserPropertyService', () => {
     it('should create a new user property', async () => {
       const createUserPropertyDto: CreateUserPropertyDTO = {
         user: { id: 1 } as User,
-        property: { id: 1 } as Properties,
+        property: { id: 1 } as Property,
         noOfShare: 1,
         acquisitionDate: new Date(),
         isActive: true,
@@ -99,7 +99,7 @@ describe('UserPropertyService', () => {
         .mockResolvedValue({ id: 1 } as User);
       jest
         .spyOn(propertyRepository, 'findOne')
-        .mockResolvedValue({ id: 1 } as Properties);
+        .mockResolvedValue({ id: 1 } as Property);
       jest.spyOn(userPropertyRepository, 'findOne').mockResolvedValue(null);
       jest.spyOn(userPropertyRepository, 'save').mockResolvedValue({
         id: 1,
@@ -122,7 +122,7 @@ describe('UserPropertyService', () => {
     it('should return USER_NOT_FOUND if user does not exist', async () => {
       const createUserPropertyDto: CreateUserPropertyDTO = {
         user: { id: 1 } as User,
-        property: { id: 1 } as Properties,
+        property: { id: 1 } as Property,
         noOfShare: 1,
         acquisitionDate: new Date(),
         isActive: true,
@@ -170,7 +170,7 @@ describe('UserPropertyService', () => {
     it('should return PROPERTY_NOT_FOUND if property does not exist', async () => {
       const createUserPropertyDto: CreateUserPropertyDTO = {
         user: { id: 1 } as User,
-        property: { id: 1 } as Properties,
+        property: { id: 1 } as Property,
         noOfShare: 1,
         acquisitionDate: new Date(),
         isActive: true,
@@ -223,7 +223,7 @@ describe('UserPropertyService', () => {
     it('should return USER_PROPERTY_ALREADY_EXISTS if user property already exists', async () => {
       const createUserPropertyDto: CreateUserPropertyDTO = {
         user: { id: 1 } as User,
-        property: { id: 1 } as Properties,
+        property: { id: 1 } as Property,
         noOfShare: 1,
         acquisitionDate: new Date(),
         isActive: true,
@@ -264,7 +264,7 @@ describe('UserPropertyService', () => {
         .mockResolvedValue({ id: 1 } as User);
       jest
         .spyOn(propertyRepository, 'findOne')
-        .mockResolvedValue({ id: 1 } as Properties);
+        .mockResolvedValue({ id: 1 } as Property);
       jest
         .spyOn(userPropertyRepository, 'findOne')
         .mockResolvedValue({ id: 1 } as UserProperties);

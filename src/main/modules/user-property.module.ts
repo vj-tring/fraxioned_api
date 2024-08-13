@@ -6,11 +6,11 @@ import { UserProperties } from '../entities/user-properties.entity';
 import { LoggerModule } from './logger.module';
 import { AuthenticationModule } from './authentication.module';
 import { User } from '../entities/user.entity';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserProperties, User, Properties]),
+    TypeOrmModule.forFeature([UserProperties, User, Property]),
     LoggerModule,
     AuthenticationModule,
   ],
