@@ -115,4 +115,15 @@ export const HOLIDAYS_RESPONSES = {
     message: `Holiday ID ${id} exists and is mapped to property, hence cannot be deleted.`,
     statusCode: HttpStatus.CONFLICT,
   }),
+  PROPERTY_DETAILS_NOT_FOUND: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Property details not found for property with ID ${id}`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
 };

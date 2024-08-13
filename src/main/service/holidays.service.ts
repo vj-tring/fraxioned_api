@@ -89,10 +89,10 @@ export class HolidaysService {
           });
 
           if (!propertyDetails) {
-            throw new HttpException(
+            this.logger.error(
               `Property details not found for property with ID ${property.id}`,
-              HttpStatus.NOT_FOUND,
             );
+            return HOLIDAYS_RESPONSES.PROPERTY_DETAILS_NOT_FOUND(property.id);
           }
 
           const isPeakSeason = await this.isHolidayInPeakSeason(
@@ -131,14 +131,58 @@ export class HolidaysService {
     holidayEndDate: Date,
     propertyDetails: PropertyDetails,
   ): Promise<boolean> {
-    const { peakSeasonStartDate, peakSeasonEndDate } = propertyDetails;
+    try {
+      const { peakSeasonStartDate, peakSeasonEndDate } = propertyDetails;
 
-    return (
-      holidayStartDate >= peakSeasonStartDate &&
-      holidayStartDate <= peakSeasonEndDate &&
-      holidayEndDate >= peakSeasonStartDate &&
-      holidayEndDate <= peakSeasonEndDate
-    );
+      const startHolidayDate = new Date(holidayStartDate);
+      const endHolidayDate = new Date(holidayEndDate);
+
+      const isDateWithinPeakSeason = (
+        date: Date,
+        peakStart: Date,
+        peakEnd: Date,
+      ): boolean => {
+        const dateMonth = date.getMonth() + 1;
+        const dateDay = date.getDate();
+
+        const peakStartMonth = peakStart.getMonth() + 1;
+        const peakStartDay = peakStart.getDate();
+
+        const peakEndMonth = peakEnd.getMonth() + 1;
+        const peakEndDay = peakEnd.getDate();
+
+        const isAfterOrOnPeakStart =
+          dateMonth > peakStartMonth ||
+          (dateMonth === peakStartMonth && dateDay >= peakStartDay);
+
+        const isBeforeOrOnPeakEnd =
+          dateMonth < peakEndMonth ||
+          (dateMonth === peakEndMonth && dateDay <= peakEndDay);
+
+        return isAfterOrOnPeakStart && isBeforeOrOnPeakEnd;
+      };
+
+      return (
+        isDateWithinPeakSeason(
+          startHolidayDate,
+          peakSeasonStartDate,
+          peakSeasonEndDate,
+        ) &&
+        isDateWithinPeakSeason(
+          endHolidayDate,
+          peakSeasonStartDate,
+          peakSeasonEndDate,
+        )
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error calculation is peak season or not: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while calculation is peak season or not',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getAllHolidayRecords(): Promise<{
