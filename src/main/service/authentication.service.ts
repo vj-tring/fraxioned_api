@@ -23,7 +23,7 @@ import {
   LOGOUT_RESPONSES,
 } from 'src/main/commons/constants/response-constants/auth.constant';
 import { Role } from '../entities/role.entity';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 import { ROLE_RESPONSES } from '../commons/constants/response-constants/role.constant';
@@ -41,8 +41,8 @@ export class AuthenticationService {
     private readonly userPropertyRepository: Repository<UserProperties>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
-    @InjectRepository(Properties)
-    private readonly propertyRepository: Repository<Properties>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
     private readonly mailService: MailService,
     private readonly logger: LoggerService,
   ) {}

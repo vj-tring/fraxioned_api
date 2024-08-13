@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 
 export const seedProperties = async (dataSource: DataSource): Promise<void> => {
-  const propertiesRepository = dataSource.getRepository(Properties);
+  const propertiesRepository = dataSource.getRepository(Property);
   const userRepository = dataSource.getRepository(User);
 
   const adminUser = await userRepository.findOne({ where: { id: 1 } });
@@ -25,12 +25,11 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       houseDescription: 'A luxurious villa with all amenities.',
       isExclusive: true,
       propertyShare: 100,
-      mapCoordinates: 'POINT(34.073620 -118.400356)',
       createdBy: adminUser,
       updatedBy: adminUser,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
-    });
+    } as Property);
 
     const property2 = propertiesRepository.create({
       propertyName: 'Crown Jewel',
@@ -42,12 +41,11 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       houseDescription: 'A beautiful beach house with ocean views.',
       isExclusive: false,
       propertyShare: 50,
-      mapCoordinates: 'POINT(25.790654 -80.130045)',
       createdBy: ownerUser,
       updatedBy: ownerUser,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
-    });
+    } as Property);
 
     await propertiesRepository.save([property1, property2]);
   }

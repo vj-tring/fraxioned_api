@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Properties } from './properties.entity';
+import { Property } from './property.entity';
 import { User } from './user.entity';
 
 @Entity('fxn_property_details')
@@ -19,11 +19,11 @@ export class PropertyDetails {
   })
   id: number;
 
-  @OneToOne(() => Properties, (properties) => properties.id)
+  @OneToOne(() => Property, (property) => property.id)
   @JoinColumn({
     name: 'property_id',
   })
-  property: Properties;
+  property: Property;
 
   @Column({
     name: 'no_of_guests_allowed',
@@ -33,15 +33,27 @@ export class PropertyDetails {
 
   @Column({
     name: 'no_of_bedrooms',
-    type: 'integer',
+    type: 'float',
   })
   noOfBedrooms: number;
 
   @Column({
     name: 'no_of_bathrooms',
-    type: 'integer',
+    default: 0,
   })
   noOfBathrooms: number;
+
+  @Column({
+    name: 'no_of_bathrooms_full',
+    default: 0,
+  })
+  noOfBathroomsFull: number;
+
+  @Column({
+    name: 'no_of_bathrooms_half',
+    default: 0,
+  })
+  noOfBathroomsHalf: number;
 
   @Column({
     name: 'no_of_pets_allowed',
@@ -57,15 +69,13 @@ export class PropertyDetails {
 
   @Column({
     name: 'check_in_time',
-    type: 'timestamp',
   })
-  checkInTime: Date;
+  checkInTime: number;
 
   @Column({
     name: 'check_out_time',
-    type: 'timestamp',
   })
-  checkOutTime: Date;
+  checkOutTime: number;
 
   @Column({
     name: 'pet_policy',
@@ -87,15 +97,15 @@ export class PropertyDetails {
 
   @Column({
     name: 'peak_season_start_date',
-    type: 'timestamp',
+    type: 'date',
   })
-  peakSeasonStartDate: Date = undefined;
+  peakSeasonStartDate: Date;
 
   @Column({
     name: 'peak_season_end_date',
-    type: 'timestamp',
+    type: 'date',
   })
-  peakSeasonEndDate: Date = undefined;
+  peakSeasonEndDate: Date;
 
   @Column({
     name: 'psan',
@@ -147,13 +157,11 @@ export class PropertyDetails {
 
   @CreateDateColumn({
     name: 'created_at',
-    nullable: true,
   })
-  createdAt: Date = undefined;
+  createdAt: Date;
 
   @UpdateDateColumn({
     name: 'updated_at',
-    nullable: true,
   })
-  updatedAt: Date = undefined;
+  updatedAt: Date;
 }
