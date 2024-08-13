@@ -1,8 +1,8 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
 
-describe('E2E test for User Session', () => {
-  const url = `${baseurl}/user-sessions`;
+describe('E2E test for User Document', () => {
+  const url = `${baseurl}/user-documents`;
   const url1 = `${baseurl}/authentication`;
   let token: string;
   let userid: number;
@@ -20,17 +20,17 @@ describe('E2E test for User Session', () => {
     token = session.token;
     userid = user.id;
   });
-  describe('User Session Creation', () => {
-    it('Successful user-session creation', async () => {
+  describe('User Document Creation', () => {
+    it('Successful user-document creation', async () => {
       const credentials = {
-        user: { id: 3 },
-        createdBy: { id: 3 },
-        updatedBy: { id: 3 },
-        token: 'nekottoken',
-        expiresAt: '2024-08-13T08:53:04.646Z',
+        user: { id: 1 },
+        property: { id: 1 },
+        createdBy: { id: 1 },
+        documentName: 'string',
+        documentURL: 'string',
       };
       const response = await request(url)
-        .post('/user-session')
+        .post('/')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -38,37 +38,19 @@ describe('E2E test for User Session', () => {
         .expect('Content-Type', /json/)
         .expect(201);
       const { message, status } = response.body;
-      expect(message).toBe('User session created successfully');
+      expect(message).toBe('Document created successfully');
       expect(status).toBe(201);
     });
-    it('User Session already exist', async () => {
-      const credentials = {
-        user: { id: 3 },
-        createdBy: { id: 3 },
-        updatedBy: { id: 3 },
-        token: 'string',
-        expiresAt: '2024-08-13T08:53:04.646Z',
-      };
-      const response = await request(url)
-        .post('/user-session')
-        .set('Accept', 'application/json')
-        .send(credentials)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Internal server error');
-      expect(response.body.statusCode).toBe(500);
-    });
     it('Invalid token or user id', async () => {
       const credentials = {
-        startDate: '2024-08-03',
-        endDate: '2024-08-03',
-        createdBy: { id: 3 },
-        name: 'holiday',
-        year: 2024,
+        user: { id: 1 },
+        property: { id: 1 },
+        createdBy: { id: 1 },
+        documentName: 'string',
+        documentURL: 'string',
       };
       const response = await request(url)
-        .post('/user-session')
+        .post('/')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -80,8 +62,8 @@ describe('E2E test for User Session', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch All User Sessions', () => {
-    it('Successful user-session fetch', async () => {
+  describe('Fetch All User Documents', () => {
+    it('Successful user-document fetch', async () => {
       const response = await request(url)
         .get('/')
         .set('Accept', 'application/json')
@@ -89,7 +71,7 @@ describe('E2E test for User Session', () => {
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
       const { message, status } = response.body;
-      expect(message).toBe('User sessions fetched successfully');
+      expect(message).toBe('Documents fetched successfully');
       expect(status).toBe(200);
     });
     it('Invalid token or user id', async () => {
@@ -104,31 +86,30 @@ describe('E2E test for User Session', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch Specific User Session', () => {
-    it('Successful user-session fetch', async () => {
+  describe('Fetch Specific User Document', () => {
+    it('Successful user-document fetch', async () => {
       const response = await request(url)
-        .get('/user-session/1')
+        .get('/3')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      expect(response.body).toHaveProperty('token');
-      expect(response.body).toHaveProperty('expiresAt');
+      const { message, status } = response.body;
+      expect(message).toBe('Document fetched successfully');
+      expect(status).toBe(200);
     });
-    it('Unsuccessful user-session fetch', async () => {
+    it('Unsuccessful user-document fetch', async () => {
       const response = await request(url)
-        .get('/user-session/70')
+        .get('/1')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      const { error, statusCode } = response.body;
-      expect(error).toBe('Not Found');
-      expect(statusCode).toBe(404);
+      expect(response.body.status).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/user-session/1')
+        .get('/1')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -138,15 +119,17 @@ describe('E2E test for User Session', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Update Specific User Session', () => {
-    it('Successful user-session update', async () => {
+  describe('Update Specific User Document', () => {
+    it('Successful user-document update', async () => {
       const credentials = {
-        updatedBy: { id: 3 },
-        token: 'update',
-        expiresAt: '2024-08-13T08:53:30.195Z',
+        user: { id: 1 },
+        property: { id: 1 },
+        updatedBy: { id: 1 },
+        documentName: 'string',
+        documentURL: 'string',
       };
       const response = await request(url)
-        .patch('/user-session/2')
+        .patch('/4')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -154,36 +137,36 @@ describe('E2E test for User Session', () => {
         .expect('Content-Type', /json/);
 
       const { message, status } = response.body;
-      expect(message).toBe('User session updated successfully');
+      expect(message).toBe('Document updated successfully');
       expect(status).toBe(200);
     });
-    it('Unsuccessful user-session update', async () => {
+    it('Unsuccessful user-document update', async () => {
       const credentials = {
-        updatedBy: { id: 3 },
-        token: 'update',
-        expiresAt: '2024-08-13T08:53:30.195Z',
+        user: { id: 1 },
+        property: { id: 1 },
+        updatedBy: { id: 1 },
+        documentName: 'string',
+        documentURL: 'string',
       };
       const response = await request(url)
-        .patch('/user-session/70')
+        .patch('/1')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      const { error, statusCode } = response.body;
-      expect(error).toBe('Not Found');
-      expect(statusCode).toBe(404);
+      expect(response.body.status).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const credentials = {
-        user: { id: 3 },
-        createdBy: { id: 3 },
-        updatedBy: { id: 3 },
-        token: 'string',
-        expiresAt: '2024-08-13T08:53:04.646Z',
+        user: { id: 1 },
+        property: { id: 1 },
+        updatedBy: { id: 1 },
+        documentName: 'string',
+        documentURL: 'string',
       };
       const response = await request(url)
-        .delete('/user-session/1')
+        .patch('/1')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -194,32 +177,30 @@ describe('E2E test for User Session', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Delete Specific User Session', () => {
-    it('Successful user-session deletion', async () => {
+  describe('Delete Specific User Document', () => {
+    it('Successful user-document deletion', async () => {
       const response = await request(url)
-        .delete('/user-session/103')
+        .delete('/7')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
       const { message, status } = response.body;
-      expect(message).toBe('User session deleted successfully');
-      expect(status).toBe(200);
+      expect(message).toBe('Document deleted successfully');
+      expect(status).toBe(404);
     });
-    it('User Session not found for delete', async () => {
+    it('User Document not found for delete', async () => {
       const response = await request(url)
-        .delete('/user-session/70')
+        .delete('/1')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      const { error, statusCode } = response.body;
-      expect(error).toBe('Not Found');
-      expect(statusCode).toBe(404);
+      expect(response.body.status).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/user-session/4')
+        .delete('/1')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
