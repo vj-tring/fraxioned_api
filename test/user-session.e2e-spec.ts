@@ -183,7 +183,7 @@ describe('E2E test for User Session', () => {
         expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
-        .delete('/user-session/1')
+        .patch('/user-session/1')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
