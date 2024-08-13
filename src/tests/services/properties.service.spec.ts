@@ -854,18 +854,7 @@ describe('PropertiesService', () => {
           propertyDetailsId: 1,
         },
       ]);
-      expect(propertiesRepository.find).toHaveBeenCalledWith({
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          id: true,
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
+      expect(propertiesRepository.find).toHaveBeenCalledWith();
       expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
         where: { property: { id: 1 } },
       });
@@ -877,18 +866,7 @@ describe('PropertiesService', () => {
       const result = await service.getAllPropertiesWithDetails();
 
       expect(result).toEqual(USER_PROPERTY_RESPONSES.PROPERTIES_NOT_FOUND);
-      expect(propertiesRepository.find).toHaveBeenCalledWith({
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          id: true,
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
+      expect(propertiesRepository.find).toHaveBeenCalledWith();
     });
 
     it('should handle properties without details', async () => {
@@ -906,23 +884,12 @@ describe('PropertiesService', () => {
       expect(result).toBeDefined();
       expect(result).toEqual([
         {
-          id: 1,
           propertyId: 1,
           propertyDetailsId: null,
+          ...mockProperty,
         },
       ]);
-      expect(propertiesRepository.find).toHaveBeenCalledWith({
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          id: true,
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
+      expect(propertiesRepository.find).toHaveBeenCalledWith();
       expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
         where: { property: { id: 1 } },
       });
