@@ -168,7 +168,7 @@ describe('E2E test for Amenities', () => {
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/amenity/1')
+        .patch('/amenity/1')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
