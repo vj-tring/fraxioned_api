@@ -12,6 +12,7 @@ import { ComparePropertiesDto } from '../dto/ownerRez-properties.dto';
 import axios from 'axios';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 import { PropertyWithDetailsResponseDto } from '../dto/responses/PropertyWithDetailsResponseDto.dto';
+import { UserProperties } from '../entities/user-properties.entity';
 
 @Injectable()
 export class PropertiesService {
@@ -20,6 +21,8 @@ export class PropertiesService {
     private propertiesRepository: Repository<Property>,
     @InjectRepository(PropertyDetails)
     private propertyDetailsRepository: Repository<PropertyDetails>,
+    @InjectRepository(UserProperties)
+    private userPropertiesRepository: Repository<UserProperties>,
   ) {}
 
   async createProperties(
@@ -281,6 +284,52 @@ export class PropertiesService {
             propertyId,
             propertyDetailsId,
             ...propertyWithoutId,
+            ...propertyDetailsWithoutId,
+          };
+        }),
+      );
+
+      return propertiesWithDetails;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAllPropertiesWithDetailsByUser(
+    userId: number,
+  ): Promise<PropertyWithDetailsResponseDto[] | object> {
+    try {
+      const userProperties = await this.userPropertiesRepository.find({
+        where: { user: { id: userId } },
+        relations: ['property'],
+      });
+
+      if (!userProperties.length) {
+        return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(userId);
+      }
+
+      const propertiesWithDetails = await Promise.all(
+        userProperties.map(async (userProperty) => {
+          const propertyDetails = await this.propertyDetailsRepository.findOne({
+            where: { property: { id: userProperty.property.id } },
+          });
+
+          const { ...userPropertyWithoutId } = userProperty;
+
+          if (!propertyDetails) {
+            return {
+              ...userPropertyWithoutId,
+              propertyId: userProperty.property.id,
+              propertyDetailsId: null,
+              ...userProperty.property,
+            };
+          }
+          const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
+            propertyDetails;
+
+          return {
+            ...userPropertyWithoutId,
+            propertyDetailsId,
             ...propertyDetailsWithoutId,
           };
         }),

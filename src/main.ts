@@ -6,6 +6,8 @@ import { GlobalExceptionFilter } from './main/commons/exceptions/filters/http-ex
 import { seedRole } from './main/commons/seeds/roleSeed';
 import { DataSource } from 'typeorm';
 import { seedUser } from './main/commons/seeds/userSeed';
+import { seedPropertyDetails } from './main/commons/seeds/propertDetailSeed';
+import { seedProperties } from './main/commons/seeds/propertySeed';
 
 export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +16,8 @@ export async function bootstrap(): Promise<void> {
   const dataSource = app.get(DataSource);
   await seedRole(dataSource);
   await seedUser(dataSource);
+  await seedProperties(dataSource);
+  await seedPropertyDetails(dataSource);
 
   // Global Pipes
   app.useGlobalPipes(

@@ -47,7 +47,7 @@ export class PropertyWithDetailsResponseDto {
   @ApiProperty({ example: '5300' })
   squareFootage: string;
 
-  @ApiProperty({ example: 4 })
+  @ApiProperty({ example: 16 })
   checkInTime: number;
 
   @ApiProperty({ example: 11 })
