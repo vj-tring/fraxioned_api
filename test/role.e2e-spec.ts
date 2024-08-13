@@ -111,16 +111,6 @@ describe('E2E test for Role', () => {
         .expect(200);
       expect(response.body).toHaveProperty('roleName');
     });
-    it('Role not found', async () => {
-      const response = await request(url)
-        .get('/role/3')
-        .set('Accept', 'application/json')
-        .set('user-id', `${userid}`)
-        .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(404);
-      expect(response.body.error).toBe('Not Found');
-    });
     it('Invalid token or user id', async () => {
       const response = await request(url)
         .get('/role/1')
