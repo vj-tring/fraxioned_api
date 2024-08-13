@@ -1,6 +1,5 @@
 import { DataSource } from 'typeorm';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
-import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 
 export const seedPropertyDetails = async (

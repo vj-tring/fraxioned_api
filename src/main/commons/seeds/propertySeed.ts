@@ -1,7 +1,6 @@
 import { DataSource } from 'typeorm';
 import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
-import { PropertyDetails } from 'src/main/entities/property-details.entity';
 
 export const seedProperties = async (dataSource: DataSource): Promise<void> => {
   const propertiesRepository = dataSource.getRepository(Property);
