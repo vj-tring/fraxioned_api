@@ -1,8 +1,8 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
 
-describe('E2E test for Holiday', () => {
-  const url = `${baseurl}/holidays`;
+describe('E2E test for User Session', () => {
+  const url = `${baseurl}/user-sessions`;
   const url1 = `${baseurl}/authentication`;
   let token: string;
   let userid: number;
@@ -20,43 +20,44 @@ describe('E2E test for Holiday', () => {
     token = session.token;
     userid = user.id;
   });
-  describe('Holiday Creation', () => {
-    it('Successful holiday creation', async () => {
+  describe('User Session Creation', () => {
+    it('Successful user-session creation', async () => {
       const credentials = {
-        startDate: '2020-08-04',
-        endDate: '2020-08-04',
+        user: { id: 3 },
         createdBy: { id: 3 },
-        name: 'holiday',
-        year: 2020,
+        updatedBy: { id: 3 },
+        token: 'nekottoken',
+        expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
-        .post('/holiday')
+        .post('/user-session')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(201);
-      const { message, success } = response.body;
-      expect(message).toBe('Holiday created successfully');
-      expect(success).toBe(true);
+      const { message, status } = response.body;
+      expect(message).toBe('User session created successfully');
+      expect(status).toBe(201);
     });
-    it('Holiday already exist', async () => {
+    it('User Session already exist', async () => {
       const credentials = {
-        startDate: '2024-08-03',
-        endDate: '2024-08-03',
+        user: { id: 3 },
         createdBy: { id: 3 },
-        name: 'holiday',
-        year: 2024,
+        updatedBy: { id: 3 },
+        token: 'string',
+        expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
-        .post('/holiday')
+        .post('/user-session')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Internal server error');
+      expect(response.body.statusCode).toBe(500);
     });
     it('Invalid token or user id', async () => {
       const credentials = {
@@ -67,7 +68,7 @@ describe('E2E test for Holiday', () => {
         year: 2024,
       };
       const response = await request(url)
-        .post('/holiday')
+        .post('/user-session')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -79,58 +80,21 @@ describe('E2E test for Holiday', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch All Holidays', () => {
-    it('Successful holiday fetch', async () => {
+  describe('Fetch All User Sessions', () => {
+    it('Successful user-session fetch', async () => {
       const response = await request(url)
-        .get('/holiday')
-        .set('Accept', 'application/json')
-        .set('user-id', `${userid}`)
-        .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-      const { message, success } = response.body;
-      expect(message).toBe('Holidays retrieved successfully');
-      expect(success).toBe(true);
-    });
-    it('Invalid token or user id', async () => {
-      const response = await request(url)
-        .get('/holiday')
-        .set('Accept', 'application/json')
-        .set('access-token', 'token')
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/)
-        .expect(401);
-      const { message } = response.body;
-      expect(message).toBe('The provided user ID or access token is invalid');
-    });
-  });
-  describe('Fetch Specific Holiday', () => {
-    it('Successful holiday fetch', async () => {
-      const response = await request(url)
-        .get('/holiday/4')
-        .set('Accept', 'application/json')
-        .set('user-id', `${userid}`)
-        .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-      const { message, success } = response.body;
-      expect(message).toBe('Holiday retrieved successfully');
-      expect(success).toBe(true);
-    });
-    it('Unsuccessful holiday fetch', async () => {
-      const response = await request(url)
-        .get('/holiday/1')
+        .get('/')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      const { success, statusCode } = response.body;
-      expect(success).toBe(false);
-      expect(statusCode).toBe(404);
+      const { message, status } = response.body;
+      expect(message).toBe('User sessions fetched successfully');
+      expect(status).toBe(200);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/holiday/1')
+        .get('/')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -140,55 +104,86 @@ describe('E2E test for Holiday', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Update Specific Holiday', () => {
-    it('Successful holiday update', async () => {
+  describe('Fetch Specific User Session', () => {
+    it('Successful user-session fetch', async () => {
+      const response = await request(url)
+        .get('/user-session/1')
+        .set('Accept', 'application/json')
+        .set('user-id', `${userid}`)
+        .set('access-token', `${token}`)
+        .expect('Content-Type', /json/);
+      expect(response.body).toHaveProperty('token');
+      expect(response.body).toHaveProperty('expiresAt');
+    });
+    it('Unsuccessful user-session fetch', async () => {
+      const response = await request(url)
+        .get('/user-session/70')
+        .set('Accept', 'application/json')
+        .set('user-id', `${userid}`)
+        .set('access-token', `${token}`)
+        .expect('Content-Type', /json/);
+      const { error, statusCode } = response.body;
+      expect(error).toBe('Not Found');
+      expect(statusCode).toBe(404);
+    });
+    it('Invalid token or user id', async () => {
+      const response = await request(url)
+        .get('/user-session/1')
+        .set('Accept', 'application/json')
+        .set('access-token', 'token')
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/)
+        .expect(401);
+      const { message } = response.body;
+      expect(message).toBe('The provided user ID or access token is invalid');
+    });
+  });
+  describe('Update Specific User Session', () => {
+    it('Successful user-session update', async () => {
       const credentials = {
-        startDate: '2024-08-03',
-        endDate: '2024-08-03',
         updatedBy: { id: 3 },
-        name: 'holiday',
-        year: 2024,
+        token: 'update',
+        expiresAt: '2024-08-13T08:53:30.195Z',
       };
       const response = await request(url)
-        .patch('/holiday/4')
+        .patch('/user-session/2')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
 
-      const { message, success } = response.body;
-      expect(message).toBe('Holiday updated successfully');
-      expect(success).toBe(true);
+      const { message, status } = response.body;
+      expect(message).toBe('User session updated successfully');
+      expect(status).toBe(200);
     });
-    it('Unsuccessful holiday update', async () => {
+    it('Unsuccessful user-session update', async () => {
       const credentials = {
-        startDate: '2024-08-03',
-        endDate: '2024-08-03',
         updatedBy: { id: 3 },
-        name: 'holiday',
-        year: 2024,
+        token: 'update',
+        expiresAt: '2024-08-13T08:53:30.195Z',
       };
       const response = await request(url)
-        .patch('/holiday/1')
+        .patch('/user-session/70')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      const { success, statusCode } = response.body;
-      expect(success).toBe(false);
+      const { error, statusCode } = response.body;
+      expect(error).toBe('Not Found');
       expect(statusCode).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const credentials = {
+        user: { id: 3 },
+        createdBy: { id: 3 },
         updatedBy: { id: 3 },
-        amenityName: 'amenity1',
-        amenityDescription: 'Descrip',
-        amenityType: 'Residental',
+        token: 'string',
+        expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
-        .delete('/holiday/1')
+        .delete('/user-session/1')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -199,31 +194,32 @@ describe('E2E test for Holiday', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Delete Specific Holiday', () => {
-    it('Successful holiday deletion', async () => {
+  describe('Delete Specific User Session', () => {
+    it('Successful user-session deletion', async () => {
       const response = await request(url)
-        .delete('/holiday/8')
+        .delete('/user-session/103')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-      expect(response.body.success).toBe(true);
+        .expect('Content-Type', /json/);
+      const { message, status } = response.body;
+      expect(message).toBe('User session deleted successfully');
+      expect(status).toBe(200);
     });
-    it('Holiday not found for delete', async () => {
+    it('User Session not found for delete', async () => {
       const response = await request(url)
-        .delete('/holiday/1')
+        .delete('/user-session/70')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-      const { message } = response.body;
-      expect(message).toBe('Holiday with ID 1 not found');
+        .expect('Content-Type', /json/);
+      const { error, statusCode } = response.body;
+      expect(error).toBe('Not Found');
+      expect(statusCode).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/holiday/4')
+        .delete('/user-session/4')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
