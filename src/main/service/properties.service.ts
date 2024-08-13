@@ -253,18 +253,7 @@ export class PropertiesService {
     PropertyWithDetailsResponseDto | object
   > {
     try {
-      const properties = await this.propertiesRepository.find({
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          id: true,
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
+      const properties = await this.propertiesRepository.find();
 
       if (!properties.length) {
         return USER_PROPERTY_RESPONSES.PROPERTIES_NOT_FOUND;

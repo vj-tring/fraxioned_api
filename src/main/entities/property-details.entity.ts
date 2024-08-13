@@ -97,15 +97,15 @@ export class PropertyDetails {
 
   @Column({
     name: 'peak_season_start_date',
-    type: 'timestamp',
+    type: 'date',
   })
-  peakSeasonStartDate: Date = undefined;
+  peakSeasonStartDate: Date;
 
   @Column({
     name: 'peak_season_end_date',
-    type: 'timestamp',
+    type: 'date',
   })
-  peakSeasonEndDate: Date = undefined;
+  peakSeasonEndDate: Date;
 
   @Column({
     name: 'psan',
@@ -157,13 +157,11 @@ export class PropertyDetails {
 
   @CreateDateColumn({
     name: 'created_at',
-    nullable: true,
   })
-  createdAt: Date = undefined;
+  createdAt: Date;
 
   @UpdateDateColumn({
     name: 'updated_at',
-    nullable: true,
   })
-  updatedAt: Date = undefined;
+  updatedAt: Date;
 }
