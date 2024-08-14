@@ -6,6 +6,8 @@ import { seedRole } from 'src/main/commons/seeds/roleSeed';
 import { seedUser } from 'src/main/commons/seeds/userSeed';
 import { setupSwagger } from 'src/swagger/swagger.config';
 import { INestApplication } from '@nestjs/common';
+import { seedProperties } from 'src/main/commons/seeds/propertySeed';
+import { seedPropertyDetails } from 'src/main/commons/seeds/propertDetailSeed';
 
 jest.mock('@nestjs/core', () => ({
   NestFactory: {
@@ -29,12 +31,16 @@ jest.mock('src/main/commons/seeds/propertySeed', () => ({
   seedProperties: jest.fn(),
 }));
 
+jest.mock('src/main/commons/seeds/propertDetailSeed', () => ({
+  seedPropertyDetails: jest.fn(),
+}));
+
 jest.mock('typeorm', () => {
   const actualTypeorm = jest.requireActual('typeorm');
   return {
     ...actualTypeorm,
     DataSource: jest.fn().mockImplementation(() => ({
-      get: jest.fn(),
+      getRepository: jest.fn(),
       initialize: jest.fn().mockResolvedValue(undefined),
     })),
   };
@@ -82,6 +88,8 @@ describe('Bootstrap', () => {
     expect(app.listen).toHaveBeenCalledWith(3008);
     expect(seedRole).toHaveBeenCalledWith(mockDataSource);
     expect(seedUser).toHaveBeenCalledWith(mockDataSource);
+    expect(seedProperties).toHaveBeenCalledWith(mockDataSource);
+    expect(seedPropertyDetails).toHaveBeenCalledWith(mockDataSource);
 
     const url = await app.getUrl();
     expect(url.replace('[::1]', 'localhost')).toBe('http://localhost:3008/api');
