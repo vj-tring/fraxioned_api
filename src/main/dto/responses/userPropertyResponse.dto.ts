@@ -141,7 +141,10 @@ export class UserPropertyWithDetailsResponseDto {
   @ApiProperty({ example: 84790 })
   zipcode: number;
 
-  @ApiProperty({ example: 'Ready for an escape to your home away from home? Book a stay at the beautiful Paradise Shores, your oasis in St. George, Utah. Jump back into the clear waters of the community lagoon, just steps away from your front door. Or, if you’re looking for more privacy, take a dip in your secluded private pool and spa. With game tables, a theater room, large common areas, and cozy bedrooms, you might not want to leave the house at all. There’s room for the whole crew, so bring them all (or don’t). Either way, get ready to make some lifelong memories at your vacation home. Paradise Shores- your favorite place with your favorite people.' })
+  @ApiProperty({
+    example:
+      'Ready for an escape to your home away from home? Book a stay at the beautiful Paradise Shores, your oasis in St. George, Utah. Jump back into the clear waters of the community lagoon, just steps away from your front door. Or, if you’re looking for more privacy, take a dip in your secluded private pool and spa. With game tables, a theater room, large common areas, and cozy bedrooms, you might not want to leave the house at all. There’s room for the whole crew, so bring them all (or don’t). Either way, get ready to make some lifelong memories at your vacation home. Paradise Shores- your favorite place with your favorite people.',
+  })
   houseDescription: string;
 
   @ApiProperty({ example: false })
