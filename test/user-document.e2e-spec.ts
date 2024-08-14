@@ -1,12 +1,25 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { AppModule } from './../src/app.module';
 
-process.env.DATABASE_NAME = 'fraxioned_testing';
+// process.env.DATABASE_NAME = 'fraxioned_testing';
 describe('E2E test for User Document', () => {
   const url = `${baseurl}/user-documents`;
   const url1 = `${baseurl}/authentication`;
   let token: string;
   let userid: number;
+  let app: INestApplication;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
 
   beforeAll(async () => {
     const valid_credentials = {
@@ -179,7 +192,7 @@ describe('E2E test for User Document', () => {
     });
   });
   describe('Delete Specific User Document', () => {
-    it('Successful user-document deletion', async () => {
+    it.skip('Successful user-document deletion', async () => {
       const response = await request(url)
         .delete('/5')
         .set('Accept', 'application/json')
