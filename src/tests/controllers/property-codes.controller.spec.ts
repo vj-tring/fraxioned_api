@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertyCodesController } from 'src/main/controller/property-codes.controller';
 import { CreatePropertyCodeDto } from 'src/main/dto/requests/create-property-code.dto';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertyCodes } from 'src/main/entities/property_codes.entity';
 import { PropertyCodesService } from 'src/main/service/property-codes.service';
 import { Repository } from 'typeorm';
@@ -35,7 +35,7 @@ describe('PropertyCodesController', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
       ],
@@ -96,12 +96,11 @@ describe('PropertyCodesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockPropertyCodes = {
         id: 1,
@@ -180,12 +179,11 @@ describe('PropertyCodesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockCreatePropertyCodeDto: CreatePropertyCodeDto = {
         property: mockProperties,
@@ -333,12 +331,11 @@ describe('PropertyCodesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyCodeDto: UpdatePropertyCodeDto = {
         property: mockProperties,
@@ -412,12 +409,11 @@ describe('PropertyCodesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyCodeDto: UpdatePropertyCodeDto = {
         property: mockProperties,
@@ -492,12 +488,11 @@ describe('PropertyCodesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
         updatedBy: null,
         createdAt: new Date(Date.now()),
         updatedAt: null,
-      };
+      } as Property;
 
       const mockUpdatePropertyCodeDto: UpdatePropertyCodeDto = {
         property: mockProperties,

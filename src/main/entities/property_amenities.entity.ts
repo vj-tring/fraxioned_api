@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Properties } from './properties.entity';
+import { Property } from './property.entity';
 import { Amenities } from './amenities.entity';
 import { User } from './user.entity';
 
@@ -18,11 +18,11 @@ export class PropertyAmenities {
   })
   id: number;
 
-  @ManyToOne(() => Properties, (properties) => properties.id)
+  @ManyToOne(() => Property, (properties) => properties.id)
   @JoinColumn({
     name: 'property_id',
   })
-  property: Properties;
+  property: Property;
 
   @ManyToOne(() => Amenities, (amenities) => amenities.id)
   @JoinColumn({

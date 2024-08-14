@@ -1,13 +1,13 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
 
-describe('E2E test for Role', () => {
-  const url = `${baseurl}/roles`;
+describe('E2E test for User Session', () => {
+  const url = `${baseurl}/user-sessions`;
   const url1 = `${baseurl}/authentication`;
   let token: string;
   let userid: number;
 
-  it('Login', async () => {
+  beforeAll(async () => {
     const valid_credentials = {
       email: 'dharshanramk@gmail.com',
       password: 'Admin@12',
@@ -20,51 +20,55 @@ describe('E2E test for Role', () => {
     token = session.token;
     userid = user.id;
   });
-  describe('Role Creation', () => {
-    it('Successful role creation', async () => {
+  describe('User Session Creation', () => {
+    it('Successful user-session creation', async () => {
       const credentials = {
-        createdBy: { id: 1 },
-        roleName: 'Admin0',
-        roleDescription: 'description',
+        user: { id: 3 },
+        createdBy: { id: 3 },
+        updatedBy: { id: 3 },
+        token: 'nekottoken',
+        expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
-        .post('/role')
+        .post('/user-session')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(201);
-
-      const { message } = response.body;
-      expect(message).toBe('Role created successfully');
+      const { message, status } = response.body;
+      expect(message).toBe('User session created successfully');
+      expect(status).toBe(201);
     });
-    it('Role already exist', async () => {
+    it('User Session already exist', async () => {
       const credentials = {
-        createdBy: { id: 1 },
-        roleName: 'Admin',
-        roleDescription: 'description',
+        user: { id: 3 },
+        createdBy: { id: 3 },
+        updatedBy: { id: 3 },
+        token: 'string',
+        expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
-        .post('/role')
+        .post('/user-session')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/)
-        .expect(409);
-
-      const { message } = response.body;
-      expect(message).toBe('Role with name Admin already exists');
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe('Internal server error');
+      expect(response.body.statusCode).toBe(500);
     });
     it('Invalid token or user id', async () => {
       const credentials = {
-        createdBy: { id: 1 },
-        roleName: 'Admin',
-        roleDescription: 'description',
+        startDate: '2024-08-03',
+        endDate: '2024-08-03',
+        createdBy: { id: 3 },
+        name: 'holiday',
+        year: 2024,
       };
       const response = await request(url)
-        .post('/role')
+        .post('/user-session')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -76,17 +80,17 @@ describe('E2E test for Role', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch All Roles', () => {
-    it('Successful roles fetch', async () => {
+  describe('Fetch All User Sessions', () => {
+    it('Successful user-session fetch', async () => {
       const response = await request(url)
         .get('/')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-      const { message } = response.body;
-      expect(message).toBe('Roles fetched successfully');
+        .expect('Content-Type', /json/);
+      const { message, status } = response.body;
+      expect(message).toBe('User sessions fetched successfully');
+      expect(status).toBe(200);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
@@ -100,20 +104,31 @@ describe('E2E test for Role', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch Specific Role', () => {
-    it('Successful role fetch', async () => {
+  describe('Fetch Specific User Session', () => {
+    it('Successful user-session fetch', async () => {
       const response = await request(url)
-        .get('/role/1')
+        .get('/user-session/1')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-      expect(response.body).toHaveProperty('roleName');
+        .expect('Content-Type', /json/);
+      expect(response.body).toHaveProperty('token');
+      expect(response.body).toHaveProperty('expiresAt');
+    });
+    it('Unsuccessful user-session fetch', async () => {
+      const response = await request(url)
+        .get('/user-session/70')
+        .set('Accept', 'application/json')
+        .set('user-id', `${userid}`)
+        .set('access-token', `${token}`)
+        .expect('Content-Type', /json/);
+      const { error, statusCode } = response.body;
+      expect(error).toBe('Not Found');
+      expect(statusCode).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/role/1')
+        .get('/user-session/1')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -123,28 +138,54 @@ describe('E2E test for Role', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Update Specific Role', () => {
-    it('Successful role update', async () => {
+  describe('Update Specific User Session', () => {
+    it('Successful user-session update', async () => {
       const credentials = {
-        updatedBy: { id: 1 },
-        roleName: 'Admin',
-        roleDescription: 'admin-role',
+        updatedBy: { id: 3 },
+        token: 'update',
+        expiresAt: '2024-08-13T08:53:30.195Z',
       };
       const response = await request(url)
-        .patch('/role/1')
+        .patch('/user-session/2')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-      const { message } = response.body;
-      expect(message).toBe('Role updated successfully');
+        .expect('Content-Type', /json/);
+
+      const { message, status } = response.body;
+      expect(message).toBe('User session updated successfully');
+      expect(status).toBe(200);
+    });
+    it('Unsuccessful user-session update', async () => {
+      const credentials = {
+        updatedBy: { id: 3 },
+        token: 'update',
+        expiresAt: '2024-08-13T08:53:30.195Z',
+      };
+      const response = await request(url)
+        .patch('/user-session/70')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      const { error, statusCode } = response.body;
+      expect(error).toBe('Not Found');
+      expect(statusCode).toBe(404);
     });
     it('Invalid token or user id', async () => {
+      const credentials = {
+        user: { id: 3 },
+        createdBy: { id: 3 },
+        updatedBy: { id: 3 },
+        token: 'string',
+        expiresAt: '2024-08-13T08:53:04.646Z',
+      };
       const response = await request(url)
-        .delete('/role/3')
+        .patch('/user-session/1')
         .set('Accept', 'application/json')
+        .send(credentials)
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
@@ -153,32 +194,32 @@ describe('E2E test for Role', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Delete Specific Role', () => {
-    it('Successful role deletion', async () => {
+  describe('Delete Specific User Session', () => {
+    it('Successful user-session deletion', async () => {
       const response = await request(url)
-        .delete('/role/9')
+        .delete('/user-session/103')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-      const { message } = response.body;
-      expect(message).toBe('Role deleted successfully');
+        .expect('Content-Type', /json/);
+      const { message, status } = response.body;
+      expect(message).toBe('User session deleted successfully');
+      expect(status).toBe(200);
     });
-    it('Role id not found for delete', async () => {
+    it('User Session not found for delete', async () => {
       const response = await request(url)
-        .delete('/role/8')
+        .delete('/user-session/70')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/)
-        .expect(404);
-      const { message } = response.body;
-      expect(message).toBe('Role with ID 8 not found');
+        .expect('Content-Type', /json/);
+      const { error, statusCode } = response.body;
+      expect(error).toBe('Not Found');
+      expect(statusCode).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/role/4')
+        .delete('/user-session/4')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
