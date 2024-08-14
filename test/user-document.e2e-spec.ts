@@ -89,7 +89,7 @@ describe('E2E test for User Document', () => {
   describe('Fetch Specific User Document', () => {
     it('Successful user-document fetch', async () => {
       const response = await request(url)
-        .get('/3')
+        .get('/2')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -129,7 +129,7 @@ describe('E2E test for User Document', () => {
         documentURL: 'string',
       };
       const response = await request(url)
-        .patch('/4')
+        .patch('/2')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -180,7 +180,7 @@ describe('E2E test for User Document', () => {
   describe('Delete Specific User Document', () => {
     it('Successful user-document deletion', async () => {
       const response = await request(url)
-        .delete('/7')
+        .delete('/5')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
