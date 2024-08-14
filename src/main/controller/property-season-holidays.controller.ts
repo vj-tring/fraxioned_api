@@ -90,6 +90,25 @@ export class PropertySeasonHolidaysController {
     }
   }
 
+  @Get('property/:id')
+  async getHolidaysByPropertyId(@Param('id') id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertySeasonHolidaysService.findHolidaysByPropertyId(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the holidays list for the selected property',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Patch(':id')
   async updatePropertySeasonHolidayDetail(
     @Param('id') id: string,
