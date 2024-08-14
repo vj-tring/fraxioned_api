@@ -1,6 +1,6 @@
 import { IsOptional, IsInt, IsNotEmpty } from 'class-validator';
 import { User } from 'entities/user.entity';
-import { Properties } from 'entities/properties.entity';
+import { Property } from 'entities/property.entity';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -16,7 +16,7 @@ export class UpdateUserPropertyDTO {
   @IsValidId({
     message: 'property must be an object with a valid id where (id >= 1)',
   })
-  property?: Properties;
+  property?: Property;
 
   @IsInt()
   @IsOptional()

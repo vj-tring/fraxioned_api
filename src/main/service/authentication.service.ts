@@ -23,7 +23,7 @@ import {
   LOGOUT_RESPONSES,
 } from 'src/main/commons/constants/response-constants/auth.constant';
 import { Role } from '../entities/role.entity';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 import { ROLE_RESPONSES } from '../commons/constants/response-constants/role.constant';
@@ -41,8 +41,8 @@ export class AuthenticationService {
     private readonly userPropertyRepository: Repository<UserProperties>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
-    @InjectRepository(Properties)
-    private readonly propertyRepository: Repository<Properties>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
     private readonly mailService: MailService,
     private readonly logger: LoggerService,
   ) {}
@@ -181,7 +181,7 @@ export class AuthenticationService {
       await this.userPropertyRepository.save(userPropertyEntity);
     }
 
-    const loginLink = `http://localhost:3002/login`;
+    const loginLink = `http://192.168.1.47:3002/login`;
 
     await this.mailService.sendMail(
       email,
@@ -271,7 +271,7 @@ export class AuthenticationService {
 
     await this.userRepository.save(user);
 
-    const link = `http://localhost:3002/recover?resetToken=${user.resetToken}`;
+    const link = `http://192.168.1.47:3002/recover?resetToken=${user.resetToken}`;
     const subject = 'Password Reset Request';
     const text = `To reset your password, please click the following link: ${link}`;
 

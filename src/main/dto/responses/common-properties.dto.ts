@@ -42,8 +42,14 @@ export class CommonPropertiesResponseDto {
   @IsNumber()
   propertyShare: number;
 
-  @IsString()
-  mapCoordinates: string = 'POINT (0 0)';
+  @IsOptional()
+  latitude: number;
+
+  @IsOptional()
+  longitude: number;
+
+  @IsOptional()
+  isActive: boolean;
 
   @IsInt()
   @Min(1)

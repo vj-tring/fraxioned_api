@@ -12,6 +12,7 @@ import { UserModule } from './main/modules/user.module';
 import { AmenitiesModule } from './main/modules/amenities.module';
 import { UserDocumentModule } from './main/modules/user-document.module';
 import { PropertyAmenitiesModule } from './main/modules/property-amenities.module';
+import { PropertyCodesModule } from './main/modules/property-codes.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PropertyAmenitiesModule } from './main/modules/property-amenities.modul
     AmenitiesModule,
     UserDocumentModule,
     PropertyAmenitiesModule,
+    PropertyCodesModule,
   ],
 })
 export class AppModule {}
