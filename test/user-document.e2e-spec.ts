@@ -1,6 +1,7 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
 
+process.env.DATABASE_NAME = 'fraxioned_testing';
 describe('E2E test for User Document', () => {
   const url = `${baseurl}/user-documents`;
   const url1 = `${baseurl}/authentication`;
