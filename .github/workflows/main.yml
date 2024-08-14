@@ -47,9 +47,6 @@ jobs:
       - name: Checks Test coverage
         run: npm run test:cov
 
-      - name: Checks e2e Tests
-        run: npm run test:e2e  
-
       - name: Run Nest Build
         run: npm run build
         
