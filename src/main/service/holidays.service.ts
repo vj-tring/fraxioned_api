@@ -253,13 +253,25 @@ export class HolidaysService {
   }> {
     try {
       const holiday = await this.holidayRepository.findOne({
-        relations: ['createdBy', 'updatedBy'],
+        relations: [
+          'createdBy',
+          'updatedBy',
+          'propertySeasonHolidays',
+          'propertySeasonHolidays.property',
+        ],
         select: {
           createdBy: {
             id: true,
           },
           updatedBy: {
             id: true,
+          },
+          propertySeasonHolidays: {
+            id: true,
+            property: {
+              id: true,
+              propertyName: true,
+            },
           },
         },
         where: { id },
