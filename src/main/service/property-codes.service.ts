@@ -8,15 +8,15 @@ import { UpdatePropertyCodeDto } from '../dto/requests/update-property-code.dto'
 import { InjectRepository } from '@nestjs/typeorm';
 import { PropertyCodes } from '../entities/property_codes.entity';
 import { Repository } from 'typeorm';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 
 @Injectable()
 export class PropertyCodesService {
   constructor(
     @InjectRepository(PropertyCodes)
     private propertyCodesRepository: Repository<PropertyCodes>,
-    @InjectRepository(Properties)
-    private propertiesRepository: Repository<Properties>,
+    @InjectRepository(Property)
+    private propertiesRepository: Repository<Property>,
   ) {}
   async createPropertyCodes(
     createPropertyCodeDto: CreatePropertyCodeDto,

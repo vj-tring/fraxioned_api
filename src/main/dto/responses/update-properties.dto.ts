@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsInt,
@@ -5,14 +6,17 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  Min,
 } from 'class-validator';
+import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { User } from 'src/main/entities/user.entity';
 
 export class UpdatePropertiesResponseDto {
   @IsNotEmpty()
   @IsString()
   propertyName: string;
+
+  @IsInt()
+  ownerRezPropId: number;
 
   @IsOptional()
   @IsString()
@@ -47,10 +51,24 @@ export class UpdatePropertiesResponseDto {
   propertyShare?: number;
 
   @IsOptional()
-  @IsString()
-  mapCoordinates?: string = 'POINT (0 0)';
+  latitude: number;
 
-  @IsInt()
-  @Min(1)
+  @IsOptional()
+  longitude: number;
+
+  @IsOptional()
+  isActive: boolean;
+
+  @IsOptional()
+  @IsInt({ message: 'displayOrder should be int' })
+  displayOrder: number;
+
+  @ApiProperty({
+    example: { id: 1 },
+  })
+  @IsNotEmpty({ message: 'updatedBy is required' })
+  @IsValidId({
+    message: 'updatedBy must be an object with a valid id where (id >= 1)',
+  })
   updatedBy: User;
 }

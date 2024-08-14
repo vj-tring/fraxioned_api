@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { Properties } from 'entities/properties.entity';
+import { Property } from 'entities/property.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { User } from 'entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
@@ -13,7 +13,7 @@ export class CreatePropertyAmenitiesDto {
   @IsValidId({
     message: 'property must be an object with a valid id where (id >= 1)',
   })
-  property: Properties;
+  property: Property;
 
   @ApiProperty({
     example: { id: 1 },

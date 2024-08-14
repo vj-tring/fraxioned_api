@@ -7,7 +7,7 @@ import { USER_DOCUMENT_RESPONSES } from 'src/main/commons/constants/response-con
 import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
 import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
 import { User } from 'src/main/entities/user.entity';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 
@@ -18,8 +18,8 @@ export class UserDocumentService {
     private readonly userDocumentRepository: Repository<UserDocument>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Properties)
-    private readonly propertyRepository: Repository<Properties>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
     private readonly logger: LoggerService,
   ) {}
 
