@@ -6,8 +6,10 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
+import { PropertySeasonHolidays } from './property-season-holidays.entity';
 
 @Entity('fxn_holidays')
 export class Holidays {
@@ -49,4 +51,10 @@ export class Holidays {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
+
+  @OneToMany(
+    () => PropertySeasonHolidays,
+    (propertySeasonHolidays) => propertySeasonHolidays.holiday,
+  )
+  propertySeasonHolidays: PropertySeasonHolidays[];
 }

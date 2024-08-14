@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateHolidayDto } from '../dto/requests/create-holiday.dto';
 import { UpdateHolidayDto } from '../dto/requests/update-holiday.dto';
 import { Holidays } from '../entities/holidays.entity';
@@ -11,7 +11,7 @@ import { PropertySeasonHolidays } from '../entities/property-season-holidays.ent
 import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
 import { PropertySeasonHolidaysService } from './property-season-holidays.service';
 import { PropertyDetails } from '../entities/property-details.entity';
-// import { PropertyDetailsModule } from '../modules/property-details.module';
+import { Properties } from '../entities/properties.entity';
 
 @Injectable()
 export class HolidaysService {
@@ -24,6 +24,8 @@ export class HolidaysService {
     private readonly propertySeasonHolidayRepository: Repository<PropertySeasonHolidays>,
     @InjectRepository(PropertyDetails)
     private readonly propertyDetailsRepository: Repository<PropertyDetails>,
+    @InjectRepository(Properties)
+    private readonly propertiesRepository: Repository<Properties>,
     private readonly propertySeasonHolidayService: PropertySeasonHolidaysService,
     private readonly logger: LoggerService,
   ) {}
@@ -68,6 +70,25 @@ export class HolidaysService {
         );
 
         return HOLIDAYS_RESPONSES.USER_NOT_FOUND(createHolidayDto.createdBy.id);
+      }
+
+      const propertyIds = createHolidayDto.properties.map(
+        (property) => property.id,
+      );
+      const existingProperties = await this.propertiesRepository.findBy({
+        id: In(propertyIds),
+      });
+
+      if (propertyIds.length > 0) {
+        const nonExistingIds = propertyIds.filter(
+          (id) => !existingProperties.some((property) => property.id === id),
+        );
+        if (nonExistingIds.length > 0) {
+          this.logger.error(
+            `Properties with ID(s) ${nonExistingIds.join(', ')} do not exist`,
+          );
+          return HOLIDAYS_RESPONSES.PROPERTIES_NOT_FOUND(nonExistingIds);
+        }
       }
 
       const holiday = this.holidayRepository.create({
@@ -302,10 +323,102 @@ export class HolidaysService {
         return HOLIDAYS_RESPONSES.USER_NOT_FOUND(updateHolidayDto.updatedBy.id);
       }
 
+      if (updateHolidayDto.properties) {
+        const propertyIds = updateHolidayDto.properties.map(
+          (property) => property.id,
+        );
+        const existingProperties = await this.propertiesRepository.findBy({
+          id: In(propertyIds),
+        });
+
+        if (propertyIds.length > 0) {
+          const nonExistingIds = propertyIds.filter(
+            (id) => !existingProperties.some((property) => property.id === id),
+          );
+          if (nonExistingIds.length > 0) {
+            this.logger.error(
+              `Properties with ID(s) ${nonExistingIds.join(', ')} do not exist`,
+            );
+            return HOLIDAYS_RESPONSES.PROPERTIES_NOT_FOUND(nonExistingIds);
+          }
+        }
+      }
+
       Object.assign(holiday, updateHolidayDto);
       const updatedHoliday = await this.holidayRepository.save(holiday);
 
       this.logger.log(`Holiday with ID ${id} updated successfully`);
+
+      if (updatedHoliday && updateHolidayDto.properties) {
+        const { properties } = updateHolidayDto;
+        const holiday = await this.holidayRepository.findOne({
+          where: { id },
+          relations: [
+            'propertySeasonHolidays',
+            'propertySeasonHolidays.property',
+            'propertySeasonHolidays.holiday',
+          ],
+        });
+        if (!holiday) {
+          this.logger.error(`Holiday with ID ${id} not found`);
+          return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
+        }
+        const existingPropertySeasonHolidays = holiday.propertySeasonHolidays;
+        const propertyIdsFromDto = properties.map((property) => property.id);
+        const existingPropertyIds = existingPropertySeasonHolidays.map(
+          (psh) => psh.property.id,
+        );
+
+        const recordsToDelete = existingPropertySeasonHolidays.filter(
+          (psh) => !propertyIdsFromDto.includes(psh.property.id),
+        );
+
+        const recordsToCreate = propertyIdsFromDto.filter(
+          (propertyId) => !existingPropertyIds.includes(propertyId),
+        );
+
+        const idsToDelete = recordsToDelete.map((record) => record.id);
+        if (idsToDelete.length > 0) {
+          await this.propertySeasonHolidayRepository.delete(idsToDelete);
+        }
+
+        if (recordsToCreate.length > 0) {
+          for (const property of updateHolidayDto.properties) {
+            const propertyDetails =
+              await this.propertyDetailsRepository.findOne({
+                where: { property: { id: property.id } },
+              });
+
+            if (!propertyDetails) {
+              this.logger.error(
+                `Property details not found for property with ID ${property.id}`,
+              );
+              return HOLIDAYS_RESPONSES.PROPERTY_DETAILS_NOT_FOUND(property.id);
+            }
+
+            const startDate = updateHolidayDto.startDate || holiday.startDate;
+            const endDate = updateHolidayDto.endDate || holiday.endDate;
+
+            const isPeakSeason = await this.isHolidayInPeakSeason(
+              startDate,
+              endDate,
+              propertyDetails,
+            );
+
+            const createPropertySeasonHolidayDto: CreatePropertySeasonHolidayDto =
+              {
+                property: property,
+                holiday: { id: updatedHoliday.id } as Holidays,
+                isPeakSeason: isPeakSeason,
+                createdBy: updateHolidayDto.updatedBy,
+              };
+
+            await this.propertySeasonHolidayService.createPropertySeasonHoliday(
+              createPropertySeasonHolidayDto,
+            );
+          }
+        }
+      }
 
       return HOLIDAYS_RESPONSES.HOLIDAY_UPDATED(updatedHoliday);
     } catch (error) {
