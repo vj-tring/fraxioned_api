@@ -13,6 +13,7 @@ import axios from 'axios';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 import { PropertyWithDetailsResponseDto } from '../dto/responses/PropertyWithDetailsResponseDto.dto';
 import { UserProperties } from '../entities/user-properties.entity';
+import { UserPropertyWithDetailsResponseDto } from '../dto/responses/userPropertyResponse.dto';
 
 @Injectable()
 export class PropertiesService {
@@ -308,34 +309,53 @@ export class PropertiesService {
         return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(userId);
       }
 
-      const propertiesWithDetails = await Promise.all(
+      const propertyMap = new Map<number, UserPropertyWithDetailsResponseDto>();
+
+      await Promise.all(
         userProperties.map(async (userProperty) => {
           const propertyDetails = await this.propertyDetailsRepository.findOne({
             where: { property: { id: userProperty.property.id } },
           });
 
-          const { ...userPropertyWithoutId } = userProperty;
+          const {
+            property: { id: propertyId, ...propertyWithoutId },
+            ...userPropertyWithoutId
+          } = userProperty;
 
           if (!propertyDetails) {
-            return {
-              ...userPropertyWithoutId,
-              propertyId: userProperty.property.id,
-              propertyDetailsId: null,
-              ...userProperty.property,
-            };
+            if (!propertyMap.has(propertyId)) {
+              propertyMap.set(propertyId, {
+                propertyId,
+                propertyDetailsId: null,
+                ...propertyWithoutId,
+                userProperties: [],
+              });
+            }
+            propertyMap
+              .get(propertyId)
+              .userProperties.push(userPropertyWithoutId);
+            return;
           }
+
           const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
             propertyDetails;
 
-          return {
-            ...userPropertyWithoutId,
-            propertyDetailsId,
-            ...propertyDetailsWithoutId,
-          };
+          if (!propertyMap.has(propertyId)) {
+            propertyMap.set(propertyId, {
+              propertyId,
+              propertyDetailsId,
+              ...propertyWithoutId,
+              ...propertyDetailsWithoutId,
+              userProperties: [],
+            });
+          }
+          propertyMap
+            .get(propertyId)
+            .userProperties.push(userPropertyWithoutId);
         }),
       );
 
-      return propertiesWithDetails;
+      return Array.from(propertyMap.values());
     } catch (error) {
       throw error;
     }
