@@ -11,6 +11,7 @@ import { User } from 'src/main/entities/user.entity';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import axios from 'axios';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
+import { UserProperties } from 'src/main/entities/user-properties.entity';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -26,6 +27,10 @@ describe('PropertiesService', () => {
         PropertiesService,
         {
           provide: getRepositoryToken(Property),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserProperties),
           useClass: Repository,
         },
         {
