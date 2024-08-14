@@ -123,7 +123,7 @@ export class PropertiesController {
     }
   }
 
-  @Get('user/:userId/properties-with-details')
+  @Get(':userId/properties-with-details')
   async getAllPropertiesWithDetailsByUser(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<PropertyWithDetailsResponseDto[] | object> {
