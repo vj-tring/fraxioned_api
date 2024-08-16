@@ -13,7 +13,7 @@ import { UserContactDetails } from 'src/main/entities/user-contact-details.entit
 import { UserSession } from 'src/main/entities/user-session.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { Role } from 'src/main/entities/role.entity';
-import { MailService } from 'src/main/service/mail.service';
+import { MailService } from 'src/main/email/mail.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import * as bcrypt from 'bcrypt';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';

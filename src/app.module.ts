@@ -13,6 +13,10 @@ import { AmenitiesModule } from './main/modules/amenities.module';
 import { UserDocumentModule } from './main/modules/user-document.module';
 import { PropertyAmenitiesModule } from './main/modules/property-amenities.module';
 import { PropertyCodesModule } from './main/modules/property-codes.module';
+import { ConfigModule } from '@nestjs/config';
+import { MailModule } from './main/email/mail.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -30,6 +34,11 @@ import { PropertyCodesModule } from './main/modules/property-codes.module';
     UserDocumentModule,
     PropertyAmenitiesModule,
     PropertyCodesModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    MailModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'main/email/assets'),
+    }),
   ],
 })
 export class AppModule {}

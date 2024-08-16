@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Fraxioned</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            margin: 0px;
+            font-family: Montserrat !important;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .content p {
+            font-size: .75rem;
+            line-height: 18px;
+        }
+
+        .content p b {
+            font-size: .88rem;
+            line-height: 25px;
+        }
+
+        .content table {
+            font-size: .82rem;
+        }
+
+        .content table th td {
+            text-decoration: none;
+            font-weight: lighter;
+        }
+
+        .content .thead th {
+            padding-right: 40px;
+        }
+
+        .content th,
+        .content td {
+            padding: 5px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 550px;
+            min-width: 450px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 0px;
+            box-sizing: border-box;
+        }
+
+        .content {
+            padding-left: 50px;
+            padding-right: 50px;
+            padding-bottom: 25px;
+            text-align: justify;
+        }
+
+        .content .highlight-text {
+            font-weight: 450;
+        }
+
+        .header {
+            padding-left: 50px;
+            padding-right: 50px;
+            padding-top: 25px;
+        }
+
+        .header-table {
+            width: 100%;
+            height: 30px;
+            border: 0px solid;
+            border-collapse: collapse;
+        }
+
+        .header-logo {
+            text-align: start;
+            border: 0px solid;
+            height: 50px;
+            width: 20px;
+        }
+
+        .header-logo img {
+            max-height: 60%;
+        }
+
+        .header-text {
+            font-weight: 600;
+            font-size: 1.25rem;
+            border: 0px solid;
+            width: 90%;
+            max-width: 90%;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #d7871e;
+            color: #ffffff;
+            padding: 7px 27px;
+            border-radius: 6px;
+            border: none;
+            text-decoration: none;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .mail {
+            color: #d7871e;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .footer {
+            background-color: #E9F7F8;
+            padding: 5px;
+        }
+
+        .footer-table {
+            width: 100%;
+            height: 50px;
+            border: 0px solid;
+            border-collapse: collapse;
+        }
+
+        .footer-table td {
+            border: 0px solid;
+        }
+
+        .footer-logo {
+            width: 50%;
+            vertical-align: middle;
+        }
+
+        .footer-logo img {
+            width: 60%;
+        }
+
+        .footer-one a, .footer-two a {
+            text-decoration: none;
+            color: #06565F;
+            font-weight: 400;
+            font-size: .5rem;
+            vertical-align:middle;
+            padding-left: 2%;
+        }
+
+        .footer-two img, .footer-one td:not(:first-of-type) img {
+            width: 10%;
+            vertical-align: middle;
+        }
+
+        .footer-one td:nth-last-of-type(2), .footer-two td:nth-of-type(1) {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <table class="header-table">
+                <tr>
+                    <td class="header-logo">
+                        <img src="https://i.ibb.co/2kKHdtw/home.png" alt="home">
+                    </td>
+                    <td class="header-text">
+                        <p>Welcome to Fraxioned</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="content">
+            <p>
+                <b>Hello {{ name }},</b>
+            </p>
+            <p>
+                We are excited to welcome you to the Fraxioned family and congratulate you on purchasing a share of a
+                beautiful vacation home.
+            </p>
+            <p>
+                The next step is to log in to your Owners' Portal account. This is where you can book time to stay at
+                your home, find important documents, and much more.
+            </p>
+            <p>
+                <b>Your Account</b>
+            </p>
+            <p>
+                We created your account and uploaded some basic information to your profile. Here is your user name and
+                password to get started:
+            </p>
+            <table>
+                <tr class="thead">
+                    <th>Username</th>
+                    <th>Password</th>
+                </tr>
+                <tr>
+                    <td>{{ username }}</td>
+                    <td>{{ password }}</td>
+                </tr>
+            </table>
+            <p class="highlight-text">
+                Please be sure to create a new, unique password after logging in.
+            </p>
+            <p>
+                Well, what are you waiting for? Create your first booking today and get ready to make lifelong memories
+                at your new home away from home.
+            </p>
+            <a href={{ link }} class="button">My Account</a>
+            <p>
+                <b>Questions?</b>
+            </p>
+            <p>
+                If you need help accessing your account or have any other questions about your new Fraxioned home,
+                please contact <a href="mailto:owners@fraxioned.com" class="mail">owners@fraxioned.com</a>
+            </p>
+        </div>
+        <div class="footer">
+            <table class="footer-table">
+                <tr class="footer-one">
+                    <td rowspan="2" class="footer-logo">
+                        <img src="https://i.ibb.co/4VjNmZp/fraxioned-logo.png" alt="Fraxioned Logo">
+                    </td>
+                    <td>
+                        <img src="https://i.ibb.co/yXS3ynw/email.png" alt="email">
+                    </td>
+                    <td style="width: 25%;">
+                        <a href="mailto:owners@fraxioned.com">
+                        owners@fraxioned.com
+                        </a>
+                    </td>
+                </tr>
+                <tr class="footer-two">
+                    <td>
+                        <img src="https://i.ibb.co/RYWRQJX/account.png" alt="portal">
+                    </td>
+                    <td>
+                        <a href="http://192.168.1.47:3002/login">
+                        Portal Login
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
