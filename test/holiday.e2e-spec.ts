@@ -6,6 +6,7 @@ describe('E2E test for Holiday', () => {
   const url1 = `${baseurl}/authentication`;
   let token: string;
   let userid: number;
+  let id: number;
 
   beforeAll(async () => {
     const valid_credentials = {
@@ -20,14 +21,37 @@ describe('E2E test for Holiday', () => {
     token = session.token;
     userid = user.id;
   });
+  beforeAll(async () => {
+    const credentials = {
+      startDate: '2024-08-03',
+      endDate: '2024-08-03',
+      createdBy: { id: 1 },
+      name: 'Holiday',
+      year: 2024,
+    };
+    await request(url)
+      .post('/holiday')
+      .set('Accept', 'application/json')
+      .send(credentials)
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`);
+  });
+  const generateYear = (): number => {
+    const min = 2000;
+    const max = 2100;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
   describe('Holiday Creation', () => {
     it('Successful holiday creation', async () => {
+      const year = generateYear();
+      const startDate = `${year}-08-04`;
+      const endDate = `${year}-08-04`;
       const credentials = {
-        startDate: '2020-08-04',
-        endDate: '2020-08-04',
-        createdBy: { id: 3 },
+        startDate,
+        endDate,
+        createdBy: { id: 1 },
         name: 'holiday',
-        year: 2020,
+        year: year,
       };
       const response = await request(url)
         .post('/holiday')
@@ -37,16 +61,17 @@ describe('E2E test for Holiday', () => {
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(201);
-      const { message, success } = response.body;
+      const { message, success, data } = response.body;
       expect(message).toBe('Holiday created successfully');
       expect(success).toBe(true);
+      id = data.id;
     });
     it('Holiday already exist', async () => {
       const credentials = {
         startDate: '2024-08-03',
         endDate: '2024-08-03',
-        createdBy: { id: 3 },
-        name: 'holiday',
+        createdBy: { id: 1 },
+        name: 'Holiday',
         year: 2024,
       };
       const response = await request(url)
@@ -62,7 +87,7 @@ describe('E2E test for Holiday', () => {
       const credentials = {
         startDate: '2024-08-03',
         endDate: '2024-08-03',
-        createdBy: { id: 3 },
+        createdBy: { id: 1 },
         name: 'holiday',
         year: 2024,
       };
@@ -107,7 +132,7 @@ describe('E2E test for Holiday', () => {
   describe('Fetch Specific Holiday', () => {
     it('Successful holiday fetch', async () => {
       const response = await request(url)
-        .get('/holiday/4')
+        .get(`/holiday/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -119,7 +144,7 @@ describe('E2E test for Holiday', () => {
     });
     it('Unsuccessful holiday fetch', async () => {
       const response = await request(url)
-        .get('/holiday/1')
+        .get('/holiday/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -130,7 +155,7 @@ describe('E2E test for Holiday', () => {
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/holiday/1')
+        .get('/holiday/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -145,12 +170,12 @@ describe('E2E test for Holiday', () => {
       const credentials = {
         startDate: '2024-08-03',
         endDate: '2024-08-03',
-        updatedBy: { id: 3 },
+        updatedBy: { id: 1 },
         name: 'holiday',
         year: 2024,
       };
       const response = await request(url)
-        .patch('/holiday/4')
+        .patch(`/holiday/${id}`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -165,12 +190,12 @@ describe('E2E test for Holiday', () => {
       const credentials = {
         startDate: '2024-08-03',
         endDate: '2024-08-03',
-        updatedBy: { id: 3 },
+        updatedBy: { id: 1 },
         name: 'holiday',
         year: 2024,
       };
       const response = await request(url)
-        .patch('/holiday/1')
+        .patch('/holiday/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -182,13 +207,13 @@ describe('E2E test for Holiday', () => {
     });
     it('Invalid token or user id', async () => {
       const credentials = {
-        updatedBy: { id: 3 },
+        updatedBy: { id: 1 },
         amenityName: 'amenity1',
         amenityDescription: 'Descrip',
         amenityType: 'Residental',
       };
       const response = await request(url)
-        .delete('/holiday/1')
+        .delete('/holiday/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -202,7 +227,7 @@ describe('E2E test for Holiday', () => {
   describe('Delete Specific Holiday', () => {
     it('Successful holiday deletion', async () => {
       const response = await request(url)
-        .delete('/holiday/8')
+        .delete(`/holiday/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -212,18 +237,19 @@ describe('E2E test for Holiday', () => {
     });
     it('Holiday not found for delete', async () => {
       const response = await request(url)
-        .delete('/holiday/1')
+        .delete('/holiday/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/)
         .expect(200);
-      const { message } = response.body;
-      expect(message).toBe('Holiday with ID 1 not found');
+      const { success, statusCode } = response.body;
+      expect(success).toBe(false);
+      expect(statusCode).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/holiday/4')
+        .delete('/holiday/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
