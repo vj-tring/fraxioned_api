@@ -8,7 +8,7 @@ import { PropertyDetails } from '../entities/property-details.entity';
 import { Repository } from 'typeorm';
 import { CreatePropertyDetailsDto } from '../dto/requests/create-property-details.dto';
 import { UpdatePropertyDetailsDto } from '../dto/requests/update-property-details.dto';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 import { CreatePropertyDetailsResponseDto } from '../dto/responses/create-property-details.dto';
 import { UpdatePropertyDetailsResponseDto } from '../dto/responses/update-property-details.dto';
 
@@ -17,8 +17,8 @@ export class PropertyDetailsService {
   constructor(
     @InjectRepository(PropertyDetails)
     private propertyDetailsRepository: Repository<PropertyDetails>,
-    @InjectRepository(Properties)
-    private propertiesRepository: Repository<Properties>,
+    @InjectRepository(Property)
+    private propertiesRepository: Repository<Property>,
   ) {}
 
   async createPropertyDetails(
@@ -26,7 +26,7 @@ export class PropertyDetailsService {
   ): Promise<CreatePropertyDetailsResponseDto> {
     try {
       const existingProperties = await this.propertiesRepository.findOne({
-        where: { id: createPropertyDetailsDto.property as unknown as number },
+        where: { id: createPropertyDetailsDto.property.id },
       });
 
       if (!existingProperties) {

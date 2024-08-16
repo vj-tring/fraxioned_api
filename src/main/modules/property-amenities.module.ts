@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { LoggerModule } from './logger.module';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 import { AuthenticationModule } from './authentication.module';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
 import { Amenities } from '../entities/amenities.entity';
@@ -11,7 +11,7 @@ import { PropertyAmenitiesController } from '../controller/property-amenities.co
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PropertyAmenities, User, Amenities, Properties]),
+    TypeOrmModule.forFeature([PropertyAmenities, User, Amenities, Property]),
     LoggerModule,
     AuthenticationModule,
   ],

@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { LoggerService } from './logger.service';
 import { Holidays } from '../entities/holidays.entity';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from '../commons/constants/response-constants/property-season-holidays.constants';
 import { UpdatePropertySeasonHolidayDto } from '../dto/requests/update-property-season-holiday.dto';
 
@@ -19,8 +19,8 @@ export class PropertySeasonHolidaysService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Holidays)
     private readonly holidayRepository: Repository<Holidays>,
-    @InjectRepository(Properties)
-    private readonly propertiesRepository: Repository<Properties>,
+    @InjectRepository(Property)
+    private readonly propertiesRepository: Repository<Property>,
     private readonly logger: LoggerService,
   ) {}
 
