@@ -8,20 +8,20 @@ import {
   Param,
   Patch,
   Delete,
-  // UseGuards,
+  UseGuards,
 } from '@nestjs/common';
 import { PropertySeasonHolidaysService } from '../service/property-season-holidays.service';
 import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 import { UpdatePropertySeasonHolidayDto } from '../dto/requests/update-property-season-holiday.dto';
-// import { AuthGuard } from '../commons/guards/auth.guard';
-// import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { AuthGuard } from '../commons/guards/auth.guard';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Property Season Holidays')
 @Controller('v1/property-season-holidays/property-season-holiday')
-// @UseGuards(AuthGuard)
-// @ApiHeadersForAuth()
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class PropertySeasonHolidaysController {
   constructor(
     private readonly propertySeasonHolidaysService: PropertySeasonHolidaysService,
