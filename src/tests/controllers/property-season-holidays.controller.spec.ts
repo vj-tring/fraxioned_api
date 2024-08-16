@@ -1,4 +1,3 @@
-
 // import { Test, TestingModule } from '@nestjs/testing';
 // import { HttpException, HttpStatus } from '@nestjs/common';
 // import { Holidays } from 'src/main/entities/holidays.entity';
@@ -193,7 +192,6 @@
 //     });
 //   });
 
-
 //   describe('getPropertySeasonHolidayById', () => {
 //     it('should get property season holiday by ID', async () => {
 //       const mockPropertySeasonHoliday: PropertySeasonHolidays = {
@@ -206,7 +204,6 @@
 //         createdAt: new Date(),
 //         updatedAt: undefined,
 //       };
-
 
 //       const expectedResult =
 //         PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_FETCHED(
@@ -243,7 +240,6 @@
 //       }
 //     });
 //   });
-
 
 //   describe('updatePropertySeasonHolidayDetail', () => {
 //     it('should update property season holiday details', async () => {
@@ -306,7 +302,6 @@
 //           propertySeasonHoliday,
 //           propertySeasonHoliday.id,
 //         );
-
 
 //       jest
 //         .spyOn(service, 'updatePropertySeasonHoliday')
