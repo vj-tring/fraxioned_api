@@ -8,6 +8,7 @@ import { setupSwagger } from 'src/swagger/swagger.config';
 import { INestApplication } from '@nestjs/common';
 import { seedProperties } from 'src/main/commons/seeds/propertySeed';
 import { seedPropertyDetails } from 'src/main/commons/seeds/propertDetailSeed';
+import { seedUserPropertyDetails } from 'src/main/commons/seeds/userPropertyDetailsSeed';
 
 jest.mock('@nestjs/core', () => ({
   NestFactory: {
@@ -33,6 +34,10 @@ jest.mock('src/main/commons/seeds/propertySeed', () => ({
 
 jest.mock('src/main/commons/seeds/propertDetailSeed', () => ({
   seedPropertyDetails: jest.fn(),
+}));
+
+jest.mock('src/main/commons/seeds/userPropertyDetailsSeed', () => ({
+  seedUserPropertyDetails: jest.fn(),
 }));
 
 jest.mock('typeorm', () => {
@@ -90,6 +95,7 @@ describe('Bootstrap', () => {
     expect(seedUser).toHaveBeenCalledWith(mockDataSource);
     expect(seedProperties).toHaveBeenCalledWith(mockDataSource);
     expect(seedPropertyDetails).toHaveBeenCalledWith(mockDataSource);
+    expect(seedUserPropertyDetails).toHaveBeenCalledWith(mockDataSource);
 
     const url = await app.getUrl();
     expect(url.replace('[::1]', 'localhost')).toBe('http://localhost:3008/api');

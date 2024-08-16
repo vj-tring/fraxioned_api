@@ -610,5 +610,7 @@ export const seedUserPropertyDetails = async (
         updatedAt: new Date(Date.now()),
       },
     ]);
+  } else {
+    console.log('Data already exists in User Properties table');
   }
 };
