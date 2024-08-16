@@ -134,13 +134,32 @@ export class PropertySeasonHolidaysService {
     try {
       const propertySeasonHolidays =
         await this.propertySeasonHolidayRepository.find({
-          relations: ['property', 'holiday', 'createdBy', 'updatedBy'],
+          relations: [
+            'property',
+            'holiday',
+            'holiday.createdBy',
+            'holiday.updatedBy',
+            'createdBy',
+            'updatedBy',
+          ],
           select: {
             property: {
               id: true,
             },
             holiday: {
               id: true,
+              name: true,
+              year: true,
+              startDate: true,
+              endDate: true,
+              createdAt: true,
+              updatedAt: true,
+              createdBy: {
+                id: true,
+              },
+              updatedBy: {
+                id: true,
+              },
             },
             createdBy: {
               id: true,

@@ -11,7 +11,7 @@ import { PropertySeasonHolidays } from '../entities/property-season-holidays.ent
 import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
 import { PropertySeasonHolidaysService } from './property-season-holidays.service';
 import { PropertyDetails } from '../entities/property-details.entity';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 
 @Injectable()
 export class HolidaysService {
@@ -24,8 +24,8 @@ export class HolidaysService {
     private readonly propertySeasonHolidayRepository: Repository<PropertySeasonHolidays>,
     @InjectRepository(PropertyDetails)
     private readonly propertyDetailsRepository: Repository<PropertyDetails>,
-    @InjectRepository(Properties)
-    private readonly propertiesRepository: Repository<Properties>,
+    @InjectRepository(Property)
+    private readonly propertiesRepository: Repository<Property>,
     private readonly propertySeasonHolidayService: PropertySeasonHolidaysService,
     private readonly logger: LoggerService,
   ) {}
@@ -153,10 +153,12 @@ export class HolidaysService {
     propertyDetails: PropertyDetails,
   ): Promise<boolean> {
     try {
-      const { peakSeasonStartDate, peakSeasonEndDate } = propertyDetails;
+      let { peakSeasonStartDate, peakSeasonEndDate } = propertyDetails;
 
       const startHolidayDate = new Date(holidayStartDate);
       const endHolidayDate = new Date(holidayEndDate);
+      peakSeasonStartDate = new Date(peakSeasonStartDate);
+      peakSeasonEndDate = new Date(peakSeasonEndDate);
 
       const isDateWithinPeakSeason = (
         date: Date,

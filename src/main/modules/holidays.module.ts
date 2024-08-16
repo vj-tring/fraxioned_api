@@ -11,7 +11,7 @@ import { AuthenticationModule } from './authentication.module';
 import { PropertySeasonHolidaysModule } from './property-season-holidays.module';
 import { PropertyDetailsModule } from './property-details.module';
 import { PropertyDetails } from '../entities/property-details.entity';
-import { Properties } from '../entities/properties.entity';
+import { Property } from '../entities/property.entity';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { Properties } from '../entities/properties.entity';
       User,
       PropertySeasonHolidays,
       PropertyDetails,
-      Properties,
+      Property,
     ]),
     LoggerModule,
     UserModule,

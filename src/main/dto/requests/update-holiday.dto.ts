@@ -2,7 +2,7 @@ import { IsNumber, IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from '../../entities/property.entity';
 import { IsValidIdArray } from 'src/main/commons/guards/is-valid-id-list.decorator';
 
 export class UpdateHolidayDto {
@@ -41,5 +41,5 @@ export class UpdateHolidayDto {
   @IsValidIdArray({
     message: 'Each property in the array must have a valid id (id >= 1)',
   })
-  properties: Properties[];
+  properties: Property[];
 }
