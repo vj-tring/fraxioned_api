@@ -4,7 +4,6 @@ import { User } from 'src/main/entities/user.entity';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MailService } from 'src/main/service/mail.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { LoggerService } from 'src/main/service/logger.service';
@@ -27,6 +26,7 @@ import { Property } from '../entities/property.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 import { ROLE_RESPONSES } from '../commons/constants/response-constants/role.constant';
+import { MailService } from '../email/mail.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -48,149 +48,157 @@ export class AuthenticationService {
   ) {}
 
   async inviteUser(inviteUserDto: InviteUserDto): Promise<object> {
-    const {
-      email,
-      firstName,
-      lastName,
-      addressLine1,
-      addressLine2,
-      state,
-      country,
-      city,
-      zipcode,
-      phoneNumber,
-      roleId,
-      createdBy,
-      updatedBy,
-      userPropertyDetails,
-    } = inviteUserDto;
+    try {
+      const {
+        email,
+        firstName,
+        lastName,
+        addressLine1,
+        addressLine2,
+        state,
+        country,
+        city,
+        zipcode,
+        phoneNumber,
+        roleId,
+        createdBy,
+        updatedBy,
+        userPropertyDetails,
+      } = inviteUserDto;
 
-    this.logger.log(`Inviting user with email: ${email}`);
+      this.logger.log(`Inviting user with email: ${email}`);
 
-    const existingUserEmail = await this.userContactRepository.findOne({
-      where: { contactValue: email, contactType: 'email' },
-    });
-    if (existingUserEmail) {
-      this.logger.error(`Email already exists: ${email}`);
-      return INVITE_USER_RESPONSES.EMAIL_EXISTS;
+      const existingUserEmail = await this.userContactRepository.findOne({
+        where: { contactValue: email, contactType: 'email' },
+      });
+      if (existingUserEmail) {
+        this.logger.error(`Email already exists: ${email}`);
+        return INVITE_USER_RESPONSES.EMAIL_EXISTS;
+      }
+
+      // Validate createdBy user
+      const createdByUser = await this.userRepository.findOne({
+        where: { id: createdBy },
+      });
+      if (!createdByUser) {
+        this.logger.error(`CreatedBy user not found with ID: ${createdBy}`);
+        return USER_RESPONSES.USER_NOT_FOUND(createdBy);
+      }
+
+      // Validate updatedBy user
+      const updatedByUser = await this.userRepository.findOne({
+        where: { id: updatedBy },
+      });
+      if (!updatedByUser) {
+        this.logger.error(`UpdatedBy user not found with ID: ${updatedBy}`);
+        return USER_RESPONSES.USER_NOT_FOUND(updatedBy);
+      }
+
+      // Validate role
+      const role = await this.roleRepository.findOne({ where: { id: roleId } });
+      if (!role) {
+        this.logger.error(`Role not found with ID: ${roleId}`);
+        return ROLE_RESPONSES.ROLE_NOT_FOUND(roleId);
+      }
+
+      // Validate property
+      const propertyId = userPropertyDetails.propertyID;
+      const userProperty = await this.propertyRepository.findOne({
+        where: { id: propertyId },
+      });
+      if (!userProperty) {
+        this.logger.error(`Property not found with ID: ${propertyId}`);
+        return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
+      }
+
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+      const user = this.userRepository.create({
+        firstName,
+        lastName,
+        addressLine1,
+        addressLine2,
+        state,
+        country,
+        city,
+        zipcode: zipcode,
+        password: hashedPassword,
+        isActive: true,
+        createdBy: createdByUser.id,
+        updatedBy: updatedByUser.id,
+        role: role,
+      });
+      await this.userRepository.save(user);
+
+      const userContacts = [
+        {
+          user,
+          contactType: 'email',
+          contactValue: email,
+          createdBy: createdByUser,
+          updatedBy: updatedByUser,
+        },
+        {
+          user,
+          contactType: 'phone',
+          contactValue: phoneNumber,
+          createdBy: createdByUser,
+          updatedBy: updatedByUser,
+        },
+      ];
+
+      for (const contact of userContacts) {
+        const userContact = this.userContactRepository.create(contact);
+        await this.userContactRepository.save(userContact);
+      }
+
+      const currentYear = new Date().getFullYear();
+      const userPropertyEntities = [
+        this.userPropertyRepository.create({
+          ...userPropertyDetails,
+          user,
+          year: currentYear,
+          createdBy: createdByUser,
+          updatedBy: updatedByUser,
+        }),
+        this.userPropertyRepository.create({
+          ...userPropertyDetails,
+          user,
+          year: currentYear + 1,
+          createdBy: createdByUser,
+          updatedBy: updatedByUser,
+        }),
+        this.userPropertyRepository.create({
+          ...userPropertyDetails,
+          user,
+          year: currentYear + 2,
+          createdBy: createdByUser,
+          updatedBy: updatedByUser,
+        }),
+      ];
+
+      for (const userPropertyEntity of userPropertyEntities) {
+        await this.userPropertyRepository.save(userPropertyEntity);
+      }
+
+      const loginLink = `http://192.168.1.47:3002/login`;
+      const subject = 'Welcome to Fraxioned';
+      const template = './registration';
+      const context = {
+        name: firstName,
+        username: email,
+        password: tempPassword,
+        link: loginLink,
+      };
+
+      await this.mailService.sendMail(email, subject, template, context);
+
+      this.logger.log(`Invite sent successfully to ${email}`);
+      return INVITE_USER_RESPONSES.INVITE_SUCCESS;
+    } catch (error) {
+      console.log(error);
     }
-
-    // Validate createdBy user
-    const createdByUser = await this.userRepository.findOne({
-      where: { id: createdBy },
-    });
-    if (!createdByUser) {
-      this.logger.error(`CreatedBy user not found with ID: ${createdBy}`);
-      return USER_RESPONSES.USER_NOT_FOUND(createdBy);
-    }
-
-    // Validate updatedBy user
-    const updatedByUser = await this.userRepository.findOne({
-      where: { id: updatedBy },
-    });
-    if (!updatedByUser) {
-      this.logger.error(`UpdatedBy user not found with ID: ${updatedBy}`);
-      return USER_RESPONSES.USER_NOT_FOUND(updatedBy);
-    }
-
-    // Validate role
-    const role = await this.roleRepository.findOne({ where: { id: roleId } });
-    if (!role) {
-      this.logger.error(`Role not found with ID: ${roleId}`);
-      return ROLE_RESPONSES.ROLE_NOT_FOUND(roleId);
-    }
-
-    // Validate property
-    const propertyId = userPropertyDetails.propertyID;
-    const userProperty = await this.propertyRepository.findOne({
-      where: { id: propertyId },
-    });
-    if (!userProperty) {
-      this.logger.error(`Property not found with ID: ${propertyId}`);
-      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
-    }
-
-    const tempPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
-
-    const user = this.userRepository.create({
-      firstName,
-      lastName,
-      addressLine1,
-      addressLine2,
-      state,
-      country,
-      city,
-      zipcode: zipcode,
-      password: hashedPassword,
-      isActive: true,
-      createdBy: createdByUser.id,
-      updatedBy: updatedByUser.id,
-      role: role,
-    });
-    await this.userRepository.save(user);
-
-    const userContacts = [
-      {
-        user,
-        contactType: 'email',
-        contactValue: email,
-        createdBy: createdByUser,
-        updatedBy: updatedByUser,
-      },
-      {
-        user,
-        contactType: 'phone',
-        contactValue: phoneNumber,
-        createdBy: createdByUser,
-        updatedBy: updatedByUser,
-      },
-    ];
-
-    for (const contact of userContacts) {
-      const userContact = this.userContactRepository.create(contact);
-      await this.userContactRepository.save(userContact);
-    }
-
-    const currentYear = new Date().getFullYear();
-    const userPropertyEntities = [
-      this.userPropertyRepository.create({
-        ...userPropertyDetails,
-        user,
-        year: currentYear,
-        createdBy: createdByUser,
-        updatedBy: updatedByUser,
-      }),
-      this.userPropertyRepository.create({
-        ...userPropertyDetails,
-        user,
-        year: currentYear + 1,
-        createdBy: createdByUser,
-        updatedBy: updatedByUser,
-      }),
-      this.userPropertyRepository.create({
-        ...userPropertyDetails,
-        user,
-        year: currentYear + 2,
-        createdBy: createdByUser,
-        updatedBy: updatedByUser,
-      }),
-    ];
-
-    for (const userPropertyEntity of userPropertyEntities) {
-      await this.userPropertyRepository.save(userPropertyEntity);
-    }
-
-    const loginLink = `http://192.168.1.47:3002/login`;
-
-    await this.mailService.sendMail(
-      email,
-      'You are invited!',
-      `Hello ${firstName},\n\nYou have been invited to our platform. Please use the following link to login: ${loginLink}\n\nUsername: ${email}\n\nYour temporary password is: ${tempPassword}\n\nBest regards,\nYour Team`,
-    );
-
-    this.logger.log(`Invite sent successfully to ${email}`);
-    return INVITE_USER_RESPONSES.INVITE_SUCCESS;
   }
 
   async login(loginDto: LoginDto): Promise<object> {
@@ -271,11 +279,16 @@ export class AuthenticationService {
 
     await this.userRepository.save(user);
 
-    const link = `http://192.168.1.47:3002/recover?resetToken=${user.resetToken}`;
-    const subject = 'Password Reset Request';
-    const text = `To reset your password, please click the following link: ${link}`;
+    const resetLink = `http://192.168.1.47:3002/recover?resetToken=${user.resetToken}`;
+    const email = userEmail.contactValue;
+    const subject = 'Password Reset';
+    const template = './reset-password';
+    const context = {
+      name: user.firstName,
+      link: resetLink,
+    };
 
-    await this.mailService.sendMail(userEmail.contactValue, subject, text);
+    await this.mailService.sendMail(email, subject, template, context);
 
     this.logger.log(
       `Password reset email sent successfully to ${forgotPasswordDto.email}`,
