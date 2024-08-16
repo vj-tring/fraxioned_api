@@ -6,7 +6,7 @@ import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
 import { AuthGuard } from 'commons/guards/auth.guard';
 import { Reflector } from '@nestjs/core';
 import { USER_DOCUMENT_RESPONSES } from 'src/main/commons/constants/response-constants/user-document.constant';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 import { UserDocument } from 'src/main/entities/user-documents.entity';
 import { Repository } from 'typeorm';
@@ -53,7 +53,7 @@ describe('UserDocumentController', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
 
@@ -69,7 +69,7 @@ describe('UserDocumentController', () => {
     it('should create a user document', async () => {
       const createUserDocumentDto: CreateUserDocumentDTO = {
         user: new User(),
-        property: new Properties(),
+        property: new Property(),
         documentName: '',
         documentURL: '',
         createdBy: new User(),
@@ -120,7 +120,7 @@ describe('UserDocumentController', () => {
     it('should update a user document', async () => {
       const updateUserDocumentDto: UpdateUserDocumentDTO = {
         user: new User(),
-        property: new Properties(),
+        property: new Property(),
         updatedBy: new User(),
       };
 

@@ -9,7 +9,7 @@ import { PropertySeasonHolidaysController } from 'src/main/controller/property-s
 import { PropertySeasonHolidaysService } from 'src/main/service/property-season-holidays.service';
 import { CreatePropertySeasonHolidayDto } from 'src/main/dto/requests/create-property-season-holiday.dto';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from 'src/main/commons/constants/response-constants/property-season-holidays.constants';
 import { UpdatePropertySeasonHolidayDto } from 'src/main/dto/requests/update-property-season-holiday.dto';
 
@@ -67,12 +67,14 @@ describe('PropertySeasonHolidaysController', () => {
       houseDescription: '',
       isExclusive: false,
       propertyShare: 0,
-      mapCoordinates: '',
       createdBy: new User(),
       updatedBy: new User(),
       createdAt: undefined,
       updatedAt: undefined,
-    },
+      latitude: 0,
+      longitude: 0,
+      isActive: false,
+    } as Property,
     holiday: {
       id: 1,
       name: '',
@@ -113,7 +115,7 @@ describe('PropertySeasonHolidaysController', () => {
     it('should create a property season holiday', async () => {
       const expectedPropertySeasonHoliday: PropertySeasonHolidays = {
         id: 1,
-        property: { id: 1 } as Properties,
+        property: { id: 1 } as Property,
         holiday: { id: 1 } as Holidays,
         isPeakSeason: false,
         createdBy: { id: 1 } as User,
@@ -196,7 +198,7 @@ describe('PropertySeasonHolidaysController', () => {
     it('should get property season holiday by ID', async () => {
       const mockPropertySeasonHoliday: PropertySeasonHolidays = {
         id: 1,
-        property: { id: 1 } as Properties,
+        property: { id: 1 } as Property,
         holiday: { id: 1 } as Holidays,
         isPeakSeason: false,
         createdBy: { id: 1 } as User,
@@ -255,12 +257,14 @@ describe('PropertySeasonHolidaysController', () => {
           houseDescription: '',
           isExclusive: false,
           propertyShare: 0,
-          mapCoordinates: '',
           createdBy: new User(),
           updatedBy: new User(),
           createdAt: undefined,
           updatedAt: undefined,
-        },
+          latitude: 0,
+          longitude: 0,
+          isActive: false,
+        } as Property,
         holiday: {
           id: 1,
           name: '',

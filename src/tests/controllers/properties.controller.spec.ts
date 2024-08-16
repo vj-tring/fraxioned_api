@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertiesController } from 'src/main/controller/properties.controller';
-import { CreatePropertiesDto } from 'src/main/dto/requests/create-properties.dto';
+import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
 import { Repository } from 'typeorm';
 import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
-import { NotFoundException } from '@nestjs/common';
-import { Properties } from 'src/main/entities/properties.entity';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { Property } from 'src/main/entities/property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { AuthenticationService } from 'src/main/service/authentication.service';
 import { User } from 'src/main/entities/user.entity';
@@ -17,6 +17,8 @@ import { MailService } from 'src/main/email/mail.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import * as bcrypt from 'bcrypt';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
+import { PropertyDetails } from 'src/main/entities/property-details.entity';
+import { PropertyWithDetailsResponseDto } from 'src/main/dto/responses/PropertyWithDetailsResponseDto.dto';
 
 describe('PropertiesController', () => {
   let controller: PropertiesController;
@@ -28,7 +30,11 @@ describe('PropertiesController', () => {
       providers: [
         PropertiesService,
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(PropertyDetails),
           useClass: Repository,
         },
         {
@@ -87,7 +93,7 @@ describe('PropertiesController', () => {
 
   describe('createProperties', () => {
     it('should return a created property', async () => {
-      const mockProperties = new Properties();
+      const mockProperties = new Property();
 
       const mockRole = {
         id: 1,
@@ -132,9 +138,8 @@ describe('PropertiesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
-      };
+      } as Property;
 
       jest.spyOn(service, 'createProperties').mockResolvedValue(mockProperties);
 
@@ -189,9 +194,8 @@ describe('PropertiesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         createdBy: mockUser,
-      };
+      } as Property;
 
       jest
         .spyOn(service, 'createProperties')
@@ -207,7 +211,7 @@ describe('PropertiesController', () => {
 
   describe('getAllProperties', () => {
     it('should return all the properties', async () => {
-      const mockProperties = [new Properties(), new Properties()];
+      const mockProperties = [new Property(), new Property()];
 
       jest.spyOn(service, 'getAllProperties').mockResolvedValue(mockProperties);
 
@@ -233,7 +237,7 @@ describe('PropertiesController', () => {
 
   describe('getPropertiesById', () => {
     it('should return a property of respective id', async () => {
-      const mockProperties = new Properties();
+      const mockProperties = new Property();
 
       const mockPropertyId = 1;
 
@@ -270,7 +274,7 @@ describe('PropertiesController', () => {
   });
   describe('updatePropertiesById', () => {
     it('should return a updated property of respective id', async () => {
-      const mockProperties = new Properties();
+      const mockProperties = new Property();
 
       const mockRole = {
         id: 1,
@@ -315,9 +319,8 @@ describe('PropertiesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         updatedBy: mockUser,
-      };
+      } as Property;
 
       const mockPropertyId = 1;
 
@@ -384,9 +387,8 @@ describe('PropertiesController', () => {
         houseDescription: 'test description',
         isExclusive: true,
         propertyShare: 1,
-        mapCoordinates: 'POINT (0 0)',
         updatedBy: mockUser,
-      };
+      } as Property;
 
       jest
         .spyOn(service, 'updatePropertiesById')
@@ -411,7 +413,7 @@ describe('PropertiesController', () => {
     it('should returen a deleted property of respective id', async () => {
       const mockPropertyId = 1;
 
-      const mockProperties = new Properties();
+      const mockProperties = new Property();
 
       jest
         .spyOn(service, 'deletePropertiesById')
@@ -442,6 +444,119 @@ describe('PropertiesController', () => {
       );
 
       expect(service.deletePropertiesById).toHaveBeenCalled();
+    });
+  });
+  describe('compareAndUpdateProperties', () => {
+    it('should compare and update properties', async () => {
+      const mockProperties = [new Property(), new Property()];
+
+      jest
+        .spyOn(service, 'compareAndUpdateProperties')
+        .mockResolvedValue(mockProperties);
+
+      const result = await controller.compareAndUpdateProperties();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(mockProperties);
+      expect(service.compareAndUpdateProperties).toHaveBeenCalled();
+    });
+
+    it('should throw HttpException when service throws an error', async () => {
+      jest
+        .spyOn(service, 'compareAndUpdateProperties')
+        .mockRejectedValue(new Error('Service Error'));
+
+      await expect(controller.compareAndUpdateProperties()).rejects.toThrow(
+        new HttpException(
+          'An error occurred while comparing and updating properties',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+
+      expect(service.compareAndUpdateProperties).toHaveBeenCalled();
+    });
+  });
+
+  describe('getPropertyWithDetailsById', () => {
+    it('should return property with details', async () => {
+      const mockPropertyWithDetails = {
+        propertyId: 1,
+        propertyDetailsId: 1,
+        createdBy: { id: 1 },
+        updatedBy: { id: 1 },
+      } as PropertyWithDetailsResponseDto;
+
+      jest
+        .spyOn(service, 'getPropertyWithDetailsById')
+        .mockResolvedValue(mockPropertyWithDetails);
+
+      const result = await controller.getPropertyWithDetailsById(1);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(mockPropertyWithDetails);
+      expect(service.getPropertyWithDetailsById).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw Error when service throws NotFoundException', async () => {
+      jest
+        .spyOn(service, 'getPropertyWithDetailsById')
+        .mockRejectedValue(new NotFoundException('Property not found'));
+
+      await expect(controller.getPropertyWithDetailsById(1)).rejects.toThrow(
+        new NotFoundException('Property not found'),
+      );
+
+      expect(service.getPropertyWithDetailsById).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw Error when service throws an error', async () => {
+      jest
+        .spyOn(service, 'getPropertyWithDetailsById')
+        .mockRejectedValue(new Error('Service Error'));
+
+      await expect(controller.getPropertyWithDetailsById(1)).rejects.toThrow(
+        new Error('Service Error'),
+      );
+
+      expect(service.getPropertyWithDetailsById).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('getAllPropertiesWithDetails', () => {
+    it('should return all properties with details', async () => {
+      const mockPropertiesWithDetails = [
+        {
+          propertyId: 1,
+          propertyDetailsId: 1,
+          createdBy: { id: 1 },
+          updatedBy: { id: 1 },
+        },
+      ] as PropertyWithDetailsResponseDto[];
+
+      jest
+        .spyOn(service, 'getAllPropertiesWithDetails')
+        .mockResolvedValue(mockPropertiesWithDetails);
+
+      const result = await controller.getAllPropertiesWithDetails();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(mockPropertiesWithDetails);
+      expect(service.getAllPropertiesWithDetails).toHaveBeenCalled();
+    });
+
+    it('should throw HttpException when service throws an error', async () => {
+      jest
+        .spyOn(service, 'getAllPropertiesWithDetails')
+        .mockRejectedValue(new Error('Service Error'));
+
+      await expect(controller.getAllPropertiesWithDetails()).rejects.toThrow(
+        new HttpException(
+          'An error occurred while fetching properties with details',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+
+      expect(service.getAllPropertiesWithDetails).toHaveBeenCalled();
     });
   });
 });

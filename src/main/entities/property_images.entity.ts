@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Properties } from './properties.entity';
+import { Property } from './property.entity';
 import { User } from './user.entity';
 
 @Entity('fxn_property_images')
@@ -18,11 +18,11 @@ export class PropertyImages {
   })
   id: number;
 
-  @ManyToOne(() => Properties, (properties) => properties.id)
+  @ManyToOne(() => Property, (properties) => properties.id)
   @JoinColumn({
     name: 'property_id',
   })
-  property: Properties;
+  property: Property;
 
   @Column({
     name: 'url',

@@ -8,7 +8,7 @@ import { User } from 'src/main/entities/user.entity';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
 import { Role } from 'src/main/entities/role.entity';
 import { PropertySeasonHolidaysService } from 'src/main/service/property-season-holidays.service';
-import { Properties } from 'src/main/entities/properties.entity';
+import { Property } from 'src/main/entities/property.entity';
 import { CreatePropertySeasonHolidayDto } from 'src/main/dto/requests/create-property-season-holiday.dto';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from 'src/main/commons/constants/response-constants/property-season-holidays.constants';
 import { UpdatePropertySeasonHolidayDto } from 'src/main/dto/requests/update-property-season-holiday.dto';
@@ -18,7 +18,7 @@ describe('PropertySeasonHolidaysService', () => {
   let propertySeasonHolidayRepository: Repository<PropertySeasonHolidays>;
   let usersRepository: Repository<User>;
   let holidayRepository: Repository<Holidays>;
-  let propertiesRepository: Repository<Properties>;
+  let propertiesRepository: Repository<Property>;
   let logger: LoggerService;
 
   beforeEach(async () => {
@@ -38,7 +38,7 @@ describe('PropertySeasonHolidaysService', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Properties),
+          provide: getRepositoryToken(Property),
           useClass: Repository,
         },
         {
@@ -61,8 +61,8 @@ describe('PropertySeasonHolidaysService', () => {
     holidayRepository = module.get<Repository<Holidays>>(
       getRepositoryToken(Holidays),
     );
-    propertiesRepository = module.get<Repository<Properties>>(
-      getRepositoryToken(Properties),
+    propertiesRepository = module.get<Repository<Property>>(
+      getRepositoryToken(Property),
     );
     logger = module.get<LoggerService>(LoggerService);
   });
@@ -83,12 +83,15 @@ describe('PropertySeasonHolidaysService', () => {
       houseDescription: '',
       isExclusive: false,
       propertyShare: 0,
-      mapCoordinates: '',
       createdBy: new User(),
       updatedBy: new User(),
       createdAt: undefined,
       updatedAt: undefined,
-    },
+      latitude: 0,
+      longitude: 0,
+      isActive: false,
+      displayOrder: 0,
+    } as Property,
     holiday: {
       id: 1,
       name: '',
@@ -137,12 +140,15 @@ describe('PropertySeasonHolidaysService', () => {
       houseDescription: '',
       isExclusive: false,
       propertyShare: 0,
-      mapCoordinates: '',
       createdBy: new User(),
       updatedBy: new User(),
       createdAt: undefined,
       updatedAt: undefined,
-    },
+      latitude: 0,
+      longitude: 0,
+      isActive: false,
+      displayOrder: 0,
+    } as Property,
     holiday: {
       id: 1,
       name: '',
@@ -181,7 +187,7 @@ describe('PropertySeasonHolidaysService', () => {
 
   describe('createPropertySeasonHoliday', () => {
     it('should create a property season holiday', async () => {
-      const property = { id: 1 } as Properties;
+      const property = { id: 1 } as Property;
       const user = { id: 1 } as User;
       const holiday = { id: 1 } as Holidays;
       const propertySeasonHoliday = { id: 1 } as PropertySeasonHolidays;
@@ -233,7 +239,7 @@ describe('PropertySeasonHolidaysService', () => {
     it('should return holiday not found if holiday does not exist', async () => {
       jest
         .spyOn(propertiesRepository, 'findOne')
-        .mockResolvedValue({ id: 1 } as Properties);
+        .mockResolvedValue({ id: 1 } as Property);
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValueOnce(null);
 
       const expectedResult =
@@ -254,7 +260,7 @@ describe('PropertySeasonHolidaysService', () => {
     it('should return not found if user does not exist', async () => {
       jest
         .spyOn(propertiesRepository, 'findOne')
-        .mockResolvedValue({ id: 1 } as Properties);
+        .mockResolvedValue({ id: 1 } as Property);
       jest
         .spyOn(holidayRepository, 'findOne')
         .mockResolvedValue({ id: 1 } as Holidays);
@@ -277,7 +283,7 @@ describe('PropertySeasonHolidaysService', () => {
     it('should return PROPERTY_SEASON_HOLIDAY_ALREADY_EXISTS if the mapping already exists', async () => {
       jest
         .spyOn(propertiesRepository, 'findOne')
-        .mockResolvedValue({ id: 1 } as Properties);
+        .mockResolvedValue({ id: 1 } as Property);
       jest
         .spyOn(holidayRepository, 'findOne')
         .mockResolvedValue({ id: 1 } as Holidays);
@@ -320,7 +326,7 @@ describe('PropertySeasonHolidaysService', () => {
       const propertySeasonHolidays: PropertySeasonHolidays[] = [
         {
           id: 1,
-          property: new Properties(),
+          property: new Property(),
           holiday: new Holidays(),
           isPeakSeason: false,
           createdBy: new User(),
@@ -330,7 +336,7 @@ describe('PropertySeasonHolidaysService', () => {
         },
         {
           id: 2,
-          property: new Properties(),
+          property: new Property(),
           holiday: new Holidays(),
           isPeakSeason: false,
           createdBy: new User(),
@@ -428,7 +434,7 @@ describe('PropertySeasonHolidaysService', () => {
     it('should update property season holiday details', async () => {
       const propertySeasonHoliday = { id: 1 } as PropertySeasonHolidays;
       const user = { id: 1 } as User;
-      const property = { id: 1 } as Properties;
+      const property = { id: 1 } as Property;
       const holiday = { id: 1 } as Holidays;
       const expectedResult =
         PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAY_UPDATED(
@@ -522,7 +528,7 @@ describe('PropertySeasonHolidaysService', () => {
         .mockResolvedValue({ id: 1 } as User);
       jest
         .spyOn(propertiesRepository, 'findOne')
-        .mockResolvedValue({ id: 1 } as Properties);
+        .mockResolvedValue({ id: 1 } as Property);
       jest.spyOn(holidayRepository, 'findOne').mockResolvedValue(null);
 
       const result = await service.updatePropertySeasonHoliday(
