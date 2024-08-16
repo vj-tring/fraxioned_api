@@ -9,7 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  // UseGuards,
+  UseGuards,
 } from '@nestjs/common';
 import { PropertyDetailsService } from '../service/property-details.service';
 import { CreatePropertyDetailsDto } from '../dto/requests/create-property-details.dto';
@@ -17,13 +17,13 @@ import { ApiTags } from '@nestjs/swagger';
 import { UpdatePropertyDetailsDto } from '../dto/requests/update-property-details.dto';
 import { CreatePropertyDetailsResponseDto } from '../dto/responses/create-property-details.dto';
 import { UpdatePropertyDetailsResponseDto } from '../dto/responses/update-property-details.dto';
-// import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
-// import { AuthGuard } from '../commons/guards/auth.guard';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { AuthGuard } from '../commons/guards/auth.guard';
 
 @ApiTags('Property Details')
 @Controller('v1/property-details')
-// @UseGuards(AuthGuard)
-// @ApiHeadersForAuth()
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class PropertyDetailsController {
   constructor(
     private readonly propertyDetailsService: PropertyDetailsService,
