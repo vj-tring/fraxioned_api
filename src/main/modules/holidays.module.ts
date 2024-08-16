@@ -8,14 +8,25 @@ import { Holidays } from 'entities/holidays.entity';
 import { User } from 'entities/user.entity';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 import { AuthenticationModule } from './authentication.module';
+import { PropertySeasonHolidaysModule } from './property-season-holidays.module';
+import { PropertyDetailsModule } from './property-details.module';
+import { PropertyDetails } from '../entities/property-details.entity';
+import { Property } from '../entities/property.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Holidays, User, PropertySeasonHolidays]),
+    TypeOrmModule.forFeature([
+      Holidays,
+      User,
+      PropertySeasonHolidays,
+      PropertyDetails,
+      Property,
+    ]),
     LoggerModule,
     UserModule,
-    PropertySeasonHolidays,
+    PropertySeasonHolidaysModule,
     AuthenticationModule,
+    PropertyDetailsModule,
   ],
   controllers: [HolidaysController],
   providers: [HolidaysService],

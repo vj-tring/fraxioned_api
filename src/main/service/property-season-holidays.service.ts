@@ -134,13 +134,32 @@ export class PropertySeasonHolidaysService {
     try {
       const propertySeasonHolidays =
         await this.propertySeasonHolidayRepository.find({
-          relations: ['property', 'holiday', 'createdBy', 'updatedBy'],
+          relations: [
+            'property',
+            'holiday',
+            'holiday.createdBy',
+            'holiday.updatedBy',
+            'createdBy',
+            'updatedBy',
+          ],
           select: {
             property: {
               id: true,
             },
             holiday: {
               id: true,
+              name: true,
+              year: true,
+              startDate: true,
+              endDate: true,
+              createdAt: true,
+              updatedAt: true,
+              createdBy: {
+                id: true,
+              },
+              updatedBy: {
+                id: true,
+              },
             },
             createdBy: {
               id: true,
@@ -221,6 +240,72 @@ export class PropertySeasonHolidaysService {
       );
       throw new HttpException(
         'An error occurred while retrieving the holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findHolidaysByPropertyId(id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays[];
+    statusCode: number;
+  }> {
+    try {
+      const propertyHolidays = await this.propertySeasonHolidayRepository.find({
+        relations: [
+          'property',
+          'holiday',
+          'holiday.createdBy',
+          'holiday.updatedBy',
+          'createdBy',
+          'updatedBy',
+        ],
+        select: {
+          property: {
+            id: true,
+          },
+          holiday: {
+            id: true,
+            name: true,
+            year: true,
+            startDate: true,
+            endDate: true,
+            createdAt: true,
+            updatedAt: true,
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
+          },
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+        where: { property: { id } },
+      });
+
+      if (propertyHolidays.length === 0) {
+        this.logger.error(`No holidays are available for this property`);
+        return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAYS_NOT_FOUND();
+      }
+      this.logger.log(
+        `Retrieved ${propertyHolidays.length} holidays successfully.`,
+      );
+      return PROPERTY_SEASON_HOLIDAY_RESPONSES.PROPERTY_SEASON_HOLIDAYS_FETCHED(
+        propertyHolidays,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property season holidays: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the holidays list for the selected property',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

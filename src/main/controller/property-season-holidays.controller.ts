@@ -8,20 +8,20 @@ import {
   Param,
   Patch,
   Delete,
-  UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import { PropertySeasonHolidaysService } from '../service/property-season-holidays.service';
 import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 import { UpdatePropertySeasonHolidayDto } from '../dto/requests/update-property-season-holiday.dto';
-import { AuthGuard } from '../commons/guards/auth.guard';
-import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+// import { AuthGuard } from '../commons/guards/auth.guard';
+// import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Property Season Holidays')
 @Controller('v1/property-season-holidays/property-season-holiday')
-@UseGuards(AuthGuard)
-@ApiHeadersForAuth()
+// @UseGuards(AuthGuard)
+// @ApiHeadersForAuth()
 export class PropertySeasonHolidaysController {
   constructor(
     private readonly propertySeasonHolidaysService: PropertySeasonHolidaysService,
@@ -85,6 +85,25 @@ export class PropertySeasonHolidaysController {
     } catch (error) {
       throw new HttpException(
         'An error occurred while retrieving the property season holiday',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('property/:id')
+  async getHolidaysByPropertyId(@Param('id') id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySeasonHolidays[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertySeasonHolidaysService.findHolidaysByPropertyId(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the holidays list for the selected property',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
