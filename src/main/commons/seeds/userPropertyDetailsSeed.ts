@@ -4,7 +4,9 @@ import { Role } from 'src/main/entities/role.entity';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import * as bcrypt from 'bcrypt';
 
-export const seedUser = async (dataSource: DataSource): Promise<void> => {
+export const seedUserPropertyDetails = async (
+  dataSource: DataSource,
+): Promise<void> => {
   const userRepository = dataSource.getRepository(User);
   const roleRepository = dataSource.getRepository(Role);
   const userContactDetailsRepository =

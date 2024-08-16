@@ -8,6 +8,7 @@ import { DataSource } from 'typeorm';
 import { seedUser } from './main/commons/seeds/userSeed';
 import { seedPropertyDetails } from './main/commons/seeds/propertDetailSeed';
 import { seedProperties } from './main/commons/seeds/propertySeed';
+import { seedUserPropertyDetails } from './main/commons/seeds/userPropertyDetailsSeed';
 
 export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -18,6 +19,7 @@ export async function bootstrap(): Promise<void> {
   await seedUser(dataSource);
   await seedProperties(dataSource);
   await seedPropertyDetails(dataSource);
+  await seedUserPropertyDetails(dataSource);
 
   // Global Pipes
   app.useGlobalPipes(
