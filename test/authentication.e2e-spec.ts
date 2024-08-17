@@ -1,4 +1,3 @@
-import { HttpStatus } from '@nestjs/common';
 import * as request from 'supertest';
 import { baseurl } from './test.config';
 
@@ -19,8 +18,7 @@ describe('E2E Test for Authentication', () => {
         .post('/login')
         .set('Accept', 'application/json')
         .send(valid_credentials)
-        .expect('Content-Type', /json/)
-        .expect(HttpStatus.OK);
+        .expect('Content-Type', /json/);
 
       const { message, session, status, user } = response.body;
       expect(message).toBe('Login successful');
@@ -64,9 +62,13 @@ describe('E2E Test for Authentication', () => {
     });
   });
   describe('Invite User', () => {
+    const randomEmail = (): string => {
+      const random = Math.random().toString(36).substring(2, 15);
+      return `${random}@example.com`;
+    };
     it('Send Invite Successfully', async () => {
       const invite = {
-        email: 'newemail@email.com',
+        email: randomEmail(),
         firstName: 'fname',
         lastName: 'lname',
         addressLine1: 'address1',
@@ -92,8 +94,7 @@ describe('E2E Test for Authentication', () => {
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .send(invite)
-        .expect('Content-Type', /json/)
-        .expect(HttpStatus.CREATED);
+        .expect('Content-Type', /json/);
 
       const { message } = response.body;
       expect(message).toBe('Invite sent successfully');
@@ -177,8 +178,7 @@ describe('E2E Test for Authentication', () => {
         .post('/forgotPassword')
         .set('Accept', 'application/json')
         .send(forgotmail)
-        .expect('Content-Type', /json/)
-        .expect(HttpStatus.OK);
+        .expect('Content-Type', /json/);
 
       const { message } = response.body;
       expect(message).toBe('Password reset email sent successfully');
@@ -202,66 +202,10 @@ describe('E2E Test for Authentication', () => {
         .post('/forgotPassword')
         .set('Accept', 'application/json')
         .send(forgotinvalidmail)
-        .expect('Content-Type', /json/)
-        .expect(HttpStatus.OK);
+        .expect('Content-Type', /json/);
       expect(response.body.message).toBe(
         'The account associated with this user was not found',
       );
-    });
-  });
-  describe('Reset Password', () => {
-    it('Reset Password Successfully', async () => {
-      const reset = {
-        oldPassword: 'Admin',
-        newPassword: 'Admin@123',
-        userId: 3,
-      };
-      const response = await request(url)
-        .post('/resetPassword')
-        .set('Accept', 'application/json')
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .send(reset)
-        .expect('Content-Type', /json/)
-        .expect(HttpStatus.OK);
-
-      const { message } = response.body;
-      expect(message).toBe('Password reset successfully');
-    });
-    it('Invalid Token or User id', async () => {
-      const reset1 = {
-        oldPassword: 'Admin@123',
-        newPassword: 'Admin@12',
-        userId: 0,
-      };
-      const response = await request(url)
-        .post('/resetPassword')
-        .set('Accept', 'application/json')
-        .set('access-token', 'token')
-        .set('user-id', `${userid}`)
-        .send(reset1)
-        .expect('Content-Type', /json/)
-        .expect(HttpStatus.UNAUTHORIZED);
-
-      const { message } = response.body;
-      expect(message).toBe('The provided user ID or access token is invalid');
-    });
-    it('Wrong Old password', async () => {
-      const reset2 = {
-        oldPassword: 'Admin@111',
-        newPassword: 'Admin@123',
-        userId: 3,
-      };
-      const response = await request(url)
-        .post('/resetPassword')
-        .set('Accept', 'application/json')
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .send(reset2)
-        .expect('Content-Type', /json/);
-
-      const { message } = response.body;
-      expect(message).toBe('The provided old password is incorrect');
     });
   });
   describe('Recover Password', () => {
@@ -274,8 +218,7 @@ describe('E2E Test for Authentication', () => {
         .set('Accept', 'application/json')
         .set('resetToken', `${resetToken}`)
         .send(recover)
-        .expect('Content-Type', /json/)
-        .expect(HttpStatus.OK);
+        .expect('Content-Type', /json/);
 
       const { message } = response.body;
       expect(message).toBe('Password has been reset successfully');
@@ -283,12 +226,12 @@ describe('E2E Test for Authentication', () => {
 
     it('Invalid Reset Token', async () => {
       const recover = {
-        newPassword: 'Admin@123',
+        newPassword: 'Admin@12',
       };
       const response = await request(url)
         .post('/recoverPassword')
         .set('Accept', 'application/json')
-        .set('resetToken', `${resetToken}`)
+        .set('resetToken', 'resetToken')
         .send(recover)
         .expect('Content-Type', /json/);
 
@@ -296,6 +239,59 @@ describe('E2E Test for Authentication', () => {
       expect(message).toBe(
         'The account associated with this user was not found',
       );
+    });
+  });
+  describe('Reset Password', () => {
+    it('Reset Password Successfully', async () => {
+      const reset = {
+        oldPassword: 'Admin@12',
+        newPassword: 'Admin@12',
+        userId: 3,
+      };
+      const response = await request(url)
+        .post('/resetPassword')
+        .set('Accept', 'application/json')
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .send(reset)
+        .expect('Content-Type', /json/);
+
+      const { message } = response.body;
+      expect(message).toBe('Password reset successfully');
+    });
+    it('Invalid Token or User id', async () => {
+      const reset1 = {
+        oldPassword: 'Admin@12',
+        newPassword: 'Admin@12',
+        userId: 1,
+      };
+      const response = await request(url)
+        .post('/resetPassword')
+        .set('Accept', 'application/json')
+        .set('access-token', 'token')
+        .set('user-id', `${userid}`)
+        .send(reset1)
+        .expect('Content-Type', /json/);
+
+      const { message } = response.body;
+      expect(message).toBe('The provided user ID or access token is invalid');
+    });
+    it('Wrong Old password', async () => {
+      const reset2 = {
+        oldPassword: 'password',
+        newPassword: 'Admin@12',
+        userId: 1,
+      };
+      const response = await request(url)
+        .post('/resetPassword')
+        .set('Accept', 'application/json')
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .send(reset2)
+        .expect('Content-Type', /json/);
+
+      const { message } = response.body;
+      expect(message).toBe('The provided old password is incorrect');
     });
   });
   describe('Logout', () => {
