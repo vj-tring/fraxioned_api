@@ -213,7 +213,7 @@ describe('E2E test for Holiday', () => {
         amenityType: 'Residental',
       };
       const response = await request(url)
-        .delete('/holiday/0')
+        .patch('/holiday/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
