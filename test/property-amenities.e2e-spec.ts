@@ -24,6 +24,8 @@ describe('E2E test for Property Codes', () => {
     const { session, user } = response.body;
     token = session.token;
     userid = user.id;
+  });
+  beforeAll(async () => {
     const credentials = {
       createdBy: { id: 1 },
       propertyName: 'Property Name',
@@ -48,7 +50,8 @@ describe('E2E test for Property Codes', () => {
       .set('access-token', `${token}`)
       .set('user-id', `${userid}`);
     propertyid = response1.body.id;
-
+  });
+  beforeAll(async () => {
     const amenityCredentials = {
       createdBy: { id: 1 },
       amenityName: 'Amenityname',
