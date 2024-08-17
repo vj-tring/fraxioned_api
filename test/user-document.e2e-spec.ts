@@ -4,8 +4,11 @@ import { baseurl } from './test.config';
 describe('E2E test for User Document', () => {
   const url = `${baseurl}/user-documents`;
   const url1 = `${baseurl}/authentication`;
+  const url2 = `${baseurl}/properties`;
   let token: string;
   let userid: number;
+  let id: number;
+  let propertyid: number;
 
   beforeAll(async () => {
     const valid_credentials = {
@@ -20,14 +23,47 @@ describe('E2E test for User Document', () => {
     token = session.token;
     userid = user.id;
   });
+  beforeAll(async () => {
+    const credentials = {
+      createdBy: { id: 1 },
+      propertyName: 'Property Name',
+      ownerRezPropId: 0,
+      address: 'Property Address',
+      city: 'Property City',
+      state: 'Property State',
+      country: 'Property Country',
+      zipcode: 0,
+      houseDescription: 'Property Description',
+      isExclusive: true,
+      propertyShare: 0,
+      latitude: 0,
+      longitude: 0,
+      isActive: true,
+      displayOrder: 0,
+    };
+    const response = await request(url2)
+      .post('/property')
+      .set('Accept', 'application/json')
+      .send(credentials)
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`);
+    propertyid = response.body.id;
+  });
+  afterAll(async () => {
+    await request(url2)
+      .delete(`/property/${propertyid}`)
+      .set('Accept', 'application/json')
+      .set('user-id', `${userid}`)
+      .set('access-token', `${token}`);
+  });
   describe('User Document Creation', () => {
     it('Successful user-document creation', async () => {
       const credentials = {
         user: { id: 1 },
-        property: { id: 1 },
+        property: { id: propertyid },
         createdBy: { id: 1 },
-        documentName: 'string',
-        documentURL: 'string',
+        documentName: 'Doc Name',
+        documentURL: 'Doc URL',
       };
       const response = await request(url)
         .post('/')
@@ -37,17 +73,36 @@ describe('E2E test for User Document', () => {
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(201);
-      const { message, status } = response.body;
+      const { message, status, document } = response.body;
       expect(message).toBe('Document created successfully');
       expect(status).toBe(201);
+      id = document.id;
+    });
+    it('Unuccessful user-document creation', async () => {
+      const credentials = {
+        user: { id: 1 },
+        property: { id: 10000 },
+        createdBy: { id: 1 },
+        documentName: 'Doc Name',
+        documentURL: 'Doc URL',
+      };
+      const response = await request(url)
+        .post('/')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      const { status } = response.body;
+      expect(status).toBe(404);
     });
     it('Invalid token or user id', async () => {
       const credentials = {
         user: { id: 1 },
-        property: { id: 1 },
+        property: { id: propertyid },
         createdBy: { id: 1 },
-        documentName: 'string',
-        documentURL: 'string',
+        documentName: 'Doc Name',
+        documentURL: 'Doc URL',
       };
       const response = await request(url)
         .post('/')
@@ -63,7 +118,7 @@ describe('E2E test for User Document', () => {
     });
   });
   describe('Fetch All User Documents', () => {
-    it('Successful user-document fetch', async () => {
+    it('Successful user-documents fetch', async () => {
       const response = await request(url)
         .get('/')
         .set('Accept', 'application/json')
@@ -89,7 +144,7 @@ describe('E2E test for User Document', () => {
   describe('Fetch Specific User Document', () => {
     it('Successful user-document fetch', async () => {
       const response = await request(url)
-        .get('/2')
+        .get(`/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -100,7 +155,7 @@ describe('E2E test for User Document', () => {
     });
     it('Unsuccessful user-document fetch', async () => {
       const response = await request(url)
-        .get('/1')
+        .get('/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -109,7 +164,7 @@ describe('E2E test for User Document', () => {
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/1')
+        .get('/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -123,13 +178,13 @@ describe('E2E test for User Document', () => {
     it('Successful user-document update', async () => {
       const credentials = {
         user: { id: 1 },
-        property: { id: 1 },
+        property: { id: propertyid },
         updatedBy: { id: 1 },
-        documentName: 'string',
-        documentURL: 'string',
+        documentName: 'Document Name',
+        documentURL: 'Document URL',
       };
       const response = await request(url)
-        .patch('/2')
+        .patch(`/${id}`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -143,13 +198,13 @@ describe('E2E test for User Document', () => {
     it('Unsuccessful user-document update', async () => {
       const credentials = {
         user: { id: 1 },
-        property: { id: 1 },
+        property: { id: propertyid },
         updatedBy: { id: 1 },
-        documentName: 'string',
-        documentURL: 'string',
+        documentName: 'Document Name',
+        documentURL: 'Document URL',
       };
       const response = await request(url)
-        .patch('/1')
+        .patch('/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -160,13 +215,13 @@ describe('E2E test for User Document', () => {
     it('Invalid token or user id', async () => {
       const credentials = {
         user: { id: 1 },
-        property: { id: 1 },
+        property: { id: propertyid },
         updatedBy: { id: 1 },
         documentName: 'string',
         documentURL: 'string',
       };
       const response = await request(url)
-        .patch('/1')
+        .patch('/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -178,9 +233,9 @@ describe('E2E test for User Document', () => {
     });
   });
   describe('Delete Specific User Document', () => {
-    it.skip('Successful user-document deletion', async () => {
+    it('Successful user-document deletion', async () => {
       const response = await request(url)
-        .delete('/5')
+        .delete(`/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -191,7 +246,7 @@ describe('E2E test for User Document', () => {
     });
     it('User Document not found for delete', async () => {
       const response = await request(url)
-        .delete('/1')
+        .delete('/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -200,7 +255,7 @@ describe('E2E test for User Document', () => {
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/1')
+        .delete('/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)

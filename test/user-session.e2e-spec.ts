@@ -6,6 +6,7 @@ describe('E2E test for User Session', () => {
   const url1 = `${baseurl}/authentication`;
   let token: string;
   let userid: number;
+  let id: number;
 
   beforeAll(async () => {
     const valid_credentials = {
@@ -23,10 +24,10 @@ describe('E2E test for User Session', () => {
   describe('User Session Creation', () => {
     it('Successful user-session creation', async () => {
       const credentials = {
-        user: { id: 3 },
-        createdBy: { id: 3 },
-        updatedBy: { id: 3 },
-        token: 'nekottoken',
+        user: { id: 1 },
+        createdBy: { id: 1 },
+        updatedBy: { id: 1 },
+        token: 'nekottokent764bzhxbhjgzgxvg',
         expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
@@ -37,16 +38,17 @@ describe('E2E test for User Session', () => {
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(201);
-      const { message, status } = response.body;
+      const { message, status, userSession } = response.body;
       expect(message).toBe('User session created successfully');
       expect(status).toBe(201);
+      id = userSession.id;
     });
     it('User Session already exist', async () => {
       const credentials = {
-        user: { id: 3 },
-        createdBy: { id: 3 },
-        updatedBy: { id: 3 },
-        token: 'string',
+        user: { id: 1 },
+        createdBy: { id: 1 },
+        updatedBy: { id: 1 },
+        token: 'nekottokent764bzhxbhjgzgxvg',
         expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
@@ -61,11 +63,11 @@ describe('E2E test for User Session', () => {
     });
     it('Invalid token or user id', async () => {
       const credentials = {
-        startDate: '2024-08-03',
-        endDate: '2024-08-03',
-        createdBy: { id: 3 },
-        name: 'holiday',
-        year: 2024,
+        user: { id: 1 },
+        createdBy: { id: 1 },
+        updatedBy: { id: 1 },
+        token: 'nekottokent764bzhxbhjgzgxvg',
+        expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
         .post('/user-session')
@@ -107,7 +109,7 @@ describe('E2E test for User Session', () => {
   describe('Fetch Specific User Session', () => {
     it('Successful user-session fetch', async () => {
       const response = await request(url)
-        .get('/user-session/1')
+        .get(`/user-session/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -117,7 +119,7 @@ describe('E2E test for User Session', () => {
     });
     it('Unsuccessful user-session fetch', async () => {
       const response = await request(url)
-        .get('/user-session/70')
+        .get('/user-session/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -128,7 +130,7 @@ describe('E2E test for User Session', () => {
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/user-session/1')
+        .get('/user-session/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -141,12 +143,12 @@ describe('E2E test for User Session', () => {
   describe('Update Specific User Session', () => {
     it('Successful user-session update', async () => {
       const credentials = {
-        updatedBy: { id: 3 },
-        token: 'update',
+        updatedBy: { id: 1 },
+        token: 'token78376token',
         expiresAt: '2024-08-13T08:53:30.195Z',
       };
       const response = await request(url)
-        .patch('/user-session/2')
+        .patch(`/user-session/${id}`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -159,12 +161,12 @@ describe('E2E test for User Session', () => {
     });
     it('Unsuccessful user-session update', async () => {
       const credentials = {
-        updatedBy: { id: 3 },
+        updatedBy: { id: 1 },
         token: 'update',
         expiresAt: '2024-08-13T08:53:30.195Z',
       };
       const response = await request(url)
-        .patch('/user-session/70')
+        .patch('/user-session/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -183,7 +185,7 @@ describe('E2E test for User Session', () => {
         expiresAt: '2024-08-13T08:53:04.646Z',
       };
       const response = await request(url)
-        .patch('/user-session/1')
+        .patch('/user-session/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -197,7 +199,7 @@ describe('E2E test for User Session', () => {
   describe('Delete Specific User Session', () => {
     it('Successful user-session deletion', async () => {
       const response = await request(url)
-        .delete('/user-session/103')
+        .delete(`/user-session/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -208,7 +210,7 @@ describe('E2E test for User Session', () => {
     });
     it('User Session not found for delete', async () => {
       const response = await request(url)
-        .delete('/user-session/70')
+        .delete('/user-session/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -219,7 +221,7 @@ describe('E2E test for User Session', () => {
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/user-session/4')
+        .delete('/user-session/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
