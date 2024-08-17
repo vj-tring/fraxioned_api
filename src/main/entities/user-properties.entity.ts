@@ -7,8 +7,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { Property } from './property.entity';
+import { User } from './user.entity';
 
 @Entity('fxn_user_properties')
 export class UserProperties {
