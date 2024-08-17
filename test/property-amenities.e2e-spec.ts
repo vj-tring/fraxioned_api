@@ -2,13 +2,15 @@ import * as request from 'supertest';
 import { baseurl } from './test.config';
 
 describe('E2E test for Property Codes', () => {
-  const url = `${baseurl}/property-codes`;
+  const url = `${baseurl}/property-amenities`;
   const url1 = `${baseurl}/authentication`;
   const url2 = `${baseurl}/properties`;
+  const url3 = `${baseurl}/amenities`;
   let token: string;
   let userid: number;
   let id: number;
   let propertyid: number;
+  let amenityid: number;
 
   beforeAll(async () => {
     const valid_credentials = {
@@ -22,8 +24,6 @@ describe('E2E test for Property Codes', () => {
     const { session, user } = response.body;
     token = session.token;
     userid = user.id;
-  });
-  beforeAll(async () => {
     const credentials = {
       createdBy: { id: 1 },
       propertyName: 'Property Name',
@@ -41,13 +41,27 @@ describe('E2E test for Property Codes', () => {
       isActive: true,
       displayOrder: 0,
     };
-    const response = await request(url2)
+    const response1 = await request(url2)
       .post('/property')
       .set('Accept', 'application/json')
       .send(credentials)
       .set('access-token', `${token}`)
       .set('user-id', `${userid}`);
-    propertyid = response.body.id;
+    propertyid = response1.body.id;
+
+    const amenityCredentials = {
+      createdBy: { id: 1 },
+      amenityName: 'Amenityname',
+      amenityDescription: 'Description',
+      amenityType: 'Type',
+    };
+    const amenityResponse = await request(url3)
+      .post('/amenity')
+      .set('Accept', 'application/json')
+      .send(amenityCredentials)
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`);
+    amenityid = amenityResponse.body.data.id;
   });
   afterAll(async () => {
     await request(url2)
@@ -56,52 +70,78 @@ describe('E2E test for Property Codes', () => {
       .set('user-id', `${userid}`)
       .set('access-token', `${token}`);
   });
-  describe('Property Codes Creation', () => {
-    it('Successful property codes creation', async () => {
+  afterAll(async () => {
+    await request(url)
+      .delete(`/property-amenity/${id}`)
+      .set('Accept', 'application/json')
+      .set('user-id', `${userid}`)
+      .set('access-token', `${token}`);
+  });
+  afterAll(async () => {
+    await request(url3)
+      .delete(`/amenity/${amenityid}`)
+      .set('Accept', 'application/json')
+      .set('user-id', `${userid}`)
+      .set('access-token', `${token}`);
+  });
+  describe('Property Amenity Creation', () => {
+    it('Successful property amenity creation', async () => {
       const credentials = {
-        property: propertyid,
-        propertyCodeType: 'string',
-        propertyCode: 'string',
-        createdBy: 1,
+        property: { id: propertyid },
+        amenity: { id: amenityid },
+        createdBy: { id: 1 },
       };
       const response = await request(url)
-        .post('/property-code')
-        .set('Accept', 'application/json')
-        .send(credentials)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/)
-        .expect(201);
-      expect(response.body).toHaveProperty('id');
-      id = response.body.id;
-    });
-    it('Unsuccessful property codes creation', async () => {
-      const credentials = {
-        property: 10000,
-        propertyCodeType: 'string',
-        propertyCode: 'string',
-        createdBy: 1,
-      };
-      const response = await request(url)
-        .post('/property-code')
+        .post('/property-amenity')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      const { statusCode, error } = response.body;
+      id = response.body.data.id;
+    });
+    it('Property amenity already exist', async () => {
+      const credentials = {
+        property: { id: propertyid },
+        amenity: { id: amenityid },
+        createdBy: { id: 1 },
+      };
+      const response = await request(url)
+        .post('/property-amenity')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      const { statusCode, success } = response.body;
+      expect(statusCode).toBe(409);
+      expect(success).toBe(false);
+    });
+    it('Unsuccessful property amenity creation', async () => {
+      const credentials = {
+        property: { id: 10000 },
+        amenity: { id: amenityid },
+        createdBy: { id: 1 },
+      };
+      const response = await request(url)
+        .post('/property-amenity')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      const { statusCode, success } = response.body;
       expect(statusCode).toBe(404);
-      expect(error).toBe('Not Found');
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
       const credentials = {
-        property: propertyid,
-        propertyCodeType: 'string',
-        propertyCode: 'string',
-        createdBy: 1,
+        property: { id: propertyid },
+        amenity: { id: amenityid },
+        createdBy: { id: 1 },
       };
       const response = await request(url)
-        .post('/property-code')
+        .post('/property-amenity')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
@@ -112,19 +152,22 @@ describe('E2E test for Property Codes', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch All Property Codes', () => {
-    it('Successful property codes fetch', async () => {
-      await request(url)
-        .get('/')
+  describe('Fetch All Property amenity', () => {
+    it('Successful property amenity fetch', async () => {
+      const response = await request(url)
+        .get('/property-amenity')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/)
         .expect(200);
+      const { message, success } = response.body;
+      expect(message).toBe('Property amenities retrieved successfully');
+      expect(success).toBe(true);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/')
+        .get('/property-amenity')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -134,31 +177,31 @@ describe('E2E test for Property Codes', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch Specific Property codes', () => {
-    it('Successful property codes fetch', async () => {
+  describe('Fetch Specific Property amenity', () => {
+    it('Successful property amenity fetch', async () => {
       const response = await request(url)
-        .get(`/property-code/${id}`)
+        .get(`/property-amenity/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/)
         .expect(200);
-      expect(response.body).toHaveProperty('id');
+      expect(response.body.success).toBe(true);
     });
-    it('Unsuccessful property code fetch', async () => {
+    it('Unsuccessful property amenity fetch', async () => {
       const response = await request(url)
-        .get('/property-code/0')
+        .get('/property-amenity/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      const { statusCode, error } = response.body;
+      const { statusCode, success } = response.body;
       expect(statusCode).toBe(404);
-      expect(error).toBe('Not Found');
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/property-code/0')
+        .get('/property-amenity/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -168,44 +211,43 @@ describe('E2E test for Property Codes', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Update Specific Property Codes', () => {
-    it('Successful property codes update', async () => {
+  describe('Update Specific Property amenity', () => {
+    it('Successful property amenity update', async () => {
       const credentials = {
-        property: propertyid,
-        propertyCodeType: 'CodeType',
-        propertyCode: 'Code',
-        updatedBy: 1,
+        property: { id: propertyid },
+        amenity: { id: amenityid },
+        updatedBy: { id: 1 },
       };
-      await request(url)
-        .patch(`/property-code/${id}`)
+      const response = await request(url)
+        .patch(`/property-amenity/${id}`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(200);
+      expect(response.body.success).toBe(true);
     });
-    it('Unsuccessful property codes update', async () => {
+    it('Unsuccessful property amenity update', async () => {
       const credentials = {
-        property: propertyid,
-        propertyCodeType: 'CodeType',
-        propertyCode: 'Code',
-        updatedBy: 1,
+        property: { id: propertyid },
+        amenity: { id: amenityid },
+        updatedBy: { id: 1 },
       };
       const response = await request(url)
-        .patch('/property-code/0')
+        .patch('/property-amenity/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      const { statusCode, error } = response.body;
+      const { statusCode, success } = response.body;
       expect(statusCode).toBe(404);
-      expect(error).toBe('Not Found');
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .patch('/property-code/0')
+        .patch('/property-amenity/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -215,30 +257,31 @@ describe('E2E test for Property Codes', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Delete Specific Property Codes', () => {
-    it('Successful property codes deletion', async () => {
-      await request(url)
-        .delete(`/property-code/${id}`)
+  describe('Delete Specific Property amenity', () => {
+    it('Successful property amenity deletion', async () => {
+      const response = await request(url)
+        .delete(`/property-amenity/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/)
         .expect(200);
+      expect(response.body.success).toBe(true);
     });
-    it('Property codes id not found for delete', async () => {
+    it('Property amenity id not found for delete', async () => {
       const response = await request(url)
-        .delete('/property-code/0')
+        .delete('/property-amenity/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      const { statusCode, error } = response.body;
+      const { statusCode, success } = response.body;
       expect(statusCode).toBe(404);
-      expect(error).toBe('Not Found');
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/property-code/0')
+        .delete('/property-amenity/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
