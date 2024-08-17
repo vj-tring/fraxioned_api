@@ -27,6 +27,11 @@ import { USER_RESPONSES } from '../commons/constants/response-constants/user.con
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 import { ROLE_RESPONSES } from '../commons/constants/response-constants/role.constant';
 import { MailService } from '../email/mail.service';
+import { authConstants } from '../commons/constants/authentication/authentication.constants';
+import {
+  mailSubject,
+  mailTemplates,
+} from '../commons/constants/email/mail.constants';
 
 @Injectable()
 export class AuthenticationService {
@@ -182,9 +187,9 @@ export class AuthenticationService {
         await this.userPropertyRepository.save(userPropertyEntity);
       }
 
-      const loginLink = `http://192.168.1.47:3002/login`;
-      const subject = 'Welcome to Fraxioned';
-      const template = './registration';
+      const loginLink = `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.login}`;
+      const subject = mailSubject.auth.registration;
+      const template = mailTemplates.auth.registration;
       const context = {
         name: firstName,
         username: email,
@@ -279,10 +284,10 @@ export class AuthenticationService {
 
     await this.userRepository.save(user);
 
-    const resetLink = `http://192.168.1.47:3002/recover?resetToken=${user.resetToken}`;
+    const resetLink = `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.forgotPassword}?resetToken=${user.resetToken}`;
     const email = userEmail.contactValue;
-    const subject = 'Password Reset';
-    const template = './reset-password';
+    const subject = mailSubject.auth.forgotPassword;
+    const template = mailTemplates.auth.forgotPassword;
     const context = {
       name: user.firstName,
       link: resetLink,
