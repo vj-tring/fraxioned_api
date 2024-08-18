@@ -9,8 +9,9 @@ import { Property } from 'src/main/entities/property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { User } from 'src/main/entities/user.entity';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
-import axios from 'axios';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
+import { UserProperties } from 'src/main/entities/user-properties.entity';
+import axios from 'axios';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -26,6 +27,10 @@ describe('PropertiesService', () => {
         PropertiesService,
         {
           provide: getRepositoryToken(Property),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserProperties),
           useClass: Repository,
         },
         {
@@ -893,6 +898,195 @@ describe('PropertiesService', () => {
       expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
         where: { property: { id: 1 } },
       });
+    });
+  });
+
+  describe('PropertiesService - getAllPropertiesWithDetailsByUser', () => {
+    let service: PropertiesService;
+    let userPropertiesRepository: Repository<UserProperties>;
+    let propertyDetailsRepository: Repository<PropertyDetails>;
+
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          PropertiesService,
+          {
+            provide: getRepositoryToken(Property),
+            useClass: Repository,
+          },
+          {
+            provide: getRepositoryToken(UserProperties),
+            useClass: Repository,
+          },
+          {
+            provide: getRepositoryToken(PropertyDetails),
+            useClass: Repository,
+          },
+        ],
+      }).compile();
+
+      service = module.get<PropertiesService>(PropertiesService);
+      userPropertiesRepository = module.get<Repository<UserProperties>>(
+        getRepositoryToken(UserProperties),
+      );
+      propertyDetailsRepository = module.get<Repository<PropertyDetails>>(
+        getRepositoryToken(PropertyDetails),
+      );
+    });
+
+    it('should return user properties with details when found', async () => {
+      const mockUserId = 1;
+      const mockUserProperties = [
+        {
+          id: 1,
+          property: { id: 1, propertyName: 'Property 1' },
+          user: { id: mockUserId },
+        } as UserProperties,
+        {
+          id: 2,
+          property: { id: 2, propertyName: 'Property 2' },
+          user: { id: mockUserId },
+        } as UserProperties,
+      ];
+      const mockPropertyDetails = {
+        id: 1,
+        noOfBathrooms: 2,
+        noOfBedrooms: 3,
+      } as PropertyDetails;
+
+      jest
+        .spyOn(userPropertiesRepository, 'find')
+        .mockResolvedValue(mockUserProperties);
+      jest
+        .spyOn(propertyDetailsRepository, 'findOne')
+        .mockResolvedValue(mockPropertyDetails);
+
+      const result =
+        await service.getAllPropertiesWithDetailsByUser(mockUserId);
+
+      expect(result).toEqual([
+        {
+          propertyId: 1,
+          propertyDetailsId: 1,
+          propertyName: 'Property 1',
+          noOfBathrooms: 2,
+          noOfBedrooms: 3,
+          userProperties: [{ id: 1, user: { id: mockUserId } }],
+        },
+        {
+          propertyId: 2,
+          propertyDetailsId: 1,
+          propertyName: 'Property 2',
+          noOfBathrooms: 2,
+          noOfBedrooms: 3,
+          userProperties: [{ id: 2, user: { id: mockUserId } }],
+        },
+      ]);
+      expect(userPropertiesRepository.find).toHaveBeenCalledWith({
+        where: { user: { id: mockUserId } },
+        relations: ['property'],
+      });
+      expect(propertyDetailsRepository.findOne).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return USER_PROPERTY_NOT_FOUND when no user properties are found', async () => {
+      const mockUserId = 1;
+      jest.spyOn(userPropertiesRepository, 'find').mockResolvedValue([]);
+
+      const result =
+        await service.getAllPropertiesWithDetailsByUser(mockUserId);
+
+      expect(result).toEqual(
+        USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(mockUserId),
+      );
+      expect(userPropertiesRepository.find).toHaveBeenCalledWith({
+        where: { user: { id: mockUserId } },
+        relations: ['property'],
+      });
+    });
+
+    it('should handle properties without details', async () => {
+      const mockUserId = 1;
+      const mockUserProperties = [
+        {
+          id: 1,
+          property: { id: 1, propertyName: 'Property 1' },
+          user: { id: mockUserId },
+        } as UserProperties,
+      ];
+
+      jest
+        .spyOn(userPropertiesRepository, 'find')
+        .mockResolvedValue(mockUserProperties);
+      jest.spyOn(propertyDetailsRepository, 'findOne').mockResolvedValue(null);
+
+      const result =
+        await service.getAllPropertiesWithDetailsByUser(mockUserId);
+
+      expect(result).toEqual([
+        {
+          propertyId: 1,
+          propertyDetailsId: null,
+          propertyName: 'Property 1',
+          userProperties: [{ id: 1, user: { id: mockUserId } }],
+        },
+      ]);
+    });
+
+    it('should handle multiple user properties for the same property', async () => {
+      const mockUserId = 1;
+      const mockUserProperties = [
+        {
+          id: 1,
+          property: { id: 1, propertyName: 'Property 1' },
+          user: { id: mockUserId },
+        } as UserProperties,
+        {
+          id: 2,
+          property: { id: 1, propertyName: 'Property 1' },
+          user: { id: mockUserId },
+        } as UserProperties,
+      ];
+      const mockPropertyDetails = {
+        id: 1,
+        noOfBathrooms: 2,
+        noOfBedrooms: 3,
+      } as PropertyDetails;
+
+      jest
+        .spyOn(userPropertiesRepository, 'find')
+        .mockResolvedValue(mockUserProperties);
+      jest
+        .spyOn(propertyDetailsRepository, 'findOne')
+        .mockResolvedValue(mockPropertyDetails);
+
+      const result =
+        await service.getAllPropertiesWithDetailsByUser(mockUserId);
+
+      expect(result).toEqual([
+        {
+          propertyId: 1,
+          propertyDetailsId: 1,
+          propertyName: 'Property 1',
+          noOfBathrooms: 2,
+          noOfBedrooms: 3,
+          userProperties: [
+            { id: 1, user: { id: mockUserId } },
+            { id: 2, user: { id: mockUserId } },
+          ],
+        },
+      ]);
+    });
+
+    it('should handle errors and throw them', async () => {
+      const mockUserId = 1;
+      const mockError = new Error('Database error');
+
+      jest.spyOn(userPropertiesRepository, 'find').mockRejectedValue(mockError);
+
+      await expect(
+        service.getAllPropertiesWithDetailsByUser(mockUserId),
+      ).rejects.toThrow(mockError);
     });
   });
 });

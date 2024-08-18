@@ -43,7 +43,19 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
       updatedAt: new Date(Date.now()),
     });
 
-    await userRepository.save([adminUser, ownerUser]);
+    const ownerUser2 = userRepository.create({
+      firstName: 'Owner',
+      lastName: 'User2',
+      password: await bcrypt.hash('Owner@123', 10),
+      role: ownerRole,
+      isActive: true,
+      createdBy: 1,
+      updatedBy: 1,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
+
+    await userRepository.save([adminUser, ownerUser, ownerUser2]);
 
     const adminEmail = userContactDetailsRepository.create({
       user: adminUser,
@@ -85,11 +97,33 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
       updatedAt: new Date(Date.now()),
     });
 
+    const ownerEmail2 = userContactDetailsRepository.create({
+      user: ownerUser2,
+      contactType: 'email',
+      contactValue: 'fraxowner1@gmail.com',
+      createdBy: ownerUser2,
+      updatedBy: ownerUser2,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
+
+    const ownerPhone2 = userContactDetailsRepository.create({
+      user: ownerUser2,
+      contactType: 'phone',
+      contactValue: '0987654321',
+      createdBy: ownerUser2,
+      updatedBy: ownerUser2,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
+
     await userContactDetailsRepository.save([
       adminEmail,
       adminPhone,
       ownerEmail,
       ownerPhone,
+      ownerEmail2,
+      ownerPhone2,
     ]);
   }
 };

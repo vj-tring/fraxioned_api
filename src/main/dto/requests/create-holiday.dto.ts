@@ -1,8 +1,9 @@
-import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Property } from '../../entities/property.entity';
+import { IsValidIdArray } from 'src/main/commons/guards/is-valid-id-list.decorator';
 
 export class CreateHolidayDto {
   @IsNotEmpty({ message: 'holiday name is required' })
@@ -17,14 +18,12 @@ export class CreateHolidayDto {
     example: '2024-08-03',
   })
   @IsNotEmpty({ message: 'start date is required' })
-  @Type(() => Date)
   startDate: Date;
 
   @ApiProperty({
     example: '2024-08-03',
   })
   @IsNotEmpty({ message: 'end date is required' })
-  @Type(() => Date)
   endDate: Date;
 
   @ApiProperty({
@@ -35,4 +34,12 @@ export class CreateHolidayDto {
     message: 'createdBy must be an object with a valid id property (id >= 1)',
   })
   createdBy: User;
+
+  @ApiProperty({
+    example: [{ id: 1 }, { id: 2 }],
+  })
+  @IsValidIdArray({
+    message: 'Each property in the array must have a valid id (id >= 1)',
+  })
+  properties: Property[];
 }

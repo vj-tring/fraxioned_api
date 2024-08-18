@@ -1,99 +1,63 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MailService } from 'src/main/service/mail.service';
-import { MailConfig } from 'src/main/config/mail.config';
-import * as nodemailer from 'nodemailer';
-import { LoggerService } from 'src/main/service/logger.service';
-import { ConfigService } from '@nestjs/config';
-import { Transporter } from 'nodemailer';
-
-jest.mock('nodemailer');
+import { MailerService } from '@nestjs-modules/mailer';
+import { MailService } from 'src/main/email/mail.service';
 
 describe('MailService', () => {
-  let service: MailService;
-  let transporterMock: jest.Mocked<Transporter>;
-  let loggerService: LoggerService;
-  let configService: ConfigService;
+  let mailService: MailService;
+  let mailerService: MailerService;
 
   beforeEach(async () => {
-    transporterMock = {
-      sendMail: jest.fn().mockResolvedValue({}),
-    } as unknown as jest.Mocked<Transporter>;
-    (nodemailer.createTransport as jest.Mock).mockReturnValue(transporterMock);
-
-    configService = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'MAIL_HOST':
-            return 'smtp.example.com';
-          case 'MAIL_PORT':
-            return 587;
-          case 'MAIL_USER':
-            return 'user@example.com';
-          case 'MAIL_PASSWORD':
-            return 'password';
-          case 'MAIL_FROM':
-            return 'from@example.com';
-          default:
-            return null;
-        }
-      }),
-    } as unknown as ConfigService;
-
-    const mailConfig = new MailConfig(configService);
+    const mailerServiceMock = {
+      sendMail: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MailService,
-        { provide: MailConfig, useValue: mailConfig },
-        {
-          provide: LoggerService,
-          useValue: {
-            log: jest.fn(),
-            error: jest.fn(),
-          },
-        },
+        { provide: MailerService, useValue: mailerServiceMock },
       ],
     }).compile();
 
-    service = module.get<MailService>(MailService);
-    loggerService = module.get<LoggerService>(LoggerService);
+    mailService = module.get<MailService>(MailService);
+    mailerService = module.get<MailerService>(MailerService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should send an email', async () => {
-    const to = 'to@example.com';
-    const subject = 'Test Subject';
-    const text = 'Test Text';
+  describe('sendMail', () => {
+    it('should call mailerService.sendMail with the correct parameters', async () => {
+      const email = 'test@example.com';
+      const subject = 'Test Subject';
+      const template = 'test-template';
+      const context = { key: 'value' };
 
-    await service.sendMail(to, subject, text);
+      await mailService.sendMail(email, subject, template, context);
 
-    expect(transporterMock.sendMail).toHaveBeenCalledWith({
-      from: 'from@example.com',
-      to,
-      subject,
-      text,
+      expect(mailerService.sendMail).toHaveBeenCalledWith({
+        to: email,
+        subject: subject,
+        template: template,
+        context: {
+          ...context,
+        },
+      });
     });
 
-    expect(loggerService.log).toHaveBeenCalledWith(
-      `Email sent to ${to} with subject: ${subject}`,
-    );
-    expect(loggerService.error).not.toHaveBeenCalled();
-  });
+    it('should handle errors thrown by mailerService.sendMail', async () => {
+      (mailerService.sendMail as jest.Mock).mockRejectedValue(
+        new Error('Send mail failed'),
+      );
 
-  it('should log an error if sending email fails', async () => {
-    const to = 'to@example.com';
-    const subject = 'Test Subject';
-    const text = 'Test Text';
+      const email = 'test@example.com';
+      const subject = 'Test Subject';
+      const template = 'test-template';
+      const context = { key: 'value' };
 
-    const error = new Error('Failed to send email');
-    transporterMock.sendMail.mockRejectedValue(error);
-
-    await expect(service.sendMail(to, subject, text)).rejects.toThrow(error);
-
-    expect(loggerService.error).toHaveBeenCalledWith(error.stack);
-    expect(loggerService.log).not.toHaveBeenCalled();
+      await expect(
+        mailService.sendMail(email, subject, template, context),
+      ).rejects.toThrow('Send mail failed');
+    });
   });
 });

@@ -12,6 +12,9 @@ import { ComparePropertiesDto } from '../dto/ownerRez-properties.dto';
 import axios from 'axios';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
 import { PropertyWithDetailsResponseDto } from '../dto/responses/PropertyWithDetailsResponseDto.dto';
+import { UserProperties } from '../entities/user-properties.entity';
+import { UserPropertyWithDetailsResponseDto } from '../dto/responses/userPropertyResponse.dto';
+import { PropertyWithDetails } from '../commons/interface/userPropertyDetails';
 
 @Injectable()
 export class PropertiesService {
@@ -20,6 +23,8 @@ export class PropertiesService {
     private propertiesRepository: Repository<Property>,
     @InjectRepository(PropertyDetails)
     private propertyDetailsRepository: Repository<PropertyDetails>,
+    @InjectRepository(UserProperties)
+    private userPropertiesRepository: Repository<UserProperties>,
   ) {}
 
   async createProperties(
@@ -287,6 +292,71 @@ export class PropertiesService {
       );
 
       return propertiesWithDetails;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAllPropertiesWithDetailsByUser(
+    userId: number,
+  ): Promise<UserPropertyWithDetailsResponseDto[] | object> {
+    try {
+      const userProperties = await this.userPropertiesRepository.find({
+        where: { user: { id: userId } },
+        relations: ['property'],
+      });
+
+      if (!userProperties.length) {
+        return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(userId);
+      }
+
+      const propertyMap = new Map<number, PropertyWithDetails>();
+
+      await Promise.all(
+        userProperties.map(async (userProperty) => {
+          const propertyDetails = await this.propertyDetailsRepository.findOne({
+            where: { property: { id: userProperty.property.id } },
+          });
+
+          const {
+            property: { id: propertyId, ...propertyWithoutId },
+            ...userPropertyWithoutId
+          } = userProperty;
+
+          if (!propertyDetails) {
+            if (!propertyMap.has(propertyId)) {
+              propertyMap.set(propertyId, {
+                propertyId,
+                propertyDetailsId: null,
+                ...propertyWithoutId,
+                userProperties: [],
+              });
+            }
+            propertyMap
+              .get(propertyId)!
+              .userProperties.push(userPropertyWithoutId);
+            return;
+          }
+
+          const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
+            propertyDetails;
+
+          if (!propertyMap.has(propertyId)) {
+            propertyMap.set(propertyId, {
+              propertyId,
+              propertyDetailsId,
+              ...propertyWithoutId,
+              ...propertyDetailsWithoutId,
+              userProperties: [],
+            });
+          }
+          propertyMap
+            .get(propertyId)!
+            .userProperties.push(userPropertyWithoutId);
+        }),
+      );
+
+      return Array.from(propertyMap.values());
     } catch (error) {
       throw error;
     }

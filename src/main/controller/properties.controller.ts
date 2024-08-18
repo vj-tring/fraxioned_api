@@ -122,4 +122,20 @@ export class PropertiesController {
       );
     }
   }
+
+  @Get(':userId/properties-with-details')
+  async getAllPropertiesWithDetailsByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<PropertyWithDetailsResponseDto[] | object> {
+    try {
+      return await this.propertiesService.getAllPropertiesWithDetailsByUser(
+        userId,
+      );
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while fetching properties with details for the user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
