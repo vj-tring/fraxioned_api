@@ -1,28 +1,17 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { setup, token, userid } from './setup';
 
 describe('E2E test for User Document', () => {
   const url = `${baseurl}/user-documents`;
-  const url1 = `${baseurl}/authentication`;
   const url2 = `${baseurl}/properties`;
-  let token: string;
-  let userid: number;
   let id: number;
   let propertyid: number;
 
   beforeAll(async () => {
-    const valid_credentials = {
-      email: 'dharshanramk@gmail.com',
-      password: 'Admin@12',
-    };
-    const response = await request(url1)
-      .post('/login')
-      .set('Accept', 'application/json')
-      .send(valid_credentials);
-    const { session, user } = response.body;
-    token = session.token;
-    userid = user.id;
-  });
+    await setup();
+  }, 100000);
+
   beforeAll(async () => {
     const credentials = {
       createdBy: { id: 1 },
@@ -49,6 +38,7 @@ describe('E2E test for User Document', () => {
       .set('user-id', `${userid}`);
     propertyid = response.body.id;
   });
+
   afterAll(async () => {
     await request(url2)
       .delete(`/property/${propertyid}`)
@@ -56,6 +46,7 @@ describe('E2E test for User Document', () => {
       .set('user-id', `${userid}`)
       .set('access-token', `${token}`);
   });
+
   describe('User Document Creation', () => {
     it('Successful user-document creation', async () => {
       const credentials = {

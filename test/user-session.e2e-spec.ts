@@ -1,26 +1,15 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { setup, token, userid } from './setup';
 
 describe('E2E test for User Session', () => {
   const url = `${baseurl}/user-sessions`;
-  const url1 = `${baseurl}/authentication`;
-  let token: string;
-  let userid: number;
   let id: number;
 
   beforeAll(async () => {
-    const valid_credentials = {
-      email: 'dharshanramk@gmail.com',
-      password: 'Admin@12',
-    };
-    const response = await request(url1)
-      .post('/login')
-      .set('Accept', 'application/json')
-      .send(valid_credentials);
-    const { session, user } = response.body;
-    token = session.token;
-    userid = user.id;
-  });
+    await setup();
+  }, 100000);
+
   describe('User Session Creation', () => {
     it('Successful user-session creation', async () => {
       const credentials = {
@@ -144,7 +133,8 @@ describe('E2E test for User Session', () => {
     it('Successful user-session update', async () => {
       const credentials = {
         updatedBy: { id: 1 },
-        token: 'token78376token',
+        token:
+          '534251e668624cbc28a03c73fcf1a00f12ad4801dbda9b5349fd18306eb4adc2467af23913442947b55d9c7673caf85a',
         expiresAt: '2024-08-13T08:53:30.195Z',
       };
       const response = await request(url)

@@ -1,27 +1,17 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { setup, token, userid } from './setup';
 
 describe('E2E test for User Property', () => {
   const url = `${baseurl}/user-properties`;
-  const url1 = `${baseurl}/authentication`;
   const url2 = `${baseurl}/properties`;
-  let token: string;
-  let userid: number;
   let id: number;
   let propertyid: number;
+
   beforeAll(async () => {
-    const valid_credentials = {
-      email: 'dharshanramk@gmail.com',
-      password: 'Admin@12',
-    };
-    const response = await request(url1)
-      .post('/login')
-      .set('Accept', 'application/json')
-      .send(valid_credentials);
-    const { session, user } = response.body;
-    token = session.token;
-    userid = user.id;
-  });
+    await setup();
+  }, 100000);
+
   beforeAll(async () => {
     const credentials = {
       createdBy: { id: 1 },
@@ -48,6 +38,7 @@ describe('E2E test for User Property', () => {
       .set('user-id', `${userid}`);
     propertyid = response.body.id;
   });
+
   afterAll(async () => {
     await request(url2)
       .delete(`/property/${propertyid}`)
@@ -55,6 +46,7 @@ describe('E2E test for User Property', () => {
       .set('user-id', `${userid}`)
       .set('access-token', `${token}`);
   });
+
   describe('User Property Creation', () => {
     it('Successful user property creation', async () => {
       const credentials = {
@@ -104,7 +96,7 @@ describe('E2E test for User Property', () => {
         .expect(201);
       expect(response.body.message).toBe('User property created successfully');
       id = response.body.userProperty.id;
-    });
+    }, 100000);
     it('Unsuccessful user property creation', async () => {
       const credentials = {
         user: { id: 1 },

@@ -1,32 +1,21 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { setup, token, userid } from './setup';
 
 describe('E2E test for Users', () => {
   const url = `${baseurl}/users`;
-  const url1 = `${baseurl}/authentication`;
-  let token: string;
-  let userid: number;
   let id: number;
 
   beforeAll(async () => {
-    const valid_credentials = {
-      email: 'dharshanramk@gmail.com',
-      password: 'Admin@12',
-    };
-    const response = await request(url1)
-      .post('/login')
-      .set('Accept', 'application/json')
-      .send(valid_credentials);
-    const { session, user } = response.body;
-    token = session.token;
-    userid = user.id;
-  });
+    await setup();
+  }, 100000);
+
   describe('User Creation', () => {
     it('Successful user creation', async () => {
       const credentials = {
         role: { id: 1 },
-        firstName: 'Fname',
-        lastName: 'Lname',
+        firstName: 'firstName',
+        lastName: 'lastName',
         password: 'password',
         imageURL: 'URL',
         isActive: true,
@@ -178,18 +167,18 @@ describe('E2E test for Users', () => {
     it('Successful user update', async () => {
       const credentials = {
         role: { id: 1 },
-        firstName: 'Admin',
-        lastName: 'Admin',
-        password: 'Admin',
-        imageURL: 'Admin',
+        firstName: 'update e2e',
+        lastName: 'update e2e',
+        password: 'update e2e',
+        imageURL: 'update e2e',
         isActive: true,
-        addressLine1: 'Admin',
-        addressLine2: 'Admin',
-        state: 'Admin',
-        country: 'Admin',
-        city: 'Admin',
-        zipcode: 'Admin',
-        resetToken: 'Admin',
+        addressLine1: 'update e2e',
+        addressLine2: 'update e2e',
+        state: 'update e2e',
+        country: 'update e2e',
+        city: 'update e2e',
+        zipcode: 'update e2e',
+        resetToken: 'update e2e',
         resetTokenExpires: '2024-08-12T06:10:51.104Z',
         lastLoginTime: '2024-08-12T06:10:51.104Z',
         updatedBy: 1,

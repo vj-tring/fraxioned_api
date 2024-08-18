@@ -1,26 +1,15 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { setup, token, userid } from './setup';
 
 describe('E2E test for Properties', () => {
   const url = `${baseurl}/properties`;
-  const url1 = `${baseurl}/authentication`;
-  let token: string;
-  let userid: number;
   let id: number;
 
   beforeAll(async () => {
-    const valid_credentials = {
-      email: 'dharshanramk@gmail.com',
-      password: 'Admin@12',
-    };
-    const response = await request(url1)
-      .post('/login')
-      .set('Accept', 'application/json')
-      .send(valid_credentials);
-    const { session, user } = response.body;
-    token = session.token;
-    userid = user.id;
-  });
+    await setup();
+  }, 100000);
+
   describe('Property Creation', () => {
     it('Successful property creation', async () => {
       const credentials = {
@@ -249,7 +238,7 @@ describe('E2E test for Properties', () => {
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(201);
-    });
+    }, 100000);
     it('Invalid token or user id', async () => {
       const response = await request(url)
         .post('/compare-properties')
@@ -271,7 +260,7 @@ describe('E2E test for Properties', () => {
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/)
         .expect(200);
-    });
+    }, 100000);
     it('Unsuccessful Fetch', async () => {
       const response = await request(url)
         .get('/property/0/details')

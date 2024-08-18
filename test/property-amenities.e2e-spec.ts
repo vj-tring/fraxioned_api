@@ -1,30 +1,19 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { setup, token, userid } from './setup';
 
 describe('E2E test for Property Amenities', () => {
   const url = `${baseurl}/property-amenities`;
-  const url1 = `${baseurl}/authentication`;
   const url2 = `${baseurl}/properties`;
   const url3 = `${baseurl}/amenities`;
-  let token: string;
-  let userid: number;
   let id: number;
   let propertyid: number;
   let amenityid: number;
 
   beforeAll(async () => {
-    const valid_credentials = {
-      email: 'dharshanramk@gmail.com',
-      password: 'Admin@12',
-    };
-    const response = await request(url1)
-      .post('/login')
-      .set('Accept', 'application/json')
-      .send(valid_credentials);
-    const { session, user } = response.body;
-    token = session.token;
-    userid = user.id;
-  });
+    await setup();
+  }, 100000);
+
   beforeAll(async () => {
     const credentials = {
       createdBy: { id: 1 },
@@ -51,6 +40,7 @@ describe('E2E test for Property Amenities', () => {
       .set('user-id', `${userid}`);
     propertyid = response.body.id;
   });
+
   beforeAll(async () => {
     const amenityCredentials = {
       createdBy: { id: 1 },
@@ -66,6 +56,7 @@ describe('E2E test for Property Amenities', () => {
       .set('user-id', `${userid}`);
     amenityid = response.body.data.id;
   });
+
   afterAll(async () => {
     await request(url2)
       .delete(`/property/${propertyid}`)
@@ -73,6 +64,7 @@ describe('E2E test for Property Amenities', () => {
       .set('user-id', `${userid}`)
       .set('access-token', `${token}`);
   });
+
   afterAll(async () => {
     await request(url)
       .delete(`/property-amenity/${id}`)
@@ -80,6 +72,7 @@ describe('E2E test for Property Amenities', () => {
       .set('user-id', `${userid}`)
       .set('access-token', `${token}`);
   });
+
   afterAll(async () => {
     await request(url3)
       .delete(`/amenity/${amenityid}`)
@@ -87,6 +80,7 @@ describe('E2E test for Property Amenities', () => {
       .set('user-id', `${userid}`)
       .set('access-token', `${token}`);
   });
+
   describe('Property Amenity Creation', () => {
     it('Successful property amenity creation', async () => {
       const credentials = {

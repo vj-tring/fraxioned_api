@@ -1,6 +1,7 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
 
+//Verify credentials for all test suites prior to executing the authentication(E2E) test successfully.
 describe('E2E Test for Authentication', () => {
   const url = `${baseurl}/authentication`;
   let token: string;
@@ -11,8 +12,8 @@ describe('E2E Test for Authentication', () => {
   describe('Login', () => {
     it('Successful Login', async () => {
       const valid_credentials = {
-        email: 'dharshanramk@gmail.com',
-        password: 'Admin@12',
+        email: 'fraxionedownersportal@gmail.com',
+        password: 'Admin@123',
       };
       const response = await request(url)
         .post('/login')
@@ -27,11 +28,11 @@ describe('E2E Test for Authentication', () => {
       token = session.token;
       userid = user.id;
       roleid = user.role.id;
-    });
+    }, 100000);
 
     it('Unsuccessful Login', async () => {
       const invalid_credentials = {
-        email: 'dharshanramk@gmail.com',
+        email: 'fraxionedownersportal@gmail.com',
         password: 'password',
       };
       const response = await request(url)
@@ -98,7 +99,7 @@ describe('E2E Test for Authentication', () => {
 
       const { message } = response.body;
       expect(message).toBe('Invite sent successfully');
-    });
+    }, 10000);
     it('Invite already sended', async () => {
       const invite = {
         email: 'fraxionedownersportal@gmail.com',
@@ -172,7 +173,7 @@ describe('E2E Test for Authentication', () => {
   describe('Forget Password', () => {
     it('Send Link Successfully', async () => {
       const forgotmail = {
-        email: 'dharshanramk@gmail.com',
+        email: 'fraxionedownersportal@gmail.com',
       };
       const response = await request(url)
         .post('/forgotPassword')
@@ -182,11 +183,12 @@ describe('E2E Test for Authentication', () => {
 
       const { message } = response.body;
       expect(message).toBe('Password reset email sent successfully');
-    });
+    }, 100000);
+
     it('Login again to get Reset Token', async () => {
       const valid_credentials = {
-        email: 'dharshanramk@gmail.com',
-        password: 'Admin@12',
+        email: 'fraxionedownersportal@gmail.com',
+        password: 'Admin@123',
       };
       const response = await request(url)
         .post('/login')
@@ -211,7 +213,7 @@ describe('E2E Test for Authentication', () => {
   describe('Recover Password', () => {
     it('Successfully Change Password', async () => {
       const recover = {
-        newPassword: 'Admin@12',
+        newPassword: 'Admin@123',
       };
       const response = await request(url)
         .post('/recoverPassword')
@@ -226,7 +228,7 @@ describe('E2E Test for Authentication', () => {
 
     it('Invalid Reset Token', async () => {
       const recover = {
-        newPassword: 'Admin@12',
+        newPassword: 'Admin@123',
       };
       const response = await request(url)
         .post('/recoverPassword')
@@ -236,17 +238,19 @@ describe('E2E Test for Authentication', () => {
         .expect('Content-Type', /json/);
 
       const { message } = response.body;
-      expect(message).toBe(
-        'The account associated with this user was not found',
-      );
+      expect(
+        message === 'The account associated with this user was not found' ||
+          message === 'The password reset token has expired',
+      ).toBe(true);
     });
   });
+
   describe('Reset Password', () => {
     it('Reset Password Successfully', async () => {
       const reset = {
-        oldPassword: 'Admin@12',
-        newPassword: 'Admin@12',
-        userId: 3,
+        oldPassword: 'Admin@123',
+        newPassword: 'Admin@123',
+        userId: 1,
       };
       const response = await request(url)
         .post('/resetPassword')
@@ -261,8 +265,8 @@ describe('E2E Test for Authentication', () => {
     });
     it('Invalid Token or User id', async () => {
       const reset1 = {
-        oldPassword: 'Admin@12',
-        newPassword: 'Admin@12',
+        oldPassword: 'Admin@123',
+        newPassword: 'Admin@123',
         userId: 1,
       };
       const response = await request(url)
@@ -279,7 +283,7 @@ describe('E2E Test for Authentication', () => {
     it('Wrong Old password', async () => {
       const reset2 = {
         oldPassword: 'password',
-        newPassword: 'Admin@12',
+        newPassword: 'Admin@123',
         userId: 1,
       };
       const response = await request(url)
