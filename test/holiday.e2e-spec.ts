@@ -5,6 +5,7 @@ import { setup, token, userid } from './setup';
 describe('E2E test for Holiday', () => {
   const url = `${baseurl}/holidays`;
   let id: number;
+  let beforeall_id: number;
 
   beforeAll(async () => {
     await setup();
@@ -18,18 +19,29 @@ describe('E2E test for Holiday', () => {
       name: 'Holiday',
       year: 2024,
     };
-    await request(url)
+    const response = await request(url)
       .post('/holiday')
       .set('Accept', 'application/json')
       .send(credentials)
       .set('access-token', `${token}`)
       .set('user-id', `${userid}`);
+    beforeall_id = response.body.data?.id;
   });
+
+  afterAll(async () => {
+    await request(url)
+      .delete(`/holiday/${beforeall_id}`)
+      .set('Accept', 'application/json')
+      .set('user-id', `${userid}`)
+      .set('access-token', `${token}`);
+  });
+
   const generateYear = (): number => {
     const min = 2000;
     const max = 2100;
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
+
   describe('Holiday Creation', () => {
     it('Successful holiday creation', async () => {
       const year = generateYear();
