@@ -2,11 +2,13 @@ import * as request from 'supertest';
 import { baseurl } from './test.config';
 import { setup, token, userid } from './setup';
 
-describe('E2E test for User Document', () => {
-  const url = `${baseurl}/user-documents`;
+describe('E2E test for Property Season holiday', () => {
+  const url = `${baseurl}/property-season-holidays`;
   const url2 = `${baseurl}/properties`;
+  const url3 = `${baseurl}/holidays`;
   let id: number;
   let propertyid: number;
+  let holidayid: number;
 
   beforeAll(async () => {
     await setup();
@@ -39,6 +41,29 @@ describe('E2E test for User Document', () => {
     propertyid = response.body.id;
   });
 
+  beforeAll(async () => {
+    const credentials = {
+      startDate: '2025-08-03',
+      endDate: '2025-08-03',
+      createdBy: { id: 1 },
+      properties: [],
+      name: 'Holiday',
+      year: 2026,
+    };
+    const response = await request(url3)
+      .post('/holiday')
+      .set('Accept', 'application/json')
+      .send(credentials)
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`)
+      .expect('Content-Type', /json/)
+      .expect(201);
+    const { message, success, data } = response.body;
+    expect(message).toBe('Holiday created successfully');
+    expect(success).toBe(true);
+    holidayid = data.id;
+  });
+
   afterAll(async () => {
     await request(url2)
       .delete(`/property/${propertyid}`)
@@ -47,82 +72,105 @@ describe('E2E test for User Document', () => {
       .set('access-token', `${token}`);
   });
 
-  describe('User Document Creation', () => {
-    it('Successful user-document creation', async () => {
+  afterAll(async () => {
+    await request(url3)
+      .delete(`/holiday/${holidayid}`)
+      .set('Accept', 'application/json')
+      .set('user-id', `${userid}`)
+      .set('access-token', `${token}`);
+  });
+
+  describe('Property Season Holiday Creation', () => {
+    it('Successful property season holiday creation', async () => {
       const credentials = {
-        user: { id: 1 },
         property: { id: propertyid },
+        holiday: { id: holidayid },
         createdBy: { id: 1 },
-        documentName: 'Doc Name',
-        documentURL: 'Doc URL',
+        isPeakSeason: true,
       };
       const response = await request(url)
-        .post('/')
+        .post('/property-season-holiday')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/)
-        .expect(201);
-      const { message, status, document } = response.body;
-      expect(message).toBe('Document created successfully');
-      expect(status).toBe(201);
-      id = document.id;
+        .expect('Content-Type', /json/);
+      const { message, success } = response.body;
+      expect(message).toBe('Property Season Holiday created successfully');
+      expect(success).toBe(true);
+      id = response.body.data.id;
     });
-    it('Unuccessful user-document creation', async () => {
+    it('Property season holiday already exist', async () => {
       const credentials = {
-        user: { id: 1 },
+        property: { id: propertyid },
+        holiday: { id: holidayid },
+        createdBy: { id: 1 },
+        isPeakSeason: true,
+      };
+      const response = await request(url)
+        .post('/property-season-holiday')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      const { statusCode, success } = response.body;
+      expect(statusCode).toBe(409);
+      expect(success).toBe(false);
+    });
+    it('Unsuccessful property season holiday creation', async () => {
+      const credentials = {
         property: { id: 10000 },
+        holiday: { id: holidayid },
         createdBy: { id: 1 },
-        documentName: 'Doc Name',
-        documentURL: 'Doc URL',
+        isPeakSeason: true,
       };
       const response = await request(url)
-        .post('/')
+        .post('/property-season-holiday')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      const { status } = response.body;
-      expect(status).toBe(404);
+      const { statusCode, success } = response.body;
+      expect(statusCode).toBe(404);
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
       const credentials = {
-        user: { id: 1 },
         property: { id: propertyid },
+        holiday: { id: holidayid },
         createdBy: { id: 1 },
-        documentName: 'Doc Name',
-        documentURL: 'Doc URL',
+        isPeakSeason: true,
       };
       const response = await request(url)
-        .post('/')
+        .post('/property-season-holiday')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(401);
-
       const { message } = response.body;
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch All User Documents', () => {
-    it('Successful user-documents fetch', async () => {
+  describe('Fetch All Property season holiday', () => {
+    it('Successful property season holiday fetch', async () => {
       const response = await request(url)
-        .get('/')
+        .get('/property-season-holiday')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/);
-      const { message, status } = response.body;
-      expect(message).toBe('Documents fetched successfully');
-      expect(status).toBe(200);
+        .expect('Content-Type', /json/)
+        .expect(200);
+      const { message, success } = response.body;
+      expect(message).toBe('Property season holidays retrieved successfully');
+      expect(success).toBe(true);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/')
+        .get('/property-season-holiday')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -132,30 +180,31 @@ describe('E2E test for User Document', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch Specific User Document', () => {
-    it('Successful user-document fetch', async () => {
+  describe('Fetch Specific Property season holiday', () => {
+    it('Successful property season holiday fetch', async () => {
       const response = await request(url)
-        .get(`/${id}`)
+        .get(`/property-season-holiday/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/);
-      const { message, status } = response.body;
-      expect(message).toBe('Document fetched successfully');
-      expect(status).toBe(200);
+        .expect('Content-Type', /json/)
+        .expect(200);
+      expect(response.body.success).toBe(true);
     });
-    it('Unsuccessful user-document fetch', async () => {
+    it('Unsuccessful property season holiday fetch', async () => {
       const response = await request(url)
-        .get('/0')
+        .get('/property-season-holiday/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      expect(response.body.status).toBe(404);
+      const { statusCode, success } = response.body;
+      expect(statusCode).toBe(404);
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/0')
+        .get('/property-season-holiday/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -165,56 +214,46 @@ describe('E2E test for User Document', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Update Specific User Document', () => {
-    it('Successful user-document update', async () => {
+  describe('Update Specific Property season holiday', () => {
+    it('Successful property season holiday update', async () => {
       const credentials = {
-        user: { id: 1 },
         property: { id: propertyid },
+        holiday: { id: holidayid },
         updatedBy: { id: 1 },
-        documentName: 'Document Name',
-        documentURL: 'Document URL',
+        isPeakSeason: true,
       };
       const response = await request(url)
-        .patch(`/${id}`)
+        .patch(`/property-season-holiday/${id}`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-
-      const { message, status } = response.body;
-      expect(message).toBe('Document updated successfully');
-      expect(status).toBe(200);
+        .expect('Content-Type', /json/)
+        .expect(200);
+      expect(response.body.success).toBe(true);
     });
-    it('Unsuccessful user-document update', async () => {
+    it('Unsuccessful property season holiday update', async () => {
       const credentials = {
-        user: { id: 1 },
         property: { id: propertyid },
+        holiday: { id: holidayid },
         updatedBy: { id: 1 },
-        documentName: 'Document Name',
-        documentURL: 'Document URL',
+        isPeakSeason: true,
       };
       const response = await request(url)
-        .patch('/0')
+        .patch('/property-season-holiday/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      expect(response.body.status).toBe(404);
+      const { statusCode, success } = response.body;
+      expect(statusCode).toBe(404);
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
-      const credentials = {
-        user: { id: 1 },
-        property: { id: propertyid },
-        updatedBy: { id: 1 },
-        documentName: 'string',
-        documentURL: 'string',
-      };
       const response = await request(url)
-        .patch('/0')
+        .patch('/property-season-holiday/0')
         .set('Accept', 'application/json')
-        .send(credentials)
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
@@ -223,30 +262,31 @@ describe('E2E test for User Document', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Delete Specific User Document', () => {
-    it('Successful user-document deletion', async () => {
+  describe('Delete Specific Property season holiday', () => {
+    it('Successful property season holiday deletion', async () => {
       const response = await request(url)
-        .delete(`/${id}`)
+        .delete(`/property-season-holiday/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/);
-      const { message, status } = response.body;
-      expect(message).toBe('Document deleted successfully');
-      expect(status).toBe(404);
+        .expect('Content-Type', /json/)
+        .expect(200);
+      expect(response.body.success).toBe(true);
     });
-    it('User Document not found for delete', async () => {
+    it('Property season holiday id not found for delete', async () => {
       const response = await request(url)
-        .delete('/0')
+        .delete('/property-season-holiday/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      expect(response.body.status).toBe(404);
+      const { statusCode, success } = response.body;
+      expect(statusCode).toBe(404);
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/0')
+        .delete('/property-season-holiday/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
