@@ -1,32 +1,22 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { setup, token, userid } from './setup';
 
 describe('E2E test for Amenities', () => {
   const url = `${baseurl}/amenities`;
-  const url1 = `${baseurl}/authentication`;
-  let token: string;
-  let userid: number;
+  let id: number;
 
   beforeAll(async () => {
-    const valid_credentials = {
-      email: 'dharshanramk@gmail.com',
-      password: 'Admin@12',
-    };
-    const response = await request(url1)
-      .post('/login')
-      .set('Accept', 'application/json')
-      .send(valid_credentials);
-    const { session, user } = response.body;
-    token = session.token;
-    userid = user.id;
-  });
+    await setup();
+  }, 100000);
+
   describe('Amenity Creation', () => {
     it('Successful amenity creation', async () => {
       const credentials = {
-        createdBy: { id: 3 },
-        amenityName: 'AmenityName',
+        createdBy: { id: 1 },
+        amenityName: 'Amenity',
         amenityDescription: 'Description',
-        amenityType: 'Residential',
+        amenityType: 'Facility',
       };
       const response = await request(url)
         .post('/amenity')
@@ -37,13 +27,14 @@ describe('E2E test for Amenities', () => {
         .expect('Content-Type', /json/)
         .expect(201);
       expect(response.body.success).toBe(true);
+      id = response.body.data.id;
     });
     it('Amenity already exist', async () => {
       const credentials = {
-        createdBy: { id: 3 },
-        amenityName: 'amenity',
+        createdBy: { id: 1 },
+        amenityName: 'Amenity',
         amenityDescription: 'Description',
-        amenityType: 'Residential',
+        amenityType: 'Facility',
       };
       const response = await request(url)
         .post('/amenity')
@@ -56,10 +47,10 @@ describe('E2E test for Amenities', () => {
     });
     it('Invalid token or user id', async () => {
       const credentials = {
-        createdBy: { id: 3 },
-        amenityName: 'amenity',
+        createdBy: { id: 1 },
+        amenityName: 'AmenityAmenity',
         amenityDescription: 'Description',
-        amenityType: 'Residential',
+        amenityType: 'Facility',
       };
       const response = await request(url)
         .post('/amenity')
@@ -69,13 +60,12 @@ describe('E2E test for Amenities', () => {
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(401);
-
       const { message } = response.body;
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
   describe('Fetch All Amenities', () => {
-    it('Successful roles fetch', async () => {
+    it('Successful amenity fetch', async () => {
       const response = await request(url)
         .get('/amenity')
         .set('Accept', 'application/json')
@@ -101,7 +91,7 @@ describe('E2E test for Amenities', () => {
   describe('Fetch Specific Amenity', () => {
     it('Successful amenity fetch', async () => {
       const response = await request(url)
-        .get('/amenity/7')
+        .get(`/amenity/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -111,7 +101,7 @@ describe('E2E test for Amenities', () => {
     });
     it('Unsuccessful amenity fetch', async () => {
       const response = await request(url)
-        .get('/amenity/1')
+        .get('/amenity/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -135,12 +125,12 @@ describe('E2E test for Amenities', () => {
     it('Successful role update', async () => {
       const credentials = {
         updatedBy: { id: 3 },
-        amenityName: 'amenity1',
-        amenityDescription: 'Descrip',
-        amenityType: 'Residental',
+        amenityName: 'Amenity',
+        amenityDescription: 'Description',
+        amenityType: 'Rental',
       };
       const response = await request(url)
-        .patch('/amenity/5')
+        .patch(`/amenity/${id}`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -152,12 +142,12 @@ describe('E2E test for Amenities', () => {
     it('Unsuccessful role update', async () => {
       const credentials = {
         updatedBy: { id: 3 },
-        amenityName: 'amenity1',
-        amenityDescription: 'Descrip',
-        amenityType: 'Residental',
+        amenityName: 'Amenity',
+        amenityDescription: 'Description',
+        amenityType: 'Rental',
       };
       const response = await request(url)
-        .patch('/amenity/1')
+        .patch('/amenity/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -168,7 +158,7 @@ describe('E2E test for Amenities', () => {
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/amenity/1')
+        .patch('/amenity/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -181,7 +171,7 @@ describe('E2E test for Amenities', () => {
   describe('Delete Specific Amenity', () => {
     it('Successful amenity deletion', async () => {
       const response = await request(url)
-        .delete('/amenity/8')
+        .delete(`/amenity/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -191,18 +181,19 @@ describe('E2E test for Amenities', () => {
     });
     it('Amenity not found for delete', async () => {
       const response = await request(url)
-        .delete('/amenity/1')
+        .delete('/amenity/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/)
         .expect(200);
-      const { message } = response.body;
-      expect(message).toBe('Amenity with ID 1 not found');
+      const { message, success } = response.body;
+      expect(message).toBe('Amenity with ID 0 not found');
+      expect(success).toBe(false);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/amenity/4')
+        .delete('/amenity/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
