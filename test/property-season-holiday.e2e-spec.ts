@@ -6,11 +6,9 @@ describe('E2E test for Property Season holiday', () => {
   const url = `${baseurl}/property-season-holidays`;
   const url2 = `${baseurl}/properties`;
   const url3 = `${baseurl}/holidays`;
-  const url4 = `${baseurl}/property-details`;
   let id: number;
   let propertyid: number;
   let holidayid: number;
-  let detailid: number;
 
   beforeAll(async () => {
     await setup();
@@ -42,47 +40,15 @@ describe('E2E test for Property Season holiday', () => {
       .set('user-id', `${userid}`);
     propertyid = response.body.id;
   });
-  beforeAll(async () => {
-    const credentials = {
-      property: { id: propertyid },
-      createdBy: { id: 1 },
-      noOfGuestsAllowed: 0,
-      noOfBedrooms: 0,
-      noOfBathrooms: 0,
-      noOfBathroomsFull: 0,
-      noOfBathroomsHalf: 0,
-      squareFootage: 'Meters',
-      checkInTime: 0,
-      checkOutTime: 0,
-      cleaningFee: 0,
-      noOfPetsAllowed: 0,
-      petPolicy: '2',
-      feePerPet: 0,
-      peakSeasonStartDate: '2024-08-16',
-      peakSeasonEndDate: '2024-08-16',
-      peakSeasonAllottedNights: 0,
-      offSeasonAllottedNights: 0,
-      peakSeasonAllottedHolidayNights: 0,
-      offSeasonAllottedHolidayNights: 0,
-      lastMinuteBookingAllottedNights: 0,
-      wifiNetwork: 'ACTEthernet',
-    };
-    const response = await request(url4)
-      .post('/property-detail')
-      .set('Accept', 'application/json')
-      .send(credentials)
-      .set('access-token', `${token}`)
-      .set('user-id', `${userid}`);
-    detailid = response.body.id;
-  });
+
   beforeAll(async () => {
     const credentials = {
       startDate: '2025-08-03',
       endDate: '2025-08-03',
       createdBy: { id: 1 },
-      properties: [{ id: propertyid }],
+      properties: [],
       name: 'Holiday',
-      year: 2002,
+      year: 2026,
     };
     const response = await request(url3)
       .post('/holiday')
@@ -96,31 +62,6 @@ describe('E2E test for Property Season holiday', () => {
     expect(message).toBe('Holiday created successfully');
     expect(success).toBe(true);
     holidayid = data.id;
-  });
-
-  beforeAll(async () => {
-    const response = await request(url)
-      .get('/property-season-holiday')
-      .set('Accept', 'application/json')
-      .set('user-id', `${userid}`)
-      .set('access-token', `${token}`);
-    const { data } = response.body;
-    const lastRecord = data[data.length - 1];
-    if (lastRecord) {
-      await request(url)
-        .delete(`/property-season-holiday/${lastRecord.id}`)
-        .set('Accept', 'application/json')
-        .set('user-id', `${userid}`)
-        .set('access-token', `${token}`);
-    }
-  });
-
-  afterAll(async () => {
-    await request(url4)
-      .delete(`/property-detail/${detailid}`)
-      .set('Accept', 'application/json')
-      .set('user-id', `${userid}`)
-      .set('access-token', `${token}`);
   });
 
   afterAll(async () => {

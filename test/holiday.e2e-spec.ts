@@ -5,54 +5,20 @@ import { setup, token, userid } from './setup';
 describe('E2E test for Holiday', () => {
   const url = `${baseurl}/holidays`;
   let id: number;
-  let beforeall_id: number;
 
   beforeAll(async () => {
     await setup();
   }, 100000);
 
-  beforeAll(async () => {
-    const credentials = {
-      startDate: '2024-08-03',
-      endDate: '2024-08-03',
-      createdBy: { id: 1 },
-      name: 'Holiday',
-      year: 2024,
-    };
-    const response = await request(url)
-      .post('/holiday')
-      .set('Accept', 'application/json')
-      .send(credentials)
-      .set('access-token', `${token}`)
-      .set('user-id', `${userid}`);
-    beforeall_id = response.body.data?.id;
-  });
-
-  afterAll(async () => {
-    await request(url)
-      .delete(`/holiday/${beforeall_id}`)
-      .set('Accept', 'application/json')
-      .set('user-id', `${userid}`)
-      .set('access-token', `${token}`);
-  });
-
-  const generateYear = (): number => {
-    const min = 2000;
-    const max = 2100;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-
   describe('Holiday Creation', () => {
     it('Successful holiday creation', async () => {
-      const year = generateYear();
-      const startDate = `${year}-08-04`;
-      const endDate = `${year}-08-04`;
       const credentials = {
-        startDate,
-        endDate,
+        startDate: '2024-08-03',
+        endDate: '2024-08-03',
         createdBy: { id: 1 },
-        name: 'holiday',
-        year: year,
+        properties: [],
+        name: 'Holiday',
+        year: 2000,
       };
       const response = await request(url)
         .post('/holiday')
@@ -72,8 +38,9 @@ describe('E2E test for Holiday', () => {
         startDate: '2024-08-03',
         endDate: '2024-08-03',
         createdBy: { id: 1 },
+        properties: [],
         name: 'Holiday',
-        year: 2024,
+        year: 2000,
       };
       const response = await request(url)
         .post('/holiday')
@@ -89,8 +56,9 @@ describe('E2E test for Holiday', () => {
         startDate: '2024-08-03',
         endDate: '2024-08-03',
         createdBy: { id: 1 },
-        name: 'holiday',
-        year: 2024,
+        properties: [],
+        name: 'Holiday',
+        year: 2000,
       };
       const response = await request(url)
         .post('/holiday')
@@ -172,8 +140,9 @@ describe('E2E test for Holiday', () => {
         startDate: '2024-08-03',
         endDate: '2024-08-03',
         updatedBy: { id: 1 },
-        name: 'holiday',
-        year: 2024,
+        properties: [],
+        name: 'Holiday',
+        year: 2020,
       };
       const response = await request(url)
         .patch(`/holiday/${id}`)
@@ -192,8 +161,9 @@ describe('E2E test for Holiday', () => {
         startDate: '2024-08-03',
         endDate: '2024-08-03',
         updatedBy: { id: 1 },
-        name: 'holiday',
-        year: 2024,
+        properties: [],
+        name: 'Holiday',
+        year: 2020,
       };
       const response = await request(url)
         .patch('/holiday/0')
@@ -208,10 +178,12 @@ describe('E2E test for Holiday', () => {
     });
     it('Invalid token or user id', async () => {
       const credentials = {
+        startDate: '2024-08-03',
+        endDate: '2024-08-03',
         updatedBy: { id: 1 },
-        amenityName: 'amenity1',
-        amenityDescription: 'Descrip',
-        amenityType: 'Residental',
+        properties: [],
+        name: 'Holiday',
+        year: 2020,
       };
       const response = await request(url)
         .patch('/holiday/0')
