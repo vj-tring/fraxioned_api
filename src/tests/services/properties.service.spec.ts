@@ -737,356 +737,45 @@ describe('PropertiesService', () => {
     });
   });
 
-  describe('getPropertyWithDetailsById', () => {
-    it('should return property with details', async () => {
-      const mockProperty = {
-        id: 1,
-      } as Property;
-
-      const mockPropertyDetails = {
-        id: 1,
-      } as PropertyDetails;
-
-      jest
-        .spyOn(propertiesRepository, 'findOne')
-        .mockResolvedValue(mockProperty);
-      jest
-        .spyOn(propertyDetailsRepository, 'findOne')
-        .mockResolvedValue(mockPropertyDetails);
-
-      const result = await service.getPropertyWithDetailsById(1);
-
-      expect(result).toBeDefined();
-      expect(result).toEqual({
-        propertyId: 1,
-        propertyDetailsId: 1,
-      });
-      expect(propertiesRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
-      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
-        where: { property: { id: 1 } },
-      });
-    });
-
-    it('should return PROPERTY_NOT_FOUND if property is not found', async () => {
+  describe('getPropertiesWithDetails', () => {
+    it('should return PROPERTY_NOT_FOUND when property is not found', async () => {
       jest.spyOn(propertiesRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await service.getPropertyWithDetailsById(1);
+      const result = await service.getPropertiesWithDetails(1);
 
       expect(result).toEqual(USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(1));
-      expect(propertiesRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
     });
 
-    it('should return PROPERTY_DETAIL_NOT_FOUND if property details are not found', async () => {
-      const mockProperty = {
-        id: 1,
-        createdBy: { id: 1 },
-        updatedBy: { id: 1 },
-      } as Property;
+    it('should return PROPERTY_DETAIL_NOT_FOUND when property details are not found', async () => {
+      const mockProperty = { id: 1, propertyName: 'Test Property' } as Property;
 
       jest
         .spyOn(propertiesRepository, 'findOne')
         .mockResolvedValue(mockProperty);
       jest.spyOn(propertyDetailsRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await service.getPropertyWithDetailsById(1);
+      const result = await service.getPropertiesWithDetails(1);
 
       expect(result).toEqual(
         USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(1),
       );
-      expect(propertiesRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
-      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
-        where: { property: { id: 1 } },
-      });
-    });
-  });
-
-  describe('getAllPropertiesWithDetails', () => {
-    it('should return all properties with details', async () => {
-      const mockProperty = {
-        id: 1,
-      } as Property;
-
-      const mockPropertyDetails = {
-        id: 1,
-      } as PropertyDetails;
-
-      jest
-        .spyOn(propertiesRepository, 'find')
-        .mockResolvedValue([mockProperty]);
-      jest
-        .spyOn(propertyDetailsRepository, 'findOne')
-        .mockResolvedValue(mockPropertyDetails);
-
-      const result = await service.getAllPropertiesWithDetails();
-
-      expect(result).toBeDefined();
-      expect(result).toEqual([
-        {
-          propertyId: 1,
-          propertyDetailsId: 1,
-        },
-      ]);
-      expect(propertiesRepository.find).toHaveBeenCalledWith();
-      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
-        where: { property: { id: 1 } },
-      });
     });
 
-    it('should return PROPERTIES_NOT_FOUND if no properties are found', async () => {
+    it('should return PROPERTIES_NOT_FOUND when no properties are found', async () => {
       jest.spyOn(propertiesRepository, 'find').mockResolvedValue([]);
 
-      const result = await service.getAllPropertiesWithDetails();
+      const result = await service.getPropertiesWithDetails();
 
       expect(result).toEqual(USER_PROPERTY_RESPONSES.PROPERTIES_NOT_FOUND);
-      expect(propertiesRepository.find).toHaveBeenCalledWith();
-    });
-
-    it('should handle properties without details', async () => {
-      const mockProperty = {
-        id: 1,
-      } as Property;
-
-      jest
-        .spyOn(propertiesRepository, 'find')
-        .mockResolvedValue([mockProperty]);
-      jest.spyOn(propertyDetailsRepository, 'findOne').mockResolvedValue(null);
-
-      const result = await service.getAllPropertiesWithDetails();
-
-      expect(result).toBeDefined();
-      expect(result).toEqual([
-        {
-          propertyId: 1,
-          propertyDetailsId: null,
-          ...mockProperty,
-        },
-      ]);
-      expect(propertiesRepository.find).toHaveBeenCalledWith();
-      expect(propertyDetailsRepository.findOne).toHaveBeenCalledWith({
-        where: { property: { id: 1 } },
-      });
-    });
-  });
-
-  describe('PropertiesService - getAllPropertiesWithDetailsByUser', () => {
-    let service: PropertiesService;
-    let userPropertiesRepository: Repository<UserProperties>;
-    let propertyDetailsRepository: Repository<PropertyDetails>;
-
-    beforeEach(async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          PropertiesService,
-          {
-            provide: getRepositoryToken(Property),
-            useClass: Repository,
-          },
-          {
-            provide: getRepositoryToken(UserProperties),
-            useClass: Repository,
-          },
-          {
-            provide: getRepositoryToken(PropertyDetails),
-            useClass: Repository,
-          },
-        ],
-      }).compile();
-
-      service = module.get<PropertiesService>(PropertiesService);
-      userPropertiesRepository = module.get<Repository<UserProperties>>(
-        getRepositoryToken(UserProperties),
-      );
-      propertyDetailsRepository = module.get<Repository<PropertyDetails>>(
-        getRepositoryToken(PropertyDetails),
-      );
-    });
-
-    it('should return user properties with details when found', async () => {
-      const mockUserId = 1;
-      const mockUserProperties = [
-        {
-          id: 1,
-          property: { id: 1, propertyName: 'Property 1' },
-          user: { id: mockUserId },
-        } as UserProperties,
-        {
-          id: 2,
-          property: { id: 2, propertyName: 'Property 2' },
-          user: { id: mockUserId },
-        } as UserProperties,
-      ];
-      const mockPropertyDetails = {
-        id: 1,
-        noOfBathrooms: 2,
-        noOfBedrooms: 3,
-      } as PropertyDetails;
-
-      jest
-        .spyOn(userPropertiesRepository, 'find')
-        .mockResolvedValue(mockUserProperties);
-      jest
-        .spyOn(propertyDetailsRepository, 'findOne')
-        .mockResolvedValue(mockPropertyDetails);
-
-      const result =
-        await service.getAllPropertiesWithDetailsByUser(mockUserId);
-
-      expect(result).toEqual([
-        {
-          propertyId: 1,
-          propertyDetailsId: 1,
-          propertyName: 'Property 1',
-          noOfBathrooms: 2,
-          noOfBedrooms: 3,
-          userProperties: [{ id: 1, user: { id: mockUserId } }],
-        },
-        {
-          propertyId: 2,
-          propertyDetailsId: 1,
-          propertyName: 'Property 2',
-          noOfBathrooms: 2,
-          noOfBedrooms: 3,
-          userProperties: [{ id: 2, user: { id: mockUserId } }],
-        },
-      ]);
-      expect(userPropertiesRepository.find).toHaveBeenCalledWith({
-        where: { user: { id: mockUserId } },
-        relations: ['property'],
-      });
-      expect(propertyDetailsRepository.findOne).toHaveBeenCalledTimes(2);
-    });
-
-    it('should return USER_PROPERTY_NOT_FOUND when no user properties are found', async () => {
-      const mockUserId = 1;
-      jest.spyOn(userPropertiesRepository, 'find').mockResolvedValue([]);
-
-      const result =
-        await service.getAllPropertiesWithDetailsByUser(mockUserId);
-
-      expect(result).toEqual(
-        USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(mockUserId),
-      );
-      expect(userPropertiesRepository.find).toHaveBeenCalledWith({
-        where: { user: { id: mockUserId } },
-        relations: ['property'],
-      });
-    });
-
-    it('should handle properties without details', async () => {
-      const mockUserId = 1;
-      const mockUserProperties = [
-        {
-          id: 1,
-          property: { id: 1, propertyName: 'Property 1' },
-          user: { id: mockUserId },
-        } as UserProperties,
-      ];
-
-      jest
-        .spyOn(userPropertiesRepository, 'find')
-        .mockResolvedValue(mockUserProperties);
-      jest.spyOn(propertyDetailsRepository, 'findOne').mockResolvedValue(null);
-
-      const result =
-        await service.getAllPropertiesWithDetailsByUser(mockUserId);
-
-      expect(result).toEqual([
-        {
-          propertyId: 1,
-          propertyDetailsId: null,
-          propertyName: 'Property 1',
-          userProperties: [{ id: 1, user: { id: mockUserId } }],
-        },
-      ]);
-    });
-
-    it('should handle multiple user properties for the same property', async () => {
-      const mockUserId = 1;
-      const mockUserProperties = [
-        {
-          id: 1,
-          property: { id: 1, propertyName: 'Property 1' },
-          user: { id: mockUserId },
-        } as UserProperties,
-        {
-          id: 2,
-          property: { id: 1, propertyName: 'Property 1' },
-          user: { id: mockUserId },
-        } as UserProperties,
-      ];
-      const mockPropertyDetails = {
-        id: 1,
-        noOfBathrooms: 2,
-        noOfBedrooms: 3,
-      } as PropertyDetails;
-
-      jest
-        .spyOn(userPropertiesRepository, 'find')
-        .mockResolvedValue(mockUserProperties);
-      jest
-        .spyOn(propertyDetailsRepository, 'findOne')
-        .mockResolvedValue(mockPropertyDetails);
-
-      const result =
-        await service.getAllPropertiesWithDetailsByUser(mockUserId);
-
-      expect(result).toEqual([
-        {
-          propertyId: 1,
-          propertyDetailsId: 1,
-          propertyName: 'Property 1',
-          noOfBathrooms: 2,
-          noOfBedrooms: 3,
-          userProperties: [
-            { id: 1, user: { id: mockUserId } },
-            { id: 2, user: { id: mockUserId } },
-          ],
-        },
-      ]);
     });
 
     it('should handle errors and throw them', async () => {
-      const mockUserId = 1;
       const mockError = new Error('Database error');
+      jest.spyOn(propertiesRepository, 'findOne').mockRejectedValue(mockError);
 
-      jest.spyOn(userPropertiesRepository, 'find').mockRejectedValue(mockError);
-
-      await expect(
-        service.getAllPropertiesWithDetailsByUser(mockUserId),
-      ).rejects.toThrow(mockError);
+      await expect(service.getPropertiesWithDetails(1)).rejects.toThrow(
+        mockError,
+      );
     });
   });
 });

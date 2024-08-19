@@ -113,11 +113,13 @@ describe('AuthenticationService', () => {
       roleId: 1,
       createdBy: 1,
       updatedBy: 1,
-      userPropertyDetails: {
-        propertyID: 0,
-        noOfShares: '',
-        acquisitionDate: undefined,
-      },
+      userPropertyDetails: [
+        {
+          propertyID: 0,
+          noOfShares: '',
+          acquisitionDate: undefined,
+        },
+      ],
     };
 
     it('should invite a user successfully', async () => {
@@ -207,11 +209,22 @@ describe('AuthenticationService', () => {
 
       expect(result).toEqual(
         USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
-          inviteUserDto.userPropertyDetails.propertyID,
+          inviteUserDto.userPropertyDetails[0].propertyID,
         ),
       );
       expect(logger.error).toHaveBeenCalledWith(
-        `Property not found with ID: ${inviteUserDto.userPropertyDetails.propertyID}`,
+        `Property not found with ID: ${inviteUserDto.userPropertyDetails[0].propertyID}`,
+      );
+    });
+
+    it('should handle unexpected errors gracefully', async () => {
+      const errorMessage = 'Unexpected error';
+      userContactDetailsRepository.findOne.mockRejectedValue(
+        new Error(errorMessage),
+      );
+
+      await expect(service.inviteUser(inviteUserDto)).rejects.toThrow(
+        errorMessage,
       );
     });
   });

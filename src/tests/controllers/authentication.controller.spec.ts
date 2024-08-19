@@ -54,11 +54,13 @@ describe('AuthenticationController', () => {
         roleId: 1,
         createdBy: 1,
         updatedBy: 1,
-        userPropertyDetails: {
-          propertyID: 0,
-          noOfShares: '',
-          acquisitionDate: undefined,
-        },
+        userPropertyDetails: [
+          {
+            propertyID: 0,
+            noOfShares: '',
+            acquisitionDate: undefined,
+          },
+        ],
       };
       const result = { message: 'Invite sent successfully' };
       jest.spyOn(service, 'inviteUser').mockResolvedValue(result);

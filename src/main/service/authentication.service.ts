@@ -106,16 +106,6 @@ export class AuthenticationService {
         return ROLE_RESPONSES.ROLE_NOT_FOUND(roleId);
       }
 
-      // Validate property
-      const propertyId = userPropertyDetails.propertyID;
-      const userProperty = await this.propertyRepository.findOne({
-        where: { id: propertyId },
-      });
-      if (!userProperty) {
-        this.logger.error(`Property not found with ID: ${propertyId}`);
-        return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
-      }
-
       const tempPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
@@ -127,7 +117,7 @@ export class AuthenticationService {
         state,
         country,
         city,
-        zipcode: zipcode,
+        zipcode,
         password: hashedPassword,
         isActive: true,
         createdBy: createdByUser.id,
@@ -159,29 +149,43 @@ export class AuthenticationService {
       }
 
       const currentYear = new Date().getFullYear();
-      const userPropertyEntities = [
-        this.userPropertyRepository.create({
-          ...userPropertyDetails,
-          user,
-          year: currentYear,
-          createdBy: createdByUser,
-          updatedBy: updatedByUser,
-        }),
-        this.userPropertyRepository.create({
-          ...userPropertyDetails,
-          user,
-          year: currentYear + 1,
-          createdBy: createdByUser,
-          updatedBy: updatedByUser,
-        }),
-        this.userPropertyRepository.create({
-          ...userPropertyDetails,
-          user,
-          year: currentYear + 2,
-          createdBy: createdByUser,
-          updatedBy: updatedByUser,
-        }),
-      ];
+      const userPropertyEntities = [];
+
+      for (const propertyDetail of userPropertyDetails) {
+        // Validate property
+        const propertyId = propertyDetail.propertyID;
+        const userProperty = await this.propertyRepository.findOne({
+          where: { id: propertyId },
+        });
+        if (!userProperty) {
+          this.logger.error(`Property not found with ID: ${propertyId}`);
+          return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
+        }
+
+        userPropertyEntities.push(
+          this.userPropertyRepository.create({
+            ...propertyDetail,
+            user,
+            year: currentYear,
+            createdBy: createdByUser,
+            updatedBy: updatedByUser,
+          }),
+          this.userPropertyRepository.create({
+            ...propertyDetail,
+            user,
+            year: currentYear + 1,
+            createdBy: createdByUser,
+            updatedBy: updatedByUser,
+          }),
+          this.userPropertyRepository.create({
+            ...propertyDetail,
+            user,
+            year: currentYear + 2,
+            createdBy: createdByUser,
+            updatedBy: updatedByUser,
+          }),
+        );
+      }
 
       for (const userPropertyEntity of userPropertyEntities) {
         await this.userPropertyRepository.save(userPropertyEntity);
@@ -202,7 +206,8 @@ export class AuthenticationService {
       this.logger.log(`Invite sent successfully to ${email}`);
       return INVITE_USER_RESPONSES.INVITE_SUCCESS;
     } catch (error) {
-      console.log(error);
+      this.logger.error(`Failed to invite user: ${error.message}`);
+      throw error;
     }
   }
 
