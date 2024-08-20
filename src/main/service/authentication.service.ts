@@ -73,9 +73,9 @@ export class AuthenticationService {
         updatedBy,
         userPropertyDetails,
       } = inviteUserDto;
-  
+
       this.logger.log(`Inviting user with email: ${email}`);
-  
+
       const existingUserEmail = await this.userContactRepository.findOne({
         where: { contactValue: email, contactType: 'email' },
       });
@@ -83,7 +83,7 @@ export class AuthenticationService {
         this.logger.error(`Email already exists: ${email}`);
         return INVITE_USER_RESPONSES.EMAIL_EXISTS;
       }
-  
+
       // Validate createdBy user
       const createdByUser = await this.userRepository.findOne({
         where: { id: createdBy },
@@ -92,7 +92,7 @@ export class AuthenticationService {
         this.logger.error(`CreatedBy user not found with ID: ${createdBy}`);
         return USER_RESPONSES.USER_NOT_FOUND(createdBy);
       }
-  
+
       // Validate updatedBy user
       const updatedByUser = await this.userRepository.findOne({
         where: { id: updatedBy },
@@ -101,17 +101,17 @@ export class AuthenticationService {
         this.logger.error(`UpdatedBy user not found with ID: ${updatedBy}`);
         return USER_RESPONSES.USER_NOT_FOUND(updatedBy);
       }
-  
+
       // Validate role
       const role = await this.roleRepository.findOne({ where: { id: roleId } });
       if (!role) {
         this.logger.error(`Role not found with ID: ${roleId}`);
         return ROLE_RESPONSES.ROLE_NOT_FOUND(roleId);
       }
-  
+
       const tempPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
-  
+
       const user = this.userRepository.create({
         firstName,
         lastName,
@@ -127,8 +127,8 @@ export class AuthenticationService {
         updatedBy: updatedByUser.id,
         role: role,
       });
-      // await this.userRepository.save(user);
-  
+      await this.userRepository.save(user);
+
       const userContacts = [
         {
           user,
@@ -145,15 +145,15 @@ export class AuthenticationService {
           updatedBy: updatedByUser,
         },
       ];
-  
+
       for (const contact of userContacts) {
         const userContact = this.userContactRepository.create(contact);
-        // await this.userContactRepository.save(userContact);
+        await this.userContactRepository.save(userContact);
       }
-  
+
       const currentYear = new Date().getFullYear();
       const userPropertyEntities = [];
-  
+
       for (const propertyDetail of userPropertyDetails) {
         // Validate property
         const propertyId = propertyDetail.propertyID;
@@ -168,7 +168,7 @@ export class AuthenticationService {
           this.logger.error(`Property not found with ID: ${propertyId}`);
           return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
         }
-  
+
         // Calculate prorated nights
         const peakAllottedNights = this.calculateAllottedNights(
           propertyDetail.noOfShares,
@@ -186,7 +186,7 @@ export class AuthenticationService {
           propertyDetail.noOfShares,
           userPropertyDetails.offSeasonAllottedHolidayNights,
         );
-  
+
         const ratedPeakAllottedNights = this.rateNights(
           peakAllottedNights,
           new Date(propertyDetail.acquisitionDate),
@@ -195,13 +195,13 @@ export class AuthenticationService {
           offAllottedNights,
           new Date(propertyDetail.acquisitionDate),
         );
-  
+
         // Calculate maximum stay length
         const maximumStayLength = Math.min(
           14 + (propertyDetail.noOfShares - 1) * 7,
-          28
+          28,
         );
-  
+
         for (let yearOffset = 0; yearOffset <= 2; yearOffset++) {
           const year = currentYear + yearOffset;
           const isCurrentYear = year === currentYear;
@@ -245,11 +245,11 @@ export class AuthenticationService {
           );
         }
       }
-  
+
       for (const userPropertyEntity of userPropertyEntities) {
         await this.userPropertyRepository.save(userPropertyEntity);
       }
-  
+
       const loginLink = `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.login}`;
       const subject = mailSubject.auth.registration;
       const template = mailTemplates.auth.registration;
@@ -259,9 +259,9 @@ export class AuthenticationService {
         password: tempPassword,
         link: loginLink,
       };
-  
-      // await this.mailService.sendMail(email, subject, template, context);
-  
+
+      await this.mailService.sendMail(email, subject, template, context);
+
       this.logger.log(`Invite sent successfully to ${email}`);
       return INVITE_USER_RESPONSES.INVITE_SUCCESS;
     } catch (error) {
@@ -273,22 +273,22 @@ export class AuthenticationService {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const endOfYear = new Date(currentYear, 11, 30); // December 30th
-  
+
     // Check if the current year is a leap year
     const isLeapYear = (year: number): boolean => {
       return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
     };
-  
+
     const daysInYear = isLeapYear(currentYear) ? 366 : 365;
-  
+
     // Adjust the days in the year to account for the calendar year ending on December 30
     const adjustedDaysInYear = daysInYear - 1;
-  
+
     // Check if acquisition date is within the current calendar year
     const isAcquisitionInCurrentYear =
       acquisitionDate.getFullYear() === currentYear &&
       acquisitionDate <= endOfYear;
-  
+
     let daysRemaining: number;
     if (isAcquisitionInCurrentYear) {
       // Calculate the difference in days, including the acquisition date
@@ -301,17 +301,16 @@ export class AuthenticationService {
       // Calculate the total days in the current calendar year
       daysRemaining = adjustedDaysInYear;
     }
-  
+
     return Math.floor((daysRemaining / adjustedDaysInYear) * allottedNights);
   }
-  
+
   private calculateAllottedNights(
     noOfShares: number,
     baseAllottedNights: number,
   ): number {
     return noOfShares * baseAllottedNights;
   }
-
 
   async login(loginDto: LoginDto): Promise<object> {
     const { email, password } = loginDto;

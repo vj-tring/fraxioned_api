@@ -32,7 +32,7 @@ export class AuthenticationController {
   // @ApiHeader({
   //   name: 'access-token',
   //   required: true,
-  //   description: 'Access Token', 
+  //   description: 'Access Token',
   // })
   inviteUser(@Body() inviteUserDto: InviteUserDto): Promise<object> {
     return this.authenticationService.inviteUser(inviteUserDto);
