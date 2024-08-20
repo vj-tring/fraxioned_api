@@ -127,7 +127,7 @@ export class AuthenticationService {
         updatedBy: updatedByUser.id,
         role: role,
       });
-      // await this.userRepository.save(user);
+      await this.userRepository.save(user);
 
       const userContacts = [
         {
@@ -148,7 +148,7 @@ export class AuthenticationService {
 
       for (const contact of userContacts) {
         const userContact = this.userContactRepository.create(contact);
-        // await this.userContactRepository.save(userContact);
+        await this.userContactRepository.save(userContact);
       }
 
       const currentYear = new Date().getFullYear();
@@ -253,7 +253,7 @@ export class AuthenticationService {
         link: loginLink,
       };
 
-      // await this.mailService.sendMail(email, subject, template, context);
+      await this.mailService.sendMail(email, subject, template, context);
 
       this.logger.log(`Invite sent successfully to ${email}`);
       return INVITE_USER_RESPONSES.INVITE_SUCCESS;
@@ -267,22 +267,22 @@ export class AuthenticationService {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const endOfYear = new Date(currentYear, 11, 30); // December 30th
-  
+
     // Check if the current year is a leap year
     const isLeapYear = (year: number): boolean => {
       return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
     };
-  
+
     const daysInYear = isLeapYear(currentYear) ? 366 : 365;
-  
+
     // Adjust the days in the year to account for the calendar year ending on December 30
     const adjustedDaysInYear = daysInYear - 1;
-  
+
     // Check if acquisition date is within the current calendar year
     const isAcquisitionInCurrentYear =
       acquisitionDate.getFullYear() === currentYear &&
       acquisitionDate <= endOfYear;
-  
+
     let daysRemaining: number;
     if (isAcquisitionInCurrentYear) {
       // Calculate the difference in days, including the acquisition date
@@ -295,7 +295,7 @@ export class AuthenticationService {
       // Calculate the total days in the current calendar year
       daysRemaining = adjustedDaysInYear;
     }
-  
+
     return Math.floor((daysRemaining / adjustedDaysInYear) * allottedNights);
   }
   private calculateAllottedNights(
