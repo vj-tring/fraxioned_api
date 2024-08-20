@@ -57,7 +57,7 @@ describe('AuthenticationController', () => {
         userPropertyDetails: [
           {
             propertyID: 0,
-            noOfShares: '',
+            noOfShares: 0,
             acquisitionDate: undefined,
           },
         ],

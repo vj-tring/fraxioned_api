@@ -6,7 +6,7 @@ export class UserPropertyDto {
   propertyID: number;
 
   @IsOptional()
-  noOfShares: string;
+  noOfShares: number;
 
   @IsOptional()
   acquisitionDate: Date;

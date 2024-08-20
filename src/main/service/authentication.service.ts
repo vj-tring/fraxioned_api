@@ -32,6 +32,7 @@ import {
   mailSubject,
   mailTemplates,
 } from '../commons/constants/email/mail.constants';
+import { PropertyDetails } from '../entities/property-details.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -48,6 +49,8 @@ export class AuthenticationService {
     private readonly roleRepository: Repository<Role>,
     @InjectRepository(Property)
     private readonly propertyRepository: Repository<Property>,
+    @InjectRepository(PropertyDetails)
+    private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     private readonly mailService: MailService,
     private readonly logger: LoggerService,
   ) {}
@@ -157,34 +160,83 @@ export class AuthenticationService {
         const userProperty = await this.propertyRepository.findOne({
           where: { id: propertyId },
         });
+        const userPropertyDetails =
+          await this.propertyDetailsRepository.findOne({
+            where: { id: propertyId },
+          });
         if (!userProperty) {
           this.logger.error(`Property not found with ID: ${propertyId}`);
           return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
         }
 
-        userPropertyEntities.push(
-          this.userPropertyRepository.create({
-            ...propertyDetail,
-            user,
-            year: currentYear,
-            createdBy: createdByUser,
-            updatedBy: updatedByUser,
-          }),
-          this.userPropertyRepository.create({
-            ...propertyDetail,
-            user,
-            year: currentYear + 1,
-            createdBy: createdByUser,
-            updatedBy: updatedByUser,
-          }),
-          this.userPropertyRepository.create({
-            ...propertyDetail,
-            user,
-            year: currentYear + 2,
-            createdBy: createdByUser,
-            updatedBy: updatedByUser,
-          }),
+        // Calculate prorated nights
+        const peakAllottedNights = this.calculateAllottedNights(
+          propertyDetail.noOfShares,
+          userPropertyDetails.peakSeasonAllottedNights,
         );
+        const offAllottedNights = this.calculateAllottedNights(
+          propertyDetail.noOfShares,
+          userPropertyDetails.offSeasonAllottedNights,
+        );
+        const peakAllottedHolidayNights = this.calculateAllottedNights(
+          propertyDetail.noOfShares,
+          userPropertyDetails.peakSeasonAllottedHolidayNights,
+        );
+        const offAllottedHolidayNights = this.calculateAllottedNights(
+          propertyDetail.noOfShares,
+          userPropertyDetails.offSeasonAllottedHolidayNights,
+        );
+
+        const ratedPeakAllottedNights = this.rateNights(
+          peakAllottedNights,
+          new Date(propertyDetail.acquisitionDate),
+        );
+        const ratedOffAllottedNights = this.rateNights(
+          offAllottedNights,
+          new Date(propertyDetail.acquisitionDate),
+        );
+
+        for (let yearOffset = 0; yearOffset <= 2; yearOffset++) {
+          const year = currentYear + yearOffset;
+          const isCurrentYear = year === currentYear;
+          userPropertyEntities.push(
+            this.userPropertyRepository.create({
+              property: userProperty,
+              noOfShare: propertyDetail.noOfShares,
+              acquisitionDate: new Date(propertyDetail.acquisitionDate),
+              user,
+              year,
+              createdBy: createdByUser,
+              updatedBy: updatedByUser,
+              peakAllottedNights: isCurrentYear
+                ? ratedPeakAllottedNights
+                : peakAllottedNights,
+              peakRemainingNights: isCurrentYear
+                ? ratedPeakAllottedNights
+                : peakAllottedNights,
+              peakAllottedHolidayNights: isCurrentYear
+                ? peakAllottedHolidayNights
+                : peakAllottedHolidayNights,
+              peakRemainingHolidayNights: isCurrentYear
+                ? peakAllottedHolidayNights
+                : peakAllottedHolidayNights,
+              offAllottedNights: isCurrentYear
+                ? ratedOffAllottedNights
+                : offAllottedNights,
+              offRemainingNights: isCurrentYear
+                ? ratedOffAllottedNights
+                : offAllottedNights,
+              offAllottedHolidayNights: isCurrentYear
+                ? offAllottedHolidayNights
+                : offAllottedHolidayNights,
+              offRemainingHolidayNights: isCurrentYear
+                ? offAllottedHolidayNights
+                : offAllottedHolidayNights,
+              lastMinuteAllottedNights: 8 * propertyDetail.noOfShares,
+              lastMinuteRemainingNights: 8 * propertyDetail.noOfShares,
+            } as unknown as UserProperties),
+          );
+        }
       }
 
       for (const userPropertyEntity of userPropertyEntities) {
@@ -209,6 +261,44 @@ export class AuthenticationService {
       this.logger.error(`Failed to invite user: ${error.message}`);
       throw error;
     }
+  }
+
+  private rateNights(allottedNights: number, acquisitionDate: Date): number {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const endOfYear = new Date(currentYear, 11, 31);
+
+    // Check if the current year is a leap year
+    const isLeapYear = (year: number): boolean => {
+      return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    };
+
+    const daysInYear = isLeapYear(currentYear) ? 366 : 365;
+
+    // Check if acquisition date is within the current year
+    const isAcquisitionInCurrentYear =
+      acquisitionDate.getFullYear() === currentYear;
+
+    let daysRemaining: number;
+    if (isAcquisitionInCurrentYear) {
+      // Calculate the difference in days, including the acquisition date
+      daysRemaining =
+        Math.ceil(
+          (endOfYear.getTime() - acquisitionDate.getTime()) /
+            (1000 * 60 * 60 * 24),
+        ) + 1;
+    } else {
+      // Calculate the total days in the current year
+      daysRemaining = daysInYear;
+    }
+
+    return Math.floor((daysRemaining / daysInYear) * allottedNights);
+  }
+  private calculateAllottedNights(
+    noOfShares: number,
+    baseAllottedNights: number,
+  ): number {
+    return noOfShares * baseAllottedNights;
   }
 
   async login(loginDto: LoginDto): Promise<object> {

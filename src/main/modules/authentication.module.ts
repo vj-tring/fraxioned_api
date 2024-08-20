@@ -10,6 +10,7 @@ import { UserContactDetails } from 'src/main/entities/user-contact-details.entit
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { Property } from '../entities/property.entity';
 import { MailModule } from '../email/mail.module';
+import { PropertyDetails } from '../entities/property-details.entity';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MailModule } from '../email/mail.module';
       UserProperties,
       Role,
       Property,
+      PropertyDetails,
     ]),
     LoggerModule,
     MailModule,
