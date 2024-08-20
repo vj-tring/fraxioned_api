@@ -207,6 +207,7 @@ describe('UserPropertyController', () => {
           updatedBy: new User(),
           createdAt: new Date(),
           updatedAt: new Date(),
+          maximumStayLength: 0
         },
       ];
       jest
@@ -266,6 +267,7 @@ describe('UserPropertyController', () => {
         updatedBy: new User(),
         createdAt: new Date(),
         updatedAt: new Date(),
+        maximumStayLength: 0
       };
       jest
         .spyOn(service, 'getUserPropertyById')
@@ -379,6 +381,7 @@ describe('UserPropertyController', () => {
         } as User,
         createdAt: new Date(),
         updatedAt: new Date(),
+        maximumStayLength: 0
       };
       jest
         .spyOn(service, 'updateUserProperty')

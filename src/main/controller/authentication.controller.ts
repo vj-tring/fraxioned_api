@@ -27,13 +27,13 @@ export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Post('invite')
-  @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
+  // @UseGuards(AuthGuard)
+  // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  // @ApiHeader({
+  //   name: 'access-token',
+  //   required: true,
+  //   description: 'Access Token', 
+  // })
   inviteUser(@Body() inviteUserDto: InviteUserDto): Promise<object> {
     return this.authenticationService.inviteUser(inviteUserDto);
   }
