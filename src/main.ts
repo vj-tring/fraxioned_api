@@ -9,6 +9,8 @@ import { seedUser } from './main/commons/seeds/userSeed';
 import { seedPropertyDetails } from './main/commons/seeds/propertDetailSeed';
 import { seedProperties } from './main/commons/seeds/propertySeed';
 import { seedUserPropertyDetails } from './main/commons/seeds/userPropertyDetailsSeed';
+import { seedSpace } from './main/commons/seeds/space-seed';
+import { seedSpaceType } from './main/commons/seeds/space-types-seed';
 
 export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +22,8 @@ export async function bootstrap(): Promise<void> {
   await seedProperties(dataSource);
   await seedPropertyDetails(dataSource);
   await seedUserPropertyDetails(dataSource);
+  await seedSpace(dataSource);
+  await seedSpaceType(dataSource);
 
   // Global Pipes
   app.useGlobalPipes(

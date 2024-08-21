@@ -17,6 +17,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './main/email/mail.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { PropertyImagesModule } from './main/modules/property-images.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { join } from 'path';
     UserDocumentModule,
     PropertyAmenitiesModule,
     PropertyCodesModule,
+    PropertyImagesModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     ServeStaticModule.forRoot({
