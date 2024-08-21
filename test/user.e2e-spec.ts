@@ -1,24 +1,110 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { setup, token, userid } from './setup';
 
 describe('E2E test for Users', () => {
   const url = `${baseurl}/users`;
-  const url1 = `${baseurl}/authentication`;
-  let token: string;
-  let userid: number;
+  let id: number;
 
   beforeAll(async () => {
-    const valid_credentials = {
-      email: 'dharshanramk@gmail.com',
-      password: 'Admin@12',
-    };
-    const response = await request(url1)
-      .post('/login')
-      .set('Accept', 'application/json')
-      .send(valid_credentials);
-    const { session, user } = response.body;
-    token = session.token;
-    userid = user.id;
+    await setup();
+  }, 100000);
+
+  describe('User Creation', () => {
+    it('Successful user creation', async () => {
+      const credentials = {
+        role: { id: 1 },
+        firstName: 'firstName',
+        lastName: 'lastName',
+        password: 'password',
+        imageURL: 'URL',
+        isActive: true,
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        state: 'state',
+        country: 'country',
+        city: 'city',
+        zipcode: 'zipcode',
+        resetToken: 'resetToken',
+        resetTokenExpires: '2024-08-17T11:23:44.467Z',
+        lastLoginTime: '2024-08-17T11:23:44.467Z',
+        createdBy: 1,
+        contactDetails: [{ contactType: 'string', contactValue: 'string' }],
+      };
+      const response = await request(url)
+        .post('/user')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/)
+        .expect(201);
+      const { message, user } = response.body;
+      expect(message).toBe('User created successfully');
+      id = user.id;
+    });
+    it('User already exist', async () => {
+      const credentials = {
+        role: { id: 1 },
+        firstName: 'Fname',
+        lastName: 'Lname',
+        password: 'password',
+        imageURL: 'URL',
+        isActive: true,
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        state: 'state',
+        country: 'country',
+        city: 'city',
+        zipcode: 'zipcode',
+        resetToken: 'resetToken',
+        resetTokenExpires: '2024-08-17T11:23:44.467Z',
+        lastLoginTime: '2024-08-17T11:23:44.467Z',
+        createdBy: 1,
+        contactDetails: [{ contactType: 'string', contactValue: 'string' }],
+      };
+      const response = await request(url)
+        .post('/user')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      const { status } = response.body;
+      expect(status).toBe(409);
+    });
+    it('Invalid token or user id', async () => {
+      const credentials = {
+        role: { id: 1 },
+        firstName: 'Fname',
+        lastName: 'Lname',
+        password: 'password',
+        imageURL: 'URL',
+        isActive: true,
+        addressLine1: 'Address 1',
+        addressLine2: 'Address 2',
+        state: 'state',
+        country: 'country',
+        city: 'city',
+        zipcode: 'zipcode',
+        resetToken: 'resetToken',
+        resetTokenExpires: '2024-08-17T11:23:44.467Z',
+        lastLoginTime: '2024-08-17T11:23:44.467Z',
+        createdBy: 1,
+        contactDetails: [{ contactType: 'string', contactValue: 'string' }],
+      };
+      const response = await request(url)
+        .post('/user')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', 'token')
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/)
+        .expect(401);
+
+      const { message } = response.body;
+      expect(message).toBe('The provided user ID or access token is invalid');
+    });
   });
   describe('Fetch All Users', () => {
     it('Successful users fetch', async () => {
@@ -47,7 +133,7 @@ describe('E2E test for Users', () => {
   describe('Fetch Specific User', () => {
     it('Successful user fetch', async () => {
       const response = await request(url)
-        .get('/user/1')
+        .get(`/user/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
@@ -67,7 +153,7 @@ describe('E2E test for Users', () => {
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/user/1')
+        .get('/user/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -81,21 +167,21 @@ describe('E2E test for Users', () => {
     it('Successful user update', async () => {
       const credentials = {
         role: { id: 1 },
-        firstName: 'Mail',
-        lastName: 'Check',
-        password: 'string',
-        imageURL: 'string',
+        firstName: 'update e2e',
+        lastName: 'update e2e',
+        password: 'update e2e',
+        imageURL: 'update e2e',
         isActive: true,
-        addressLine1: 'string',
-        addressLine2: 'string',
-        state: 'string',
-        country: 'string',
-        city: 'string',
-        zipcode: 'string',
-        resetToken: 'string',
+        addressLine1: 'update e2e',
+        addressLine2: 'update e2e',
+        state: 'update e2e',
+        country: 'update e2e',
+        city: 'update e2e',
+        zipcode: 'update e2e',
+        resetToken: 'update e2e',
         resetTokenExpires: '2024-08-12T06:10:51.104Z',
         lastLoginTime: '2024-08-12T06:10:51.104Z',
-        updatedBy: 3,
+        updatedBy: 1,
         contactDetails: [
           {
             contactType: 'string',
@@ -104,7 +190,7 @@ describe('E2E test for Users', () => {
         ],
       };
       const response = await request(url)
-        .patch('/user/5')
+        .patch(`/user/${id}`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
@@ -114,9 +200,43 @@ describe('E2E test for Users', () => {
       const { message } = response.body;
       expect(message).toBe('User updated successfully');
     });
+    it('Unsuccessful user update', async () => {
+      const credentials = {
+        role: { id: 1 },
+        firstName: 'Update Fname',
+        lastName: 'Update Lname',
+        password: 'Update password',
+        imageURL: 'Update imageURL',
+        isActive: true,
+        addressLine1: 'Update address1',
+        addressLine2: 'Update address2',
+        state: 'Update state',
+        country: 'Update country',
+        city: 'Update City',
+        zipcode: 'Update zipcode',
+        resetToken: 'Update resetToken',
+        resetTokenExpires: '2024-08-12T06:10:51.104Z',
+        lastLoginTime: '2024-08-12T06:10:51.104Z',
+        updatedBy: 1,
+        contactDetails: [
+          {
+            contactType: 'string',
+            contactValue: 'string',
+          },
+        ],
+      };
+      const response = await request(url)
+        .patch('/user/0')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.status).toBe(404);
+    });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .patch('/user/5')
+        .patch('/user/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -132,7 +252,7 @@ describe('E2E test for Users', () => {
         isActive: true,
       };
       const response = await request(url)
-        .patch('/user/5/set-active-status')
+        .patch(`/user/${id}/set-active-status`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('user-id', `${userid}`)
@@ -147,7 +267,7 @@ describe('E2E test for Users', () => {
         isActive: false,
       };
       const response = await request(url)
-        .patch('/user/5/set-active-status')
+        .patch(`/user/${id}/set-active-status`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('user-id', `${userid}`)
@@ -162,7 +282,7 @@ describe('E2E test for Users', () => {
         isActive: false,
       };
       const response = await request(url)
-        .patch('/user/5/set-active-status')
+        .patch(`/user/${id}/set-active-status`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('user-id', `${userid}`)
@@ -177,7 +297,7 @@ describe('E2E test for Users', () => {
         isActive: true,
       };
       const response = await request(url)
-        .patch('/user/5/set-active-status')
+        .patch(`/user/${id}/set-active-status`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('user-id', `${userid}`)
@@ -193,7 +313,7 @@ describe('E2E test for Users', () => {
         isActive: true,
       };
       const response = await request(url)
-        .patch('/user/5/set-active-status')
+        .patch(`/user/${id}/set-active-status`)
         .send(credentials)
         .set('Accept', 'application/json')
         .set('access-token', 'token')

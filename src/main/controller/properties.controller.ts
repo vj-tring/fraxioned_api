@@ -103,18 +103,21 @@ export class PropertiesController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<PropertyWithDetailsResponseDto | object> {
     try {
-      return await this.propertiesService.getPropertyWithDetailsById(id);
+      return await this.propertiesService.getPropertiesWithDetails(id);
     } catch (error) {
-      throw error;
+      throw new HttpException(
+        `An error occurred while fetching property details for ID ${id}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get('properties-with-details')
   async getAllPropertiesWithDetails(): Promise<
-    PropertyWithDetailsResponseDto | object
+    PropertyWithDetailsResponseDto[] | object
   > {
     try {
-      return await this.propertiesService.getAllPropertiesWithDetails();
+      return await this.propertiesService.getPropertiesWithDetails();
     } catch (error) {
       throw new HttpException(
         'An error occurred while fetching properties with details',

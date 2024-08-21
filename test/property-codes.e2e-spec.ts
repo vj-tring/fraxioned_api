@@ -2,86 +2,116 @@ import * as request from 'supertest';
 import { baseurl } from './test.config';
 import { setup, token, userid } from './setup';
 
-describe('E2E test for User Session', () => {
-  const url = `${baseurl}/user-sessions`;
+describe('E2E test for Property Codes', () => {
+  const url = `${baseurl}/property-codes`;
+  const url2 = `${baseurl}/properties`;
   let id: number;
+  let propertyid: number;
 
   beforeAll(async () => {
     await setup();
   }, 100000);
 
-  describe('User Session Creation', () => {
-    it('Successful user-session creation', async () => {
+  beforeAll(async () => {
+    const credentials = {
+      createdBy: { id: 1 },
+      propertyName: 'Property Name',
+      ownerRezPropId: 0,
+      address: 'Property Address',
+      city: 'Property City',
+      state: 'Property State',
+      country: 'Property Country',
+      zipcode: 0,
+      houseDescription: 'Property Description',
+      isExclusive: true,
+      propertyShare: 0,
+      latitude: 0,
+      longitude: 0,
+      isActive: true,
+      displayOrder: 0,
+    };
+    const response = await request(url2)
+      .post('/property')
+      .set('Accept', 'application/json')
+      .send(credentials)
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`);
+    propertyid = response.body.id;
+  });
+
+  afterAll(async () => {
+    await request(url2)
+      .delete(`/property/${propertyid}`)
+      .set('Accept', 'application/json')
+      .set('user-id', `${userid}`)
+      .set('access-token', `${token}`);
+  });
+
+  describe('Property Codes Creation', () => {
+    it('Successful property codes creation', async () => {
       const credentials = {
-        user: { id: 1 },
-        createdBy: { id: 1 },
-        updatedBy: { id: 1 },
-        token: 'nekottokent764bzhxbhjgzgxvg',
-        expiresAt: '2024-08-13T08:53:04.646Z',
+        property: propertyid,
+        propertyCodeType: 'string',
+        propertyCode: 'string',
+        createdBy: 1,
       };
       const response = await request(url)
-        .post('/user-session')
+        .post('/property-code')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(201);
-      const { message, status, userSession } = response.body;
-      expect(message).toBe('User session created successfully');
-      expect(status).toBe(201);
-      id = userSession.id;
+      expect(response.body).toHaveProperty('id');
+      id = response.body.id;
     });
-    it('User Session already exist', async () => {
+    it('Unsuccessful property codes creation', async () => {
       const credentials = {
-        user: { id: 1 },
-        createdBy: { id: 1 },
-        updatedBy: { id: 1 },
-        token: 'nekottokent764bzhxbhjgzgxvg',
-        expiresAt: '2024-08-13T08:53:04.646Z',
+        property: 10000,
+        propertyCodeType: 'string',
+        propertyCode: 'string',
+        createdBy: 1,
       };
       const response = await request(url)
-        .post('/user-session')
+        .post('/property-code')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Internal server error');
-      expect(response.body.statusCode).toBe(500);
+      const { statusCode, error } = response.body;
+      expect(statusCode).toBe(404);
+      expect(error).toBe('Not Found');
     });
     it('Invalid token or user id', async () => {
       const credentials = {
-        user: { id: 1 },
-        createdBy: { id: 1 },
-        updatedBy: { id: 1 },
-        token: 'nekottokent764bzhxbhjgzgxvg',
-        expiresAt: '2024-08-13T08:53:04.646Z',
+        property: propertyid,
+        propertyCodeType: 'string',
+        propertyCode: 'string',
+        createdBy: 1,
       };
       const response = await request(url)
-        .post('/user-session')
+        .post('/property-code')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
         .expect(401);
-
       const { message } = response.body;
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch All User Sessions', () => {
-    it('Successful user-session fetch', async () => {
-      const response = await request(url)
+  describe('Fetch All Property Codes', () => {
+    it('Successful property codes fetch', async () => {
+      await request(url)
         .get('/')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/);
-      const { message, status } = response.body;
-      expect(message).toBe('User sessions fetched successfully');
-      expect(status).toBe(200);
+        .expect('Content-Type', /json/)
+        .expect(200);
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
@@ -95,31 +125,31 @@ describe('E2E test for User Session', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Fetch Specific User Session', () => {
-    it('Successful user-session fetch', async () => {
+  describe('Fetch Specific Property codes', () => {
+    it('Successful property codes fetch', async () => {
       const response = await request(url)
-        .get(`/user-session/${id}`)
+        .get(`/property-code/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/);
-      expect(response.body).toHaveProperty('token');
-      expect(response.body).toHaveProperty('expiresAt');
+        .expect('Content-Type', /json/)
+        .expect(200);
+      expect(response.body).toHaveProperty('id');
     });
-    it('Unsuccessful user-session fetch', async () => {
+    it('Unsuccessful property code fetch', async () => {
       const response = await request(url)
-        .get('/user-session/0')
+        .get('/property-code/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      const { error, statusCode } = response.body;
-      expect(error).toBe('Not Found');
+      const { statusCode, error } = response.body;
       expect(statusCode).toBe(404);
+      expect(error).toBe('Not Found');
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .get('/user-session/0')
+        .get('/property-code/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
@@ -129,55 +159,45 @@ describe('E2E test for User Session', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Update Specific User Session', () => {
-    it('Successful user-session update', async () => {
+  describe('Update Specific Property Codes', () => {
+    it('Successful property codes update', async () => {
       const credentials = {
-        updatedBy: { id: 1 },
-        token:
-          '534251e668624cbc28a03c73fcf1a00f12ad4801dbda9b5349fd18306eb4adc2467af23913442947b55d9c7673caf85a',
-        expiresAt: '2024-08-13T08:53:30.195Z',
+        property: propertyid,
+        propertyCodeType: 'CodeType',
+        propertyCode: 'Code',
+        updatedBy: 1,
       };
-      const response = await request(url)
-        .patch(`/user-session/${id}`)
+      await request(url)
+        .patch(`/property-code/${id}`)
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-
-      const { message, status } = response.body;
-      expect(message).toBe('User session updated successfully');
-      expect(status).toBe(200);
+        .expect('Content-Type', /json/)
+        .expect(200);
     });
-    it('Unsuccessful user-session update', async () => {
+    it('Unsuccessful property codes update', async () => {
       const credentials = {
-        updatedBy: { id: 1 },
-        token: 'update',
-        expiresAt: '2024-08-13T08:53:30.195Z',
+        property: propertyid,
+        propertyCodeType: 'CodeType',
+        propertyCode: 'Code',
+        updatedBy: 1,
       };
       const response = await request(url)
-        .patch('/user-session/0')
+        .patch('/property-code/0')
         .set('Accept', 'application/json')
         .send(credentials)
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
-      const { error, statusCode } = response.body;
-      expect(error).toBe('Not Found');
+      const { statusCode, error } = response.body;
       expect(statusCode).toBe(404);
+      expect(error).toBe('Not Found');
     });
     it('Invalid token or user id', async () => {
-      const credentials = {
-        user: { id: 3 },
-        createdBy: { id: 3 },
-        updatedBy: { id: 3 },
-        token: 'string',
-        expiresAt: '2024-08-13T08:53:04.646Z',
-      };
       const response = await request(url)
-        .patch('/user-session/0')
+        .patch('/property-code/0')
         .set('Accept', 'application/json')
-        .send(credentials)
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/)
@@ -186,32 +206,30 @@ describe('E2E test for User Session', () => {
       expect(message).toBe('The provided user ID or access token is invalid');
     });
   });
-  describe('Delete Specific User Session', () => {
-    it('Successful user-session deletion', async () => {
-      const response = await request(url)
-        .delete(`/user-session/${id}`)
+  describe('Delete Specific Property Codes', () => {
+    it('Successful property codes deletion', async () => {
+      await request(url)
+        .delete(`/property-code/${id}`)
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
-        .expect('Content-Type', /json/);
-      const { message, status } = response.body;
-      expect(message).toBe('User session deleted successfully');
-      expect(status).toBe(200);
+        .expect('Content-Type', /json/)
+        .expect(200);
     });
-    it('User Session not found for delete', async () => {
+    it('Property codes id not found for delete', async () => {
       const response = await request(url)
-        .delete('/user-session/0')
+        .delete('/property-code/0')
         .set('Accept', 'application/json')
         .set('user-id', `${userid}`)
         .set('access-token', `${token}`)
         .expect('Content-Type', /json/);
-      const { error, statusCode } = response.body;
-      expect(error).toBe('Not Found');
+      const { statusCode, error } = response.body;
       expect(statusCode).toBe(404);
+      expect(error).toBe('Not Found');
     });
     it('Invalid token or user id', async () => {
       const response = await request(url)
-        .delete('/user-session/0')
+        .delete('/property-code/0')
         .set('Accept', 'application/json')
         .set('access-token', 'token')
         .set('user-id', `${userid}`)
