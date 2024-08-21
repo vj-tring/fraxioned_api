@@ -210,88 +210,129 @@ export class PropertiesService {
     return updatedProperties;
   }
 
-  async getPropertyWithDetailsById(
-    id: number,
-  ): Promise<PropertyWithDetailsResponseDto | object> {
-    try {
-      const property = await this.propertiesRepository.findOne({
-        where: { id },
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
-
-      if (!property) {
-        return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
-      }
-
-      const propertyDetails = await this.propertyDetailsRepository.findOne({
-        where: { property: { id: id } },
-      });
-
-      if (!propertyDetails) {
-        return USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(id);
-      }
-
-      const { id: propertyId, ...propertyWithoutId } = property;
-      const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
-        propertyDetails;
-
-      return {
-        propertyId,
-        propertyDetailsId,
-        ...propertyWithoutId,
-        ...propertyDetailsWithoutId,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getAllPropertiesWithDetails(): Promise<
-    PropertyWithDetailsResponseDto | object
+  async getPropertiesWithDetails(
+    id?: number,
+  ): Promise<
+    PropertyWithDetailsResponseDto | PropertyWithDetailsResponseDto[] | object
   > {
     try {
-      const properties = await this.propertiesRepository.find();
+      if (id) {
+        const property = await this.propertiesRepository.findOne({
+          where: { id },
+          relations: ['createdBy', 'updatedBy'],
+          select: {
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
+          },
+        });
 
-      if (!properties.length) {
-        return USER_PROPERTY_RESPONSES.PROPERTIES_NOT_FOUND;
-      }
+        if (!property) {
+          return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
+        }
 
-      const propertiesWithDetails = await Promise.all(
-        properties.map(async (property) => {
-          const propertyDetails = await this.propertyDetailsRepository.findOne({
-            where: { property: { id: property.id } },
-          });
+        const propertyDetails = await this.propertyDetailsRepository.findOne({
+          where: { property: { id: id } },
+        });
 
-          if (!propertyDetails) {
-            return {
-              propertyId: property.id,
-              propertyDetailsId: null,
-              ...property,
-            };
+        if (!propertyDetails) {
+          return USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(id);
+        }
+
+        const userProperties = await this.userPropertiesRepository.find({
+          where: { property: { id: id } },
+          relations: ['user'],
+        });
+
+        const uniqueUsers = new Map();
+        userProperties.forEach((userProperty) => {
+          if (!uniqueUsers.has(userProperty.user.id)) {
+            uniqueUsers.set(userProperty.user.id, userProperty.user);
           }
+        });
 
-          const { id: propertyId, ...propertyWithoutId } = property;
-          const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
-            propertyDetails;
+        const { id: propertyId, ...propertyWithoutId } = property;
+        const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
+          propertyDetails;
 
-          return {
-            propertyId,
-            propertyDetailsId,
-            ...propertyWithoutId,
-            ...propertyDetailsWithoutId,
-          };
-        }),
-      );
+        return {
+          propertyId,
+          propertyDetailsId,
+          ...propertyWithoutId,
+          ...propertyDetailsWithoutId,
+          users: Array.from(uniqueUsers.values()).map((user) => ({
+            userId: user.id,
+            ...user,
+          })),
+        };
+      } else {
+        const properties = await this.propertiesRepository.find({
+          relations: ['createdBy', 'updatedBy'],
+          select: {
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
+          },
+        });
 
-      return propertiesWithDetails;
+        if (!properties.length) {
+          return USER_PROPERTY_RESPONSES.PROPERTIES_NOT_FOUND;
+        }
+
+        const propertiesWithDetails = await Promise.all(
+          properties.map(async (property) => {
+            const propertyDetails =
+              await this.propertyDetailsRepository.findOne({
+                where: { property: { id: property.id } },
+              });
+
+            const userProperties = await this.userPropertiesRepository.find({
+              where: { property: { id: property.id } },
+              relations: ['user'],
+            });
+
+            const uniqueUsers = new Map();
+            userProperties.forEach((userProperty) => {
+              if (!uniqueUsers.has(userProperty.user.id)) {
+                uniqueUsers.set(userProperty.user.id, userProperty.user);
+              }
+            });
+
+            if (!propertyDetails) {
+              return {
+                propertyId: property.id,
+                propertyDetailsId: null,
+                ...property,
+                users: Array.from(uniqueUsers.values()).map((user) => ({
+                  userId: user.id,
+                  ...user,
+                })),
+              };
+            }
+
+            const { id: propertyId, ...propertyWithoutId } = property;
+            const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
+              propertyDetails;
+
+            return {
+              propertyId,
+              propertyDetailsId,
+              ...propertyWithoutId,
+              ...propertyDetailsWithoutId,
+              owners: Array.from(uniqueUsers.values()).map((user) => ({
+                userId: user.id,
+              })),
+            };
+          }),
+        );
+        return propertiesWithDetails;
+      }
     } catch (error) {
       throw error;
     }
@@ -303,7 +344,7 @@ export class PropertiesService {
     try {
       const userProperties = await this.userPropertiesRepository.find({
         where: { user: { id: userId } },
-        relations: ['property'],
+        relations: ['property', 'user'],
       });
 
       if (!userProperties.length) {

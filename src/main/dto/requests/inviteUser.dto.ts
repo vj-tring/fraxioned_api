@@ -9,7 +9,7 @@ export class InviteUserDto {
   @IsNotEmpty({ message: 'firstName is required' })
   firstName: string;
 
-  @IsNotEmpty({ message: 'firstName is required' })
+  @IsNotEmpty({ message: 'lastName is required' })
   lastName: string;
 
   @IsNotEmpty({ message: 'addressLine1 is required' })
@@ -43,7 +43,7 @@ export class InviteUserDto {
   createdBy: number;
 
   @IsOptional()
-  @ValidateNested()
+  @ValidateNested({ each: true })
   @Type(() => UserPropertyDto)
-  userPropertyDetails: UserPropertyDto;
+  userPropertyDetails: UserPropertyDto[];
 }
