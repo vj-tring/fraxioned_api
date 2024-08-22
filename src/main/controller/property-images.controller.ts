@@ -2,15 +2,17 @@ import {
   Controller,
   Post,
   Body,
-  HttpStatus,
-  HttpException,
+  UploadedFiles,
   UseInterceptors,
-  UploadedFile,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { PropertyImagesService } from '../service/property-images.service';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { CreatePropertyImagesRequestDto } from '../dto/requests/create-property-images-request.dto';
 import { CreatePropertyImagesDto } from '../dto/requests/create-property-images.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { PropertyImagesService } from '../service/property-images.service';
+import { PropertyImages } from '../entities/property_images.entity';
 
 @ApiTags('Property Images')
 @Controller('v1/propertyImages/propertyImage')
@@ -18,30 +20,37 @@ export class PropertyImagesController {
   constructor(private readonly propertyImagesService: PropertyImagesService) {}
 
   @Post()
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('imageFile'))
-  async createPropertyImage(
-    @Body() createPropertyImagesDto: CreatePropertyImagesDto,
-    @UploadedFile() imageFile: Express.Multer.File,
-  ): Promise<void> {
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'imageFiles', maxCount: 50 }]),
+  )
+  async createPropertyImages(
+    @UploadedFiles() files: { imageFiles?: Express.Multer.File[] },
+    @Body() createPropertyImagesRequestDto: CreatePropertyImagesRequestDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyImages;
+    statusCode: HttpStatus;
+  }> {
     try {
-      console.log('Type of imageFile:', typeof imageFile);
-      console.log('Received Image File:', imageFile);
-      console.log('Received DTO:', createPropertyImagesDto);
+      const propertyImageDetails: CreatePropertyImagesDto[] = JSON.parse(
+        createPropertyImagesRequestDto.propertyImages,
+      );
 
-      if (!imageFile) {
-        throw new HttpException(
-          'Image file is required please',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+      const processedPropertyImagesDtos = propertyImageDetails.map(
+        (dto, index) => ({
+          ...dto,
+          imageFiles: files.imageFiles ? files.imageFiles[index] : null,
+        }),
+      );
 
-      // Proceed with your logic here
-      // const result = await this.propertyImagesService.createPropertyImages(createPropertyImagesDto);
-      // return result;
+      const result = await this.propertyImagesService.createPropertyImages(
+        processedPropertyImagesDtos,
+      );
+      return result;
     } catch (error) {
       throw new HttpException(
-        'An error occurred while creating the property image(s)',
+        'An error occurred while creating the property images',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

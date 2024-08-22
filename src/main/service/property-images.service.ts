@@ -22,7 +22,7 @@ export class PropertyImagesService {
   ) {}
 
   async createPropertyImages(
-    createPropertyImagesDto: CreatePropertyImagesDto,
+    createPropertyImagesDtos: CreatePropertyImagesDto[],
   ): Promise<{
     success: boolean;
     message: string;
@@ -34,7 +34,7 @@ export class PropertyImagesService {
       message: 'created successfully',
       statusCode: HttpStatus.CREATED,
     };
-    console.log(createPropertyImagesDto);
+    console.log(createPropertyImagesDtos);
     return result;
     //     try {
     //       this.logger.log(

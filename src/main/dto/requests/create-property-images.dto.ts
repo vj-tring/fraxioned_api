@@ -31,9 +31,6 @@ export class CreatePropertyImagesDto {
   })
   createdBy: User;
 
-  // @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value))
-  // @IsArray()
-  // images: CreateImagesDto[];
   @ApiProperty({ example: 'Bedroom 1' })
   @IsNotEmpty({ message: 'Image name is required' })
   @IsString()
@@ -50,9 +47,5 @@ export class CreatePropertyImagesDto {
   spaceType: SpaceTypes;
 
   @ApiProperty({ type: 'string', format: 'binary' })
-  // @IsNotEmpty({ message: 'Image file is required' })
-  // @Transform(({ value }) =>
-  //   typeof value === 'string' ? JSON.parse(value) : value,
-  // )
-  imageFile: Express.Multer.File;
+  imageFiles: Express.Multer.File;
 }
