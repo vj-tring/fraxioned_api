@@ -19,12 +19,15 @@ import {
   RESET_PASSWORD_RESPONSES,
   LOGOUT_RESPONSES,
 } from 'src/main/commons/constants/response-constants/auth.constant';
-import { MailService } from '../../email/mail.service';
-import { authConstants } from '../../commons/constants/authentication/authentication.constants';
+import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
 import {
   mailSubject,
   mailTemplates,
-} from '../../commons/constants/email/mail.constants';
+} from 'src/main/commons/constants/email/mail.constants';
+import { MailService } from 'src/main/email/mail.service';
+import { PropertyDetails } from 'src/main/entities/property-details.entity';
+import { Property } from 'src/main/entities/property.entity';
+import { Role } from 'src/main/entities/role.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -36,6 +39,13 @@ export class AuthenticationService {
     @InjectRepository(UserSession)
     private readonly userSessionRepository: Repository<UserSession>,
     @InjectRepository(UserProperties)
+    private readonly userPropertyRepository: Repository<UserProperties>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
+    @InjectRepository(PropertyDetails)
+    private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     private readonly mailService: MailService,
     private readonly logger: LoggerService,
   ) {}
