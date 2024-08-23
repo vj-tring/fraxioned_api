@@ -6,7 +6,7 @@ import { Role } from 'entities/role.entity';
 import { LoggerService } from 'services/logger.service';
 import { User } from 'entities/user.entity';
 import { Repository } from 'typeorm';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('RoleController', () => {

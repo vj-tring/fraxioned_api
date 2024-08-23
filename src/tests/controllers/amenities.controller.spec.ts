@@ -3,7 +3,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { AmenitiesController } from 'src/main/controller/amenities.controller';
 import { AmenitiesService } from 'src/main/service/amenities.service';

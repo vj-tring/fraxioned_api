@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { UpdatePropertyCodeDto } from 'src/main/dto/requests/update-property-code.dto';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('PropertyCodesController', () => {

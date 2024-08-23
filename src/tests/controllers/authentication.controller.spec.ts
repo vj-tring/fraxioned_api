@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationController } from 'src/main/controller/authentication.controller';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
@@ -11,10 +11,12 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InviteService } from 'src/main/service/auth/invite.service';
 
 describe('AuthenticationController', () => {
   let controller: AuthenticationController;
   let service: AuthenticationService;
+  let inviteService: InviteService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,11 +33,18 @@ describe('AuthenticationController', () => {
             logout: jest.fn(),
           },
         },
+        {
+          provide: InviteService,
+          useValue: {
+            inviteUser: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<AuthenticationController>(AuthenticationController);
     service = module.get<AuthenticationService>(AuthenticationService);
+    inviteService = module.get<InviteService>(InviteService);
   });
 
   describe('inviteUser', () => {
@@ -63,7 +72,7 @@ describe('AuthenticationController', () => {
         ],
       };
       const result = { message: 'Invite sent successfully' };
-      jest.spyOn(service, 'inviteUser').mockResolvedValue(result);
+      jest.spyOn(inviteService, 'inviteUser').mockResolvedValue(result);
 
       expect(await controller.inviteUser(inviteUserDto)).toEqual(result);
     });

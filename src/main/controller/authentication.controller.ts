@@ -12,7 +12,7 @@ import {
   InternalServerErrorException,
   UseGuards,
 } from '@nestjs/common';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { LoginDto } from 'src/main/dto/requests/login.dto';
 import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
@@ -20,22 +20,26 @@ import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
+import { InviteService } from '../service/auth/invite.service';
 
 @ApiTags('Authentication')
 @Controller('v1/authentication')
 export class AuthenticationController {
-  constructor(private readonly authenticationService: AuthenticationService) {}
+  constructor(
+    private readonly authenticationService: AuthenticationService,
+    private readonly inviteService: InviteService,
+  ) {}
 
   @Post('invite')
-  // @UseGuards(AuthGuard)
-  // @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  // @ApiHeader({
-  //   name: 'access-token',
-  //   required: true,
-  //   description: 'Access Token',
-  // })
+  @UseGuards(AuthGuard)
+  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
+  @ApiHeader({
+    name: 'access-token',
+    required: true,
+    description: 'Access Token',
+  })
   inviteUser(@Body() inviteUserDto: InviteUserDto): Promise<object> {
-    return this.authenticationService.inviteUser(inviteUserDto);
+    return this.inviteService.inviteUser(inviteUserDto);
   }
 
   @Post('login')

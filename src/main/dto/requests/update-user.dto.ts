@@ -78,6 +78,7 @@ export class UpdateUserDTO {
   @IsOptional()
   updatedBy?: number;
 
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UserContactDetailsDTO)

@@ -9,7 +9,7 @@ import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
 import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/response-constants/holiday.constants';
 import { Role } from 'src/main/entities/role.entity';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('HolidaysController', () => {
