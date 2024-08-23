@@ -11,7 +11,6 @@ import * as crypto from 'crypto';
 import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
 import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
 import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
-import { UserProperties } from 'src/main/entities/user-properties.entity';
 import {
   LOGIN_RESPONSES,
   FORGOT_PASSWORD_RESPONSES,
@@ -25,9 +24,6 @@ import {
   mailTemplates,
 } from 'src/main/commons/constants/email/mail.constants';
 import { MailService } from 'src/main/email/mail.service';
-import { PropertyDetails } from 'src/main/entities/property-details.entity';
-import { Property } from 'src/main/entities/property.entity';
-import { Role } from 'src/main/entities/role.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -38,14 +34,6 @@ export class AuthenticationService {
     private readonly userContactRepository: Repository<UserContactDetails>,
     @InjectRepository(UserSession)
     private readonly userSessionRepository: Repository<UserSession>,
-    @InjectRepository(UserProperties)
-    private readonly userPropertyRepository: Repository<UserProperties>,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
-    @InjectRepository(Property)
-    private readonly propertyRepository: Repository<Property>,
-    @InjectRepository(PropertyDetails)
-    private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     private readonly mailService: MailService,
     private readonly logger: LoggerService,
   ) {}

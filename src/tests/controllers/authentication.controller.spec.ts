@@ -33,11 +33,18 @@ describe('AuthenticationController', () => {
             logout: jest.fn(),
           },
         },
+        {
+          provide: InviteService,
+          useValue: {
+            inviteUser: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<AuthenticationController>(AuthenticationController);
     service = module.get<AuthenticationService>(AuthenticationService);
+    inviteService = module.get<InviteService>(InviteService);
   });
 
   describe('inviteUser', () => {
