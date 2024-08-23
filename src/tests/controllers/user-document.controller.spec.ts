@@ -12,7 +12,7 @@ import { UserDocument } from 'src/main/entities/user-documents.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { LoggerService } from 'src/main/service/logger.service';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 
 describe('UserDocumentController', () => {
   let controller: UserDocumentController;

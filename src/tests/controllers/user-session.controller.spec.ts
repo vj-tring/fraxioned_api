@@ -6,7 +6,7 @@ import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
 import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/response-constants/user-session.constant';
 import { User } from 'entities/user.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 
 describe('UserSessionController', () => {

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationService } from '../../main/service/authentication.service';
+import { AuthenticationService } from '../../main/service/auth/authentication.service';
 import { LoggerService } from '../../main/service/logger.service';
 import * as bcrypt from 'bcrypt';
 import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
@@ -22,6 +22,7 @@ import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-con
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 import { MailService } from 'src/main/email/mail.service';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
+import { InviteService } from 'src/main/service/auth/invite.service';
 
 type MockRepository<T> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
@@ -41,6 +42,7 @@ jest.mock('bcrypt', () => ({
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
+  let inviteService: InviteService;
   let userRepository: MockRepository<User>;
   let userSessionRepository: MockRepository<UserSession>;
   let userPropertyRepository: MockRepository<UserProperties>;
@@ -156,7 +158,7 @@ describe('AuthenticationService', () => {
       userPropertyRepository.create.mockReturnValue({});
       userPropertyRepository.save.mockResolvedValue({});
 
-      const result = await service.inviteUser(inviteUserDto);
+      const result = await inviteService.inviteUser(inviteUserDto);
 
       expect(result).toEqual(INVITE_USER_RESPONSES.INVITE_SUCCESS);
       expect(logger.log).toHaveBeenCalledWith(
@@ -170,7 +172,7 @@ describe('AuthenticationService', () => {
     it('should return EMAIL_EXISTS if email already exists', async () => {
       userContactDetailsRepository.findOne.mockResolvedValue({});
 
-      const result = await service.inviteUser(inviteUserDto);
+      const result = await inviteService.inviteUser(inviteUserDto);
 
       expect(result).toEqual(INVITE_USER_RESPONSES.EMAIL_EXISTS);
       expect(logger.error).toHaveBeenCalledWith(
@@ -182,7 +184,7 @@ describe('AuthenticationService', () => {
       userContactDetailsRepository.findOne.mockResolvedValue(null);
       userRepository.findOne.mockResolvedValueOnce(null);
 
-      const result = await service.inviteUser(inviteUserDto);
+      const result = await inviteService.inviteUser(inviteUserDto);
 
       expect(result).toEqual(
         USER_RESPONSES.USER_NOT_FOUND(inviteUserDto.createdBy),
@@ -197,7 +199,7 @@ describe('AuthenticationService', () => {
       userRepository.findOne.mockResolvedValueOnce({ id: 1 });
       userRepository.findOne.mockResolvedValueOnce(null);
 
-      const result = await service.inviteUser(inviteUserDto);
+      const result = await inviteService.inviteUser(inviteUserDto);
 
       expect(result).toEqual(
         USER_RESPONSES.USER_NOT_FOUND(inviteUserDto.updatedBy),
@@ -213,7 +215,7 @@ describe('AuthenticationService', () => {
       userRepository.findOne.mockResolvedValueOnce({ id: 1 });
       roleRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.inviteUser(inviteUserDto);
+      const result = await inviteService.inviteUser(inviteUserDto);
 
       expect(result).toEqual(
         ROLE_RESPONSES.ROLE_NOT_FOUND(inviteUserDto.roleId),
@@ -230,7 +232,7 @@ describe('AuthenticationService', () => {
       roleRepository.findOne.mockResolvedValue({ id: 1 });
       propertyRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.inviteUser(inviteUserDto);
+      const result = await inviteService.inviteUser(inviteUserDto);
 
       expect(result).toEqual(
         USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
@@ -248,7 +250,7 @@ describe('AuthenticationService', () => {
         new Error(errorMessage),
       );
 
-      await expect(service.inviteUser(inviteUserDto)).rejects.toThrow(
+      await expect(inviteService.inviteUser(inviteUserDto)).rejects.toThrow(
         errorMessage,
       );
       expect(logger.error).toHaveBeenCalledWith(

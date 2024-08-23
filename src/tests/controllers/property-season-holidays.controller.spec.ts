@@ -3,7 +3,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { Holidays } from 'src/main/entities/holidays.entity';
 import { User } from 'src/main/entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { PropertySeasonHolidaysController } from 'src/main/controller/property-season-holidays.controller';
 import { PropertySeasonHolidaysService } from 'src/main/service/property-season-holidays.service';
