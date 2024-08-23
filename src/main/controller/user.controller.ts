@@ -9,11 +9,11 @@ import {
 } from '@nestjs/common';
 import { UserService } from 'services/user.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDTO } from 'dto/requests/create-user.dto';
-import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { AuthGuard } from 'commons/guards/auth.guard';
-import { SetActiveStatusDTO } from '../dto/requests/set-active.dto';
+import { SetActiveStatusDTO } from '../dto/requests/user/set-active.dto';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { CreateUserDTO } from '../dto/requests/user/create-user.dto';
+import { UpdateUserDTO } from '../dto/requests/user/update-user.dto';
 
 @ApiTags('User')
 @Controller('v1/users')

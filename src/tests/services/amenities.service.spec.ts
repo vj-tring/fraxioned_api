@@ -8,9 +8,9 @@ import { Role } from 'src/main/entities/role.entity';
 import { AmenitiesService } from 'src/main/service/amenities.service';
 import { Amenities } from 'src/main/entities/amenities.entity';
 import { PropertyAmenities } from 'src/main/entities/property_amenities.entity';
-import { CreateAmenitiesDto } from 'src/main/dto/requests/create-amenities.dto';
 import { AMENITIES_RESPONSES } from 'src/main/commons/constants/response-constants/amenities.constant';
-import { UpdateAmenitiesDto } from 'src/main/dto/requests/update-amenities.dto';
+import { CreateAmenitiesDto } from 'src/main/dto/requests/amenity/create-amenities.dto';
+import { UpdateAmenitiesDto } from 'src/main/dto/requests/amenity/update-amenities.dto';
 
 describe('AmenitiesService', () => {
   let service: AmenitiesService;

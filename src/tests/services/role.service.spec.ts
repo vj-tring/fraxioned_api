@@ -4,12 +4,12 @@ import { DeleteResult, Repository } from 'typeorm';
 import { RoleService } from 'src/main/service/role.service';
 import { Role } from 'entities/role.entity';
 import { LoggerService } from 'services/logger.service';
-import { CreateRoleDTO } from 'src/main/dto/requests/createRole.dto';
-import { UpdateRoleDTO } from 'src/main/dto/requests/updateRole.dto';
 import { NotFoundException } from '@nestjs/common';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 import { User } from 'entities/user.entity';
 import { RoleAlreadyExistsException } from 'src/main/commons/exceptions/roleName_exists';
+import { CreateRoleDTO } from 'src/main/dto/requests/role/createRole.dto';
+import { UpdateRoleDTO } from 'src/main/dto/requests/role/updateRole.dto';
 
 describe('RoleService', () => {
   let service: RoleService;

@@ -12,9 +12,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PropertyDetailsService } from '../service/property-details.service';
-import { CreatePropertyDetailsDto } from '../dto/requests/create-property-details.dto';
+import { CreatePropertyDetailsDto } from '../dto/requests/property-details/create-property-details.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { UpdatePropertyDetailsDto } from '../dto/requests/update-property-details.dto';
+import { UpdatePropertyDetailsDto } from '../dto/requests/property-details/update-property-details.dto';
 import { CreatePropertyDetailsResponseDto } from '../dto/responses/create-property-details.dto';
 import { UpdatePropertyDetailsResponseDto } from '../dto/responses/update-property-details.dto';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';

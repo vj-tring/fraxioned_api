@@ -13,9 +13,9 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { AmenitiesService } from '../service/amenities.service';
-import { CreateAmenitiesDto } from '../dto/requests/create-amenities.dto';
+import { CreateAmenitiesDto } from '../dto/requests/amenity/create-amenities.dto';
 import { Amenities } from '../entities/amenities.entity';
-import { UpdateAmenitiesDto } from '../dto/requests/update-amenities.dto';
+import { UpdateAmenitiesDto } from '../dto/requests/amenity/update-amenities.dto';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Amenities')

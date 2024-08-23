@@ -11,10 +11,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PropertySeasonHolidaysService } from '../service/property-season-holidays.service';
-import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
+import { CreatePropertySeasonHolidayDto } from '../dto/requests/property-season-holiday/create-property-season-holiday.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
-import { UpdatePropertySeasonHolidayDto } from '../dto/requests/update-property-season-holiday.dto';
+import { UpdatePropertySeasonHolidayDto } from '../dto/requests/property-season-holiday/update-property-season-holiday.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 

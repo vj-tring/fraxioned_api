@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserDocumentController } from 'src/main/controller/user-document.controller';
 import { UserDocumentService } from 'services/user-document.service';
-import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
-import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
+import { UpdateUserDocumentDTO } from 'src/main/dto/requests/user-document/update-user-document.dto';
 import { AuthGuard } from 'commons/guards/auth.guard';
 import { Reflector } from '@nestjs/core';
 import { USER_DOCUMENT_RESPONSES } from 'src/main/commons/constants/response-constants/user-document.constant';
@@ -13,6 +12,7 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { LoggerService } from 'src/main/service/logger.service';
 import { AuthenticationService } from 'src/main/service/auth/authentication.service';
+import { CreateUserDocumentDTO } from 'src/main/dto/requests/user-document/create-user-document.dto';
 
 describe('UserDocumentController', () => {
   let controller: UserDocumentController;

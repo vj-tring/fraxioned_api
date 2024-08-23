@@ -5,10 +5,10 @@ import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { PropertyDetailsService } from 'src/main/service/property-details.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { CreatePropertyDetailsDto } from 'src/main/dto/requests/create-property-details.dto';
-import { UpdatePropertyDetailsDto } from 'src/main/dto/requests/update-property-details.dto';
+import { UpdatePropertyDetailsDto } from 'src/main/dto/requests/property-details/update-property-details.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { User } from 'src/main/entities/user.entity';
+import { CreatePropertyDetailsDto } from 'src/main/dto/requests/property-details/create-property-details.dto';
 
 describe('PropertyDetailsService', () => {
   let service: PropertyDetailsService;

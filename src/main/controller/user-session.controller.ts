@@ -9,11 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserSessionService } from 'services/user-session.service';
-import { CreateUserSessionDTO } from 'dto/requests/create-user-session.dto';
-import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
+import { UpdateUserSessionDTO } from 'src/main/dto/requests/user-session/update-user-session.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { AuthGuard } from '../commons/guards/auth.guard';
+import { CreateUserSessionDTO } from '../dto/requests/user-session/create-user-session.dto';
 
 @ApiTags('UserSession')
 @Controller('v1/user-sessions')
