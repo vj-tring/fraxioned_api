@@ -6,6 +6,9 @@ import {
   UseInterceptors,
   HttpException,
   HttpStatus,
+  UseGuards,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreatePropertyImagesRequestDto } from '../dto/requests/create-property-images-request.dto';
@@ -13,9 +16,13 @@ import { CreatePropertyImagesDto } from '../dto/requests/create-property-images.
 import { ApiTags } from '@nestjs/swagger';
 import { PropertyImagesService } from '../service/property-images.service';
 import { PropertyImages } from '../entities/property_images.entity';
+import { AuthGuard } from '../commons/guards/auth.guard';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Property Images')
 @Controller('v1/propertyImages/propertyImage')
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class PropertyImagesController {
   constructor(private readonly propertyImagesService: PropertyImagesService) {}
 
@@ -29,7 +36,7 @@ export class PropertyImagesController {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: PropertyImages;
+    data?: PropertyImages[];
     statusCode: HttpStatus;
   }> {
     try {
@@ -51,6 +58,42 @@ export class PropertyImagesController {
     } catch (error) {
       throw new HttpException(
         'An error occurred while creating the property images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get()
+  async getAllPropertyImages(): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyImages[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result = await this.propertyImagesService.findAllPropertyImages();
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving all property images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get(':id')
+  async getByPropertyImageId(@Param('id') id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyImages;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result = await this.propertyImagesService.findPropertyImageById(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the property image',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

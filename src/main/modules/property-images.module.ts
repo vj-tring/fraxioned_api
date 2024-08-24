@@ -7,10 +7,18 @@ import { Property } from '../entities/property.entity';
 import { PropertyImages } from '../entities/property_images.entity';
 import { PropertyImagesController } from '../controller/property-images.controller';
 import { PropertyImagesService } from '../service/property-images.service';
+import { Space } from '../entities/space.entity';
+import { SpaceTypes } from '../entities/space-types.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PropertyImages, User, Property]),
+    TypeOrmModule.forFeature([
+      PropertyImages,
+      User,
+      Property,
+      SpaceTypes,
+      Space,
+    ]),
     LoggerModule,
     AuthenticationModule,
   ],

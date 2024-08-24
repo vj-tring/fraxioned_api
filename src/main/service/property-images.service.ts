@@ -1,24 +1,33 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { PropertyImages } from '../entities/property_images.entity';
 import { CreatePropertyImagesDto } from '../dto/requests/create-property-images.dto';
+import { LoggerService } from './logger.service';
+import { Property } from '../entities/property.entity';
+import { PROPERTY_IMAGES_RESPONSES } from '../commons/constants/response-constants/property-images.constant';
+import { Space } from '../entities/space.entity';
+import { SpaceTypes } from '../entities/space-types.entity';
+import { S3 } from 'aws-sdk';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class PropertyImagesService {
+  private readonly s3 = new S3();
+  private readonly bucketName = process.env.AWS_S3_BUCKET_NAME;
+
   constructor(
     @InjectRepository(PropertyImages)
     private readonly propertyImagesRepository: Repository<PropertyImages>,
-    // @InjectRepository(User)
-    // private readonly usersRepository: Repository<User>,
-    // @InjectRepository(PropertySeasonHolidays)
-    // private readonly propertySeasonHolidayRepository: Repository<PropertySeasonHolidays>,
-    // @InjectRepository(PropertyDetails)
-    // private readonly propertyDetailsRepository: Repository<PropertyDetails>,
-    // @InjectRepository(Property)
-    // private readonly propertiesRepository: Repository<Property>,
-    // private readonly propertySeasonHolidayService: PropertySeasonHolidaysService,
-    // private readonly logger: LoggerService,
+    @InjectRepository(Property)
+    private readonly propertiesRepository: Repository<Property>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Space)
+    private readonly spaceRepository: Repository<Space>,
+    @InjectRepository(SpaceTypes)
+    private readonly spaceTypesRepository: Repository<SpaceTypes>,
+    private readonly logger: LoggerService,
   ) {}
 
   async createPropertyImages(
@@ -26,459 +35,211 @@ export class PropertyImagesService {
   ): Promise<{
     success: boolean;
     message: string;
+    data?: PropertyImages[];
+    statusCode: number;
+  }> {
+    try {
+      const propertyId = createPropertyImagesDtos[0].property.id;
+      const createdByUserId = createPropertyImagesDtos[0].createdBy.id;
+
+      const existingProperty = await this.propertiesRepository.findOne({
+        where: { id: propertyId },
+      });
+      if (!existingProperty) {
+        this.logger.error(`Property with ID ${propertyId} does not exist`);
+        return PROPERTY_IMAGES_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
+      }
+
+      const existingUser = await this.userRepository.findOne({
+        where: { id: createdByUserId },
+      });
+      if (!existingUser) {
+        this.logger.error(`User with ID ${createdByUserId} does not exist`);
+        return PROPERTY_IMAGES_RESPONSES.USER_NOT_FOUND(createdByUserId);
+      }
+
+      const spaceTypeIds = createPropertyImagesDtos.map(
+        (dto) => dto.spaceType.id,
+      );
+
+      const existingSpaceTypes = await this.spaceTypesRepository.find({
+        where: { id: In(spaceTypeIds) },
+        relations: ['space'],
+      });
+
+      const validSpaceTypeIds = new Set(existingSpaceTypes.map((st) => st.id));
+
+      const invalidSpaceTypeIds = spaceTypeIds.filter(
+        (id) => !validSpaceTypeIds.has(id),
+      );
+
+      if (invalidSpaceTypeIds.length > 0) {
+        this.logger.error(
+          `Invalid Space Type IDs: ${invalidSpaceTypeIds.join(', ')}`,
+        );
+        return PROPERTY_IMAGES_RESPONSES.MULTIPLE_SPACE_TYPES_NOT_FOUND(
+          invalidSpaceTypeIds,
+        );
+      }
+
+      const uploadPromises = createPropertyImagesDtos.map(async (dto) => {
+        const existingSpaceType = await this.spaceTypesRepository.findOne({
+          where: { id: dto.spaceType.id },
+          relations: ['space'],
+        });
+
+        const folderName = `properties_media/${existingProperty.propertyName}/images/${existingSpaceType.space.name}`;
+        const fileName = dto.imageFiles.originalname;
+
+        const uploadResult = await this.s3
+          .upload({
+            Bucket: this.bucketName,
+            Key: `${folderName}/${fileName}`,
+            Body: dto.imageFiles.buffer,
+            ContentType: dto.imageFiles.mimetype,
+          })
+          .promise();
+
+        const imageUrlLocation = uploadResult.Location;
+
+        const newImage = this.propertyImagesRepository.create({
+          property: dto.property,
+          createdBy: dto.createdBy,
+          imageName: dto.name,
+          spaceType: dto.spaceType,
+          imageUrl: imageUrlLocation,
+        });
+
+        const savedImage = await this.propertyImagesRepository.save(newImage);
+        return savedImage;
+      });
+
+      const uploadedImages = await Promise.all(uploadPromises);
+
+      this.logger.log(
+        `${uploadedImages.length} property images created successfully`,
+      );
+      return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_CREATED(
+        uploadedImages.length,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error creating property images: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while creating the property images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findAllPropertyImages(): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyImages[];
+    statusCode: number;
+  }> {
+    try {
+      const propertyImages = await this.propertyImagesRepository.find({
+        relations: [
+          'spaceType',
+          'spaceType.space',
+          'property',
+          'createdBy',
+          'updatedBy',
+        ],
+        select: {
+          spaceType: {
+            id: true,
+            name: true,
+            space: {
+              id: true,
+              name: true,
+            },
+          },
+          property: {
+            id: true,
+            propertyName: true,
+          },
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+
+      if (propertyImages.length === 0) {
+        this.logger.log(`No property images are found`);
+        return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_NOT_FOUND();
+      }
+
+      this.logger.log(`Retrieved ${propertyImages.length} property images`);
+      return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_FETCHED(propertyImages);
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property images: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving all property images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findPropertyImageById(id: number): Promise<{
+    success: boolean;
+    message: string;
     data?: PropertyImages;
     statusCode: number;
   }> {
-    const result = {
-      success: true,
-      message: 'created successfully',
-      statusCode: HttpStatus.CREATED,
-    };
-    console.log(createPropertyImagesDtos);
-    return result;
-    //     try {
-    //       this.logger.log(
-    //         `Creating holiday ${createHolidayDto.name} for the year ${createHolidayDto.year}`,
-    //       );
-    //       const existingHoliday = await this.holidayRepository.findOne({
-    //         where: {
-    //           name: createHolidayDto.name,
-    //           year: createHolidayDto.year,
-    //         },
-    //       });
+    try {
+      const propertyImage = await this.propertyImagesRepository.findOne({
+        relations: [
+          'spaceType',
+          'spaceType.space',
+          'property',
+          'createdBy',
+          'updatedBy',
+        ],
+        select: {
+          spaceType: {
+            id: true,
+            name: true,
+            space: {
+              id: true,
+              name: true,
+            },
+          },
+          property: {
+            id: true,
+            propertyName: true,
+          },
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+        where: { id },
+      });
 
-    //       if (existingHoliday) {
-    //         this.logger.error(
-    //           `Error creating holiday: Holiday ${createHolidayDto.name} for the year ${createHolidayDto.year} already exists`,
-    //         );
-
-    //         return HOLIDAYS_RESPONSES.HOLIDAY_ALREADY_EXISTS(
-    //           createHolidayDto.name,
-    //           createHolidayDto.year,
-    //         );
-    //       }
-
-    //       const user = await this.usersRepository.findOne({
-    //         where: {
-    //           id: createHolidayDto.createdBy.id,
-    //         },
-    //       });
-
-    //       if (!user) {
-    //         this.logger.error(
-    //           `User with ID ${createHolidayDto.createdBy.id} does not exist`,
-    //         );
-
-    //         return HOLIDAYS_RESPONSES.USER_NOT_FOUND(createHolidayDto.createdBy.id);
-    //       }
-
-    //       const propertyIds = createHolidayDto.properties.map(
-    //         (property) => property.id,
-    //       );
-    //       const existingProperties = await this.propertiesRepository.findBy({
-    //         id: In(propertyIds),
-    //       });
-
-    //       if (propertyIds.length > 0) {
-    //         const nonExistingIds = propertyIds.filter(
-    //           (id) => !existingProperties.some((property) => property.id === id),
-    //         );
-    //         if (nonExistingIds.length > 0) {
-    //           this.logger.error(
-    //             `Properties with ID(s) ${nonExistingIds.join(', ')} do not exist`,
-    //           );
-    //           return HOLIDAYS_RESPONSES.PROPERTIES_NOT_FOUND(nonExistingIds);
-    //         }
-    //       }
-
-    //       const holiday = this.holidayRepository.create({
-    //         ...createHolidayDto,
-    //       });
-    //       const savedHoliday = await this.holidayRepository.save(holiday);
-    //       this.logger.log(
-    //         `Holiday ${createHolidayDto.name} created with ID ${savedHoliday.id}`,
-    //       );
-
-    //       if (
-    //         savedHoliday &&
-    //         createHolidayDto.properties &&
-    //         createHolidayDto.properties.length > 0
-    //       ) {
-    //         for (const property of createHolidayDto.properties) {
-    //           const propertyDetails = await this.propertyDetailsRepository.findOne({
-    //             where: { property: { id: property.id } },
-    //           });
-
-    //           if (!propertyDetails) {
-    //             this.logger.error(
-    //               `Property details not found for property with ID ${property.id}`,
-    //             );
-    //             return HOLIDAYS_RESPONSES.PROPERTY_DETAILS_NOT_FOUND(property.id);
-    //           }
-
-    //           const isPeakSeason = await this.isHolidayInPeakSeason(
-    //             createHolidayDto.startDate,
-    //             createHolidayDto.endDate,
-    //             propertyDetails,
-    //           );
-
-    //           const createPropertySeasonHolidayDto: CreatePropertySeasonHolidayDto =
-    //             {
-    //               property: property,
-    //               holiday: { id: savedHoliday.id } as Holidays,
-    //               isPeakSeason: isPeakSeason,
-    //               createdBy: createHolidayDto.createdBy,
-    //             };
-
-    //           await this.propertySeasonHolidayService.createPropertySeasonHoliday(
-    //             createPropertySeasonHolidayDto,
-    //           );
-    //         }
-    //       }
-    //       return HOLIDAYS_RESPONSES.HOLIDAY_CREATED(savedHoliday);
-    //     } catch (error) {
-    //       this.logger.error(
-    //         `Error creating holiday: ${error.message} - ${error.stack}`,
-    //       );
-    //       throw new HttpException(
-    //         'An error occurred while creating the holiday',
-    //         HttpStatus.INTERNAL_SERVER_ERROR,
-    //       );
-    //     }
+      if (!propertyImage) {
+        this.logger.error(`Property Image with ID ${id} not found`);
+        return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND(id);
+      }
+      this.logger.log(`Property Image with ID ${id} retrieved successfully`);
+      return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_FETCHED(propertyImage);
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property image with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the property image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
-
-  //   async isHolidayInPeakSeason(
-  //     holidayStartDate: Date,
-  //     holidayEndDate: Date,
-  //     propertyDetails: PropertyDetails,
-  //   ): Promise<boolean> {
-  //     try {
-  //       let { peakSeasonStartDate, peakSeasonEndDate } = propertyDetails;
-
-  //       const startHolidayDate = new Date(holidayStartDate);
-  //       const endHolidayDate = new Date(holidayEndDate);
-  //       peakSeasonStartDate = new Date(peakSeasonStartDate);
-  //       peakSeasonEndDate = new Date(peakSeasonEndDate);
-
-  //       const isDateWithinPeakSeason = (
-  //         date: Date,
-  //         peakStart: Date,
-  //         peakEnd: Date,
-  //       ): boolean => {
-  //         const dateMonth = date.getMonth() + 1;
-  //         const dateDay = date.getDate();
-
-  //         const peakStartMonth = peakStart.getMonth() + 1;
-  //         const peakStartDay = peakStart.getDate();
-
-  //         const peakEndMonth = peakEnd.getMonth() + 1;
-  //         const peakEndDay = peakEnd.getDate();
-
-  //         const isAfterOrOnPeakStart =
-  //           dateMonth > peakStartMonth ||
-  //           (dateMonth === peakStartMonth && dateDay >= peakStartDay);
-
-  //         const isBeforeOrOnPeakEnd =
-  //           dateMonth < peakEndMonth ||
-  //           (dateMonth === peakEndMonth && dateDay <= peakEndDay);
-
-  //         return isAfterOrOnPeakStart && isBeforeOrOnPeakEnd;
-  //       };
-
-  //       return (
-  //         isDateWithinPeakSeason(
-  //           startHolidayDate,
-  //           peakSeasonStartDate,
-  //           peakSeasonEndDate,
-  //         ) &&
-  //         isDateWithinPeakSeason(
-  //           endHolidayDate,
-  //           peakSeasonStartDate,
-  //           peakSeasonEndDate,
-  //         )
-  //       );
-  //     } catch (error) {
-  //       this.logger.error(
-  //         `Error calculation is peak season or not: ${error.message} - ${error.stack}`,
-  //       );
-  //       throw new HttpException(
-  //         'An error occurred while calculation is peak season or not',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-  // }
-
-  //   async getAllHolidayRecords(): Promise<{
-  //     success: boolean;
-  //     message: string;
-  //     data?: Holidays[];
-  //     statusCode: number;
-  //   }> {
-  //     try {
-  //       const holidays = await this.holidayRepository.find({
-  //         relations: ['createdBy', 'updatedBy'],
-  //         select: {
-  //           createdBy: {
-  //             id: true,
-  //           },
-  //           updatedBy: {
-  //             id: true,
-  //           },
-  //         },
-  //       });
-
-  //       if (holidays.length === 0) {
-  //         this.logger.log(`No holidays are available`);
-
-  //         return HOLIDAYS_RESPONSES.HOLIDAYS_NOT_FOUND();
-  //       }
-
-  //       this.logger.log(`Retrieved ${holidays.length} holidays successfully.`);
-
-  //       return HOLIDAYS_RESPONSES.HOLIDAYS_FETCHED(holidays);
-  //     } catch (error) {
-  //       this.logger.error(
-  //         `Error retrieving holidays: ${error.message} - ${error.stack}`,
-  //       );
-  //       throw new HttpException(
-  //         'An error occurred while retrieving the holiday',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-  //   }
-
-  //   async findHolidayById(id: number): Promise<{
-  //     success: boolean;
-  //     message: string;
-  //     data?: Holidays;
-  //     statusCode: number;
-  //   }> {
-  //     try {
-  //       const holiday = await this.holidayRepository.findOne({
-  //         relations: [
-  //           'createdBy',
-  //           'updatedBy',
-  //           'propertySeasonHolidays',
-  //           'propertySeasonHolidays.property',
-  //         ],
-  //         select: {
-  //           createdBy: {
-  //             id: true,
-  //           },
-  //           updatedBy: {
-  //             id: true,
-  //           },
-  //           propertySeasonHolidays: {
-  //             id: true,
-  //             property: {
-  //               id: true,
-  //               propertyName: true,
-  //             },
-  //           },
-  //         },
-  //         where: { id },
-  //       });
-
-  //       if (!holiday) {
-  //         this.logger.error(`Holiday with ID ${id} not found`);
-  //         return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
-  //       }
-  //       this.logger.log(`Holiday with ID ${id} retrieved successfully`);
-  //       return HOLIDAYS_RESPONSES.HOLIDAY_FETCHED(holiday);
-  //     } catch (error) {
-  //       this.logger.error(
-  //         `Error retrieving holiday with ID ${id}: ${error.message} - ${error.stack}`,
-  //       );
-  //       throw new HttpException(
-  //         'An error occurred while retrieving the holiday',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-  //   }
-
-  //   async updateHolidayDetail(
-  //     id: number,
-  //     updateHolidayDto: UpdateHolidayDto,
-  //   ): Promise<{
-  //     success: boolean;
-  //     message: string;
-  //     data?: Holidays;
-  //     statusCode: number;
-  //   }> {
-  //     try {
-  //       const holiday = await this.holidayRepository.findOne({
-  //         relations: ['createdBy', 'updatedBy'],
-  //         select: {
-  //           createdBy: {
-  //             id: true,
-  //           },
-  //           updatedBy: {
-  //             id: true,
-  //           },
-  //         },
-  //         where: { id },
-  //       });
-
-  //       if (!holiday) {
-  //         this.logger.error(`Holiday with ID ${id} not found`);
-  //         return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
-  //       }
-
-  //       const user = await this.usersRepository.findOne({
-  //         where: {
-  //           id: updateHolidayDto.updatedBy.id,
-  //         },
-  //       });
-
-  //       if (!user) {
-  //         this.logger.error(
-  //           `User with ID ${updateHolidayDto.updatedBy.id} does not exist`,
-  //         );
-  //         return HOLIDAYS_RESPONSES.USER_NOT_FOUND(updateHolidayDto.updatedBy.id);
-  //       }
-
-  //       if (updateHolidayDto.properties) {
-  //         const propertyIds = updateHolidayDto.properties.map(
-  //           (property) => property.id,
-  //         );
-  //         const existingProperties = await this.propertiesRepository.findBy({
-  //           id: In(propertyIds),
-  //         });
-
-  //         if (propertyIds.length > 0) {
-  //           const nonExistingIds = propertyIds.filter(
-  //             (id) => !existingProperties.some((property) => property.id === id),
-  //           );
-  //           if (nonExistingIds.length > 0) {
-  //             this.logger.error(
-  //               `Properties with ID(s) ${nonExistingIds.join(', ')} do not exist`,
-  //             );
-  //             return HOLIDAYS_RESPONSES.PROPERTIES_NOT_FOUND(nonExistingIds);
-  //           }
-  //         }
-  //       }
-
-  //       Object.assign(holiday, updateHolidayDto);
-  //       const updatedHoliday = await this.holidayRepository.save(holiday);
-
-  //       this.logger.log(`Holiday with ID ${id} updated successfully`);
-
-  //       if (updatedHoliday && updateHolidayDto.properties) {
-  //         const { properties } = updateHolidayDto;
-  //         const holiday = await this.holidayRepository.findOne({
-  //           where: { id },
-  //           relations: [
-  //             'propertySeasonHolidays',
-  //             'propertySeasonHolidays.property',
-  //             'propertySeasonHolidays.holiday',
-  //           ],
-  //         });
-  //         if (!holiday) {
-  //           this.logger.error(`Holiday with ID ${id} not found`);
-  //           return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
-  //         }
-  //         const existingPropertySeasonHolidays = holiday.propertySeasonHolidays;
-  //         const propertyIdsFromDto = properties.map((property) => property.id);
-  //         const existingPropertyIds = existingPropertySeasonHolidays.map(
-  //           (psh) => psh.property.id,
-  //         );
-
-  //         const recordsToDelete = existingPropertySeasonHolidays.filter(
-  //           (psh) => !propertyIdsFromDto.includes(psh.property.id),
-  //         );
-
-  //         const recordsToCreate = propertyIdsFromDto.filter(
-  //           (propertyId) => !existingPropertyIds.includes(propertyId),
-  //         );
-
-  //         const idsToDelete = recordsToDelete.map((record) => record.id);
-  //         if (idsToDelete.length > 0) {
-  //           await this.propertySeasonHolidayRepository.delete(idsToDelete);
-  //         }
-
-  //         if (recordsToCreate.length > 0) {
-  //           for (const property of updateHolidayDto.properties) {
-  //             const propertyDetails =
-  //               await this.propertyDetailsRepository.findOne({
-  //                 where: { property: { id: property.id } },
-  //               });
-
-  //             if (!propertyDetails) {
-  //               this.logger.error(
-  //                 `Property details not found for property with ID ${property.id}`,
-  //               );
-  //               return HOLIDAYS_RESPONSES.PROPERTY_DETAILS_NOT_FOUND(property.id);
-  //             }
-
-  //             const startDate = updateHolidayDto.startDate || holiday.startDate;
-  //             const endDate = updateHolidayDto.endDate || holiday.endDate;
-
-  //             const isPeakSeason = await this.isHolidayInPeakSeason(
-  //               startDate,
-  //               endDate,
-  //               propertyDetails,
-  //             );
-
-  //             const createPropertySeasonHolidayDto: CreatePropertySeasonHolidayDto =
-  //               {
-  //                 property: property,
-  //                 holiday: { id: updatedHoliday.id } as Holidays,
-  //                 isPeakSeason: isPeakSeason,
-  //                 createdBy: updateHolidayDto.updatedBy,
-  //               };
-
-  //             await this.propertySeasonHolidayService.createPropertySeasonHoliday(
-  //               createPropertySeasonHolidayDto,
-  //             );
-  //           }
-  //         }
-  //       }
-
-  //       return HOLIDAYS_RESPONSES.HOLIDAY_UPDATED(updatedHoliday);
-  //     } catch (error) {
-  //       this.logger.error(
-  //         `Error updating holiday with ID ${id}: ${error.message} - ${error.stack}`,
-  //       );
-  //       throw new HttpException(
-  //         'An error occurred while updating the holiday',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-  //   }
-
-  //   async deleteHolidayById(id: number): Promise<{
-  //     success: boolean;
-  //     message: string;
-  //     statusCode: number;
-  //   }> {
-  //     try {
-  //       const propertySeasonHoliday =
-  //         await this.propertySeasonHolidayRepository.findOne({
-  //           where: { holiday: { id: id } },
-  //         });
-  //       if (propertySeasonHoliday) {
-  //         this.logger.log(
-  //           `Holiday ID ${id} exists and is mapped to property, hence cannot be deleted.`,
-  //         );
-  //         return HOLIDAYS_RESPONSES.HOLIDAY_FOREIGN_KEY_CONFLICT(id);
-  //       }
-
-  //       const result = await this.holidayRepository.delete(id);
-
-  //       if (result.affected === 0) {
-  //         this.logger.error(`Holiday with ID ${id} not found`);
-  //         return HOLIDAYS_RESPONSES.HOLIDAY_NOT_FOUND(id);
-  //       }
-  //       this.logger.log(`Holiday with ID ${id} deleted successfully`);
-  //       return HOLIDAYS_RESPONSES.HOLIDAY_DELETED(id);
-  //     } catch (error) {
-  //       this.logger.error(
-  //         `Error deleting holiday with ID ${id}: ${error.message} - ${error.stack}`,
-  //       );
-  //       throw new HttpException(
-  //         'An error occurred while deleting the holiday',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-  //   }
 }
