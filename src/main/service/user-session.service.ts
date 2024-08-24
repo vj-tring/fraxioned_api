@@ -2,10 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserSession } from 'entities/user-session.entity';
-import { CreateUserSessionDTO } from 'dto/requests/create-user-session.dto';
-import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
+import { UpdateUserSessionDTO } from 'src/main/dto/requests/user-session/update-user-session.dto';
 import { LoggerService } from 'services/logger.service';
 import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/response-constants/user-session.constant';
+import { CreateUserSessionDTO } from '../dto/requests/user-session/create-user-session.dto';
 
 @Injectable()
 export class UserSessionService {

@@ -10,7 +10,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'entities/role.entity';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { Type } from 'class-transformer';
-import { UserContactDetailsDTO } from './user-contact-details.dto';
+import { UserContactDetailsDTO } from '../user-contact/user-contact-details.dto';
 
 export class UpdateUserDTO {
   @ApiProperty({ example: { id: 1 } })
@@ -78,6 +78,7 @@ export class UpdateUserDTO {
   @IsOptional()
   updatedBy?: number;
 
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UserContactDetailsDTO)

@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateHolidayDto } from 'dto/requests/create-holiday.dto';
-import { UpdateHolidayDto } from 'dto/requests/update-holiday.dto';
+import { UpdateHolidayDto } from 'src/main/dto/requests/holiday/update-holiday.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { HolidaysService } from 'src/main/service/holidays.service';
 import { LoggerService } from 'src/main/service/logger.service';
@@ -13,6 +12,7 @@ import { HOLIDAYS_RESPONSES } from 'src/main/commons/constants/response-constant
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { PropertySeasonHolidaysService } from 'src/main/service/property-season-holidays.service';
+import { CreateHolidayDto } from 'src/main/dto/requests/holiday/create-holiday.dto';
 
 describe('HolidaysService', () => {
   let service: HolidaysService;

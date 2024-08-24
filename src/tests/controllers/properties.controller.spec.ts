@@ -1,13 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertiesController } from 'src/main/controller/properties.controller';
-import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
 import { Repository } from 'typeorm';
-import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { Property } from 'src/main/entities/property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { User } from 'src/main/entities/user.entity';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
@@ -18,6 +16,8 @@ import { LoggerService } from 'src/main/service/logger.service';
 import * as bcrypt from 'bcrypt';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
+import { CreatePropertiesDto } from 'src/main/dto/requests/property/create-property.dto';
+import { UpdatePropertiesDto } from 'src/main/dto/requests/property/update-properties.dto';
 
 describe('PropertiesController', () => {
   let controller: PropertiesController;

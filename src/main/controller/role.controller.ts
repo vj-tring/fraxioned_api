@@ -9,11 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { RoleService } from 'src/main/service/role.service';
-import { CreateRoleDTO } from 'src/main/dto/requests/createRole.dto';
-import { UpdateRoleDTO } from 'src/main/dto/requests/updateRole.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { CreateRoleDTO } from '../dto/requests/role/createRole.dto';
+import { UpdateRoleDTO } from '../dto/requests/role/updateRole.dto';
 
 @ApiTags('Role')
 @Controller('v1/roles')

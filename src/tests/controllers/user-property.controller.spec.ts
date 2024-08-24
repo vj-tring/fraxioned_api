@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserPropertyController } from 'controllers/user-property.controller';
 import { UserPropertyService } from 'services/user-property.service';
-import { CreateUserPropertyDTO } from 'dto/requests/create-user-property.dto';
-import { UpdateUserPropertyDTO } from 'dto/requests/update-user-property.dto';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { NotFoundException } from '@nestjs/common';
 import { Role } from 'src/main/entities/role.entity';
 import { User } from 'src/main/entities/user.entity';
 import { UserProperties } from 'entities/user-properties.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
+import { CreateUserPropertyDTO } from 'src/main/dto/requests/user-property/create-user-property.dto';
+import { UpdateUserPropertyDTO } from 'src/main/dto/requests/user-property/update-user-property.dto';
 
 describe('UserPropertyController', () => {
   let controller: UserPropertyController;

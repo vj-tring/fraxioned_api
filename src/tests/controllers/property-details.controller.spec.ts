@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertyDetailsController } from 'src/main/controller/property-details.controller';
-import { CreatePropertyDetailsDto } from 'src/main/dto/requests/create-property-details.dto';
 import { Property } from 'src/main/entities/property.entity';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { PropertyDetailsService } from 'src/main/service/property-details.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { UpdatePropertyDetailsDto } from 'src/main/dto/requests/update-property-details.dto';
+import { UpdatePropertyDetailsDto } from 'src/main/dto/requests/property-details/update-property-details.dto';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
+import { CreatePropertyDetailsDto } from 'src/main/dto/requests/property-details/create-property-details.dto';
 
 describe('PropertyDetailsController', () => {
   let controller: PropertyDetailsController;

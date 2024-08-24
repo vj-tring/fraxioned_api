@@ -8,11 +8,11 @@ import { LoggerService } from 'services/logger.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Reflector } from '@nestjs/core';
 import { USER_RESPONSES } from 'commons/constants/response-constants/user.constant';
-import { CreateUserDTO } from 'dto/requests/create-user.dto';
-import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
+import { CreateUserDTO } from 'src/main/dto/requests/user/create-user.dto';
+import { UpdateUserDTO } from 'src/main/dto/requests/user/update-user.dto';
 
 describe('UserController', () => {
   let controller: UserController;

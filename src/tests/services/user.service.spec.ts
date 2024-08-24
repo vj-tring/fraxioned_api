@@ -6,10 +6,10 @@ import { Role } from 'src/main/entities/role.entity';
 import { UserContactDetails } from 'entities/user-contact-details.entity';
 import { LoggerService } from 'services/logger.service';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
-import { CreateUserDTO } from 'dto/requests/create-user.dto';
-import { UpdateUserDTO } from 'dto/requests/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
+import { CreateUserDTO } from 'src/main/dto/requests/user/create-user.dto';
+import { UpdateUserDTO } from 'src/main/dto/requests/user/update-user.dto';
 
 describe('UserService', () => {
   let service: UserService;

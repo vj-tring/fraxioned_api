@@ -3,15 +3,15 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { Holidays } from 'src/main/entities/holidays.entity';
 import { User } from 'src/main/entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { PropertySeasonHolidaysController } from 'src/main/controller/property-season-holidays.controller';
 import { PropertySeasonHolidaysService } from 'src/main/service/property-season-holidays.service';
-import { CreatePropertySeasonHolidayDto } from 'src/main/dto/requests/create-property-season-holiday.dto';
 import { PropertySeasonHolidays } from 'src/main/entities/property-season-holidays.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from 'src/main/commons/constants/response-constants/property-season-holidays.constants';
-import { UpdatePropertySeasonHolidayDto } from 'src/main/dto/requests/update-property-season-holiday.dto';
+import { UpdatePropertySeasonHolidayDto } from 'src/main/dto/requests/property-season-holiday/update-property-season-holiday.dto';
+import { CreatePropertySeasonHolidayDto } from 'src/main/dto/requests/property-season-holiday/create-property-season-holiday.dto';
 
 describe('PropertySeasonHolidaysController', () => {
   let controller: PropertySeasonHolidaysController;

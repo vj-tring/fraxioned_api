@@ -12,8 +12,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
-import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
 import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
 import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
 import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
@@ -21,6 +19,8 @@ import { PropertiesService } from 'src/main/service/properties.service';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { PropertyWithDetailsResponseDto } from '../dto/responses/PropertyWithDetailsResponseDto.dto';
+import { CreatePropertiesDto } from '../dto/requests/property/create-property.dto';
+import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.dto';
 
 @ApiTags('Properties')
 @Controller('v1/properties')
@@ -126,7 +126,7 @@ export class PropertiesController {
     }
   }
 
-  @Get(':userId/properties-with-details')
+  @Get(':userId/user-properties-with-details')
   async getAllPropertiesWithDetailsByUser(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<PropertyWithDetailsResponseDto[] | object> {
