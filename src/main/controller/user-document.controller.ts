@@ -22,7 +22,7 @@ import { CreateUserDocumentDTO } from '../dto/requests/user-document/create-user
 export class UserDocumentController {
   constructor(private readonly userDocumentService: UserDocumentService) {}
 
-  @Post()
+  @Post('document')
   async createUserDocument(
     @Body() createUserDocumentDto: CreateUserDocumentDTO,
   ): Promise<object> {
@@ -34,12 +34,12 @@ export class UserDocumentController {
     return this.userDocumentService.getUserDocuments();
   }
 
-  @Get(':id')
+  @Get('document/:id')
   async getUserDocumentById(@Param('id') id: number): Promise<object> {
     return this.userDocumentService.getUserDocumentById(id);
   }
 
-  @Patch(':id')
+  @Patch('document/:id')
   async updateUserDocument(
     @Param('id') id: number,
     @Body() updateUserDocumentDto: UpdateUserDocumentDTO,
@@ -50,7 +50,7 @@ export class UserDocumentController {
     );
   }
 
-  @Delete(':id')
+  @Delete('document/:id')
   async deleteUserDocument(@Param('id') id: number): Promise<object> {
     return this.userDocumentService.deleteUserDocument(id);
   }
