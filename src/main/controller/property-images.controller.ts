@@ -20,7 +20,7 @@ import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Property Images')
-@Controller('v1/propertyImages/propertyImage')
+@Controller('v1/propertyImages')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class PropertyImagesController {
@@ -81,7 +81,7 @@ export class PropertyImagesController {
     }
   }
 
-  @Get(':id')
+  @Get('propertyImage/:id')
   async getByPropertyImageId(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
