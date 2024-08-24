@@ -19,7 +19,7 @@ import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Property Season Holidays')
-@Controller('v1/property-season-holidays/property-season-holiday')
+@Controller('v1/property-season-holidays')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class PropertySeasonHolidaysController {
@@ -27,7 +27,7 @@ export class PropertySeasonHolidaysController {
     private readonly propertySeasonHolidaysService: PropertySeasonHolidaysService,
   ) {}
 
-  @Post()
+  @Post('property-season-holiday')
   async createPropertySeasonHoliday(
     @Body() createPropertySeasonHolidayDto: CreatePropertySeasonHolidayDto,
   ): Promise<{
@@ -69,7 +69,7 @@ export class PropertySeasonHolidaysController {
     }
   }
 
-  @Get(':id')
+  @Get('property-season-holiday/:id')
   async getPropertySeasonHolidayById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -90,7 +90,7 @@ export class PropertySeasonHolidaysController {
     }
   }
 
-  @Get('property/:id')
+  @Get('property-season-holiday/property/:id')
   async getHolidaysByPropertyId(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -109,7 +109,7 @@ export class PropertySeasonHolidaysController {
     }
   }
 
-  @Patch(':id')
+  @Patch('property-season-holiday/:id')
   async updatePropertySeasonHolidayDetail(
     @Param('id') id: string,
     @Body() updatePropertySeasonHolidayDto: UpdatePropertySeasonHolidayDto,
@@ -134,7 +134,7 @@ export class PropertySeasonHolidaysController {
     }
   }
 
-  @Delete(':id')
+  @Delete('property-season-holiday/:id')
   async deletePropertySeasonHoliday(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {

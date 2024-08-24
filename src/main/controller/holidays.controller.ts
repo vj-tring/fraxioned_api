@@ -19,13 +19,13 @@ import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Holiday')
-@Controller('v1/holidays/holiday')
+@Controller('v1/holidays')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class HolidaysController {
   constructor(private readonly holidaysService: HolidaysService) {}
 
-  @Post()
+  @Post('holiday')
   async createHoliday(@Body() createHolidayDto: CreateHolidayDto): Promise<{
     success: boolean;
     message: string;
@@ -61,7 +61,7 @@ export class HolidaysController {
     }
   }
 
-  @Get(':id')
+  @Get('holiday/:id')
   async getHolidayById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -79,7 +79,7 @@ export class HolidaysController {
     }
   }
 
-  @Patch(':id')
+  @Patch('holiday/:id')
   async updateHolidayDetail(
     @Param('id') id: string,
     @Body() updateHolidayDto: UpdateHolidayDto,
@@ -103,7 +103,7 @@ export class HolidaysController {
     }
   }
 
-  @Delete(':id')
+  @Delete('holiday/:id')
   async deleteHoliday(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
