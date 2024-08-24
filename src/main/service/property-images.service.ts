@@ -10,6 +10,7 @@ import { Space } from '../entities/space.entity';
 import { SpaceTypes } from '../entities/space-types.entity';
 import { S3 } from 'aws-sdk';
 import { User } from '../entities/user.entity';
+import { S3UtilsService } from '../service/s3-utils.service';
 
 @Injectable()
 export class PropertyImagesService {
@@ -27,6 +28,7 @@ export class PropertyImagesService {
     private readonly spaceRepository: Repository<Space>,
     @InjectRepository(SpaceTypes)
     private readonly spaceTypesRepository: Repository<SpaceTypes>,
+    private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -91,16 +93,12 @@ export class PropertyImagesService {
         const folderName = `properties_media/${existingProperty.propertyName}/images/${existingSpaceType.space.name}`;
         const fileName = dto.imageFiles.originalname;
 
-        const uploadResult = await this.s3
-          .upload({
-            Bucket: this.bucketName,
-            Key: `${folderName}/${fileName}`,
-            Body: dto.imageFiles.buffer,
-            ContentType: dto.imageFiles.mimetype,
-          })
-          .promise();
-
-        const imageUrlLocation = uploadResult.Location;
+        const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          dto.imageFiles.buffer,
+          dto.imageFiles.mimetype,
+        );
 
         const newImage = this.propertyImagesRepository.create({
           property: dto.property,
@@ -238,6 +236,50 @@ export class PropertyImagesService {
       );
       throw new HttpException(
         'An error occurred while retrieving the property image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async deletePropertyImageById(id: number): Promise<{
+    success: boolean;
+    message: string;
+    statusCode: number;
+  }> {
+    try {
+      const propertyImage = await this.propertyImagesRepository.findOne({
+        where: { id },
+      });
+
+      if (!propertyImage) {
+        return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND(id);
+      }
+
+      const s3Key = await this.s3UtilsService.extractS3Key(
+        propertyImage.imageUrl,
+      );
+
+      const headObject =
+        await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+      if (!headObject) {
+        return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND_IN_AWS_S3(
+          s3Key,
+        );
+      }
+
+      await this.s3UtilsService.deleteObjectFromS3(s3Key);
+
+      const result = await this.propertyImagesRepository.delete(id);
+      if (result.affected === 0) {
+        return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND(id);
+      }
+      return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_DELETED(id);
+    } catch (error) {
+      this.logger.error(
+        `Error deleting property image with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting the property image',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

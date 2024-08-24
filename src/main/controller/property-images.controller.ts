@@ -9,6 +9,7 @@ import {
   UseGuards,
   Get,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreatePropertyImagesRequestDto } from '../dto/requests/create-property-images-request.dto';
@@ -18,6 +19,7 @@ import { PropertyImagesService } from '../service/property-images.service';
 import { PropertyImages } from '../entities/property_images.entity';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { PROPERTY_IMAGES_RESPONSES } from '../commons/constants/response-constants/property-images.constant';
 
 @ApiTags('Property Images')
 @Controller('v1/propertyImages')
@@ -43,6 +45,10 @@ export class PropertyImagesController {
       const propertyImageDetails: CreatePropertyImagesDto[] = JSON.parse(
         createPropertyImagesRequestDto.propertyImages,
       );
+
+      if (propertyImageDetails.length !== (files.imageFiles?.length || 0)) {
+        return PROPERTY_IMAGES_RESPONSES.MISMATCHED_DTO_AND_IMAGES();
+      }
 
       const processedPropertyImagesDtos = propertyImageDetails.map(
         (dto, index) => ({
@@ -94,6 +100,22 @@ export class PropertyImagesController {
     } catch (error) {
       throw new HttpException(
         'An error occurred while retrieving the property image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('propertyImage/:id')
+  async deletePropertyImage(
+    @Param('id') id: number,
+  ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
+    try {
+      const result =
+        await this.propertyImagesService.deletePropertyImageById(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while deleting the property image',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

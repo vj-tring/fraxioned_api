@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { PropertyImages } from 'src/main/entities/property_images.entity';
 
 export const PROPERTY_IMAGES_RESPONSES = {
-  IMAGE_FILES_LENGTH_MISMATCH: (): {
+  MISMATCHED_DTO_AND_IMAGES: (): {
     success: boolean;
     message: string;
     statusCode: HttpStatus;
@@ -86,6 +86,18 @@ export const PROPERTY_IMAGES_RESPONSES = {
     message: `Property Image with ID ${id} not found`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
+  PROPERTY_IMAGE_NOT_FOUND_IN_AWS_S3: (
+    s3Key: string,
+  ): {
+    success: boolean;
+    message: string;
+    data?: PropertyImages;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Image with key ${s3Key} not found in S3 bucket`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
   PROPERTY_IMAGE_FETCHED: (
     propertyImage: PropertyImages,
   ): {
@@ -98,5 +110,16 @@ export const PROPERTY_IMAGES_RESPONSES = {
     message: `Property Image with ID ${propertyImage.id} retrieved successfully`,
     data: propertyImage,
     statusCode: HttpStatus.OK,
+  }),
+  PROPERTY_IMAGE_DELETED: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Property Image with ID ${id} deleted successfully`,
+    statusCode: HttpStatus.NO_CONTENT,
   }),
 };

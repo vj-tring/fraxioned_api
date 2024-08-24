@@ -9,6 +9,7 @@ import { PropertyImagesController } from '../controller/property-images.controll
 import { PropertyImagesService } from '../service/property-images.service';
 import { Space } from '../entities/space.entity';
 import { SpaceTypes } from '../entities/space-types.entity';
+import { S3UtilsModule } from './s3-utils.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SpaceTypes } from '../entities/space-types.entity';
     ]),
     LoggerModule,
     AuthenticationModule,
+    S3UtilsModule,
   ],
   controllers: [PropertyImagesController],
   providers: [PropertyImagesService],
