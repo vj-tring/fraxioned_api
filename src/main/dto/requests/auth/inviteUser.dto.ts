@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { UserPropertyDto } from './userProperty.dto';
+import { UserPropertyDto } from '../user-property/userProperty.dto';
 
 export class InviteUserDto {
   @IsNotEmpty({ message: 'email is required' })

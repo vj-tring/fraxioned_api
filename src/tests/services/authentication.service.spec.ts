@@ -12,7 +12,7 @@ import {
   LOGIN_RESPONSES,
   LOGOUT_RESPONSES,
 } from 'src/main/commons/constants/response-constants/auth.constant';
-import { LoginDto } from 'src/main/dto/requests/login.dto';
+import { LoginDto } from 'src/main/dto/requests/auth/login.dto';
 import { Role } from 'src/main/entities/role.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { MailService } from 'src/main/email/mail.service';

@@ -7,10 +7,10 @@ import { AuthenticationService } from 'src/main/service/auth/authentication.serv
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { AmenitiesController } from 'src/main/controller/amenities.controller';
 import { AmenitiesService } from 'src/main/service/amenities.service';
-import { CreateAmenitiesDto } from 'src/main/dto/requests/create-amenities.dto';
 import { Amenities } from 'src/main/entities/amenities.entity';
 import { AMENITIES_RESPONSES } from 'src/main/commons/constants/response-constants/amenities.constant';
-import { UpdateAmenitiesDto } from 'src/main/dto/requests/update-amenities.dto';
+import { CreateAmenitiesDto } from 'src/main/dto/requests/amenity/create-amenities.dto';
+import { UpdateAmenitiesDto } from 'src/main/dto/requests/amenity/update-amenities.dto';
 
 describe('AmenitiesController', () => {
   let controller: AmenitiesController;

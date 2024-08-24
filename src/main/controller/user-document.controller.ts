@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { UserDocumentService } from 'services/user-document.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
-import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
+import { UpdateUserDocumentDTO } from 'src/main/dto/requests/user-document/update-user-document.dto';
 import { AuthGuard } from 'commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { CreateUserDocumentDTO } from '../dto/requests/user-document/create-user-document.dto';
 
 @ApiTags('UserDocument')
 @Controller('v1/user-documents')

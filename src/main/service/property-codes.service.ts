@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreatePropertyCodeDto } from '../dto/requests/create-property-code.dto';
-import { UpdatePropertyCodeDto } from '../dto/requests/update-property-code.dto';
+import { CreatePropertyCodeDto } from '../dto/requests/property-code/create-property-code.dto';
+import { UpdatePropertyCodeDto } from '../dto/requests/property-code/update-property-code.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PropertyCodes } from '../entities/property_codes.entity';
 import { Repository } from 'typeorm';

@@ -1,7 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
-import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
 import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
 import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
 import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
@@ -15,6 +13,8 @@ import { PropertyWithDetailsResponseDto } from '../dto/responses/PropertyWithDet
 import { UserProperties } from '../entities/user-properties.entity';
 import { UserPropertyWithDetailsResponseDto } from '../dto/responses/userPropertyResponse.dto';
 import { PropertyWithDetails } from '../commons/interface/userPropertyDetails';
+import { CreatePropertiesDto } from '../dto/requests/property/create-property.dto';
+import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.dto';
 
 @Injectable()
 export class PropertiesService {

@@ -3,8 +3,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { NotFoundException } from '@nestjs/common';
-import { CreatePropertiesDto } from 'src/main/dto/requests/create-property.dto';
-import { UpdatePropertiesDto } from 'src/main/dto/requests/update-properties.dto';
 import { Property } from 'src/main/entities/property.entity';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { User } from 'src/main/entities/user.entity';
@@ -12,6 +10,8 @@ import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import axios from 'axios';
+import { CreatePropertiesDto } from 'src/main/dto/requests/property/create-property.dto';
+import { UpdatePropertiesDto } from 'src/main/dto/requests/property/update-properties.dto';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;

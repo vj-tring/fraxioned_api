@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { UserProperties } from 'entities/user-properties.entity';
 import { LoggerService } from 'services/logger.service';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
-import { CreateUserPropertyDTO } from '../dto/requests/create-user-property.dto';
-import { UpdateUserPropertyDTO } from '../dto/requests/update-user-property.dto';
+import { CreateUserPropertyDTO } from '../dto/requests/user-property/create-user-property.dto';
+import { UpdateUserPropertyDTO } from '../dto/requests/user-property/update-user-property.dto';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
 

@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserSessionController } from 'controllers/user-session.controller';
 import { UserSessionService } from 'services/user-session.service';
-import { CreateUserSessionDTO } from 'dto/requests/create-user-session.dto';
-import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
+import { UpdateUserSessionDTO } from 'src/main/dto/requests/user-session/update-user-session.dto';
 import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/response-constants/user-session.constant';
 import { User } from 'entities/user.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
 import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
+import { CreateUserSessionDTO } from 'src/main/dto/requests/user-session/create-user-session.dto';
 
 describe('UserSessionController', () => {
   let controller: UserSessionController;

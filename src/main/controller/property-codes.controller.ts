@@ -8,8 +8,8 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePropertyCodeDto } from '../dto/requests/create-property-code.dto';
-import { UpdatePropertyCodeDto } from '../dto/requests/update-property-code.dto';
+import { CreatePropertyCodeDto } from '../dto/requests/property-code/create-property-code.dto';
+import { UpdatePropertyCodeDto } from '../dto/requests/property-code/update-property-code.dto';
 import { PropertyCodesService } from '../service/property-codes.service';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';

@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreatePropertySeasonHolidayDto } from '../dto/requests/create-property-season-holiday.dto';
+import { CreatePropertySeasonHolidayDto } from '../dto/requests/property-season-holiday/create-property-season-holiday.dto';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,7 +8,7 @@ import { LoggerService } from './logger.service';
 import { Holidays } from '../entities/holidays.entity';
 import { Property } from '../entities/property.entity';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from '../commons/constants/response-constants/property-season-holidays.constants';
-import { UpdatePropertySeasonHolidayDto } from '../dto/requests/update-property-season-holiday.dto';
+import { UpdatePropertySeasonHolidayDto } from '../dto/requests/property-season-holiday/update-property-season-holiday.dto';
 
 @Injectable()
 export class PropertySeasonHolidaysService {

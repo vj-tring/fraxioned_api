@@ -4,10 +4,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { Amenities } from '../entities/amenities.entity';
-import { CreateAmenitiesDto } from '../dto/requests/create-amenities.dto';
+import { CreateAmenitiesDto } from '../dto/requests/amenity/create-amenities.dto';
 import { AMENITIES_RESPONSES } from '../commons/constants/response-constants/amenities.constant';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
-import { UpdateAmenitiesDto } from '../dto/requests/update-amenities.dto';
+import { UpdateAmenitiesDto } from '../dto/requests/amenity/update-amenities.dto';
 
 @Injectable()
 export class AmenitiesService {

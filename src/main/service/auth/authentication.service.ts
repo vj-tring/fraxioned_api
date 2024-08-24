@@ -4,13 +4,13 @@ import { UserContactDetails } from 'src/main/entities/user-contact-details.entit
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from 'src/main/dto/requests/login.dto';
+import { LoginDto } from 'src/main/dto/requests/auth/login.dto';
 import { LoggerService } from 'src/main/service/logger.service';
 import { UserSession } from 'src/main/entities/user-session.entity';
 import * as crypto from 'crypto';
-import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
-import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
-import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
+import { ForgotPasswordDto } from 'src/main/dto/requests/auth/forgotPassword.dto';
+import { ChangePasswordDto } from 'src/main/dto/requests/auth/recoverPassword.dto';
+import { ResetPasswordDto } from 'src/main/dto/requests/auth/resetPassword.dto';
 import {
   LOGIN_RESPONSES,
   FORGOT_PASSWORD_RESPONSES,

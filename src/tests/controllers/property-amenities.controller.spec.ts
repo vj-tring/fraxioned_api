@@ -7,11 +7,11 @@ import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { Property } from 'src/main/entities/property.entity';
 import { PropertyAmenitiesController } from 'src/main/controller/property-amenities.controller';
 import { PropertyAmenitiesService } from 'src/main/service/property-amenities.service';
-import { CreatePropertyAmenitiesDto } from 'src/main/dto/requests/create-property-amenities.dto';
 import { PropertyAmenities } from 'src/main/entities/property_amenities.entity';
 import { Amenities } from 'src/main/entities/amenities.entity';
 import { PROPERTY_AMENITY_RESPONSES } from 'src/main/commons/constants/response-constants/property-amenities.constant';
-import { UpdatePropertyAmenitiesDto } from 'src/main/dto/requests/update-property-amenities.dto';
+import { CreatePropertyAmenitiesDto } from 'src/main/dto/requests/property-aminity/create-property-amenities.dto';
+import { UpdatePropertyAmenitiesDto } from 'src/main/dto/requests/property-aminity/update-property-amenities.dto';
 
 describe('PropertyAmenitiesController', () => {
   let controller: PropertyAmenitiesController;

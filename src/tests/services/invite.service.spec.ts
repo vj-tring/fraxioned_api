@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InviteService } from '../../main/service/auth/invite.service';
 import { LoggerService } from '../../main/service/logger.service';
-import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
+import { InviteUserDto } from 'src/main/dto/requests/auth/inviteUser.dto';
 import { Repository } from 'typeorm';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';

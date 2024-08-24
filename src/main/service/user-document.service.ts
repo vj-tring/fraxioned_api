@@ -4,12 +4,12 @@ import { Repository } from 'typeorm';
 import { UserDocument } from 'entities/user-documents.entity';
 import { LoggerService } from 'services/logger.service';
 import { USER_DOCUMENT_RESPONSES } from 'src/main/commons/constants/response-constants/user-document.constant';
-import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
-import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
+import { UpdateUserDocumentDTO } from 'src/main/dto/requests/user-document/update-user-document.dto';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 import { USER_PROPERTY_RESPONSES } from '../commons/constants/response-constants/user-property.constant';
+import { CreateUserDocumentDTO } from '../dto/requests/user-document/create-user-document.dto';
 
 @Injectable()
 export class UserDocumentService {

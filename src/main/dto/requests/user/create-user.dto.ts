@@ -11,7 +11,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'entities/role.entity';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { Type } from 'class-transformer';
-import { UserContactDetailsDTO } from 'dto/requests/user-contact-details.dto';
+import { UserContactDetailsDTO } from '../user-contact/user-contact-details.dto';
 
 export class CreateUserDTO {
   @ApiProperty({ example: { id: 1 } })

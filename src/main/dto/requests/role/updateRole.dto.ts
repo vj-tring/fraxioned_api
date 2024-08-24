@@ -1,7 +1,7 @@
 import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
-import { User } from '../../entities/user.entity';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from 'src/main/entities/user.entity';
 
 export class UpdateRoleDTO {
   @IsString()
