@@ -19,6 +19,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PropertyImagesModule } from './main/modules/property-images.module';
 import { S3UtilsModule } from './main/modules/s3-utils.module';
+import { SpaceModule } from './main/modules/space.module';
+import { SpaceTypesModule } from './main/modules/space-types.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { S3UtilsModule } from './main/modules/s3-utils.module';
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     S3UtilsModule,
+    SpaceModule,
+    SpaceTypesModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'main/email/assets'),
     }),
