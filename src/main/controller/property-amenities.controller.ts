@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PropertyAmenitiesService } from '../service/property-amenities.service';
-import { CreatePropertyAmenitiesDto } from '../dto/requests/property-aminity/create-property-amenities.dto';
+import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
-import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-aminity/update-property-amenities.dto';
+import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
