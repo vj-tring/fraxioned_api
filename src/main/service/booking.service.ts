@@ -8,11 +8,8 @@ import { CreateBookingDTO } from '../dto/requests/booking/create-booking.dto';
 import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { PropertyDetails } from '../entities/property-details.entity';
-import {
-  LastMinuteBookingRules,
-  RegularBookingRules,
-} from '../commons/constants/enumerations/booking-rules';
 import { UpdateBookingDTO } from '../dto/requests/booking/update-booking.dto';
+import { BookingRules } from '../commons/constants/enumerations/booking-rules';
 
 @Injectable()
 export class BookingService {
@@ -129,25 +126,25 @@ export class BookingService {
     // Validation: Check last-minute booking rules
     const diffInDays =
       (checkinDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-    const isLastMinuteBooking = diffInDays <= LastMinuteBookingRules.MAX_DAYS;
+    const isLastMinuteBooking = diffInDays <= BookingRules.LAST_MAX_DAYS;
     const nightsSelected =
       (checkoutDate.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24);
 
     if (isLastMinuteBooking) {
-      if (nightsSelected < LastMinuteBookingRules.MIN_NIGHTS) {
+      if (nightsSelected < BookingRules.LAST_MIN_NIGHTS) {
         return BOOKING_RESPONSES.LAST_MINUTE_MIN_NIGHTS(
-          LastMinuteBookingRules.MIN_NIGHTS,
+          BookingRules.LAST_MIN_NIGHTS,
         );
       }
-      if (nightsSelected > LastMinuteBookingRules.MAX_NIGHTS) {
+      if (nightsSelected > BookingRules.LAST_MAX_NIGHTS) {
         return BOOKING_RESPONSES.LAST_MINUTE_MAX_NIGHTS(
-          LastMinuteBookingRules.MAX_NIGHTS,
+          BookingRules.LAST_MAX_NIGHTS,
         );
       }
     } else {
-      if (nightsSelected < RegularBookingRules.MIN_NIGHTS) {
+      if (nightsSelected < BookingRules.REGULAR_MIN_NIGHTS) {
         return BOOKING_RESPONSES.REGULAR_MIN_NIGHTS(
-          RegularBookingRules.MIN_NIGHTS,
+          BookingRules.REGULAR_MIN_NIGHTS,
         );
       }
       if (nightsSelected > userProperty.maximumStayLength) {
