@@ -17,11 +17,13 @@ import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './main/email/mail.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { BookingModule } from './main/modules/booking.module';
 
 @Module({
   imports: [
     DatabaseModule,
     AuthenticationModule,
+    BookingModule,
     UserModule,
     PropertiesModule,
     PropertyDetailsModule,
