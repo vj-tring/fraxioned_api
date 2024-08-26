@@ -58,8 +58,20 @@ export class BookingService {
       new Date(today.getFullYear(), today.getMonth(), today.getDate() + 730),
     );
     const checkOutEndDate = this.normalizeDate(
-      new Date(today.getFullYear() + 5, 11, 31),
+      new Date(today.getFullYear(), today.getMonth(), today.getDate() + 730),
     );
+
+    // Adjust for leap year
+    const isLeapYear = (year: number): boolean => {
+      return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    };
+
+    const daysInYear = isLeapYear(today.getFullYear()) ? 366 : 365;
+    const daysInNextYear = isLeapYear(today.getFullYear() + 1) ? 366 : 365;
+
+    if (daysInYear === 366 || daysInNextYear === 366) {
+      checkOutEndDate.setDate(checkOutEndDate.getDate() + 1);
+    }
 
     if (checkinDate > checkInEndDate || checkoutDate > checkOutEndDate) {
       return BOOKING_RESPONSES.DATES_OUT_OF_RANGE;
