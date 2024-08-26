@@ -41,9 +41,9 @@ export class BookingService {
     } = createBookingDto;
     const today = this.normalizeDate(new Date());
 
-    // Convert checkinDate and checkoutDate to Date objects
+    // Convert checkinDate and checkoutDate to Date objects and normalize them
     const checkinDate = this.normalizeDate(new Date(checkinDateStr));
-    const checkoutDate = new Date(checkoutDateStr);
+    const checkoutDate = this.normalizeDate(new Date(checkoutDateStr));
 
     // Validation: Check if the check-in date is before today
     if (checkinDate < today) {
@@ -56,12 +56,12 @@ export class BookingService {
     }
 
     // Validation: Check if the dates are within the allowed range
-    const checkInEndDate = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 730,
+    const checkInEndDate = this.normalizeDate(
+      new Date(today.getFullYear(), today.getMonth(), today.getDate() + 730),
     );
-    const checkOutEndDate = new Date(today.getFullYear() + 5, 11, 31);
+    const checkOutEndDate = this.normalizeDate(
+      new Date(today.getFullYear() + 5, 11, 31),
+    );
 
     if (checkinDate > checkInEndDate || checkoutDate > checkOutEndDate) {
       return BOOKING_RESPONSES.DATES_OUT_OF_RANGE;
@@ -94,23 +94,33 @@ export class BookingService {
     const isBookedDate = (date: Date): boolean =>
       bookedDates.some(
         (booking) =>
-          date >= booking.checkinDate && date <= booking.checkoutDate,
+          date >= this.normalizeDate(booking.checkinDate) &&
+          date <= this.normalizeDate(booking.checkoutDate),
       );
 
     const isUnavailableDate = (date: Date): boolean =>
       unavailableDates.some(
         (unavailable) =>
-          new Date(unavailable.holiday as unknown as string).getTime() ===
+          this.normalizeDate(new Date(unavailable.holiday as unknown as string)).getTime() ===
           date.getTime(),
       );
+
     // Validation: Check if any date in the range is booked or unavailable
+    let remainingHolidayNights = userProperty.peakRemainingHolidayNights;
     for (
       let d = new Date(checkinDate);
       d <= checkoutDate;
       d.setDate(d.getDate() + 1)
     ) {
-      if (isBookedDate(d) || isUnavailableDate(d)) {
+      if (isBookedDate(d)) {
         return BOOKING_RESPONSES.DATES_BOOKED_OR_UNAVAILABLE;
+      }
+      if (isUnavailableDate(d)) {
+        if (remainingHolidayNights > 0) {
+          remainingHolidayNights--;
+        } else {
+          return BOOKING_RESPONSES.DATES_BOOKED_OR_UNAVAILABLE;
+        }
       }
     }
 
@@ -144,8 +154,8 @@ export class BookingService {
     }
 
     // Additional validations from the calendar component
-    const peakSeasonStart = new Date(propertyDetails.peakSeasonStartDate);
-    const peakSeasonEnd = new Date(propertyDetails.peakSeasonEndDate);
+    const peakSeasonStart = this.normalizeDate(new Date(propertyDetails.peakSeasonStartDate));
+    const peakSeasonEnd = this.normalizeDate(new Date(propertyDetails.peakSeasonEndDate));
     let peakNights = 0;
     let offNights = 0;
     for (
