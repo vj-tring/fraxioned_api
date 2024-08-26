@@ -101,8 +101,9 @@ export class BookingService {
     const isUnavailableDate = (date: Date): boolean =>
       unavailableDates.some(
         (unavailable) =>
-          this.normalizeDate(new Date(unavailable.holiday as unknown as string)).getTime() ===
-          date.getTime(),
+          this.normalizeDate(
+            new Date(unavailable.holiday as unknown as string),
+          ).getTime() === date.getTime(),
       );
 
     // Validation: Check if any date in the range is booked or unavailable
@@ -154,8 +155,12 @@ export class BookingService {
     }
 
     // Additional validations from the calendar component
-    const peakSeasonStart = this.normalizeDate(new Date(propertyDetails.peakSeasonStartDate));
-    const peakSeasonEnd = this.normalizeDate(new Date(propertyDetails.peakSeasonEndDate));
+    const peakSeasonStart = this.normalizeDate(
+      new Date(propertyDetails.peakSeasonStartDate),
+    );
+    const peakSeasonEnd = this.normalizeDate(
+      new Date(propertyDetails.peakSeasonEndDate),
+    );
     let peakNights = 0;
     let offNights = 0;
     for (
