@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-// global-exception.filter.ts
 import {
   ExceptionFilter,
   Catch,
@@ -11,9 +7,14 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+interface ExceptionResponse {
+  message: string;
+  error?: string;
+}
+
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -23,13 +24,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let error = 'Internal Server Error';
 
     if (exception instanceof HttpException) {
-      const exceptionResponse = exception.getResponse() as any;
+      const exceptionResponse = exception.getResponse() as ExceptionResponse;
       status = exception.getStatus();
       message = exceptionResponse.message || exception.message;
       error = exceptionResponse.error || 'Error';
     }
 
-    return response.status(status).json({
+    response.status(status).json({
       statusCode: status,
       message,
       error,

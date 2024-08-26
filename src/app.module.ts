@@ -21,11 +21,13 @@ import { PropertyImagesModule } from './main/modules/property-images.module';
 import { S3UtilsModule } from './main/modules/s3-utils.module';
 import { SpaceModule } from './main/modules/space.module';
 import { SpaceTypesModule } from './main/modules/space-types.module';
+import { BookingModule } from './main/modules/booking.module';
 
 @Module({
   imports: [
     DatabaseModule,
     AuthenticationModule,
+    BookingModule,
     UserModule,
     PropertiesModule,
     PropertyDetailsModule,

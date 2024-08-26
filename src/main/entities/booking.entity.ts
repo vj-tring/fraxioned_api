@@ -35,10 +35,10 @@ export class Booking {
   @Column({ name: 'no_of_pets', type: 'int', nullable: false })
   noOfPets: number;
 
-  @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
+  @CreateDateColumn({ name: 'created_at', default: null })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', nullable: true, default: null })
+  @UpdateDateColumn({ name: 'updated_at', default: null })
   updatedAt: Date;
 
   @Column({
