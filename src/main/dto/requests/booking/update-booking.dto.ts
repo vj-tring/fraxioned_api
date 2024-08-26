@@ -74,5 +74,5 @@ export class UpdateBookingDTO {
   @IsValidId({
     message: 'createdBy must be an object with a valid id where (id >= 1)',
   })
-  createdBy: User;
+  updatedBy: User;
 }
