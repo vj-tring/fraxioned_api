@@ -32,6 +32,13 @@ export const PROPERTY_IMAGES_RESPONSES = {
     message: `Invalid Space Type IDs: ${invalidSpaceTypeIds.join(', ')}`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
+  SPACE_TYPE_NOT_FOUND: (
+    invalidSpaceTypeId: number,
+  ): { success: boolean; message: string; statusCode: HttpStatus } => ({
+    success: false,
+    message: `Invalid Space Type ID: ${invalidSpaceTypeId}`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
   SPACE_NOT_FOUND: (
     spaceId: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
@@ -121,5 +128,19 @@ export const PROPERTY_IMAGES_RESPONSES = {
     success: true,
     message: `Property Image with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
+  }),
+  PROPERTY_IMAGE_UPDATED: (
+    updatedPropertyImage: PropertyImages,
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    data?: PropertyImages;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Property Image with ID ${id} updated successfully`,
+    data: updatedPropertyImage,
+    statusCode: HttpStatus.OK,
   }),
 };

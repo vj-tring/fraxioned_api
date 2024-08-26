@@ -10,8 +10,13 @@ import {
   Get,
   Param,
   Delete,
+  Patch,
+  UploadedFile,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { CreatePropertyImagesRequestDto } from '../dto/requests/property-images/create-property-images-request.dto';
 import { CreatePropertyImagesDto } from '../dto/requests/property-images/create-property-images.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -20,6 +25,8 @@ import { PropertyImages } from '../entities/property_images.entity';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { PROPERTY_IMAGES_RESPONSES } from '../commons/constants/response-constants/property-images.constant';
+import { UpdatePropertyImageDto } from '../dto/requests/property-images/update-property-image.dto';
+import { UpdatePropertyImageRequestDto } from '../dto/requests/property-images/update-property-image-request.dto';
 
 @ApiTags('Property Images')
 @Controller('v1/propertyImages')
@@ -100,6 +107,44 @@ export class PropertyImagesController {
     } catch (error) {
       throw new HttpException(
         'An error occurred while retrieving the property image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Patch('propertyImage/:id')
+  @UseInterceptors(FileInterceptor('imageFile'))
+  async updatePropertyImageId(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updatePropertyImageRequestDto: UpdatePropertyImageRequestDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyImages;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const updatePropertyImageDto: UpdatePropertyImageDto = JSON.parse(
+        updatePropertyImageRequestDto.propertyImage,
+      );
+
+      if (
+        (file && !updatePropertyImageDto) ||
+        (!file && updatePropertyImageDto)
+      ) {
+        return PROPERTY_IMAGES_RESPONSES.MISMATCHED_DTO_AND_IMAGES();
+      }
+
+      updatePropertyImageDto.imageFile = file;
+      const result = await this.propertyImagesService.updatePropertyImageDetail(
+        +id,
+        updatePropertyImageDto,
+      );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while updating the property image',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

@@ -11,6 +11,7 @@ import { SpaceTypes } from '../entities/space-types.entity';
 import { S3 } from 'aws-sdk';
 import { User } from '../entities/user.entity';
 import { S3UtilsService } from '../service/s3-utils.service';
+import { UpdatePropertyImageDto } from '../dto/requests/property-images/update-property-image.dto';
 
 @Injectable()
 export class PropertyImagesService {
@@ -236,6 +237,139 @@ export class PropertyImagesService {
       );
       throw new HttpException(
         'An error occurred while retrieving the property image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updatePropertyImageDetail(
+    id: number,
+    updatePropertyImageDto: UpdatePropertyImageDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyImages;
+    statusCode: number;
+  }> {
+    try {
+      const propertyImage = await this.propertyImagesRepository.findOne({
+        relations: [
+          'spaceType',
+          'spaceType.space',
+          'property',
+          'createdBy',
+          'updatedBy',
+        ],
+        select: {
+          spaceType: {
+            id: true,
+            name: true,
+            space: {
+              id: true,
+              name: true,
+            },
+          },
+          property: {
+            id: true,
+            propertyName: true,
+          },
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+        where: { id },
+      });
+
+      if (!propertyImage) {
+        this.logger.error(`Property Image with ID ${id} not found`);
+        return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND(id);
+      }
+
+      const existingProperty = await this.propertiesRepository.findOne({
+        where: { id: updatePropertyImageDto.property.id },
+      });
+      if (!existingProperty) {
+        this.logger.error(
+          `Property with ID ${updatePropertyImageDto.property.id} does not exist`,
+        );
+        return PROPERTY_IMAGES_RESPONSES.PROPERTY_NOT_FOUND(
+          updatePropertyImageDto.property.id,
+        );
+      }
+
+      const existingUser = await this.userRepository.findOne({
+        where: { id: updatePropertyImageDto.updatedBy.id },
+      });
+      if (!existingUser) {
+        this.logger.error(
+          `User with ID ${updatePropertyImageDto.updatedBy.id} does not exist`,
+        );
+        return PROPERTY_IMAGES_RESPONSES.USER_NOT_FOUND(
+          updatePropertyImageDto.updatedBy.id,
+        );
+      }
+
+      const existingSpaceType = await this.spaceTypesRepository.findOne({
+        where: { id: updatePropertyImageDto.spaceType.id },
+        relations: ['space'],
+      });
+      if (!existingSpaceType) {
+        this.logger.error(
+          `Invalid Space Type ID: ${updatePropertyImageDto.spaceType.id}`,
+        );
+        return PROPERTY_IMAGES_RESPONSES.SPACE_TYPE_NOT_FOUND(
+          updatePropertyImageDto.spaceType.id,
+        );
+      }
+
+      const folderName = `properties_media/${existingProperty.propertyName}/images/${existingSpaceType.space.name}`;
+      const fileName = updatePropertyImageDto.imageFile.originalname;
+
+      let imageUrlLocation = propertyImage.imageUrl;
+
+      const s3Key = await this.s3UtilsService.extractS3Key(
+        propertyImage.imageUrl,
+      );
+
+      if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+        const headObject =
+          await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+        if (!headObject) {
+          return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND_IN_AWS_S3(
+            s3Key,
+          );
+        }
+
+        await this.s3UtilsService.deleteObjectFromS3(s3Key);
+
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          updatePropertyImageDto.imageFile.buffer,
+          updatePropertyImageDto.imageFile.mimetype,
+        );
+      }
+
+      propertyImage.property = existingProperty;
+      propertyImage.updatedBy = existingUser;
+      propertyImage.imageName = updatePropertyImageDto.name;
+      propertyImage.spaceType = existingSpaceType;
+      propertyImage.imageUrl = imageUrlLocation;
+
+      const updatedImage =
+        await this.propertyImagesRepository.save(propertyImage);
+
+      this.logger.log(`Property Image with ID ${id} updated successfully`);
+      return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_UPDATED(updatedImage, id);
+    } catch (error) {
+      this.logger.error(
+        `Error updating property image with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while updating the property image',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
