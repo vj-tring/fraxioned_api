@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -35,6 +35,12 @@ export class CreatePropertyImagesDto {
   @IsNotEmpty({ message: 'Image name is required' })
   @IsString()
   name: string;
+
+  @ApiProperty({ example: 1 })
+  @IsNotEmpty({ message: 'Display order is required' })
+  @IsNumber()
+  @Min(1)
+  displayOrder: number;
 
   @ApiProperty({ example: { id: 1 } })
   @IsNotEmpty({ message: 'Space type ID is required' })

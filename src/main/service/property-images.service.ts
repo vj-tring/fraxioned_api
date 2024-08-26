@@ -105,6 +105,7 @@ export class PropertyImagesService {
           property: dto.property,
           createdBy: dto.createdBy,
           imageName: dto.name,
+          displayOrder: dto.displayOrder,
           spaceType: dto.spaceType,
           imageUrl: imageUrlLocation,
         });
@@ -356,6 +357,7 @@ export class PropertyImagesService {
       propertyImage.property = existingProperty;
       propertyImage.updatedBy = existingUser;
       propertyImage.imageName = updatePropertyImageDto.name;
+      propertyImage.displayOrder = updatePropertyImageDto.displayOrder;
       propertyImage.spaceType = existingSpaceType;
       propertyImage.imageUrl = imageUrlLocation;
 

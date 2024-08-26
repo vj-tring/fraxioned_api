@@ -31,6 +31,12 @@ export class PropertyImages {
   })
   imageName: string;
 
+  @Column({
+    name: 'display_order',
+    nullable: true,
+  })
+  displayOrder: number;
+
   @ManyToOne(() => SpaceTypes, (spaceTypes) => spaceTypes.id)
   @JoinColumn({
     name: 'space_type_id',
