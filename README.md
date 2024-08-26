@@ -46,6 +46,11 @@ MAIL_FROM=user@gmail.com
 AWS_ACCESS_KEY_ID=ABCDEFGHIJKLMNOPQRST
 AWS_SECRET_ACCESS_KEY=vxxxxxxxxxxxxxxxxxxxxxxxxx
 AWS_S3_BUCKET_NAME=fraxionedawsbucket
+
+# image configurations
+MAX_FILE_SIZE=31457280
+ALLOWED_EXTENSIONS=.jpg,.jpeg,.png,.gif
+MAX_FILE_COUNT=50
 ```
 
 

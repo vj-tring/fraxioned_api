@@ -11,6 +11,28 @@ export const PROPERTY_IMAGES_RESPONSES = {
     message: `The number of files does not match the number of images in the request`,
     statusCode: HttpStatus.BAD_REQUEST,
   }),
+  FILE_SIZE_TOO_LARGE: (
+    max_file_size: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: HttpStatus;
+  } => ({
+    success: false,
+    message: `File size exceeds the maximum allowed size of ${max_file_size} MB`,
+    statusCode: HttpStatus.PAYLOAD_TOO_LARGE,
+  }),
+  UNSUPPORTED_FILE_EXTENSION: (
+    allowedExtensions: string[],
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: HttpStatus;
+  } => ({
+    success: false,
+    message: `One or more files have an unsupported extension. Allowed extensions are: ${allowedExtensions.join(', ')}`,
+    statusCode: HttpStatus.BAD_REQUEST,
+  }),
   PROPERTY_NOT_FOUND: (
     propertyId: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({

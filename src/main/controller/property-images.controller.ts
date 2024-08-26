@@ -27,6 +27,13 @@ import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { PROPERTY_IMAGES_RESPONSES } from '../commons/constants/response-constants/property-images.constant';
 import { UpdatePropertyImageDto } from '../dto/requests/property-images/update-property-image.dto';
 import { UpdatePropertyImageRequestDto } from '../dto/requests/property-images/update-property-image-request.dto';
+import {
+  getMaxFileSize,
+  getAllowedExtensions,
+  getMaxFileCount,
+  isFileSizeValid,
+  isFileExtensionValid,
+} from '../utils/image-file.utils';
 
 @ApiTags('Property Images')
 @Controller('v1/propertyImages')
@@ -37,7 +44,9 @@ export class PropertyImagesController {
 
   @Post()
   @UseInterceptors(
-    FileFieldsInterceptor([{ name: 'imageFiles', maxCount: 50 }]),
+    FileFieldsInterceptor([
+      { name: 'imageFiles', maxCount: getMaxFileCount() },
+    ]),
   )
   async createPropertyImages(
     @UploadedFiles() files: { imageFiles?: Express.Multer.File[] },
@@ -49,6 +58,27 @@ export class PropertyImagesController {
     statusCode: HttpStatus;
   }> {
     try {
+      const max_file_size = getMaxFileSize();
+      const allowedExtensions = getAllowedExtensions();
+
+      const hasOversizedFile = (files.imageFiles || []).some(
+        (file) => !isFileSizeValid(file, max_file_size),
+      );
+
+      if (hasOversizedFile) {
+        return PROPERTY_IMAGES_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
+      }
+
+      const hasUnsupportedExtension = (files.imageFiles || []).some(
+        (file) => !isFileExtensionValid(file, allowedExtensions),
+      );
+
+      if (hasUnsupportedExtension) {
+        return PROPERTY_IMAGES_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
+          allowedExtensions,
+        );
+      }
+
       const propertyImageDetails: CreatePropertyImagesDto[] = JSON.parse(
         createPropertyImagesRequestDto.propertyImages,
       );
@@ -134,6 +164,21 @@ export class PropertyImagesController {
         (!file && updatePropertyImageDto)
       ) {
         return PROPERTY_IMAGES_RESPONSES.MISMATCHED_DTO_AND_IMAGES();
+      }
+
+      const max_file_size = getMaxFileSize();
+      const allowedExtensions = getAllowedExtensions();
+
+      if (file) {
+        if (!isFileSizeValid(file, max_file_size)) {
+          return PROPERTY_IMAGES_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
+        }
+
+        if (!isFileExtensionValid(file, allowedExtensions)) {
+          return PROPERTY_IMAGES_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
+            allowedExtensions,
+          );
+        }
       }
 
       updatePropertyImageDto.imageFile = file;
