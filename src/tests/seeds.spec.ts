@@ -9,7 +9,6 @@ import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
-import { UserProperties } from 'src/main/entities/user-properties.entity';
 
 jest.mock('typeorm', () => {
   const actualTypeorm = jest.requireActual('typeorm');
