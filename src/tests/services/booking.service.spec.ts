@@ -125,9 +125,7 @@ describe('BookingService', () => {
   describe('deleteBooking', () => {
     it('should delete a booking', async () => {
       const booking = { id: 1 } as Booking;
-      jest
-        .spyOn(bookingRepository, 'findOne')
-        .mockResolvedValue(booking);
+      jest.spyOn(bookingRepository, 'findOne').mockResolvedValue(booking);
       jest.spyOn(bookingRepository, 'remove').mockResolvedValue(booking);
 
       const result = await service.deleteBooking(1);
