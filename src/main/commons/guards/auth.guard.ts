@@ -30,7 +30,6 @@ export class AuthGuard implements CanActivate {
         'The provided user ID or access token is invalid',
       );
     }
-
     return true;
   }
 }
