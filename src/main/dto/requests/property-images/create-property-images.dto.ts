@@ -2,7 +2,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Property } from '../../entities/property.entity';
+import { Property } from '../../../entities/property.entity';
 import { SpaceTypes } from 'src/main/entities/space-types.entity';
 import { Transform } from 'class-transformer';
 
