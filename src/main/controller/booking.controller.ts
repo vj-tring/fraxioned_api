@@ -1,7 +1,16 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { BookingService } from 'src/main/service/booking.service';
 import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.dto';
+import { UpdateBookingDTO } from '../dto/requests/booking/update-booking.dto';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
@@ -27,5 +36,18 @@ export class BookingController {
   @Get('booking/:id')
   async getBookingById(@Param('id') id: number): Promise<object> {
     return this.bookingService.getBookingById(id);
+  }
+
+  @Patch('booking/:id')
+  async updateBooking(
+    @Param('id') id: number,
+    @Body() updateBookingDto: UpdateBookingDTO,
+  ): Promise<object> {
+    return this.bookingService.updateBooking(id, updateBookingDto);
+  }
+
+  @Delete('booking/:id')
+  async deleteBooking(@Param('id') id: number): Promise<object> {
+    return this.bookingService.deleteBooking(id);
   }
 }

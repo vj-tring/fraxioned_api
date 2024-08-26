@@ -12,6 +12,13 @@ export const BOOKING_RESPONSES = {
     message: 'Booking fetched successfully',
     data: booking,
   }),
+  BOOKING_UPDATED: (booking: Booking): { message: string; data: Booking } => ({
+    message: 'Booking updated successfully',
+    data: booking,
+  }),
+  BOOKING_DELETED: (id: number): { message: string } => ({
+    message: `Booking with ID ${id} deleted successfully`,
+  }),
   CHECKIN_DATE_PAST: {
     message: 'Check-in date cannot be in the past',
     error: 'Bad Request',
