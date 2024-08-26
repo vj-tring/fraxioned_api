@@ -12,8 +12,8 @@ import {
   Delete,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { CreatePropertyImagesRequestDto } from '../dto/requests/create-property-images-request.dto';
-import { CreatePropertyImagesDto } from '../dto/requests/create-property-images.dto';
+import { CreatePropertyImagesRequestDto } from '../dto/requests/property-images/create-property-images-request.dto';
+import { CreatePropertyImagesDto } from '../dto/requests/property-images/create-property-images.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { PropertyImagesService } from '../service/property-images.service';
 import { PropertyImages } from '../entities/property_images.entity';

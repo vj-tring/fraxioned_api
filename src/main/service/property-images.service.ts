@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { PropertyImages } from '../entities/property_images.entity';
-import { CreatePropertyImagesDto } from '../dto/requests/create-property-images.dto';
+import { CreatePropertyImagesDto } from '../dto/requests/property-images/create-property-images.dto';
 import { LoggerService } from './logger.service';
 import { Property } from '../entities/property.entity';
 import { PROPERTY_IMAGES_RESPONSES } from '../commons/constants/response-constants/property-images.constant';
