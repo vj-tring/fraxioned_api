@@ -6,9 +6,9 @@ import { LoggerService } from './logger.service';
 import { Property } from '../entities/property.entity';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
 import { Amenities } from '../entities/amenities.entity';
-import { CreatePropertyAmenitiesDto } from '../dto/requests/property-aminity/create-property-amenities.dto';
+import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
 import { PROPERTY_AMENITY_RESPONSES } from '../commons/constants/response-constants/property-amenities.constant';
-import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-aminity/update-property-amenities.dto';
+import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 
 @Injectable()
 export class PropertyAmenitiesService {
