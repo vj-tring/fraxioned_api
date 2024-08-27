@@ -6,9 +6,9 @@ import { User } from 'entities/user.entity';
 import { Property } from 'entities/property.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from 'services/logger.service';
-import { CreateUserPropertyDTO } from 'src/main/dto/requests/create-user-property.dto';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
-import { UpdateUserPropertyDTO } from 'src/main/dto/requests/update-user-property.dto';
+import { CreateUserPropertyDTO } from 'src/main/dto/requests/user-property/create-user-property.dto';
+import { UpdateUserPropertyDTO } from 'src/main/dto/requests/user-property/update-user-property.dto';
 
 describe('UserPropertyService', () => {
   let service: UserPropertyService;

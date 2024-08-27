@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private authService: AuthenticationService) {}
@@ -30,7 +30,6 @@ export class AuthGuard implements CanActivate {
         'The provided user ID or access token is invalid',
       );
     }
-
     return true;
   }
 }

@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticationService } from '../../main/service/authentication.service';
+import { AuthenticationService } from '../../main/service/auth/authentication.service';
 import { LoggerService } from '../../main/service/logger.service';
 import * as bcrypt from 'bcrypt';
-import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
 import { Repository } from 'typeorm';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
@@ -10,17 +9,14 @@ import { UserSession } from 'src/main/entities/user-session.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
-  INVITE_USER_RESPONSES,
   LOGIN_RESPONSES,
   LOGOUT_RESPONSES,
 } from 'src/main/commons/constants/response-constants/auth.constant';
-import { LoginDto } from 'src/main/dto/requests/login.dto';
+import { LoginDto } from 'src/main/dto/requests/auth/login.dto';
 import { Role } from 'src/main/entities/role.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
-import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
-import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 import { MailService } from 'src/main/email/mail.service';
+import { PropertyDetails } from 'src/main/entities/property-details.entity';
 
 type MockRepository<T> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
@@ -46,6 +42,7 @@ describe('AuthenticationService', () => {
   let userContactDetailsRepository: MockRepository<UserContactDetails>;
   let roleRepository: MockRepository<Role>;
   let propertyRepository: MockRepository<Property>;
+  let propertyDetailsRepository: MockRepository<PropertyDetails>;
   let mailService: MailService;
   let logger: LoggerService;
 
@@ -53,6 +50,7 @@ describe('AuthenticationService', () => {
     userRepository = createMockRepository();
     userSessionRepository = createMockRepository();
     userPropertyRepository = createMockRepository();
+    propertyDetailsRepository = createMockRepository();
     userContactDetailsRepository = createMockRepository();
     roleRepository = createMockRepository();
     propertyRepository = createMockRepository();
@@ -81,6 +79,11 @@ describe('AuthenticationService', () => {
           provide: getRepositoryToken(Property),
           useValue: propertyRepository,
         },
+        {
+          provide: getRepositoryToken(PropertyDetails),
+          useValue: propertyDetailsRepository,
+        },
+
         { provide: MailService, useValue: { sendMail: jest.fn() } },
         {
           provide: LoggerService,
@@ -96,124 +99,6 @@ describe('AuthenticationService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('inviteUser', () => {
-    const inviteUserDto: InviteUserDto = {
-      email: 'test@example.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      addressLine1: '123 Main St',
-      addressLine2: '',
-      state: 'NY',
-      country: 'USA',
-      city: 'New York',
-      zipcode: '10001',
-      phoneNumber: '1234567890',
-      roleId: 1,
-      createdBy: 1,
-      updatedBy: 1,
-      userPropertyDetails: {
-        propertyID: 0,
-        noOfShares: '',
-        acquisitionDate: undefined,
-      },
-    };
-
-    it('should invite a user successfully', async () => {
-      userContactDetailsRepository.findOne.mockResolvedValue(null);
-      userRepository.findOne.mockResolvedValue({ id: 1 });
-      roleRepository.findOne.mockResolvedValue({ id: 1 });
-      propertyRepository.findOne.mockResolvedValue({ id: 0 });
-      userRepository.create.mockReturnValue({});
-      userRepository.save.mockResolvedValue({});
-      userContactDetailsRepository.create.mockReturnValue({});
-      userContactDetailsRepository.save.mockResolvedValue({});
-      userPropertyRepository.create.mockReturnValue({});
-      userPropertyRepository.save.mockResolvedValue({});
-
-      const spySendMail = jest
-        .spyOn(mailService, 'sendMail')
-        .mockResolvedValue(null);
-
-      const result = await service.inviteUser(inviteUserDto);
-
-      expect(result).toEqual(INVITE_USER_RESPONSES.INVITE_SUCCESS);
-      expect(spySendMail).toHaveBeenCalled();
-    });
-
-    it('should return EMAIL_EXISTS if email already exists', async () => {
-      userContactDetailsRepository.findOne.mockResolvedValue({});
-
-      const result = await service.inviteUser(inviteUserDto);
-
-      expect(result).toEqual(INVITE_USER_RESPONSES.EMAIL_EXISTS);
-      expect(logger.error).toHaveBeenCalledWith(
-        `Email already exists: ${inviteUserDto.email}`,
-      );
-    });
-
-    it('should return USER_NOT_FOUND if createdBy user is not found', async () => {
-      userContactDetailsRepository.findOne.mockResolvedValue(null);
-      userRepository.findOne.mockResolvedValueOnce(null);
-
-      const result = await service.inviteUser(inviteUserDto);
-
-      expect(result).toEqual(
-        USER_RESPONSES.USER_NOT_FOUND(inviteUserDto.createdBy),
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        `CreatedBy user not found with ID: ${inviteUserDto.createdBy}`,
-      );
-    });
-
-    it('should return USER_NOT_FOUND if updatedBy user is not found', async () => {
-      userContactDetailsRepository.findOne.mockResolvedValue(null);
-      userRepository.findOne.mockResolvedValueOnce({ id: 1 });
-      userRepository.findOne.mockResolvedValueOnce(null);
-
-      const result = await service.inviteUser(inviteUserDto);
-
-      expect(result).toEqual(
-        USER_RESPONSES.USER_NOT_FOUND(inviteUserDto.updatedBy),
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        `UpdatedBy user not found with ID: ${inviteUserDto.updatedBy}`,
-      );
-    });
-
-    it('should return ROLE_NOT_FOUND if role is not found', async () => {
-      userContactDetailsRepository.findOne.mockResolvedValue(null);
-      userRepository.findOne.mockResolvedValue({ id: 1 });
-      roleRepository.findOne.mockResolvedValue(null);
-
-      const result = await service.inviteUser(inviteUserDto);
-
-      expect(result).toEqual(
-        ROLE_RESPONSES.ROLE_NOT_FOUND(inviteUserDto.roleId),
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        `Role not found with ID: ${inviteUserDto.roleId}`,
-      );
-    });
-
-    it('should return PROPERTY_NOT_FOUND if property is not found', async () => {
-      userContactDetailsRepository.findOne.mockResolvedValue(null);
-      userRepository.findOne.mockResolvedValue({ id: 1 });
-      roleRepository.findOne.mockResolvedValue({ id: 1 });
-      propertyRepository.findOne.mockResolvedValue(null);
-
-      const result = await service.inviteUser(inviteUserDto);
-
-      expect(result).toEqual(
-        USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
-          inviteUserDto.userPropertyDetails.propertyID,
-        ),
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        `Property not found with ID: ${inviteUserDto.userPropertyDetails.propertyID}`,
-      );
-    });
   });
 
   describe('login', () => {

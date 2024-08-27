@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -7,13 +5,36 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import { assetsHostingUrl } from '../commons/constants/email/mail.constants';
 
+interface MailConfig {
+  transport: {
+    host: string;
+    port: number;
+    secure: boolean;
+    auth: {
+      user: string;
+      pass: string;
+    };
+  };
+  defaults: {
+    from: string;
+    to: string;
+  };
+  template: {
+    dir: string;
+    adapter: HandlebarsAdapter;
+    options: {
+      strict: boolean;
+    };
+  };
+}
+
 export const mailConfigAsync = {
-  useFactory: async (configService: ConfigService) => {
-    const mailHost = configService.get('MAIL_HOST');
-    const mailUser = configService.get('MAIL_USER');
-    const mailPassword = configService.get('MAIL_PASSWORD');
-    const mailFrom = configService.get('MAIL_FROM');
-    const mailPort = configService.get('MAIL_PORT');
+  useFactory: async (configService: ConfigService): Promise<MailConfig> => {
+    const mailHost = configService.get<string>('MAIL_HOST');
+    const mailUser = configService.get<string>('MAIL_USER');
+    const mailPassword = configService.get<string>('MAIL_PASSWORD');
+    const mailFrom = configService.get<string>('MAIL_FROM');
+    const mailPort = configService.get<number>('MAIL_PORT');
 
     if (!mailHost || !mailUser || !mailPassword || !mailFrom || !mailPort) {
       throw new Error('Missing required email configuration values.');

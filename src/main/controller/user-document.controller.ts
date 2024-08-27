@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { UserDocumentService } from 'services/user-document.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
-import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
+import { UpdateUserDocumentDTO } from 'src/main/dto/requests/user-document/update-user-document.dto';
 import { AuthGuard } from 'commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { CreateUserDocumentDTO } from '../dto/requests/user-document/create-user-document.dto';
 
 @ApiTags('UserDocument')
 @Controller('v1/user-documents')
@@ -22,7 +22,7 @@ import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 export class UserDocumentController {
   constructor(private readonly userDocumentService: UserDocumentService) {}
 
-  @Post()
+  @Post('document')
   async createUserDocument(
     @Body() createUserDocumentDto: CreateUserDocumentDTO,
   ): Promise<object> {
@@ -34,12 +34,12 @@ export class UserDocumentController {
     return this.userDocumentService.getUserDocuments();
   }
 
-  @Get(':id')
+  @Get('document/:id')
   async getUserDocumentById(@Param('id') id: number): Promise<object> {
     return this.userDocumentService.getUserDocumentById(id);
   }
 
-  @Patch(':id')
+  @Patch('document/:id')
   async updateUserDocument(
     @Param('id') id: number,
     @Body() updateUserDocumentDto: UpdateUserDocumentDTO,
@@ -50,7 +50,7 @@ export class UserDocumentController {
     );
   }
 
-  @Delete(':id')
+  @Delete('document/:id')
   async deleteUserDocument(@Param('id') id: number): Promise<object> {
     return this.userDocumentService.deleteUserDocument(id);
   }

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuthenticationService } from '../service/authentication.service';
+import { AuthenticationService } from '../service/auth/authentication.service';
 import { AuthenticationController } from '../controller/authentication.controller';
 import { User } from 'src/main/entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,6 +10,8 @@ import { UserContactDetails } from 'src/main/entities/user-contact-details.entit
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { Property } from '../entities/property.entity';
 import { MailModule } from '../email/mail.module';
+import { PropertyDetails } from '../entities/property-details.entity';
+import { InviteService } from '../service/auth/invite.service';
 
 @Module({
   imports: [
@@ -20,12 +22,13 @@ import { MailModule } from '../email/mail.module';
       UserProperties,
       Role,
       Property,
+      PropertyDetails,
     ]),
     LoggerModule,
     MailModule,
   ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService],
+  providers: [AuthenticationService, InviteService],
   exports: [AuthenticationService],
 })
 export class AuthenticationModule {}

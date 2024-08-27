@@ -9,9 +9,9 @@ import { PropertySeasonHolidays } from 'src/main/entities/property-season-holida
 import { Role } from 'src/main/entities/role.entity';
 import { PropertySeasonHolidaysService } from 'src/main/service/property-season-holidays.service';
 import { Property } from 'src/main/entities/property.entity';
-import { CreatePropertySeasonHolidayDto } from 'src/main/dto/requests/create-property-season-holiday.dto';
 import { PROPERTY_SEASON_HOLIDAY_RESPONSES } from 'src/main/commons/constants/response-constants/property-season-holidays.constants';
-import { UpdatePropertySeasonHolidayDto } from 'src/main/dto/requests/update-property-season-holiday.dto';
+import { UpdatePropertySeasonHolidayDto } from 'src/main/dto/requests/property-season-holiday/update-property-season-holiday.dto';
+import { CreatePropertySeasonHolidayDto } from 'src/main/dto/requests/property-season-holiday/create-property-season-holiday.dto';
 
 describe('PropertySeasonHolidaysService', () => {
   let service: PropertySeasonHolidaysService;

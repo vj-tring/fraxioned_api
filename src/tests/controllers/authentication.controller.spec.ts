@@ -1,20 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticationController } from 'src/main/controller/authentication.controller';
-import { AuthenticationService } from 'src/main/service/authentication.service';
-import { InviteUserDto } from 'src/main/dto/requests/inviteUser.dto';
-import { LoginDto } from 'src/main/dto/requests/login.dto';
-import { ForgotPasswordDto } from 'src/main/dto/requests/forgotPassword.dto';
-import { ResetPasswordDto } from 'src/main/dto/requests/resetPassword.dto';
-import { ChangePasswordDto } from 'src/main/dto/requests/recoverPassword.dto';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
+import { InviteUserDto } from 'src/main/dto/requests/auth/inviteUser.dto';
+import { LoginDto } from 'src/main/dto/requests/auth/login.dto';
+import { ForgotPasswordDto } from 'src/main/dto/requests/auth/forgotPassword.dto';
+import { ResetPasswordDto } from 'src/main/dto/requests/auth/resetPassword.dto';
+import { ChangePasswordDto } from 'src/main/dto/requests/auth/recoverPassword.dto';
 import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InviteService } from 'src/main/service/auth/invite.service';
 
 describe('AuthenticationController', () => {
   let controller: AuthenticationController;
   let service: AuthenticationService;
+  let inviteService: InviteService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,11 +33,18 @@ describe('AuthenticationController', () => {
             logout: jest.fn(),
           },
         },
+        {
+          provide: InviteService,
+          useValue: {
+            inviteUser: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<AuthenticationController>(AuthenticationController);
     service = module.get<AuthenticationService>(AuthenticationService);
+    inviteService = module.get<InviteService>(InviteService);
   });
 
   describe('inviteUser', () => {
@@ -54,14 +63,16 @@ describe('AuthenticationController', () => {
         roleId: 1,
         createdBy: 1,
         updatedBy: 1,
-        userPropertyDetails: {
-          propertyID: 0,
-          noOfShares: '',
-          acquisitionDate: undefined,
-        },
+        userPropertyDetails: [
+          {
+            propertyID: 0,
+            noOfShares: 0,
+            acquisitionDate: undefined,
+          },
+        ],
       };
       const result = { message: 'Invite sent successfully' };
-      jest.spyOn(service, 'inviteUser').mockResolvedValue(result);
+      jest.spyOn(inviteService, 'inviteUser').mockResolvedValue(result);
 
       expect(await controller.inviteUser(inviteUserDto)).toEqual(result);
     });

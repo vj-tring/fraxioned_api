@@ -12,14 +12,14 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PropertyAmenitiesService } from '../service/property-amenities.service';
-import { CreatePropertyAmenitiesDto } from '../dto/requests/create-property-amenities.dto';
+import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
-import { UpdatePropertyAmenitiesDto } from '../dto/requests/update-property-amenities.dto';
+import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Property Amenities')
-@Controller('v1/property-amenities/property-amenity')
+@Controller('v1/property-amenities')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class PropertyAmenitiesController {
@@ -27,7 +27,7 @@ export class PropertyAmenitiesController {
     private readonly propertyAmenitiesService: PropertyAmenitiesService,
   ) {}
 
-  @Post()
+  @Post('property-amenity')
   async createPropertyAmenity(
     @Body() createPropertyAmenityDto: CreatePropertyAmenitiesDto,
   ): Promise<{
@@ -68,7 +68,7 @@ export class PropertyAmenitiesController {
     }
   }
 
-  @Get(':id')
+  @Get('property-amenity/:id')
   async getPropertyAmenityById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -87,7 +87,7 @@ export class PropertyAmenitiesController {
     }
   }
 
-  @Patch(':id')
+  @Patch('property-amenity/:id')
   async updatePropertyAmenityDetail(
     @Param('id') id: string,
     @Body() updatePropertyAmenitiesDto: UpdatePropertyAmenitiesDto,
@@ -112,7 +112,7 @@ export class PropertyAmenitiesController {
     }
   }
 
-  @Delete(':id')
+  @Delete('property-amenity/:id')
   async deletePropertyAmenity(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {

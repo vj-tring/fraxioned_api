@@ -1,39 +1,39 @@
-import { IsNumber, IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Property } from '../../entities/property.entity';
+import { Property } from '../../../entities/property.entity';
 import { IsValidIdArray } from 'src/main/commons/guards/is-valid-id-list.decorator';
 
-export class UpdateHolidayDto {
+export class CreateHolidayDto {
+  @IsNotEmpty({ message: 'holiday name is required' })
   @IsString()
-  @IsOptional()
   name: string;
 
+  @IsNotEmpty({ message: 'year is required' })
   @IsNumber()
-  @IsOptional()
   year: number;
 
   @ApiProperty({
     example: '2024-08-03',
   })
-  @IsOptional()
+  @IsNotEmpty({ message: 'start date is required' })
   startDate: Date;
 
   @ApiProperty({
     example: '2024-08-03',
   })
-  @IsOptional()
+  @IsNotEmpty({ message: 'end date is required' })
   endDate: Date;
 
   @ApiProperty({
     example: { id: 1 },
   })
-  @IsNotEmpty({ message: 'updated by is required' })
+  @IsNotEmpty({ message: 'created by is required' })
   @IsValidId({
-    message: 'updatedBy must be an object with a valid id where (id >= 1)',
+    message: 'createdBy must be an object with a valid id property (id >= 1)',
   })
-  updatedBy: User;
+  createdBy: User;
 
   @ApiProperty({
     example: [{ id: 1 }, { id: 2 }],

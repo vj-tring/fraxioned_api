@@ -5,12 +5,12 @@ import { User } from 'entities/user.entity';
 import { Property } from 'entities/property.entity';
 import { LoggerService } from 'services/logger.service';
 import { Repository } from 'typeorm';
-import { CreateUserDocumentDTO } from 'dto/requests/create-user-document.dto';
-import { UpdateUserDocumentDTO } from 'dto/requests/update-user-document.dto';
+import { UpdateUserDocumentDTO } from 'src/main/dto/requests/user-document/update-user-document.dto';
 import { USER_DOCUMENT_RESPONSES } from 'src/main/commons/constants/response-constants/user-document.constant';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 import { Role } from 'src/main/entities/role.entity';
 import { UserDocumentService } from 'src/main/service/user-document.service';
+import { CreateUserDocumentDTO } from 'src/main/dto/requests/user-document/create-user-document.dto';
 
 describe('UserDocumentService', () => {
   let service: UserDocumentService;

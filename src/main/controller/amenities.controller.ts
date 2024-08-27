@@ -13,19 +13,19 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { AmenitiesService } from '../service/amenities.service';
-import { CreateAmenitiesDto } from '../dto/requests/create-amenities.dto';
+import { CreateAmenitiesDto } from '../dto/requests/amenity/create-amenities.dto';
 import { Amenities } from '../entities/amenities.entity';
-import { UpdateAmenitiesDto } from '../dto/requests/update-amenities.dto';
+import { UpdateAmenitiesDto } from '../dto/requests/amenity/update-amenities.dto';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Amenities')
-@Controller('v1/amenities/amenity')
+@Controller('v1/amenities')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class AmenitiesController {
   constructor(private readonly amenitiesService: AmenitiesService) {}
 
-  @Post()
+  @Post('amenity')
   async createAmenity(@Body() createAmenitiesDto: CreateAmenitiesDto): Promise<{
     success: boolean;
     message: string;
@@ -62,7 +62,7 @@ export class AmenitiesController {
     }
   }
 
-  @Get(':id')
+  @Get('amenity/:id')
   async getAmenityById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -80,7 +80,7 @@ export class AmenitiesController {
     }
   }
 
-  @Patch(':id')
+  @Patch('amenity/:id')
   async updateAmenityDetail(
     @Param('id') id: string,
     @Body() updateAmenitiesDto: UpdateAmenitiesDto,
@@ -104,7 +104,7 @@ export class AmenitiesController {
     }
   }
 
-  @Delete(':id')
+  @Delete('amenity/:id')
   async deleteAmenity(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {

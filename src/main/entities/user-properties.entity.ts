@@ -119,6 +119,9 @@ export class UserProperties {
   @Column({ name: 'lmbrn', type: 'int', nullable: true, default: null })
   lastMinuteRemainingNights: number;
 
+  @Column({ name: 'msl', type: 'int', nullable: true, default: null })
+  maximumStayLength: number;
+
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
   createdBy: User;

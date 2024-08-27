@@ -4,11 +4,11 @@ import { Repository, DeleteResult } from 'typeorm';
 import { UserSessionService } from 'services/user-session.service';
 import { UserSession } from 'entities/user-session.entity';
 import { LoggerService } from 'services/logger.service';
-import { CreateUserSessionDTO } from 'dto/requests/create-user-session.dto';
-import { UpdateUserSessionDTO } from 'dto/requests/update-user-session.dto';
+import { UpdateUserSessionDTO } from 'src/main/dto/requests/user-session/update-user-session.dto';
 import { USER_SESSION_RESPONSES } from 'src/main/commons/constants/response-constants/user-session.constant';
 import { NotFoundException } from '@nestjs/common';
 import { User } from 'entities/user.entity';
+import { CreateUserSessionDTO } from 'src/main/dto/requests/user-session/create-user-session.dto';
 
 describe('UserSessionService', () => {
   let service: UserSessionService;
