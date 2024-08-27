@@ -22,4 +22,20 @@ export class MailService {
       },
     });
   }
+
+  async sendMailWithCarbonCopy(
+    cc: string[],
+    subject: string,
+    template: string,
+    context: object,
+  ) {
+    await this.mailerService.sendMail({
+      cc: cc,
+      subject: subject,
+      template: template,
+      context: {
+        ...context,
+      },
+    });
+  }
 }

@@ -1,5 +1,6 @@
+// Change Port Number to 5000 for Production - http://192.168.1.47:5173
 export const authConstants = {
-  hostname: 'http://192.168.1.47',
+  hostname: 'http://localhost',
   port: '5173',
   endpoints: {
     login: 'login',

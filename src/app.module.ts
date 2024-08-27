@@ -17,6 +17,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './main/email/mail.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { MaintenanceModule } from './main/modules/maintenance.module';
 
 @Module({
   imports: [
@@ -37,8 +38,11 @@ import { join } from 'path';
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'main/email/assets'),
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/static',
+      exclude: ['/api/(.*)'],
     }),
+    MaintenanceModule,
   ],
 })
 export class AppModule {}
