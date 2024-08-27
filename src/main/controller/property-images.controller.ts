@@ -99,6 +99,12 @@ export class PropertyImagesController {
       );
       return result;
     } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new HttpException(
+          `Invalid request body format. Please provide a valid JSON string for propertyImages. ${error.message}`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       throw new HttpException(
         'An error occurred while creating the property images',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -188,6 +194,12 @@ export class PropertyImagesController {
       );
       return result;
     } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new HttpException(
+          `Invalid request body format. Please provide a valid JSON string for propertyImages. ${error.message}`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       throw new HttpException(
         'An error occurred while updating the property image',
         HttpStatus.INTERNAL_SERVER_ERROR,
