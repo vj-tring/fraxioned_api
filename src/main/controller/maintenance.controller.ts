@@ -3,11 +3,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
-  NotFoundException,
   Post,
-  UnauthorizedException,
-  UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
 import { MaintenanceTicketDto } from '../dto/requests/maintenance-ticket.dto';
@@ -34,15 +30,7 @@ export class MaintenanceController {
         maintenanceTicketDto,
       );
     } catch (error) {
-      if (error instanceof UnprocessableEntityException) {
-        return new UnprocessableEntityException();
-      } else if (error instanceof NotFoundException) {
-        return new NotFoundException(error.message);
-      } else if (error instanceof UnauthorizedException) {
-        return new UnauthorizedException(error.message);
-      } else {
-        return new InternalServerErrorException('Maintenance Ticket');
-      }
+      return error;
     }
   }
 }
