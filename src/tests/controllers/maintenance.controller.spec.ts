@@ -13,7 +13,7 @@ import { UserContactDetails } from 'src/main/entities/user-contact-details.entit
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { UserSession } from 'src/main/entities/user-session.entity';
 import { User } from 'src/main/entities/user.entity';
-import { AuthenticationService } from 'src/main/service/authentication.service';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import { MaintenanceService } from 'src/main/service/maintenance.service';
 import { Repository } from 'typeorm';
