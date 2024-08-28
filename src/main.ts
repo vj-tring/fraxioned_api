@@ -31,7 +31,7 @@ export async function bootstrap(): Promise<void> {
   );
 
   // Global Exception Filters
-  // app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Set global prefix for API endpoints
   const globalPrefix = 'api';

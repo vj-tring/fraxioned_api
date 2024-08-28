@@ -106,10 +106,7 @@ export class AuthenticationService {
       updatedBy: user.updatedBy,
     };
     this.logger.log(`Login successful for email: ${email}`);
-    return LOGIN_RESPONSES.LOGIN_SUCCESS(
-      userDetails,
-      session,
-    );
+    return LOGIN_RESPONSES.LOGIN_SUCCESS(userDetails, session);
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<object> {

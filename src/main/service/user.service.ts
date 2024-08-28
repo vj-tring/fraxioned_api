@@ -94,7 +94,8 @@ export class UserService {
         createdBy: true,
         updatedAt: true,
         updatedBy: true,
-      },});
+      },
+    });
     if (users.length === 0) {
       this.logger.warn('No users found');
       return USER_RESPONSES.USERS_NOT_FOUND();
