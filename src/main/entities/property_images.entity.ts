@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Property } from './property.entity';
 import { User } from './user.entity';
+import { SpaceTypes } from './space-types.entity';
 
 @Entity('fxn_property_images')
 export class PropertyImages {
@@ -18,23 +19,11 @@ export class PropertyImages {
   })
   id: number;
 
-  @ManyToOne(() => Property, (properties) => properties.id)
-  @JoinColumn({
-    name: 'property_id',
-  })
-  property: Property;
-
   @Column({
     name: 'url',
     type: 'varchar',
   })
   imageUrl: string;
-
-  @Column({
-    name: 'type',
-    type: 'varchar',
-  })
-  imageType: string;
 
   @Column({
     name: 'name',
@@ -43,10 +32,22 @@ export class PropertyImages {
   imageName: string;
 
   @Column({
-    name: 'description',
-    type: 'varchar',
+    name: 'display_order',
+    nullable: true,
   })
-  imageDescription: string;
+  displayOrder: number;
+
+  @ManyToOne(() => SpaceTypes, (spaceTypes) => spaceTypes.id)
+  @JoinColumn({
+    name: 'space_type_id',
+  })
+  spaceType: SpaceTypes;
+
+  @ManyToOne(() => Property, (properties) => properties.id)
+  @JoinColumn({
+    name: 'property_id',
+  })
+  property: Property;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({

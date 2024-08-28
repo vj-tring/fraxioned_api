@@ -10,8 +10,8 @@ import { PropertyAmenitiesService } from 'src/main/service/property-amenities.se
 import { PropertyAmenities } from 'src/main/entities/property_amenities.entity';
 import { Amenities } from 'src/main/entities/amenities.entity';
 import { PROPERTY_AMENITY_RESPONSES } from 'src/main/commons/constants/response-constants/property-amenities.constant';
-import { CreatePropertyAmenitiesDto } from 'src/main/dto/requests/property-aminity/create-property-amenities.dto';
-import { UpdatePropertyAmenitiesDto } from 'src/main/dto/requests/property-aminity/update-property-amenities.dto';
+import { CreatePropertyAmenitiesDto } from 'src/main/dto/requests/property-amenity/create-property-amenities.dto';
+import { UpdatePropertyAmenitiesDto } from 'src/main/dto/requests/property-amenity/update-property-amenities.dto';
 
 describe('PropertyAmenitiesService', () => {
   let service: PropertyAmenitiesService;
