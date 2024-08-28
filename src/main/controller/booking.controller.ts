@@ -8,20 +8,24 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { BookingService } from 'src/main/service/booking.service';
+import { BookingService } from 'src/main/service/booking/booking.service';
 import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.dto';
 import { UpdateBookingDTO } from '../dto/requests/booking/update-booking.dto';
+import { CreateBookingService } from '../service/booking/create-booking';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
 export class BookingController {
-  constructor(private readonly bookingService: BookingService) {}
+  constructor(
+    private readonly bookingService: BookingService,
+    private readonly createBookingService: CreateBookingService,
+  ) {}
 
   @Post('booking')
   async createBooking(
     @Body() createBookingDto: CreateBookingDTO,
   ): Promise<object> {
-    return this.bookingService.createBooking(createBookingDto);
+    return this.createBookingService.createBooking(createBookingDto);
   }
 
   @Get()
