@@ -85,10 +85,29 @@ export class AuthenticationService {
 
     await this.userSessionRepository.save(session);
 
-    const { ...userDetails } = user;
+    const userDetails = {
+      id: user.id,
+      roleId: user.role.id,
+      roleName: user.role.roleName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      addressLine1: user.addressLine1,
+      addressLine2: user.addressLine2,
+      city: user.city,
+      state: user.state,
+      zipcode: user.zipcode,
+      country: user.country,
+      imageURL: user.imageURL,
+      isActive: user.isActive,
+      lastLoginTime: user.lastLoginTime,
+      createdAt: user.createdAt,
+      createdBy: user.createdBy,
+      updatedAt: user.updatedAt,
+      updatedBy: user.updatedBy,
+    };
     this.logger.log(`Login successful for email: ${email}`);
     return LOGIN_RESPONSES.LOGIN_SUCCESS(
-      { ...userDetails, role: user.role },
+      userDetails,
       session,
     );
   }

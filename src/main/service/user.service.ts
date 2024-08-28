@@ -75,8 +75,26 @@ export class UserService {
   async getUsers(): Promise<object> {
     this.logger.log('Fetching all users');
     const users = await this.userRepository.find({
-      relations: ['contactDetails'],
-    });
+      relations: ['contactDetails', 'role'],
+      select: {
+        id: true,
+        role: { id: true, roleName: true },
+        firstName: true,
+        lastName: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        zipcode: true,
+        country: true,
+        imageURL: true,
+        isActive: true,
+        lastLoginTime: true,
+        createdAt: true,
+        createdBy: true,
+        updatedAt: true,
+        updatedBy: true,
+      },});
     if (users.length === 0) {
       this.logger.warn('No users found');
       return USER_RESPONSES.USERS_NOT_FOUND();
@@ -88,7 +106,26 @@ export class UserService {
     this.logger.log(`Fetching user with ID ${id}`);
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['contactDetails'],
+      relations: ['contactDetails', 'role'],
+      select: {
+        id: true,
+        role: { id: true, roleName: true },
+        firstName: true,
+        lastName: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        zipcode: true,
+        country: true,
+        imageURL: true,
+        isActive: true,
+        lastLoginTime: true,
+        createdAt: true,
+        createdBy: true,
+        updatedAt: true,
+        updatedBy: true,
+      },
     });
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
