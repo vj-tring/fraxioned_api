@@ -9,18 +9,21 @@ import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
 import { NotFoundException } from '@nestjs/common';
 import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.dto';
-import { BookingService } from 'src/main/service/booking.service';
+import { BookingService } from 'src/main/service/booking/booking.service';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
+import { CreateBookingService } from 'src/main/service/booking/create-booking';
 
 describe('BookingService', () => {
   let service: BookingService;
+  let bookingService: CreateBookingService;
   let bookingRepository: Repository<Booking>;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BookingService,
         LoggerService,
+        CreateBookingService,
         {
           provide: getRepositoryToken(Booking),
           useClass: Repository,
@@ -41,6 +44,7 @@ describe('BookingService', () => {
     }).compile();
 
     service = module.get<BookingService>(BookingService);
+    bookingService = module.get<CreateBookingService>(CreateBookingService);
     bookingRepository = module.get<Repository<Booking>>(
       getRepositoryToken(Booking),
     );

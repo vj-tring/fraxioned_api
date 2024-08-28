@@ -1,18 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from 'entities/booking.entity';
 import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
-import { CreateBookingDTO } from '../dto/requests/booking/create-booking.dto';
+import { CreateBookingDTO } from '../../dto/requests/booking/create-booking.dto';
 import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
-import { PropertyDetails } from '../entities/property-details.entity';
-import { UpdateBookingDTO } from '../dto/requests/booking/update-booking.dto';
-import { BookingRules } from '../commons/constants/enumerations/booking-rules';
+import { PropertyDetails } from '../../entities/property-details.entity';
+import { BookingRules } from '../../commons/constants/enumerations/booking-rules';
 
 @Injectable()
-export class BookingService {
+export class CreateBookingService {
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
@@ -164,6 +163,23 @@ export class BookingService {
       }
     }
 
+    const lastBooking = await this.bookingRepository.findOne({
+      where: { user: user, property: property },
+      order: { checkoutDate: 'DESC' },
+    });
+
+    if (lastBooking) {
+      const lastCheckoutDate = this.normalizeDate(
+        new Date(lastBooking.checkoutDate),
+      );
+      const diffInDays =
+        (checkinDate.getTime() - lastCheckoutDate.getTime()) /
+        (1000 * 60 * 60 * 24);
+
+      if (diffInDays < 5) {
+        return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
+      }
+    }
     // Additional validations from the calendar component
     const peakSeasonStart = this.normalizeDate(
       new Date(propertyDetails.peakSeasonStartDate),
@@ -196,77 +212,5 @@ export class BookingService {
     const booking = this.bookingRepository.create(createBookingDto);
     await this.bookingRepository.save(booking);
     return BOOKING_RESPONSES.BOOKING_CREATED(booking);
-  }
-
-  async getAllBookings(): Promise<object[]> {
-    try {
-      const existingProperties = await this.bookingRepository.find({
-        relations: ['user', 'property', 'createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-          user: {
-            id: true,
-          },
-          property: {
-            id: true,
-          },
-        },
-      });
-      if (existingProperties.length === 0) {
-        throw new NotFoundException(`Properties not found`);
-      }
-      return existingProperties;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getBookingById(id: number): Promise<object> {
-    this.logger.log(`Fetching booking with ID ${id}`);
-    const booking = await this.bookingRepository.findOne({
-      relations: ['user', 'property', 'createdBy', 'updatedBy'],
-      where: { id },
-    });
-    if (!booking) {
-      this.logger.warn(`Booking with ID ${id} not found`);
-      return BOOKING_RESPONSES.BOOKING_NOT_FOUND(id);
-    }
-    return BOOKING_RESPONSES.BOOKING_FETCHED(booking);
-  }
-
-  async updateBooking(
-    id: number,
-    updateBookingDto: UpdateBookingDTO,
-  ): Promise<object> {
-    this.logger.log(`Updating booking with ID ${id}`);
-    const booking = await this.bookingRepository.findOne({ where: { id } });
-
-    if (!booking) {
-      this.logger.warn(`Booking with ID ${id} not found`);
-      return BOOKING_RESPONSES.BOOKING_NOT_FOUND(id);
-    }
-
-    // Update booking details
-    Object.assign(booking, updateBookingDto);
-    await this.bookingRepository.save(booking);
-    return BOOKING_RESPONSES.BOOKING_UPDATED(booking);
-  }
-
-  async deleteBooking(id: number): Promise<object> {
-    this.logger.log(`Deleting booking with ID ${id}`);
-    const booking = await this.bookingRepository.findOne({ where: { id } });
-
-    if (!booking) {
-      this.logger.warn(`Booking with ID ${id} not found`);
-      return BOOKING_RESPONSES.BOOKING_NOT_FOUND(id);
-    }
-
-    await this.bookingRepository.remove(booking);
-    return BOOKING_RESPONSES.BOOKING_DELETED(id);
   }
 }
