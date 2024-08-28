@@ -6,15 +6,20 @@ import {
   Param,
   Patch,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { BookingService } from 'src/main/service/booking/booking.service';
 import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.dto';
 import { UpdateBookingDTO } from '../dto/requests/booking/update-booking.dto';
 import { CreateBookingService } from '../service/booking/create-booking';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { AuthGuard } from '../commons/guards/auth.guard';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class BookingController {
   constructor(
     private readonly bookingService: BookingService,

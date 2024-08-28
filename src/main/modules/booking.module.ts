@@ -8,6 +8,8 @@ import { UserProperties } from '../entities/user-properties.entity';
 import { PropertyDetails } from '../entities/property-details.entity';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
 import { CreateBookingService } from '../service/booking/create-booking';
+import { AuthenticationModule } from './authentication.module';
+import { User } from '../entities/user.entity';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { CreateBookingService } from '../service/booking/create-booking';
       UserProperties,
       PropertyDetails,
       PropertySeasonHolidays,
+      User,
     ]),
+    AuthenticationModule,
   ],
   controllers: [BookingController],
   providers: [BookingService, LoggerService, CreateBookingService],

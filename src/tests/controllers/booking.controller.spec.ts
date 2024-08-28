@@ -6,6 +6,15 @@ import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.d
 import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 import { CreateBookingService } from 'src/main/service/booking/create-booking';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
+import { AuthGuard } from 'src/main/commons/guards/auth.guard';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
+import { UserSession } from 'src/main/entities/user-session.entity';
+import { MailService } from 'src/main/email/mail.service';
+import { LoggerService } from 'src/main/service/logger.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 describe('BookingController', () => {
   let bookingController: BookingController;
@@ -31,6 +40,28 @@ describe('BookingController', () => {
             createBooking: jest.fn(),
           },
         },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserContactDetails),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserSession),
+          useClass: Repository,
+        },
+        {
+          provide: MailerService,
+          useValue: {
+            sendMail: jest.fn(),
+          },
+        },
+        AuthenticationService,
+        MailService,
+        LoggerService,
+        AuthGuard,
       ],
     }).compile();
 

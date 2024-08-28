@@ -16,7 +16,6 @@ import { CreateBookingService } from 'src/main/service/booking/create-booking';
 
 describe('BookingService', () => {
   let service: BookingService;
-  let bookingService: CreateBookingService;
   let bookingRepository: Repository<Booking>;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,7 +43,6 @@ describe('BookingService', () => {
     }).compile();
 
     service = module.get<BookingService>(BookingService);
-    bookingService = module.get<CreateBookingService>(CreateBookingService);
     bookingRepository = module.get<Repository<Booking>>(
       getRepositoryToken(Booking),
     );
