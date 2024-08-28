@@ -67,7 +67,8 @@ describe('BookingController', () => {
 
     bookingController = module.get<BookingController>(BookingController);
     bookingService = module.get<BookingService>(BookingService);
-    createBookingService = module.get<CreateBookingService>(CreateBookingService);
+    createBookingService =
+      module.get<CreateBookingService>(CreateBookingService);
   });
 
   describe('createBooking', () => {
@@ -83,10 +84,16 @@ describe('BookingController', () => {
         createdBy: new User(),
       };
       const result = { id: 1 };
-      jest.spyOn(createBookingService, 'createBooking').mockResolvedValue(result);
+      jest
+        .spyOn(createBookingService, 'createBooking')
+        .mockResolvedValue(result);
 
-      expect(await bookingController.createBooking(createBookingDto)).toBe(result);
-      expect(createBookingService.createBooking).toHaveBeenCalledWith(createBookingDto);
+      expect(await bookingController.createBooking(createBookingDto)).toBe(
+        result,
+      );
+      expect(createBookingService.createBooking).toHaveBeenCalledWith(
+        createBookingDto,
+      );
     });
   });
 
@@ -132,8 +139,13 @@ describe('BookingController', () => {
       const result = { id: 1 };
       jest.spyOn(bookingService, 'updateBooking').mockResolvedValue(result);
 
-      expect(await bookingController.updateBooking(1, updateBookingDto)).toBe(result);
-      expect(bookingService.updateBooking).toHaveBeenCalledWith(1, updateBookingDto);
+      expect(await bookingController.updateBooking(1, updateBookingDto)).toBe(
+        result,
+      );
+      expect(bookingService.updateBooking).toHaveBeenCalledWith(
+        1,
+        updateBookingDto,
+      );
     });
   });
 
