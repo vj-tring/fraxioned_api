@@ -115,6 +115,7 @@ describe('AuthenticationService', () => {
           id: 1,
           roleName: 'User',
         } as Role,
+        lastLoginTime: new Date(Date.now()),
       } as User;
       const userDetails = {
         id: user.id,
@@ -129,7 +130,6 @@ describe('AuthenticationService', () => {
         zipcode: user.zipcode,
         country: user.country,
         imageURL: user.imageURL,
-        lastLoginTime: new Date(Date.now()),
         isActive: user.isActive,
         createdAt: user.createdAt,
         createdBy: user.createdBy,
