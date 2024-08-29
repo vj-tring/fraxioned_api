@@ -131,7 +131,7 @@ describe('AuthenticationService', () => {
         country: user.country,
         imageURL: user.imageURL,
         isActive: user.isActive,
-        lastLoginTime: lastLoginTime: new Date(Date.now()),
+        lastLoginTime: new Date(Date.now()),
         createdAt: user.createdAt,
         createdBy: user.createdBy,
         updatedAt: user.updatedAt,
