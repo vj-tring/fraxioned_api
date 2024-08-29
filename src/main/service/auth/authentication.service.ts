@@ -99,7 +99,6 @@ export class AuthenticationService {
       country: user.country,
       imageURL: user.imageURL,
       isActive: user.isActive,
-      lastLoginTime: user.lastLoginTime,
       createdAt: user.createdAt,
       createdBy: user.createdBy,
       updatedAt: user.updatedAt,
