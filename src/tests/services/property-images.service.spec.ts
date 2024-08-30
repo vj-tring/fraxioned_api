@@ -73,6 +73,8 @@ describe('PropertyImagesService', () => {
     imageUrl: imageUrl,
   } as PropertyImages;
 
+  const propertyImage = { id: 1 } as PropertyImages;
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
@@ -266,6 +268,41 @@ describe('PropertyImagesService', () => {
       await expect(service.findAllPropertyImages()).rejects.toThrow(
         HttpException,
       );
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findPropertyImageById', () => {
+    it('should return a property image by ID', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(savedImage);
+      const result = await service.findPropertyImageById(1);
+      const expectedResult =
+        PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_FETCHED(savedImage);
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return property image with id not found', async () => {
+      const expectedResult = PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND(
+        propertyImage.id,
+      );
+      jest.spyOn(propertyImagesRepository, 'findOne').mockResolvedValue(null);
+      expect(await service.findPropertyImageById(propertyImage.id)).toEqual(
+        expectedResult,
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        `Property Image with ID ${propertyImage.id} not found`,
+      );
+    });
+
+    it('should handle errors during retrieval of a property image', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockRejectedValueOnce(new Error('DB Error'));
+      await expect(
+        service.findPropertyImageById(propertyImage.id),
+      ).rejects.toThrow(HttpException);
       expect(logger.error).toHaveBeenCalled();
     });
   });
