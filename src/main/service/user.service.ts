@@ -163,7 +163,8 @@ export class UserService {
         return USER_RESPONSES.USER_NOT_FOUND(updateUserDto.updatedBy);
       }
 
-      Object.assign(user, updateUserDto);
+      const { contactDetails, ...userDetails } = updateUserDto;
+      Object.assign(user, userDetails);
 
       if (updateUserDto.password) {
         user.password = await bcrypt.hash(updateUserDto.password, 10);
@@ -171,10 +172,8 @@ export class UserService {
 
       const updatedUser = await this.userRepository.save(user);
 
-      if (updateUserDto.contactDetails) {
-        const entityManager = this.userRepository.manager;
-
-        for (const detail of updateUserDto.contactDetails) {
+      if (contactDetails) {
+        for (const detail of contactDetails) {
           if (detail.id) {
             // Update existing contact detail
             const existingContactDetail =
@@ -182,36 +181,26 @@ export class UserService {
                 where: { id: detail.id, user: { id: updatedUser.id } },
               });
             if (existingContactDetail) {
-              await entityManager.query(
-                `UPDATE fxn_user_contact_details SET contact_type = ?, contact_value = ?, updated_by = ?, user_id = ? WHERE id = ?`,
-                [
-                  detail.contactType,
-                  detail.contactValue,
-                  updatedByUser.id,
-                  updatedUser.id,
-                  detail.id,
-                ],
+              Object.assign(existingContactDetail, detail);
+              existingContactDetail.updatedBy = updatedByUser;
+              await this.userContactDetailsRepository.save(
+                existingContactDetail,
               );
             }
           } else {
             // Add new contact detail
-            await entityManager.query(
-              `INSERT INTO fxn_user_contact_details (contact_type, contact_value, created_by, updated_by, user_id) VALUES (?, ?, ?, ?, ?)`,
-              [
-                detail.contactType,
-                detail.contactValue,
-                updatedByUser.id,
-                updatedByUser.id,
-                updatedUser.id,
-              ],
-            );
+            const newContactDetail = new UserContactDetails();
+            Object.assign(newContactDetail, detail);
+            newContactDetail.user = updatedUser;
+            newContactDetail.createdBy = updatedByUser;
+            newContactDetail.updatedBy = updatedByUser;
+            await this.userContactDetailsRepository.save(newContactDetail);
           }
         }
       }
 
-      return USER_RESPONSES.USER_UPDATED(updatedUser);
+      return updatedUser;
     } catch (error) {
-      this.logger.error(`Error updating user with ID ${id}`);
       throw error;
     }
   }
