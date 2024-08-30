@@ -199,7 +199,8 @@ export class UserService {
         }
       }
 
-      return updatedUser;
+      this.logger.log(`User with ID ${id} updated successfully`);
+      return USER_RESPONSES.USER_UPDATED(updatedUser);
     } catch (error) {
       throw error;
     }
