@@ -127,7 +127,7 @@ export class PropertyImagesService {
         `Error creating property images: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
-        'An error occurred while creating the property images',
+        `An error occurred while creating the property images`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
