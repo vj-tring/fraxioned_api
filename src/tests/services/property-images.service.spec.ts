@@ -62,6 +62,16 @@ describe('PropertyImagesService', () => {
       name: 'Test Space Name',
     },
   } as SpaceTypes;
+  const imageUrl = 'https://s3.bucket/test-image.jpg';
+  const savedImage = {
+    id: 1,
+    property: property,
+    createdBy: user,
+    displayOrder: createPropertyImagesDtos[0].displayOrder,
+    imageName: createPropertyImagesDtos[0].name,
+    spaceType: spaceType[0],
+    imageUrl: imageUrl,
+  } as PropertyImages;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -131,8 +141,6 @@ describe('PropertyImagesService', () => {
 
   describe('createPropertyImages', () => {
     it('should successfully create property images', async () => {
-      const imageUrl = 'https://s3.bucket/test-image.jpg';
-
       jest
         .spyOn(propertiesRepository, 'findOne')
         .mockResolvedValueOnce(property);
@@ -146,17 +154,6 @@ describe('PropertyImagesService', () => {
       jest
         .spyOn(s3UtilsService, 'uploadFileToS3')
         .mockResolvedValueOnce(imageUrl);
-
-      const savedImage = {
-        id: 1,
-        property: property,
-        createdBy: user,
-        displayOrder: createPropertyImagesDtos[0].displayOrder,
-        imageName: createPropertyImagesDtos[0].name,
-        spaceType: spaceType[0],
-        imageUrl: imageUrl,
-      } as PropertyImages;
-
       jest
         .spyOn(propertyImagesRepository, 'create')
         .mockReturnValue(savedImage);
@@ -232,6 +229,43 @@ describe('PropertyImagesService', () => {
       await expect(
         service.createPropertyImages(createPropertyImagesDtos),
       ).rejects.toThrow(HttpException);
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllPropertyImages', () => {
+    it('should return all property images', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'find')
+        .mockResolvedValue([savedImage]);
+
+      const result = await service.findAllPropertyImages();
+      const expectedResult = PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_FETCHED([
+        savedImage,
+      ]);
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return no property images found', async () => {
+      const propertyImages: PropertyImages[] = [];
+      const expectedResult =
+        PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_NOT_FOUND();
+
+      jest
+        .spyOn(propertyImagesRepository, 'find')
+        .mockResolvedValue(propertyImages);
+
+      expect(await service.findAllPropertyImages()).toEqual(expectedResult);
+    });
+
+    it('should handle errors during retrieval of all property images', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'find')
+        .mockRejectedValueOnce(new Error('DB Error'));
+
+      await expect(service.findAllPropertyImages()).rejects.toThrow(
+        HttpException,
+      );
       expect(logger.error).toHaveBeenCalled();
     });
   });
