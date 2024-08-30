@@ -12,5 +12,4 @@ export class UserContactDetailsDTO {
   @IsString()
   @IsNotEmpty({ message: 'contactValue is required' })
   contactValue: string;
-
 }
