@@ -37,7 +37,7 @@ export const USER_RESPONSES = {
   CONTACT_VALUE_ALREADY_EXISTS: (
     contactValue: string,
   ): UserSuccessResponse => ({
-    status: HttpStatus.OK,
+    status: HttpStatus.NOT_ACCEPTABLE,
     message: 'This email or phone already exists.',
     contactValue,
   }),
