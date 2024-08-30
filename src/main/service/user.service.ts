@@ -174,6 +174,19 @@ export class UserService {
 
       if (contactDetails) {
         for (const detail of contactDetails) {
+          // Remove whitespace from contactValue for comparison
+          const contactValue = detail.contactValue.replace(/\s+/g, '');
+
+          // Check if contactValue already exists
+          const existingContact =
+            await this.userContactDetailsRepository.findOne({
+              where: { contactValue, user: { id: updatedUser.id } },
+            });
+
+          if (existingContact && existingContact.id !== detail.id) {
+            return USER_RESPONSES.CONTACT_VALUE_ALREADY_EXISTS(contactValue);
+          }
+
           if (detail.id) {
             // Update existing contact detail
             const existingContactDetail =
