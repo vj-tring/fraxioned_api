@@ -170,25 +170,25 @@ export class UserService {
         user.password = await bcrypt.hash(updateUserDto.password, 10);
       }
 
-      const updatedUser = await this.userRepository.save(user);
-
       if (contactDetails) {
         for (const detail of contactDetails) {
-          // Remove whitespace from contactValue for comparison
           const contactValue = detail.contactValue.replace(/\s+/g, '');
-
-          // Check if contactValue already exists
           const existingContact =
             await this.userContactDetailsRepository.findOne({
-              where: { contactValue, user: { id: updatedUser.id } },
+              where: { contactValue, user: { id: user.id } },
             });
 
           if (existingContact && existingContact.id !== detail.id) {
             return USER_RESPONSES.CONTACT_VALUE_ALREADY_EXISTS(contactValue);
           }
+        }
+      }
 
+      const updatedUser = await this.userRepository.save(user);
+
+      if (contactDetails) {
+        for (const detail of contactDetails) {
           if (detail.id) {
-            // Update existing contact detail
             const existingContactDetail =
               await this.userContactDetailsRepository.findOne({
                 where: { id: detail.id, user: { id: updatedUser.id } },
@@ -201,7 +201,6 @@ export class UserService {
               );
             }
           } else {
-            // Add new contact detail
             const newContactDetail = new UserContactDetails();
             Object.assign(newContactDetail, detail);
             newContactDetail.user = updatedUser;
