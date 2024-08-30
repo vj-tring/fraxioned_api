@@ -38,7 +38,7 @@ export const USER_RESPONSES = {
     contactValue: string,
   ): UserSuccessResponse => ({
     status: HttpStatus.OK,
-    message: 'User updated successfully',
+    message: 'This email or phone already exists.',
     contactValue,
   }),
   USER_DELETED: {
