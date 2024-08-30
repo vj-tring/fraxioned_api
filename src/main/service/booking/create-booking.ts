@@ -76,9 +76,10 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.DATES_OUT_OF_RANGE;
     }
 
-    // Fetch user properties
+    // Fetch user properties based on the year of booking
+    const bookingYear = checkinDate.getFullYear();
     const userProperty = await this.userPropertiesRepository.findOne({
-      where: { user: user, property: property },
+      where: { user: user, property: property, year: bookingYear },
     });
 
     if (!userProperty) {
