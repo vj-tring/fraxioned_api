@@ -6,7 +6,7 @@ interface UserSuccessResponse {
   message: string;
   user?: Partial<User>;
   users?: Partial<User[]>;
-  contactValue?: String;
+  contactValue?: string;
 }
 
 export const USER_RESPONSES = {
@@ -35,7 +35,7 @@ export const USER_RESPONSES = {
     user,
   }),
   CONTACT_VALUE_ALREADY_EXISTS: (
-    contactValue: String,
+    contactValue: string,
   ): UserSuccessResponse => ({
     status: HttpStatus.OK,
     message: 'User updated successfully',
