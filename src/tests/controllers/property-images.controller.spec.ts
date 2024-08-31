@@ -234,7 +234,7 @@ describe('PropertyImagesController', () => {
         controller.createPropertyImages(mockFiles, mockInvalidJsonDto),
       ).rejects.toThrow(
         new HttpException(
-          `Invalid request body format. Please provide a valid JSON string for propertyImages. Unexpected token 'i', "invalid-json-string" is not valid JSON`,
+          `Invalid request body format. Please provide a valid JSON string for propertyImages. Unexpected token i in JSON at position 0`,
           HttpStatus.BAD_REQUEST,
         ),
       );
@@ -407,7 +407,7 @@ describe('PropertyImagesController', () => {
         controller.updatePropertyImageId(1, mockFile, mockDto),
       ).rejects.toThrow(
         new HttpException(
-          'Invalid request body format. Please provide a valid JSON string for propertyImages. Unexpected token \'i\', "invalid-json-string" is not valid JSON',
+          'Invalid request body format. Please provide a valid JSON string for propertyImages. Unexpected token i in JSON at position 0',
           HttpStatus.BAD_REQUEST,
         ),
       );
