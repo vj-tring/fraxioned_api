@@ -101,7 +101,7 @@ export class PropertyImagesController {
     } catch (error) {
       if (error instanceof SyntaxError) {
         throw new HttpException(
-          `Invalid request body format. Please provide a valid JSON string for propertyImages. ${error.message}`,
+          `Invalid request body format. Please provide a valid JSON string for propertyImages.`,
           HttpStatus.BAD_REQUEST,
         );
       }
@@ -196,7 +196,7 @@ export class PropertyImagesController {
     } catch (error) {
       if (error instanceof SyntaxError) {
         throw new HttpException(
-          `Invalid request body format. Please provide a valid JSON string for propertyImages. ${error.message}`,
+          `Invalid request body format. Please provide a valid JSON string for propertyImages.`,
           HttpStatus.BAD_REQUEST,
         );
       }
