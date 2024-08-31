@@ -1,14 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BookingController } from 'src/main/controller/booking.controller';
-import { BookingService } from 'src/main/service/booking.service';
+import { BookingService } from 'src/main/service/booking/booking.service';
 import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.dto';
 import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.dto';
 import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
+import { CreateBookingService } from 'src/main/service/booking/create-booking';
+import { AuthenticationService } from 'src/main/service/auth/authentication.service';
+import { AuthGuard } from 'src/main/commons/guards/auth.guard';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
+import { UserSession } from 'src/main/entities/user-session.entity';
+import { MailService } from 'src/main/email/mail.service';
+import { LoggerService } from 'src/main/service/logger.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 describe('BookingController', () => {
   let bookingController: BookingController;
   let bookingService: BookingService;
+  let createBookingService: CreateBookingService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -17,18 +28,47 @@ describe('BookingController', () => {
         {
           provide: BookingService,
           useValue: {
-            createBooking: jest.fn(),
             getAllBookings: jest.fn(),
             getBookingById: jest.fn(),
             updateBooking: jest.fn(),
             deleteBooking: jest.fn(),
           },
         },
+        {
+          provide: CreateBookingService,
+          useValue: {
+            createBooking: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserContactDetails),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserSession),
+          useClass: Repository,
+        },
+        {
+          provide: MailerService,
+          useValue: {
+            sendMail: jest.fn(),
+          },
+        },
+        AuthenticationService,
+        MailService,
+        LoggerService,
+        AuthGuard,
       ],
     }).compile();
 
     bookingController = module.get<BookingController>(BookingController);
     bookingService = module.get<BookingService>(BookingService);
+    createBookingService =
+      module.get<CreateBookingService>(CreateBookingService);
   });
 
   describe('createBooking', () => {
@@ -44,12 +84,14 @@ describe('BookingController', () => {
         createdBy: new User(),
       };
       const result = { id: 1 };
-      jest.spyOn(bookingService, 'createBooking').mockResolvedValue(result);
+      jest
+        .spyOn(createBookingService, 'createBooking')
+        .mockResolvedValue(result);
 
       expect(await bookingController.createBooking(createBookingDto)).toBe(
         result,
       );
-      expect(bookingService.createBooking).toHaveBeenCalledWith(
+      expect(createBookingService.createBooking).toHaveBeenCalledWith(
         createBookingDto,
       );
     });
