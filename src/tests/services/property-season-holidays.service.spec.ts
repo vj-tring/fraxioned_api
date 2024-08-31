@@ -493,7 +493,7 @@ describe('PropertySeasonHolidaysService', () => {
       const propertyId = 1;
 
       jest
-        .spyOn(propertySeasonHolidayRepository, 'find')
+        .spyOn(propertySeasonHolidayRepository, 'findOne')
         .mockRejectedValueOnce(new Error('DB Error'));
 
       await expect(

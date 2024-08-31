@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PropertyImagesService } from 'src/main/service/property-images.service';
 import { PropertyImages } from 'src/main/entities/property_images.entity';
@@ -10,10 +10,10 @@ import { SpaceTypes } from 'src/main/entities/space-types.entity';
 import { S3UtilsService } from 'src/main/service/s3-utils.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import { CreatePropertyImagesDto } from 'src/main/dto/requests/property-images/create-property-images.dto';
-// import { UpdatePropertyImageDto } from 'src/main/dto/requests/property-images/update-property-image.dto';
 import { HttpException } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PROPERTY_IMAGES_RESPONSES } from 'src/main/commons/constants/response-constants/property-images.constant';
+import { UpdatePropertyImageDto } from 'src/main/dto/requests/property-images/update-property-image.dto';
 
 describe('PropertyImagesService', () => {
   let service: PropertyImagesService;
@@ -75,6 +75,17 @@ describe('PropertyImagesService', () => {
 
   const propertyImage = { id: 1 } as PropertyImages;
 
+  const updatePropertyImageDto: UpdatePropertyImageDto = {
+    property: { id: 1 } as Property,
+    updatedBy: { id: 1 } as User,
+    spaceType: { id: 1 } as SpaceTypes,
+    name: 'Updated Image',
+    displayOrder: 2,
+    imageFile: mockFiles.imageFiles[0],
+  };
+
+  const s3HeadObjectOutput = {} as AWS.S3.HeadObjectOutput;
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
@@ -109,6 +120,9 @@ describe('PropertyImagesService', () => {
           provide: S3UtilsService,
           useValue: {
             uploadFileToS3: jest.fn(),
+            extractS3Key: jest.fn(),
+            checkIfObjectExistsInS3: jest.fn(),
+            deleteObjectFromS3: jest.fn(),
           },
         },
         {
@@ -302,6 +316,267 @@ describe('PropertyImagesService', () => {
         .mockRejectedValueOnce(new Error('DB Error'));
       await expect(
         service.findPropertyImageById(propertyImage.id),
+      ).rejects.toThrow(HttpException);
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('updatePropertyImageDetail', () => {
+    it('should successfully update property image details', async () => {
+      const updatedPropertyImage = {
+        ...savedImage,
+        ...updatePropertyImageDto,
+      } as PropertyImages;
+
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(savedImage);
+      jest
+        .spyOn(propertiesRepository, 'findOne')
+        .mockResolvedValueOnce(property);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(user);
+      jest
+        .spyOn(spaceTypesRepository, 'findOne')
+        .mockResolvedValueOnce(spaceType);
+      jest
+        .spyOn(s3UtilsService, 'uploadFileToS3')
+        .mockResolvedValueOnce(imageUrl);
+      jest
+        .spyOn(s3UtilsService, 'checkIfObjectExistsInS3')
+        .mockResolvedValueOnce(s3HeadObjectOutput);
+      jest
+        .spyOn(s3UtilsService, 'deleteObjectFromS3')
+        .mockResolvedValueOnce(true);
+      jest
+        .spyOn(propertyImagesRepository, 'save')
+        .mockResolvedValue(updatedPropertyImage);
+
+      const result = await service.updatePropertyImageDetail(
+        1,
+        updatePropertyImageDto,
+      );
+      const expectedResult = PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_UPDATED(
+        updatedPropertyImage,
+        1,
+      );
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return property image with id not found when updating', async () => {
+      jest.spyOn(propertyImagesRepository, 'findOne').mockResolvedValue(null);
+
+      const result = await service.updatePropertyImageDetail(
+        propertyImage.id,
+        updatePropertyImageDto,
+      );
+
+      const expectedResult = PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND(
+        propertyImage.id,
+      );
+      expect(result).toEqual(expectedResult);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Property Image with ID ${propertyImage.id} not found`,
+      );
+    });
+
+    it('should handle property not found during update', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(savedImage);
+      jest.spyOn(propertiesRepository, 'findOne').mockResolvedValueOnce(null);
+
+      const result = await service.updatePropertyImageDetail(
+        propertyImage.id,
+        updatePropertyImageDto,
+      );
+      const expectedResult = PROPERTY_IMAGES_RESPONSES.PROPERTY_NOT_FOUND(
+        property.id,
+      );
+
+      expect(result).toEqual(expectedResult);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Property with ID ${property.id} does not exist`,
+      );
+    });
+
+    it('should handle user not found during update', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(savedImage);
+      jest.spyOn(propertiesRepository, 'findOne').mockResolvedValue(property);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+      const result = await service.updatePropertyImageDetail(
+        propertyImage.id,
+        updatePropertyImageDto,
+      );
+      const expectedResult = PROPERTY_IMAGES_RESPONSES.USER_NOT_FOUND(user.id);
+
+      expect(result).toEqual(expectedResult);
+      expect(logger.error).toHaveBeenCalledWith(
+        `User with ID ${user.id} does not exist`,
+      );
+    });
+
+    it('should handle space type not found during update', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(savedImage);
+      jest
+        .spyOn(propertiesRepository, 'findOne')
+        .mockResolvedValueOnce(property);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(user);
+      jest.spyOn(spaceTypesRepository, 'findOne').mockResolvedValueOnce(null);
+
+      const result = await service.updatePropertyImageDetail(
+        propertyImage.id,
+        updatePropertyImageDto,
+      );
+      const expectedResult = PROPERTY_IMAGES_RESPONSES.SPACE_TYPE_NOT_FOUND(
+        updatePropertyImageDto.spaceType.id,
+      );
+
+      expect(result).toEqual(expectedResult);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Invalid Space Type ID: ${updatePropertyImageDto.spaceType.id}`,
+      );
+    });
+
+    it('should return PROPERTY_IMAGE_NOT_FOUND_IN_AWS_S3 when the S3 object does not exist', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(savedImage);
+      jest
+        .spyOn(propertiesRepository, 'findOne')
+        .mockResolvedValueOnce(property);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(user);
+      jest
+        .spyOn(spaceTypesRepository, 'findOne')
+        .mockResolvedValueOnce(spaceType);
+
+      jest
+        .spyOn(s3UtilsService, 'extractS3Key')
+        .mockResolvedValue('properties_media/old-image.jpg');
+      jest
+        .spyOn(s3UtilsService, 'checkIfObjectExistsInS3')
+        .mockResolvedValue(null);
+
+      const result = await service.updatePropertyImageDetail(
+        propertyImage.id,
+        updatePropertyImageDto,
+      );
+      const expectedResult =
+        PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND_IN_AWS_S3(
+          'properties_media/old-image.jpg',
+        );
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should handle errors during updating of a property image', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockRejectedValueOnce(new Error('DB Error'));
+      await expect(
+        service.updatePropertyImageDetail(
+          propertyImage.id,
+          updatePropertyImageDto,
+        ),
+      ).rejects.toThrow(HttpException);
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('deletePropertyImageById', () => {
+    it('should successfully delete a property image by ID', async () => {
+      const savedImage = {
+        id: 1,
+        imageUrl: 'https://s3.amazonaws.com/image.jpg',
+      } as PropertyImages;
+
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(savedImage);
+      jest.spyOn(s3UtilsService, 'extractS3Key').mockResolvedValue('s3-key');
+      jest
+        .spyOn(s3UtilsService, 'checkIfObjectExistsInS3')
+        .mockResolvedValue({});
+      jest
+        .spyOn(s3UtilsService, 'deleteObjectFromS3')
+        .mockResolvedValueOnce(true);
+
+      const deleteResult: DeleteResult = {
+        raw: {},
+        affected: 1,
+      };
+
+      jest
+        .spyOn(propertyImagesRepository, 'delete')
+        .mockResolvedValue(deleteResult);
+
+      const result = await service.deletePropertyImageById(1);
+
+      expect(s3UtilsService.deleteObjectFromS3).toHaveBeenCalledWith('s3-key');
+      expect(result).toEqual(
+        PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_DELETED(1),
+      );
+    });
+
+    it('should return property image with id not found when deleting', async () => {
+      jest.spyOn(propertyImagesRepository, 'findOne').mockResolvedValue(null);
+
+      const result = await service.deletePropertyImageById(propertyImage.id);
+
+      expect(result).toEqual(
+        PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND(propertyImage.id),
+      );
+    });
+
+    it('should return PROPERTY_IMAGE_NOT_FOUND_IN_AWS_S3 when the S3 object does not exist', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(savedImage);
+      jest.spyOn(s3UtilsService, 'extractS3Key').mockResolvedValue('s3-key');
+      jest
+        .spyOn(s3UtilsService, 'checkIfObjectExistsInS3')
+        .mockResolvedValue(null);
+
+      const result = await service.deletePropertyImageById(1);
+
+      expect(result).toEqual(
+        PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND_IN_AWS_S3('s3-key'),
+      );
+    });
+
+    it('should return PROPERTY_IMAGE_NOT_FOUND if the image cannot be deleted from the database', async () => {
+      const deleteResult: DeleteResult = {
+        raw: {},
+        affected: 0,
+      };
+      jest
+        .spyOn(propertyImagesRepository, 'findOne')
+        .mockResolvedValue(propertyImage);
+      jest.spyOn(s3UtilsService, 'extractS3Key').mockResolvedValue('s3-key');
+      jest
+        .spyOn(s3UtilsService, 'checkIfObjectExistsInS3')
+        .mockResolvedValue({});
+      jest.spyOn(s3UtilsService, 'deleteObjectFromS3').mockResolvedValue(true);
+      jest
+        .spyOn(propertyImagesRepository, 'delete')
+        .mockResolvedValue(deleteResult);
+
+      const result = await service.deletePropertyImageById(1);
+
+      expect(result).toEqual(
+        PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGE_NOT_FOUND(1),
+      );
+    });
+    it('should handle errors during deleting property image', async () => {
+      jest
+        .spyOn(propertyImagesRepository, 'delete')
+        .mockRejectedValue(new Error('DB Error'));
+      await expect(
+        service.deletePropertyImageById(propertyImage.id),
       ).rejects.toThrow(HttpException);
       expect(logger.error).toHaveBeenCalled();
     });
