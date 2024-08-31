@@ -3,7 +3,7 @@ export function getMaxFileSize(): number {
 }
 
 export function getAllowedExtensions(): string[] {
-  return (process.env.ALLOWED_EXTENSIONS || '')
+  return (process.env.ALLOWED_EXTENSIONS || '.jpg,.jpeg,.png,.gif')
     .split(',')
     .map((ext) => ext.trim().toLowerCase());
 }

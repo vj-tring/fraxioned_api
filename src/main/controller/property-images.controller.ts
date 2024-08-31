@@ -90,7 +90,7 @@ export class PropertyImagesController {
       const processedPropertyImagesDtos = propertyImageDetails.map(
         (dto, index) => ({
           ...dto,
-          imageFiles: files.imageFiles ? files.imageFiles[index] : null,
+          imageFiles: files.imageFiles[index],
         }),
       );
 
@@ -151,7 +151,7 @@ export class PropertyImagesController {
   @Patch('propertyImage/:id')
   @UseInterceptors(FileInterceptor('imageFile'))
   async updatePropertyImageId(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @UploadedFile() file: Express.Multer.File,
     @Body() updatePropertyImageRequestDto: UpdatePropertyImageRequestDto,
   ): Promise<{
@@ -189,7 +189,7 @@ export class PropertyImagesController {
 
       updatePropertyImageDto.imageFile = file;
       const result = await this.propertyImagesService.updatePropertyImageDetail(
-        +id,
+        id,
         updatePropertyImageDto,
       );
       return result;
