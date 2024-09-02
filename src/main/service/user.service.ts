@@ -75,7 +75,26 @@ export class UserService {
   async getUsers(): Promise<object> {
     this.logger.log('Fetching all users');
     const users = await this.userRepository.find({
-      relations: ['contactDetails'],
+      relations: ['contactDetails', 'role'],
+      select: {
+        id: true,
+        role: { id: true, roleName: true },
+        firstName: true,
+        lastName: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        zipcode: true,
+        country: true,
+        imageURL: true,
+        isActive: true,
+        lastLoginTime: true,
+        createdAt: true,
+        createdBy: true,
+        updatedAt: true,
+        updatedBy: true,
+      },
     });
     if (users.length === 0) {
       this.logger.warn('No users found');
@@ -88,7 +107,26 @@ export class UserService {
     this.logger.log(`Fetching user with ID ${id}`);
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['contactDetails'],
+      relations: ['contactDetails', 'role'],
+      select: {
+        id: true,
+        role: { id: true, roleName: true },
+        firstName: true,
+        lastName: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        zipcode: true,
+        country: true,
+        imageURL: true,
+        isActive: true,
+        lastLoginTime: true,
+        createdAt: true,
+        createdBy: true,
+        updatedAt: true,
+        updatedBy: true,
+      },
     });
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
@@ -98,54 +136,86 @@ export class UserService {
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDTO): Promise<object> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['contactDetails'],
-    });
-    if (!user) {
-      this.logger.warn(`User with ID ${id} not found`);
-      return USER_RESPONSES.USER_NOT_FOUND(id);
-    }
-
-    if (updateUserDto.role) {
-      const role = await this.roleRepository.findOne({
-        where: { id: updateUserDto.role.id },
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: ['contactDetails'],
       });
-      if (!role) {
-        return ROLE_RESPONSES.ROLE_NOT_FOUND(updateUserDto.role.id);
+
+      if (!user) {
+        this.logger.warn(`User with ID ${id} not found`);
+        return USER_RESPONSES.USER_NOT_FOUND(id);
       }
-    }
 
-    const updatedByUser = await this.userRepository.findOne({
-      where: { id: updateUserDto.updatedBy },
-    });
-    if (!updatedByUser) {
-      return USER_RESPONSES.USER_NOT_FOUND(updateUserDto.updatedBy);
-    }
+      if (updateUserDto.role) {
+        const role = await this.roleRepository.findOne({
+          where: { id: updateUserDto.role.id },
+        });
+        if (!role) {
+          return ROLE_RESPONSES.ROLE_NOT_FOUND(updateUserDto.role.id);
+        }
+      }
 
-    Object.assign(user, updateUserDto);
-
-    if (updateUserDto.password) {
-      user.password = await bcrypt.hash(updateUserDto.password, 10);
-    }
-
-    const updatedUser = await this.userRepository.save(user);
-
-    if (updateUserDto.contactDetails) {
-      await this.userContactDetailsRepository.delete({ user: { id } });
-      const contactDetails = updateUserDto.contactDetails.map((detail) => {
-        const contactDetail = new UserContactDetails();
-        contactDetail.user = updatedUser;
-        contactDetail.createdBy = updatedByUser;
-        contactDetail.updatedBy = updatedByUser;
-        Object.assign(contactDetail, detail);
-        return contactDetail;
+      const updatedByUser = await this.userRepository.findOne({
+        where: { id: updateUserDto.updatedBy },
       });
-      await this.userContactDetailsRepository.save(contactDetails);
-    }
+      if (!updatedByUser) {
+        return USER_RESPONSES.USER_NOT_FOUND(updateUserDto.updatedBy);
+      }
 
-    this.logger.log(`User with ID ${id} updated`);
-    return USER_RESPONSES.USER_UPDATED(updatedUser);
+      const { contactDetails, ...userDetails } = updateUserDto;
+      Object.assign(user, userDetails);
+
+      if (updateUserDto.password) {
+        user.password = await bcrypt.hash(updateUserDto.password, 10);
+      }
+
+      if (contactDetails) {
+        for (const detail of contactDetails) {
+          const contactValue = detail.contactValue.replace(/\s+/g, '');
+          const existingContact =
+            await this.userContactDetailsRepository.findOne({
+              where: { contactValue, user: { id: user.id } },
+            });
+
+          if (existingContact && existingContact.id !== detail.id) {
+            return USER_RESPONSES.CONTACT_VALUE_ALREADY_EXISTS(contactValue);
+          }
+        }
+      }
+
+      const updatedUser = await this.userRepository.save(user);
+
+      if (contactDetails) {
+        for (const detail of contactDetails) {
+          if (detail.id) {
+            const existingContactDetail =
+              await this.userContactDetailsRepository.findOne({
+                where: { id: detail.id, user: { id: updatedUser.id } },
+              });
+            if (existingContactDetail) {
+              Object.assign(existingContactDetail, detail);
+              existingContactDetail.updatedBy = updatedByUser;
+              await this.userContactDetailsRepository.save(
+                existingContactDetail,
+              );
+            }
+          } else {
+            const newContactDetail = new UserContactDetails();
+            Object.assign(newContactDetail, detail);
+            newContactDetail.user = updatedUser;
+            newContactDetail.createdBy = updatedByUser;
+            newContactDetail.updatedBy = updatedByUser;
+            await this.userContactDetailsRepository.save(newContactDetail);
+          }
+        }
+      }
+
+      this.logger.log(`User with ID ${id} updated successfully`);
+      return USER_RESPONSES.USER_UPDATED(updatedUser);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async setActiveStatus(id: number, isActive: boolean): Promise<object> {

@@ -80,4 +80,9 @@ export const BOOKING_RESPONSES = {
     error: 'Bad Request',
     statusCode: 400,
   },
+  INSUFFICIENT_GAP_BETWEEN_BOOKINGS: {
+    message: `You should wait atleast 5 nights from last booking to book again.`,
+    error: 'Bad Request',
+    statusCode: 400,
+  },
 };

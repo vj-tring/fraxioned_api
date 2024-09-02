@@ -115,7 +115,26 @@ describe('AuthenticationService', () => {
           id: 1,
           roleName: 'User',
         } as Role,
-        lastLoginTime: new Date(),
+        lastLoginTime: new Date(Date.now()),
+      } as User;
+      const userDetails = {
+        id: user.id,
+        roleId: user.role.id,
+        roleName: user.role.roleName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        addressLine1: user.addressLine1,
+        addressLine2: user.addressLine2,
+        city: user.city,
+        state: user.state,
+        zipcode: user.zipcode,
+        country: user.country,
+        imageURL: user.imageURL,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        createdBy: user.createdBy,
+        updatedAt: user.updatedAt,
+        updatedBy: user.updatedBy,
       };
       const userEmail = { user, contactValue: 'test@example.com' };
       const session = {
@@ -132,7 +151,7 @@ describe('AuthenticationService', () => {
       const result = await service.login(loginDto);
 
       expect(result).toEqual(
-        LOGIN_RESPONSES.LOGIN_SUCCESS({ ...user, role: user.role }, session),
+        LOGIN_RESPONSES.LOGIN_SUCCESS(userDetails, session),
       );
       expect(logger.log).toHaveBeenCalledWith(
         `User attempting to login with email: ${loginDto.email}`,
