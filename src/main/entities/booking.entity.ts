@@ -23,10 +23,10 @@ export class Booking {
   @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
   property: Property;
 
-  @Column({ name: 'checkin_at', type: 'timestamp', nullable: false })
+  @Column({ name: 'checkin_at', nullable: false })
   checkinDate: Date;
 
-  @Column({ name: 'checkout_at', type: 'timestamp', nullable: false })
+  @Column({ name: 'checkout_at', nullable: false })
   checkoutDate: Date;
 
   @Column({ name: 'no_of_guests', type: 'int', nullable: false })

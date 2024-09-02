@@ -23,8 +23,44 @@ export class CreateBookingService {
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
     private readonly logger: LoggerService,
   ) {}
-  private normalizeDate(date: Date): Date {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  private normalizeDate(date: Date | string): Date {
+    const parsedDate = new Date(date);
+    return new Date(
+      parsedDate.getFullYear(),
+      parsedDate.getMonth(),
+      parsedDate.getDate(),
+    );
+  }
+
+  private extractMonthDay(date: Date): { month: number; day: number } {
+    return { month: date.getMonth(), day: date.getDate() };
+  }
+
+  private isDateInRange(date: Date, start: Date, end: Date): boolean {
+    const { month: dateMonth, day: dateDay } = this.extractMonthDay(date);
+    const { month: startMonth, day: startDay } = this.extractMonthDay(start);
+    const { month: endMonth, day: endDay } = this.extractMonthDay(end);
+
+    if (
+      startMonth < endMonth ||
+      (startMonth === endMonth && startDay <= endDay)
+    ) {
+      // Normal case: start and end are in the same year
+      return (
+        (dateMonth > startMonth ||
+          (dateMonth === startMonth && dateDay >= startDay)) &&
+        (dateMonth < endMonth || (dateMonth === endMonth && dateDay <= endDay))
+      );
+    } else {
+      // Case where the range spans the end of the year
+      return (
+        dateMonth > startMonth ||
+        (dateMonth === startMonth && dateDay >= startDay) ||
+        dateMonth < endMonth ||
+        (dateMonth === endMonth && dateDay <= endDay)
+      );
+    }
   }
 
   async createBooking(createBookingDto: CreateBookingDTO): Promise<object> {
@@ -36,11 +72,10 @@ export class CreateBookingService {
       property,
       user,
     } = createBookingDto;
-    const today = this.normalizeDate(new Date());
 
-    // Convert checkinDate and checkoutDate to Date objects and normalize them
-    const checkinDate = this.normalizeDate(new Date(checkinDateStr));
-    const checkoutDate = this.normalizeDate(new Date(checkoutDateStr));
+    const today = new Date();
+    const checkinDate = this.normalizeDate(checkinDateStr);
+    const checkoutDate = this.normalizeDate(checkoutDateStr);
 
     // Validation: Check if the check-in date is before today
     if (checkinDate < today) {
@@ -76,8 +111,33 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.DATES_OUT_OF_RANGE;
     }
 
+    // Fetch property details to get the check-in time
+    const propertyDetails = await this.propertyDetailsRepository.findOne({
+      where: { property: property },
+    });
+
+    if (!propertyDetails) {
+      return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
+    }
+
+    // New Validation: Check if booking is made at least 24 hours before check-in time
+    const checkinTime = new Date(checkinDate);
+    checkinTime.setHours(propertyDetails.checkInTime, 0, 0, 0); // Use dynamic check-in time
+
+    const timeDifference = checkinTime.getTime() - today.getTime();
+    const hoursDifference = timeDifference / (1000 * 60 * 60);
+
+    if (hoursDifference < 24) {
+      return BOOKING_RESPONSES.BOOKING_TOO_CLOSE_TO_CHECKIN;
+    }
+
     // Fetch user properties based on the year of booking
     const bookingYear = checkinDate.getFullYear();
+    if (isNaN(bookingYear)) {
+      this.logger.error('Invalid booking year');
+      return BOOKING_RESPONSES.INVALID_BOOKING_YEAR;
+    }
+
     const userProperty = await this.userPropertiesRepository.findOne({
       where: { user: user, property: property, year: bookingYear },
     });
@@ -90,10 +150,6 @@ export class CreateBookingService {
     const bookedDates = await this.bookingRepository.find({
       where: { property: property },
       select: ['checkinDate', 'checkoutDate'],
-    });
-
-    const propertyDetails = await this.propertyDetailsRepository.findOne({
-      where: { property: property },
     });
 
     const unavailableDates = await this.propertySeasonHolidaysRepository.find({
@@ -116,8 +172,16 @@ export class CreateBookingService {
           ).getTime() === date.getTime(),
       );
 
+    const peakSeasonStart = this.normalizeDate(
+      new Date(propertyDetails.peakSeasonStartDate),
+    );
+    const peakSeasonEnd = this.normalizeDate(
+      new Date(propertyDetails.peakSeasonEndDate),
+    );
+
     // Validation: Check if any date in the range is booked or unavailable
-    let remainingHolidayNights = userProperty.peakRemainingHolidayNights;
+    let remainingPeakHolidayNights = userProperty.peakRemainingHolidayNights;
+    let remainingOffHolidayNights = userProperty.offRemainingHolidayNights;
     for (
       let d = new Date(checkinDate);
       d <= checkoutDate;
@@ -127,10 +191,18 @@ export class CreateBookingService {
         return BOOKING_RESPONSES.DATES_BOOKED_OR_UNAVAILABLE;
       }
       if (isUnavailableDate(d)) {
-        if (remainingHolidayNights > 0) {
-          remainingHolidayNights--;
+        if (this.isDateInRange(d, peakSeasonStart, peakSeasonEnd)) {
+          if (remainingPeakHolidayNights > 0) {
+            remainingPeakHolidayNights--;
+          } else {
+            return BOOKING_RESPONSES.INSUFFICIENT_PEAK_HOLIDAY_NIGHTS;
+          }
         } else {
-          return BOOKING_RESPONSES.DATES_BOOKED_OR_UNAVAILABLE;
+          if (remainingOffHolidayNights > 0) {
+            remainingOffHolidayNights--;
+          } else {
+            return BOOKING_RESPONSES.INSUFFICIENT_OFF_HOLIDAY_NIGHTS;
+          }
         }
       }
     }
@@ -181,21 +253,23 @@ export class CreateBookingService {
         return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
       }
     }
-    // Additional validations from the calendar component
-    const peakSeasonStart = this.normalizeDate(
-      new Date(propertyDetails.peakSeasonStartDate),
-    );
-    const peakSeasonEnd = this.normalizeDate(
-      new Date(propertyDetails.peakSeasonEndDate),
-    );
+
     let peakNights = 0;
     let offNights = 0;
+    let peakHolidayNights = 0;
+    let offHolidayNights = 0;
     for (
       let d = new Date(checkinDate);
       d < checkoutDate;
       d.setDate(d.getDate() + 1)
     ) {
-      if (d >= peakSeasonStart && d <= peakSeasonEnd) {
+      if (isUnavailableDate(d)) {
+        if (this.isDateInRange(d, peakSeasonStart, peakSeasonEnd)) {
+          peakHolidayNights++;
+        } else {
+          offHolidayNights++;
+        }
+      } else if (this.isDateInRange(d, peakSeasonStart, peakSeasonEnd)) {
         peakNights++;
       } else {
         offNights++;
@@ -210,8 +284,25 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.INSUFFICIENT_OFF_NIGHTS;
     }
 
+    if (peakHolidayNights > userProperty.peakRemainingHolidayNights) {
+      return BOOKING_RESPONSES.INSUFFICIENT_PEAK_HOLIDAY_NIGHTS;
+    }
+
+    if (offHolidayNights > userProperty.offRemainingHolidayNights) {
+      return BOOKING_RESPONSES.INSUFFICIENT_OFF_HOLIDAY_NIGHTS;
+    }
+
     const booking = this.bookingRepository.create(createBookingDto);
     await this.bookingRepository.save(booking);
+
+    // Update user properties after successful booking
+    userProperty.peakRemainingNights -= peakNights;
+    userProperty.offRemainingNights -= offNights;
+    userProperty.peakRemainingHolidayNights -= peakHolidayNights;
+    userProperty.offRemainingHolidayNights -= offHolidayNights;
+
+    await this.userPropertiesRepository.save(userProperty);
+
     return BOOKING_RESPONSES.BOOKING_CREATED(booking);
   }
 }

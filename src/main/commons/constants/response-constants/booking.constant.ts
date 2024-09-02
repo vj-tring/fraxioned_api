@@ -80,8 +80,28 @@ export const BOOKING_RESPONSES = {
     error: 'Bad Request',
     statusCode: 400,
   },
+  INSUFFICIENT_PEAK_HOLIDAY_NIGHTS: {
+    message: `You don't have sufficient Peak season holiday remaining nights to select this checkout date`,
+    error: 'Bad Request',
+    statusCode: 400,
+  },
+  INSUFFICIENT_OFF_HOLIDAY_NIGHTS: {
+    message: `You don't have sufficient Off season holiday remaining nights to select this checkout date`,
+    error: 'Bad Request',
+    statusCode: 400,
+  },
   INSUFFICIENT_GAP_BETWEEN_BOOKINGS: {
-    message: `You should wait atleast 5 nights from last booking to book again.`,
+    message: `You should wait at least 5 nights from the last booking to book again.`,
+    error: 'Bad Request',
+    statusCode: 400,
+  },
+  BOOKING_TOO_CLOSE_TO_CHECKIN: {
+    message: 'Booking must be made at least 24 hours before the check-in time',
+    error: 'Bad Request',
+    statusCode: 400,
+  },
+  INVALID_BOOKING_YEAR: {
+    message: 'Invalid booking year',
     error: 'Bad Request',
     statusCode: 400,
   },
