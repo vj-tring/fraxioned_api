@@ -46,14 +46,12 @@ export class CreateBookingService {
       startMonth < endMonth ||
       (startMonth === endMonth && startDay <= endDay)
     ) {
-      // Normal case: start and end are in the same year
       return (
         (dateMonth > startMonth ||
           (dateMonth === startMonth && dateDay >= startDay)) &&
         (dateMonth < endMonth || (dateMonth === endMonth && dateDay <= endDay))
       );
     } else {
-      // Case where the range spans the end of the year
       return (
         dateMonth > startMonth ||
         (dateMonth === startMonth && dateDay >= startDay) ||
@@ -83,7 +81,7 @@ export class CreateBookingService {
     }
 
     // Validation: Check if the check-out date is before the check-in date
-    if (checkoutDate <= checkinDate) {
+    if (checkinDate >= checkoutDate) {
       return BOOKING_RESPONSES.CHECKOUT_BEFORE_CHECKIN;
     }
 
@@ -300,6 +298,10 @@ export class CreateBookingService {
     userProperty.offRemainingNights -= offNights;
     userProperty.peakRemainingHolidayNights -= peakHolidayNights;
     userProperty.offRemainingHolidayNights -= offHolidayNights;
+
+    if (isLastMinuteBooking) {
+      userProperty.lastMinuteRemainingNights -= nightsSelected;
+    }
 
     await this.userPropertiesRepository.save(userProperty);
 
