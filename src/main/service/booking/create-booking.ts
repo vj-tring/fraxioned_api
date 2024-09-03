@@ -129,9 +129,9 @@ export class CreateBookingService {
       select: ['checkinDate', 'checkoutDate'],
     });
 
-    const unavailableDates = await this.propertySeasonHolidaysRepository.find({
+    const PropertyHolidays = await this.propertySeasonHolidaysRepository.find({
       where: { property: property },
-      select: ['holiday'],
+      relations: ['holiday'],
     });
 
     const isBookedDate = (date: Date): boolean =>
@@ -141,12 +141,11 @@ export class CreateBookingService {
           date <= this.normalizeDate(booking.checkoutDate),
       );
 
-    const isUnavailableDate = (date: Date): boolean =>
-      unavailableDates.some(
-        (unavailable) =>
-          this.normalizeDate(
-            new Date(unavailable.holiday as unknown as string),
-          ).getTime() === date.getTime(),
+    const isBetweenHolidayNigths = (date: Date): boolean =>
+      PropertyHolidays.some(
+        (PropertyHoliday) =>
+          date >= this.normalizeDate(PropertyHoliday.holiday.startDate) &&
+          date <= this.normalizeDate(PropertyHoliday.holiday.endDate),
       );
 
     const peakSeasonStart = this.normalizeDate(
@@ -168,7 +167,7 @@ export class CreateBookingService {
         return BOOKING_RESPONSES.DATES_BOOKED_OR_UNAVAILABLE;
       }
 
-      if (isUnavailableDate(date)) {
+      if (isBetweenHolidayNigths(date)) {
         if (this.isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
           if (remainingPeakHolidayNights > 0) {
             remainingPeakHolidayNights--;
@@ -224,11 +223,13 @@ export class CreateBookingService {
       d < checkoutDate;
       d.setDate(d.getDate() + 1)
     ) {
-      if (isUnavailableDate(d)) {
+      if (isBetweenHolidayNigths(d)) {
         if (this.isDateInRange(d, peakSeasonStart, peakSeasonEnd)) {
           peakHolidayNights++;
+          peakNights++;
         } else {
           offHolidayNights++;
+          offNights++;
         }
       } else if (this.isDateInRange(d, peakSeasonStart, peakSeasonEnd)) {
         peakNights++;
