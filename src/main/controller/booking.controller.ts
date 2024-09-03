@@ -18,8 +18,8 @@ import { AuthGuard } from '../commons/guards/auth.guard';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
-@UseGuards(AuthGuard)
-@ApiHeadersForAuth()
+// @UseGuards(AuthGuard)
+// @ApiHeadersForAuth()
 export class BookingController {
   constructor(
     private readonly bookingService: BookingService,
