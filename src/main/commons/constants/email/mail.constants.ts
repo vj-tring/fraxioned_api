@@ -7,6 +7,10 @@ export const mailTemplates = {
     default: './maintenance-default',
     ticket: './maintenance-ticket',
   },
+  contactUs: {
+    default: './contact-us-default',
+    enquiry: './contact-us',
+  },
 };
 
 export const mailSubject = {
@@ -17,6 +21,10 @@ export const mailSubject = {
   maintenance: {
     default: 'Ticket Received',
     ticket: 'Maintenance Ticket',
+  },
+  contactUs: {
+    default: 'Thank You for Reaching Out',
+    enquiry: 'Owner Enquiry',
   },
 };
 

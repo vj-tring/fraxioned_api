@@ -23,6 +23,7 @@ import { S3UtilsModule } from './main/modules/s3-utils.module';
 import { SpaceModule } from './main/modules/space.module';
 import { SpaceTypesModule } from './main/modules/space-types.module';
 import { BookingModule } from './main/modules/booking.module';
+import { ContactUsModule } from './main/modules/contact-us.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { BookingModule } from './main/modules/booking.module';
       exclude: ['/api/(.*)'],
     }),
     MaintenanceModule,
+    ContactUsModule,
   ],
 })
 export class AppModule {}

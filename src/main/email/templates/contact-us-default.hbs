@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You for Reaching Out</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    {{{ css }}}
+</head>
+
+<body>
+    <div class="container">
+        {{!-- (constructUrl '/static/assets/live-chat.png') --}}
+        {{> header logo='https://i.ibb.co/YhryV6D/live-chat.png' alt='gear' text='Thank You for Reaching Out'}}
+        <div class="content">
+            <p>
+                <b>Hello {{ name }},</b>
+            </p>
+            <p>
+                We received your contact form, and a Fraxioned team member will be in touch as soon as possible.
+            </p>
+            <p>
+                We hope you have a great day!
+            </p>
+            <p class="service">
+                Fraxioned Owner Services Team
+            </p>
+        </div>
+        {{> footer }}
+    </div>
+</body>
+
+</html>
