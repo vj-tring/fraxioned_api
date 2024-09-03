@@ -275,6 +275,7 @@ export class CreateBookingService {
 
     if (isLastMinuteBooking) {
       userProperty.lastMinuteRemainingNights -= nightsSelected;
+      userProperty.lastMinuteBookedNights += nightsSelected;
     }
 
     await this.userPropertiesRepository.save(userProperty);
