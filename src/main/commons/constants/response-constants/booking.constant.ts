@@ -105,4 +105,9 @@ export const BOOKING_RESPONSES = {
     error: 'Bad Request',
     statusCode: 400,
   },
+  GUESTS_LIMIT_EXCEEDS: {
+    message: 'Number of guests or pets exceeds property limits',
+    error: 'Bad Request',
+    statusCode: 400,
+  },
 };

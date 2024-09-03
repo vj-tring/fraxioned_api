@@ -69,7 +69,6 @@ export class InviteService {
         return INVITE_USER_RESPONSES.EMAIL_EXISTS;
       }
 
-      // Validate createdBy user
       const createdByUser = await this.userRepository.findOne({
         where: { id: createdBy },
       });
@@ -78,7 +77,6 @@ export class InviteService {
         return USER_RESPONSES.USER_NOT_FOUND(createdBy);
       }
 
-      // Validate updatedBy user
       const updatedByUser = await this.userRepository.findOne({
         where: { id: updatedBy },
       });
@@ -87,7 +85,6 @@ export class InviteService {
         return USER_RESPONSES.USER_NOT_FOUND(updatedBy);
       }
 
-      // Validate role
       const role = await this.roleRepository.findOne({ where: { id: roleId } });
       if (!role) {
         this.logger.error(`Role not found with ID: ${roleId}`);
@@ -140,7 +137,6 @@ export class InviteService {
       const userPropertyEntities = [];
 
       for (const propertyDetail of userPropertyDetails) {
-        // Validate property
         const propertyId = propertyDetail.propertyID;
         const userProperty = await this.propertyRepository.findOne({
           where: { id: propertyId },
@@ -154,7 +150,6 @@ export class InviteService {
           return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
         }
 
-        // Calculate prorated nights
         const peakAllottedNights = this.calculateAllottedNights(
           propertyDetail.noOfShares,
           userPropertyDetails.peakSeasonAllottedNights,
@@ -181,7 +176,6 @@ export class InviteService {
           new Date(propertyDetail.acquisitionDate),
         );
 
-        // Calculate maximum stay length
         const maximumStayLength = Math.min(
           14 + (propertyDetail.noOfShares - 1) * 7,
           28,

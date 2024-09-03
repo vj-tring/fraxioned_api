@@ -75,17 +75,14 @@ export class CreateBookingService {
     const checkinDate = this.normalizeDate(checkinDateStr);
     const checkoutDate = this.normalizeDate(checkoutDateStr);
 
-    // Validation: Check if the check-in date is before today
     if (checkinDate < today) {
       return BOOKING_RESPONSES.CHECKIN_DATE_PAST;
     }
 
-    // Validation: Check if the check-out date is before the check-in date
     if (checkinDate >= checkoutDate) {
       return BOOKING_RESPONSES.CHECKOUT_BEFORE_CHECKIN;
     }
 
-    // Validation: Check if the dates are within the allowed range
     const checkInEndDate = this.normalizeDate(
       new Date(today.getFullYear(), today.getMonth(), today.getDate() + 730),
     );
@@ -93,7 +90,6 @@ export class CreateBookingService {
       new Date(today.getFullYear(), today.getMonth(), today.getDate() + 730),
     );
 
-    // Adjust for leap year
     const isLeapYear = (year: number): boolean => {
       return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
     };
@@ -109,7 +105,6 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.DATES_OUT_OF_RANGE;
     }
 
-    // Fetch property details to get the check-in time
     const propertyDetails = await this.propertyDetailsRepository.findOne({
       where: { property: property },
     });
@@ -118,9 +113,8 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
-    // New Validation: Check if booking is made at least 24 hours before check-in time
     const checkinTime = new Date(checkinDate);
-    checkinTime.setHours(propertyDetails.checkInTime, 0, 0, 0); // Use dynamic check-in time
+    checkinTime.setHours(propertyDetails.checkInTime, 0, 0, 0);
 
     const timeDifference = checkinTime.getTime() - today.getTime();
     const hoursDifference = timeDifference / (1000 * 60 * 60);
@@ -142,6 +136,13 @@ export class CreateBookingService {
 
     if (!userProperty) {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
+    }
+
+    if (
+      createBookingDto.noOfGuests > propertyDetails.noOfGuestsAllowed ||
+      createBookingDto.noOfPets > propertyDetails.noOfPetsAllowed
+    ) {
+      return BOOKING_RESPONSES.GUESTS_LIMIT_EXCEEDS;
     }
 
     // Fetch booked and unavailable dates from the database
