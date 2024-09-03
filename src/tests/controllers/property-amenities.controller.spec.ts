@@ -27,6 +27,7 @@ describe('PropertyAmenitiesController', () => {
             createPropertyAmenity: jest.fn(),
             findAllPropertySAmenities: jest.fn(),
             findPropertyAmenityById: jest.fn(),
+            findAmenitiesByPropertyId: jest.fn(),
             updatePropertyAmenityHoliday: jest.fn(),
             removePropertyAmenity: jest.fn(),
           },
@@ -212,6 +213,40 @@ describe('PropertyAmenitiesController', () => {
         expect(err).toBeInstanceOf(HttpException);
         expect(err.message).toBe(
           'An error occurred while retrieving the property amenity',
+        );
+        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    });
+  });
+
+  describe('getAmenitiesByPropertyId', () => {
+    it('should get all property amenities by property Id', async () => {
+      const expectedResult = {
+        success: true,
+        message: 'Property amenities retrieved successfully',
+        data: [],
+        statusCode: HttpStatus.OK,
+      };
+
+      jest
+        .spyOn(service, 'findAmenitiesByPropertyId')
+        .mockResolvedValue(expectedResult);
+
+      expect(await controller.getHolidaysByPropertyId(1)).toEqual(
+        expectedResult,
+      );
+    });
+
+    it('should throw an HttpException if an error occurs', async () => {
+      const error = new Error('An error occurred');
+      jest.spyOn(service, 'findAmenitiesByPropertyId').mockRejectedValue(error);
+
+      try {
+        await controller.getHolidaysByPropertyId(1);
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe(
+          'An error occurred while retrieving the amenities list for the selected property',
         );
         expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
       }

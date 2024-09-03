@@ -268,7 +268,9 @@ describe('UserService', () => {
 
       const result = await service.updateUser(1, updateUserDto);
       expect(result).toEqual(USER_RESPONSES.USER_UPDATED(user));
-      expect(logger.log).toHaveBeenCalled();
+      expect(logger.log).toHaveBeenCalledWith(
+        'User with ID 1 updated successfully',
+      );
     });
   });
 

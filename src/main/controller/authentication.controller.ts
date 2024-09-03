@@ -21,6 +21,7 @@ import { ChangePasswordDto } from 'src/main/dto/requests/auth/recoverPassword.dt
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { InviteService } from '../service/auth/invite.service';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 
 @ApiTags('Authentication')
 @Controller('v1/authentication')
@@ -94,12 +95,7 @@ export class AuthenticationController {
 
   @Post('resetPassword')
   @UseGuards(AuthGuard)
-  @ApiHeader({ name: 'user-id', required: true, description: 'User ID' })
-  @ApiHeader({
-    name: 'access-token',
-    required: true,
-    description: 'Access Token',
-  })
+  @ApiHeadersForAuth()
   @HttpCode(HttpStatus.OK)
   async resetPassword(
     @Body() resetPasswordDto: ResetPasswordDto,

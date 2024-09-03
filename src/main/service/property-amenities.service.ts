@@ -219,6 +219,71 @@ export class PropertyAmenitiesService {
     }
   }
 
+  async findAmenitiesByPropertyId(id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyAmenities[];
+    statusCode: number;
+  }> {
+    try {
+      const propertyAmenities = await this.propertyAmenitiesRepository.find({
+        relations: [
+          'property',
+          'amenity',
+          'amenity.createdBy',
+          'amenity.updatedBy',
+          'createdBy',
+          'updatedBy',
+        ],
+        select: {
+          property: {
+            id: true,
+          },
+          amenity: {
+            id: true,
+            amenityName: true,
+            amenityDescription: true,
+            amenityType: true,
+            createdAt: true,
+            updatedAt: true,
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
+          },
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+        where: { property: { id } },
+      });
+
+      if (propertyAmenities.length === 0) {
+        this.logger.error(`No amenities are available for this property`);
+        return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_NOT_FOUND();
+      }
+      this.logger.log(
+        `Retrieved ${propertyAmenities.length} amenities successfully.`,
+      );
+      return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_FETCHED(
+        propertyAmenities,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property amenities: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the amenities list for the selected property',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async updatePropertyAmenityHoliday(
     id: number,
     updatePropertyAmenitiesDto: UpdatePropertyAmenitiesDto,
