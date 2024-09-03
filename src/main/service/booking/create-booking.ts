@@ -181,6 +181,7 @@ export class CreateBookingService {
     // Validation: Check if any date in the range is booked or unavailable
     let remainingPeakHolidayNights = userProperty.peakRemainingHolidayNights;
     let remainingOffHolidayNights = userProperty.offRemainingHolidayNights;
+
     for (
       let d = new Date(checkinDate);
       d <= checkoutDate;
@@ -189,6 +190,7 @@ export class CreateBookingService {
       if (isBookedDate(d)) {
         return BOOKING_RESPONSES.DATES_BOOKED_OR_UNAVAILABLE;
       }
+
       if (isUnavailableDate(d)) {
         if (this.isDateInRange(d, peakSeasonStart, peakSeasonEnd)) {
           if (remainingPeakHolidayNights > 0) {
@@ -247,7 +249,6 @@ export class CreateBookingService {
       const diffInDays =
         (checkinDate.getTime() - lastCheckoutDate.getTime()) /
         (1000 * 60 * 60 * 24);
-
       if (diffInDays < 5) {
         return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
       }
@@ -257,6 +258,7 @@ export class CreateBookingService {
     let offNights = 0;
     let peakHolidayNights = 0;
     let offHolidayNights = 0;
+
     for (
       let d = new Date(checkinDate);
       d < checkoutDate;
@@ -299,6 +301,11 @@ export class CreateBookingService {
     userProperty.offRemainingNights -= offNights;
     userProperty.peakRemainingHolidayNights -= peakHolidayNights;
     userProperty.offRemainingHolidayNights -= offHolidayNights;
+
+    userProperty.peakBookedNights += peakNights;
+    userProperty.offBookedNights += offNights;
+    userProperty.peakBookedHolidayNights += peakHolidayNights;
+    userProperty.offBookedHolidayNights += offHolidayNights;
 
     if (isLastMinuteBooking) {
       userProperty.lastMinuteRemainingNights -= nightsSelected;
