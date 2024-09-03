@@ -40,7 +40,7 @@ export class S3UtilsService {
   public async extractS3Key(imageUrl: string): Promise<string> {
     return new Promise((resolve) => {
       const urlParts = new URL(imageUrl);
-      const s3Key = urlParts.pathname.substring(1); // Remove leading slash if present
+      const s3Key = urlParts.pathname.substring(1);
       resolve(s3Key);
     });
   }

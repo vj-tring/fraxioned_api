@@ -87,6 +87,25 @@ export class PropertyAmenitiesController {
     }
   }
 
+  @Get('property/:id')
+  async getHolidaysByPropertyId(@Param('id') id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyAmenities[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertyAmenitiesService.findAmenitiesByPropertyId(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the amenities list for the selected property',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Patch('property-amenity/:id')
   async updatePropertyAmenityDetail(
     @Param('id') id: string,

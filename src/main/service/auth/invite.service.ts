@@ -69,7 +69,6 @@ export class InviteService {
         return INVITE_USER_RESPONSES.EMAIL_EXISTS;
       }
 
-      // Validate createdBy user
       const createdByUser = await this.userRepository.findOne({
         where: { id: createdBy },
       });
@@ -78,7 +77,6 @@ export class InviteService {
         return USER_RESPONSES.USER_NOT_FOUND(createdBy);
       }
 
-      // Validate updatedBy user
       const updatedByUser = await this.userRepository.findOne({
         where: { id: updatedBy },
       });
@@ -87,7 +85,6 @@ export class InviteService {
         return USER_RESPONSES.USER_NOT_FOUND(updatedBy);
       }
 
-      // Validate role
       const role = await this.roleRepository.findOne({ where: { id: roleId } });
       if (!role) {
         this.logger.error(`Role not found with ID: ${roleId}`);
@@ -140,7 +137,6 @@ export class InviteService {
       const userPropertyEntities = [];
 
       for (const propertyDetail of userPropertyDetails) {
-        // Validate property
         const propertyId = propertyDetail.propertyID;
         const userProperty = await this.propertyRepository.findOne({
           where: { id: propertyId },
@@ -154,7 +150,6 @@ export class InviteService {
           return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
         }
 
-        // Calculate prorated nights
         const peakAllottedNights = this.calculateAllottedNights(
           propertyDetail.noOfShares,
           userPropertyDetails.peakSeasonAllottedNights,
@@ -181,7 +176,6 @@ export class InviteService {
           new Date(propertyDetail.acquisitionDate),
         );
 
-        // Calculate maximum stay length
         const maximumStayLength = Math.min(
           14 + (propertyDetail.noOfShares - 1) * 7,
           28,
@@ -190,26 +184,42 @@ export class InviteService {
         for (let yearOffset = 0; yearOffset <= 2; yearOffset++) {
           const year = currentYear + yearOffset;
           const isCurrentYear = year === currentYear;
+
+          // Validate peak season end date
+          const peakSeasonEndDate = new Date(
+            userPropertyDetails.peakSeasonEndDate,
+          );
+          const acquisitionDate = new Date(propertyDetail.acquisitionDate);
+          const isAfterPeakSeasonEndDate = acquisitionDate > peakSeasonEndDate;
+
           userPropertyEntities.push(
             this.userPropertyRepository.create({
               property: userProperty,
               noOfShare: propertyDetail.noOfShares,
-              acquisitionDate: new Date(propertyDetail.acquisitionDate),
+              acquisitionDate: acquisitionDate,
               user,
               year,
               createdBy: createdByUser,
               updatedBy: updatedByUser,
               peakAllottedNights: isCurrentYear
-                ? ratedPeakAllottedNights
+                ? isAfterPeakSeasonEndDate
+                  ? 0
+                  : ratedPeakAllottedNights
                 : peakAllottedNights,
               peakRemainingNights: isCurrentYear
-                ? ratedPeakAllottedNights
+                ? isAfterPeakSeasonEndDate
+                  ? 0
+                  : ratedPeakAllottedNights
                 : peakAllottedNights,
               peakAllottedHolidayNights: isCurrentYear
-                ? peakAllottedHolidayNights
+                ? isAfterPeakSeasonEndDate
+                  ? 0
+                  : peakAllottedHolidayNights
                 : peakAllottedHolidayNights,
               peakRemainingHolidayNights: isCurrentYear
-                ? peakAllottedHolidayNights
+                ? isAfterPeakSeasonEndDate
+                  ? 0
+                  : peakAllottedHolidayNights
                 : peakAllottedHolidayNights,
               offAllottedNights: isCurrentYear
                 ? ratedOffAllottedNights
@@ -254,36 +264,32 @@ export class InviteService {
       throw error;
     }
   }
+
   private rateNights(allottedNights: number, acquisitionDate: Date): number {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const endOfYear = new Date(currentYear, 11, 30);
 
-    // Check if the current year is a leap year
     const isLeapYear = (year: number): boolean => {
       return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
     };
 
     const daysInYear = isLeapYear(currentYear) ? 366 : 365;
 
-    // Adjust the days in the year to account for the calendar year ending on December 30
     const adjustedDaysInYear = daysInYear - 1;
 
-    // Check if acquisition date is within the current calendar year
     const isAcquisitionInCurrentYear =
       acquisitionDate.getFullYear() === currentYear &&
       acquisitionDate <= endOfYear;
 
     let daysRemaining: number;
     if (isAcquisitionInCurrentYear) {
-      // Calculate the difference in days, including the acquisition date
       daysRemaining =
         Math.ceil(
           (endOfYear.getTime() - acquisitionDate.getTime()) /
             (1000 * 60 * 60 * 24),
         ) + 1;
     } else {
-      // Calculate the total days in the current calendar year
       daysRemaining = adjustedDaysInYear;
     }
 
