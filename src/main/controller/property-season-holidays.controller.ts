@@ -90,7 +90,7 @@ export class PropertySeasonHolidaysController {
     }
   }
 
-  @Get('property-season-holiday/property/:id')
+  @Get('property/:id')
   async getHolidaysByPropertyId(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;

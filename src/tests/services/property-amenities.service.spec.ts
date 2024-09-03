@@ -401,6 +401,73 @@ describe('PropertyAmenitiesService', () => {
     });
   });
 
+  describe('findAmenitiesByPropertyId', () => {
+    it('should retrieve all property amenities for a given property Id', async () => {
+      const propertyId = 1;
+      const propertyAmenities: PropertyAmenities[] = [
+        {
+          id: 1,
+          property: { id: propertyId } as Property,
+          amenity: new Amenities(),
+          createdBy: new User(),
+          updatedBy: new User(),
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
+        {
+          id: 2,
+          property: { id: propertyId } as Property,
+          amenity: new Amenities(),
+          createdBy: new User(),
+          updatedBy: new User(),
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
+      ];
+      const expectedResult =
+        PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_FETCHED(
+          propertyAmenities,
+        );
+
+      jest
+        .spyOn(propertyAmenitiesRepository, 'find')
+        .mockResolvedValue(propertyAmenities);
+
+      expect(await service.findAmenitiesByPropertyId(propertyId)).toEqual(
+        expectedResult,
+      );
+    });
+
+    it('should return no amenities found for a given property Id', async () => {
+      const propertyId = 1;
+      const propertyAmenities: PropertyAmenities[] = [];
+
+      const expectedResult =
+        PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_NOT_FOUND();
+
+      jest
+        .spyOn(propertyAmenitiesRepository, 'find')
+        .mockResolvedValue(propertyAmenities);
+
+      expect(await service.findAmenitiesByPropertyId(propertyId)).toEqual(
+        expectedResult,
+      );
+    });
+
+    it('should handle errors during retrieval of amenities by property Id', async () => {
+      const propertyId = 1;
+
+      jest
+        .spyOn(propertyAmenitiesRepository, 'findOne')
+        .mockRejectedValueOnce(new Error('DB Error'));
+
+      await expect(
+        service.findAmenitiesByPropertyId(propertyId),
+      ).rejects.toThrow(HttpException);
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
   describe('updatePropertyAmenityHoliday', () => {
     it('should update property amenity details', async () => {
       const propertyAmenity = { id: 1 } as PropertyAmenities;
