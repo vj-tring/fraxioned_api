@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { HttpException } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
-import { Role } from 'src/main/entities/role.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { PropertyAmenitiesService } from 'src/main/service/property-amenities.service';
 import { PropertyAmenities } from 'src/main/entities/property_amenities.entity';
@@ -73,134 +72,52 @@ describe('PropertyAmenitiesService', () => {
   const createPropertyAmenityDto: CreatePropertyAmenitiesDto = {
     property: {
       id: 1,
-      propertyName: '',
-      address: '',
-      city: '',
-      state: '',
-      country: '',
-      zipcode: 0,
-      houseDescription: '',
-      isExclusive: false,
-      propertyShare: 0,
-      createdBy: new User(),
-      updatedBy: new User(),
-      createdAt: undefined,
-      updatedAt: undefined,
-      latitude: 0,
-      longitude: 0,
-      isActive: false,
     } as Property,
     amenity: {
       id: 1,
-      amenityName: '',
-      amenityDescription: '',
-      amenityType: '',
-      createdBy: new User(),
-      updatedBy: new User(),
-      createdAt: undefined,
-      updatedAt: undefined,
-    },
+    } as Amenities,
     createdBy: {
       id: 1,
-      role: new Role(),
-      firstName: '',
-      lastName: '',
-      password: '',
-      imageURL: '',
-      isActive: false,
-      addressLine1: '',
-      addressLine2: '',
-      state: '',
-      country: '',
-      city: '',
-      zipcode: '',
-      resetToken: '',
-      resetTokenExpires: undefined,
-      lastLoginTime: undefined,
-      createdBy: 0,
-      updatedBy: 0,
-      createdAt: undefined,
-      updatedAt: undefined,
     } as User,
   };
 
   const updatePropertyAmenityDto: UpdatePropertyAmenitiesDto = {
     property: {
       id: 1,
-      propertyName: '',
-      address: '',
-      city: '',
-      state: '',
-      country: '',
-      zipcode: 0,
-      houseDescription: '',
-      isExclusive: false,
-      propertyShare: 0,
-      createdBy: new User(),
-      updatedBy: new User(),
-      createdAt: undefined,
-      updatedAt: undefined,
-      latitude: 0,
-      longitude: 0,
-      isActive: false,
     } as Property,
     amenity: {
       id: 1,
-      amenityName: '',
-      amenityDescription: '',
-      amenityType: '',
-      createdBy: new User(),
-      updatedBy: new User(),
-      createdAt: undefined,
-      updatedAt: undefined,
-    },
+    } as Amenities,
     updatedBy: {
       id: 1,
-      role: new Role(),
-      firstName: '',
-      lastName: '',
-      password: '',
-      imageURL: '',
-      isActive: false,
-      addressLine1: '',
-      addressLine2: '',
-      state: '',
-      country: '',
-      city: '',
-      zipcode: '',
-      resetToken: '',
-      resetTokenExpires: undefined,
-      lastLoginTime: undefined,
-      createdBy: 0,
-      updatedBy: 0,
-      createdAt: undefined,
-      updatedAt: undefined,
     } as User,
   };
-
-  const createOrDeletePropertyAmenitiesDto: CreateOrDeletePropertyAmenitiesDto =
-    {
-      property: {
-        id: 1,
-      } as Property,
-      amenities: [
-        {
-          id: 1,
-        },
-        {
-          id: 2,
-        },
-      ] as Amenities[],
-      updatedBy: {
-        id: 1,
-      } as User,
-    };
 
   const user = { id: 1 } as User;
   const property = { id: 1 } as Property;
   const amenity = { id: 1 } as Amenities;
-  const amenities = [{ id: 1 }] as Amenities[];
+  const amenities = [{ id: 1 }, { id: 2 }] as Amenities[];
+  const existingMappings = [
+    {
+      id: 1,
+      amenity: { id: 1 } as Amenities,
+      property: { id: 1 } as Property,
+      createdBy: { id: 1 } as User,
+      updatedBy: { id: 1 } as User,
+    },
+  ];
   const propertyAmenity = { id: 1 } as PropertyAmenities;
+
+  const dto: CreateOrDeletePropertyAmenitiesDto = {
+    updatedBy: user,
+    property: property,
+    amenities: amenities,
+  };
+  const dto2: CreateOrDeletePropertyAmenitiesDto = {
+    updatedBy: user,
+    property: property,
+    amenities: [{ id: 2 }] as Amenities[],
+  };
 
   describe('createPropertyAmenity', () => {
     it('should create a property amenity', async () => {
@@ -585,42 +502,38 @@ describe('PropertyAmenitiesService', () => {
   });
 
   describe('createOrDeletePropertyAmenities', () => {
-    it('should return user not found if user does not exist', async () => {
+    it('should return USER_NOT_FOUND if user does not exist', async () => {
       jest.spyOn(usersRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await service.createOrDeletePropertyAmenities(
-        createOrDeletePropertyAmenitiesDto,
-      );
+      const result = await service.createOrDeletePropertyAmenities(dto);
 
-      expect(result).toEqual(PROPERTY_AMENITY_RESPONSES.USER_NOT_FOUND(1));
+      expect(result).toEqual(
+        PROPERTY_AMENITY_RESPONSES.USER_NOT_FOUND(user.id),
+      );
       expect(logger.error).toHaveBeenCalledWith(
-        `User with ID ${createOrDeletePropertyAmenitiesDto.updatedBy.id} does not exist`,
+        `User with ID ${user.id} does not exist`,
       );
     });
-    it('should return property not found if property does not exist', async () => {
+    it('should return PROPERTY_NOT_FOUND if property does not exist', async () => {
       jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
       jest.spyOn(propertyRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await service.createOrDeletePropertyAmenities(
-        createOrDeletePropertyAmenitiesDto,
-      );
+      const result = await service.createOrDeletePropertyAmenities(dto);
+
       expect(result).toEqual(
-        PROPERTY_AMENITY_RESPONSES.PROPERTY_NOT_FOUND(
-          createOrDeletePropertyAmenitiesDto.property.id,
-        ),
+        PROPERTY_AMENITY_RESPONSES.PROPERTY_NOT_FOUND(property.id),
       );
       expect(logger.error).toHaveBeenCalledWith(
-        `Property with ID ${createOrDeletePropertyAmenitiesDto.property.id} does not exist`,
+        `Property with ID ${property.id} does not exist`,
       );
     });
-    it('should return amenities not found if any amenity does not exist', async () => {
+    it('should return AMENITIES_NOT_FOUND if some amenities do not exist', async () => {
       jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
       jest.spyOn(propertyRepository, 'findOne').mockResolvedValue(property);
-      jest.spyOn(amenityRepository, 'findBy').mockResolvedValue(amenities);
+      jest.spyOn(amenityRepository, 'findBy').mockResolvedValue([amenity]);
 
-      const result = await service.createOrDeletePropertyAmenities(
-        createOrDeletePropertyAmenitiesDto,
-      );
+      const result = await service.createOrDeletePropertyAmenities(dto);
+
       const nonExistingIds = [2];
       expect(result).toEqual(
         PROPERTY_AMENITY_RESPONSES.AMENITIES_NOT_FOUND(nonExistingIds),
@@ -630,18 +543,57 @@ describe('PropertyAmenitiesService', () => {
       );
     });
 
-    it('should handle errors gracefully', async () => {
-      const errorMessage = 'Database error';
-      jest
-        .spyOn(usersRepository, 'findOne')
-        .mockRejectedValue(new Error(errorMessage));
+    it('should remove amenities not present in the update and save new ones', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(propertyRepository, 'findOne').mockResolvedValue(property);
+      jest.spyOn(amenityRepository, 'findBy').mockResolvedValue(amenities);
+      jest.spyOn(propertyAmenitiesRepository, 'find').mockResolvedValue([
+        {
+          id: 1,
+          amenity: { id: 1 } as Amenities,
+          property: property,
+          createdBy: user,
+          updatedBy: user,
+        } as PropertyAmenities,
+      ]);
+
+      const removeSpy = jest
+        .spyOn(propertyAmenitiesRepository, 'remove')
+        .mockResolvedValue(null);
+      const saveSpy = jest
+        .spyOn(propertyAmenitiesRepository, 'save')
+        .mockResolvedValue(null);
+
+      const result = await service.createOrDeletePropertyAmenities(dto2);
+
+      expect(removeSpy).toHaveBeenCalledWith([existingMappings[0]]);
+      expect(saveSpy).toHaveBeenCalledWith([
+        {
+          amenity: { id: 2 } as Amenities,
+          property: { id: 1 } as Property,
+          createdBy: { id: 1 } as User,
+          updatedBy: { id: 1 } as User,
+        },
+      ]);
+      expect(result).toEqual(
+        PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_UPDATED(),
+      );
+    });
+
+    it('should throw HttpException if an error occurs', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(propertyRepository, 'findOne').mockResolvedValue(property);
+      jest.spyOn(amenityRepository, 'findBy').mockImplementation(() => {
+        throw new Error('Some error');
+      });
 
       await expect(
-        service.createOrDeletePropertyAmenities(
-          createOrDeletePropertyAmenitiesDto,
-        ),
+        service.createOrDeletePropertyAmenities(dto),
       ).rejects.toThrow(
-        `An error occurred while creation or deletion of property amenities for the selected property`,
+        new HttpException(
+          'An error occurred while creation or deletion of property amenities for the selected property',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
       );
     });
   });
