@@ -77,23 +77,22 @@ describe('MaintenanceService', () => {
       mockUser.lastName = 'Doe';
       mockUser.isActive = true;
       const mockUserContactDetails: UserContactDetails = {
-        contactValue: 'user@example.com',
-        contactType: 'email',
+        primaryEmail: 'user@example.com',
         user: mockUser,
       } as UserContactDetails;
 
       const mockAdmins: User[] = [
         {
           id: 2,
-          contactDetails: [
-            { contactValue: 'admin1@example.com', contactType: 'email' },
-          ],
+          contactDetails: {
+            primaryEmail: 'admin1@example.com',
+          } as UserContactDetails,
         } as User,
         {
           id: 3,
-          contactDetails: [
-            { contactValue: 'admin2@example.com', contactType: 'email' },
-          ],
+          contactDetails: {
+            primaryEmail: 'admin2@example.com',
+          } as UserContactDetails,
         } as User,
       ];
 

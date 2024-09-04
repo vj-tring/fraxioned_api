@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class UserContactDetailsDTO {
   @IsInt()
@@ -6,10 +6,34 @@ export class UserContactDetailsDTO {
   id: number;
 
   @IsString()
-  @IsNotEmpty({ message: 'contactType is required' })
-  contactType: string;
+  @IsOptional()
+  primaryEmail: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'contactValue is required' })
-  contactValue: string;
+  @IsOptional()
+  primaryPhone: string;
+
+  @IsString()
+  @IsOptional()
+  secondaryEmail: string;
+
+  @IsString()
+  @IsOptional()
+  secondaryPhone: string;
+
+  @IsString()
+  @IsOptional()
+  optionalEmailOne: string;
+
+  @IsString()
+  @IsOptional()
+  optionalPhoneOne: string;
+
+  @IsString()
+  @IsOptional()
+  optionalEmailTwo: string;
+
+  @IsString()
+  @IsOptional()
+  optionalPhoneTwo: string;
 }

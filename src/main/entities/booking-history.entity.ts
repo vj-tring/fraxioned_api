@@ -11,7 +11,7 @@ import { User } from './user.entity';
 import { Property } from './property.entity';
 
 @Entity('fxn_booking')
-export class Booking {
+export class BookingHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -98,7 +98,7 @@ export class Booking {
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
-  updatedBy: User;
+  modifiedBy: User;
 
   @Column({
     name: 'is_cancelled',

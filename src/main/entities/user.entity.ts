@@ -6,7 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { Role } from './role.entity';
 import { UserContactDetails } from './user-contact-details.entity';
@@ -135,6 +135,6 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at', nullable: true, default: null })
   updatedAt: Date;
 
-  @OneToMany(() => UserContactDetails, (contactDetail) => contactDetail.user)
-  contactDetails: UserContactDetails[];
+  @OneToOne(() => UserContactDetails, (contactDetail) => contactDetail.user)
+  contactDetails: UserContactDetails;
 }

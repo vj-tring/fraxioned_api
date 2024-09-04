@@ -55,6 +55,25 @@ export class BookingService {
     return BOOKING_RESPONSES.BOOKING_FETCHED(booking);
   }
 
+  async getBookingsForUser(userId: number): Promise<object[] | object> {
+    this.logger.log(`Fetching bookings for user with ID ${userId}`);
+    const bookings = await this.bookingRepository.find({
+      relations: ['user', 'property', 'createdBy', 'updatedBy'],
+      select: {
+        user: { id: true },
+        property: { id: true },
+        createdBy: { id: true },
+        updatedBy: { id: true },
+      },
+      where: { user: { id: userId } },
+    });
+    if (bookings.length === 0) {
+      this.logger.warn(`No bookings found for user with ID ${userId}`);
+      return BOOKING_RESPONSES.BOOKING_FOR_USER_NOT_FOUND(userId);
+    }
+    return bookings;
+  }
+
   async updateBooking(
     id: number,
     updateBookingDto: UpdateBookingDTO,
