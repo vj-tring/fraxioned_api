@@ -491,7 +491,7 @@ describe('PropertyAmenitiesService', () => {
         .mockResolvedValue(propertyAmenity);
 
       expect(
-        await service.updatePropertyAmenityHoliday(
+        await service.updatePropertyAmenity(
           propertyAmenity.id,
           updatePropertyAmenityDto,
         ),
@@ -503,7 +503,7 @@ describe('PropertyAmenitiesService', () => {
         .spyOn(propertyAmenitiesRepository, 'findOne')
         .mockResolvedValue(null);
 
-      const result = await service.updatePropertyAmenityHoliday(
+      const result = await service.updatePropertyAmenity(
         1,
         updatePropertyAmenityDto,
       );
@@ -526,7 +526,7 @@ describe('PropertyAmenitiesService', () => {
       );
 
       expect(
-        await service.updatePropertyAmenityHoliday(1, updatePropertyAmenityDto),
+        await service.updatePropertyAmenity(1, updatePropertyAmenityDto),
       ).toEqual(expectedResult);
       expect(logger.error).toHaveBeenCalledWith(
         `User with ID ${updatePropertyAmenityDto.updatedBy.id} does not exist`,
@@ -542,7 +542,7 @@ describe('PropertyAmenitiesService', () => {
         .mockResolvedValue({ id: 1 } as User);
       jest.spyOn(PropertyRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await service.updatePropertyAmenityHoliday(
+      const result = await service.updatePropertyAmenity(
         1,
         updatePropertyAmenityDto,
       );
@@ -566,7 +566,7 @@ describe('PropertyAmenitiesService', () => {
         .mockResolvedValue({ id: 1 } as Property);
       jest.spyOn(amenityRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await service.updatePropertyAmenityHoliday(
+      const result = await service.updatePropertyAmenity(
         1,
         updatePropertyAmenityDto,
       );
@@ -583,7 +583,7 @@ describe('PropertyAmenitiesService', () => {
         .mockRejectedValue(new Error('Test Error'));
 
       await expect(
-        service.updatePropertyAmenityHoliday(1, updatePropertyAmenityDto),
+        service.updatePropertyAmenity(1, updatePropertyAmenityDto),
       ).rejects.toThrow(HttpException);
     });
   });
