@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsInt,
   ValidateNested,
-  IsArray,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'entities/role.entity';
@@ -79,8 +78,7 @@ export class UpdateUserDTO {
   updatedBy?: number;
 
   @IsOptional()
-  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UserContactDetailsDTO)
-  contactDetails?: UserContactDetailsDTO[];
+  contactDetails?: UserContactDetailsDTO;
 }

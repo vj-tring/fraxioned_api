@@ -50,16 +50,15 @@ export class MaintenanceService {
           user: {
             id: userId,
           },
-          contactType: 'email',
         },
-        select: ['contactValue'],
+        select: ['primaryEmail'],
       });
 
       if (contacts.length === 0) {
         return MAINTENANCE_RESPONSES.USER_ACCOUNT_EMAIL();
       }
 
-      const { contactValue: email } = contacts[0];
+      const { primaryEmail: email } = contacts[0];
 
       if (!email) {
         return MAINTENANCE_RESPONSES.USER_ACCOUNT_EMAIL();
@@ -74,19 +73,19 @@ export class MaintenanceService {
         adminMail.map(async (admin) => {
           const user = await this.userRepository.find({
             relations: ['contactDetails'],
-            where: { id: admin.id, contactDetails: { contactType: 'email' } },
+            where: { id: admin.id },
             select: {
               id: true,
               firstName: true,
               lastName: true,
               contactDetails: {
-                contactValue: true,
+                primaryEmail: true,
               },
             },
           });
 
-          const emails = user.flatMap((user) =>
-            user.contactDetails.map((detail) => detail.contactValue),
+          const emails = user.flatMap(
+            (user) => user.contactDetails.primaryEmail,
           );
 
           return emails;

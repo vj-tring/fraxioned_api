@@ -19,22 +19,66 @@ export class UserContactDetails {
   user: User;
 
   @Column({
-    name: 'contact_type',
+    name: 'primary_email',
     type: 'varchar',
-    length: 255,
-    nullable: true,
-    default: null,
+    nullable: false,
   })
-  contactType: string;
+  primaryEmail: string;
 
   @Column({
-    name: 'contact_value',
+    name: 'secondary_email',
     type: 'varchar',
-    length: 255,
     nullable: true,
     default: null,
   })
-  contactValue: string;
+  secondaryEmail: string;
+
+  @Column({
+    name: 'optional_email_1',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  optionalEmailOne: string;
+
+  @Column({
+    name: 'optional_email_2',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  optionalEmailTwo: string;
+
+  @Column({
+    name: 'primary_phone',
+    type: 'varchar',
+    nullable: false,
+  })
+  primaryPhone: string;
+
+  @Column({
+    name: 'secondary_phone',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  secondaryPhone: string;
+
+  @Column({
+    name: 'optional_phone_1',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  optionalPhoneOne: string;
+
+  @Column({
+    name: 'optional_phone_2',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  optionalPhoneTwo: string;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
