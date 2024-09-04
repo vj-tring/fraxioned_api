@@ -47,6 +47,17 @@ export class BookingController {
     return this.bookingService.getBookingById(id);
   }
 
+  @Get('user/:userId')
+  async getBookingsForUser(
+    @Param('userId') userId: number,
+  ): Promise<object[] | object> {
+    try {
+      return await this.bookingService.getBookingsForUser(userId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Patch('booking/:id')
   async updateBooking(
     @Param('id') id: number,
