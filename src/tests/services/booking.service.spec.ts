@@ -17,11 +17,19 @@ import { CreateBookingService } from 'src/main/service/booking/create-booking.se
 describe('BookingService', () => {
   let service: BookingService;
   let bookingRepository: Repository<Booking>;
+  let loggerService: LoggerService;
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BookingService,
-        LoggerService,
+        {
+          provide: LoggerService,
+          useValue: {
+            log: jest.fn(),
+            warn: jest.fn(),
+          },
+        },
         CreateBookingService,
         {
           provide: getRepositoryToken(Booking),
@@ -46,6 +54,7 @@ describe('BookingService', () => {
     bookingRepository = module.get<Repository<Booking>>(
       getRepositoryToken(Booking),
     );
+    loggerService = module.get<LoggerService>(LoggerService);
   });
 
   describe('getAllBookings', () => {
@@ -80,6 +89,47 @@ describe('BookingService', () => {
 
       const result = await service.getBookingById(1);
       expect(result).toEqual(BOOKING_RESPONSES.BOOKING_NOT_FOUND(1));
+    });
+  });
+
+  describe('getBookingsForUser', () => {
+    it('should return bookings for a user', async () => {
+      const userId = 1;
+      const bookings = [
+        { id: 1, user: { id: userId } } as Booking,
+        { id: 2, user: { id: userId } } as Booking,
+      ];
+      jest.spyOn(bookingRepository, 'find').mockResolvedValue(bookings);
+
+      const result = await service.getBookingsForUser(userId);
+      expect(result).toEqual(bookings);
+      expect(loggerService.log).toHaveBeenCalledWith(
+        `Fetching bookings for user with ID ${userId}`,
+      );
+    });
+
+    it('should return BOOKING_FOR_USER_NOT_FOUND if no bookings found for user', async () => {
+      const userId = 1;
+      jest.spyOn(bookingRepository, 'find').mockResolvedValue([]);
+
+      const result = await service.getBookingsForUser(userId);
+      expect(result).toEqual(
+        BOOKING_RESPONSES.BOOKING_FOR_USER_NOT_FOUND(userId),
+      );
+      expect(loggerService.warn).toHaveBeenCalledWith(
+        `No bookings found for user with ID ${userId}`,
+      );
+    });
+
+    it('should handle unexpected errors', async () => {
+      const userId = 1;
+      const error = new Error('Unexpected error');
+      jest.spyOn(bookingRepository, 'find').mockRejectedValue(error);
+
+      await expect(service.getBookingsForUser(userId)).rejects.toThrow(error);
+      expect(loggerService.log).toHaveBeenCalledWith(
+        `Fetching bookings for user with ID ${userId}`,
+      );
     });
   });
 
