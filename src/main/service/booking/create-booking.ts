@@ -121,6 +121,9 @@ export class CreateBookingService {
       const diffInDaysFromCheckout =
         (checkinDate.getTime() - lastCheckoutDate.getTime()) /
         (1000 * 60 * 60 * 24);
+      const diffInDaysFromCheckoutToLastCheckin =
+        (checkoutDate.getTime() - lastCheckinDate.getTime()) /
+        (1000 * 60 * 60 * 24);
       const diffInDaysFromCheckin =
         (lastCheckinDate.getTime() - checkinDate.getTime()) /
         (1000 * 60 * 60 * 24);
@@ -128,7 +131,9 @@ export class CreateBookingService {
       if (diffInDaysFromCheckout >= 0 && diffInDaysFromCheckout <= 5) {
         return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
       }
-
+      if (diffInDaysFromCheckoutToLastCheckin >= -5) {
+        return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
+      }
       if (diffInDaysFromCheckin >= 0 && diffInDaysFromCheckin <= 5) {
         return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
       }
