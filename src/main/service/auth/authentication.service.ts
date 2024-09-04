@@ -43,7 +43,7 @@ export class AuthenticationService {
     this.logger.log(`User attempting to login with email: ${email}`);
 
     const userEmail = await this.userContactRepository.findOne({
-      where: { contactValue: email, contactType: 'email' },
+      where: { primaryEmail: email },
       relations: ['user'],
     });
 
@@ -114,7 +114,7 @@ export class AuthenticationService {
     );
 
     const userEmail = await this.userContactRepository.findOne({
-      where: { contactValue: forgotPasswordDto.email, contactType: 'email' },
+      where: { primaryEmail: forgotPasswordDto.email },
       relations: ['user'],
     });
 
@@ -132,7 +132,7 @@ export class AuthenticationService {
     await this.userRepository.save(user);
 
     const resetLink = `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.forgotPassword}?resetToken=${user.resetToken}`;
-    const email = userEmail.contactValue;
+    const email = userEmail.primaryEmail;
     const subject = mailSubject.auth.forgotPassword;
     const template = mailTemplates.auth.forgotPassword;
     const context = {
