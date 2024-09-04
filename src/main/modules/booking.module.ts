@@ -7,7 +7,7 @@ import { LoggerService } from 'services/logger.service';
 import { UserProperties } from '../entities/user-properties.entity';
 import { PropertyDetails } from '../entities/property-details.entity';
 import { PropertySeasonHolidays } from '../entities/property-season-holidays.entity';
-import { CreateBookingService } from '../service/booking/create-booking';
+import { CreateBookingService } from '../service/booking/create-booking.service';
 import { AuthenticationModule } from './authentication.module';
 import { User } from '../entities/user.entity';
 

@@ -12,7 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { BookingService } from 'src/main/service/booking/booking.service';
 import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.dto';
 import { UpdateBookingDTO } from '../dto/requests/booking/update-booking.dto';
-import { CreateBookingService } from '../service/booking/create-booking';
+import { CreateBookingService } from '../service/booking/create-booking.service';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { AuthGuard } from '../commons/guards/auth.guard';
 
