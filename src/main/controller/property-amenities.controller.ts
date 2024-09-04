@@ -17,6 +17,7 @@ import { PropertyAmenities } from '../entities/property_amenities.entity';
 import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { CreateOrDeletePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-or-delete-property-amenities.dto';
 
 @ApiTags('Property Amenities')
 @Controller('v1/property-amenities')
@@ -117,15 +118,38 @@ export class PropertyAmenitiesController {
     statusCode: HttpStatus;
   }> {
     try {
-      const result =
-        await this.propertyAmenitiesService.updatePropertyAmenityHoliday(
-          +id,
-          updatePropertyAmenitiesDto,
-        );
+      const result = await this.propertyAmenitiesService.updatePropertyAmenity(
+        +id,
+        updatePropertyAmenitiesDto,
+      );
       return result;
     } catch (error) {
       throw new HttpException(
         'An error occurred while updating the property amenity',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Patch()
+  async createOrDeletePropertyAmenities(
+    @Body()
+    createOrDeletePropertyAmenitiesDto: CreateOrDeletePropertyAmenitiesDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyAmenities[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertyAmenitiesService.createOrDeletePropertyAmenities(
+          createOrDeletePropertyAmenitiesDto,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while creation or deletion of property amenities for the selected property',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
