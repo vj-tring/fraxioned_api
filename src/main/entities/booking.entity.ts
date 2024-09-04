@@ -99,4 +99,20 @@ export class Booking {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
+
+  @Column({
+    name: 'is_cancelled',
+    type: 'boolean',
+    nullable: true,
+    default: false,
+  })
+  isCancelled: boolean;
+
+  @Column({
+    name: 'is_completed',
+    type: 'boolean',
+    nullable: true,
+    default: false,
+  })
+  isCompleted: boolean;
 }

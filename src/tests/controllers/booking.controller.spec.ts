@@ -5,7 +5,7 @@ import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.d
 import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.dto';
 import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
-import { CreateBookingService } from 'src/main/service/booking/create-booking';
+import { CreateBookingService } from 'src/main/service/booking/create-booking.service';
 import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { getRepositoryToken } from '@nestjs/typeorm';

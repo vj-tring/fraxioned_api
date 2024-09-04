@@ -112,14 +112,32 @@ export class CreateBookingService {
       },
       order: { checkoutDate: 'DESC' },
     });
+
     for (const booking of lastBookings) {
       const lastCheckoutDate = this.normalizeDate(
         new Date(booking.checkoutDate),
       );
-      const diffInDays =
+      const lastCheckinDate = this.normalizeDate(new Date(booking.checkinDate));
+      const diffInDaysFromCheckout =
         (checkinDate.getTime() - lastCheckoutDate.getTime()) /
         (1000 * 60 * 60 * 24);
-      if (diffInDays >= 0 && diffInDays <= 5) {
+      const diffInDaysFromCheckoutToLastCheckin =
+        (checkoutDate.getTime() - lastCheckinDate.getTime()) /
+        (1000 * 60 * 60 * 24);
+      const diffInDaysFromCheckin =
+        (lastCheckinDate.getTime() - checkinDate.getTime()) /
+        (1000 * 60 * 60 * 24);
+
+      if (diffInDaysFromCheckout >= 0 && diffInDaysFromCheckout <= 5) {
+        return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
+      }
+      if (
+        diffInDaysFromCheckoutToLastCheckin >= -5 &&
+        diffInDaysFromCheckoutToLastCheckin < 0
+      ) {
+        return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
+      }
+      if (diffInDaysFromCheckin >= 0 && diffInDaysFromCheckin <= 5) {
         return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
       }
     }
@@ -184,7 +202,6 @@ export class CreateBookingService {
       }
     }
 
-    // Validation: Check last-minute booking rules
     const diffInDays =
       (checkinDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
     const isLastMinuteBooking = diffInDays <= BookingRules.LAST_MAX_DAYS;
