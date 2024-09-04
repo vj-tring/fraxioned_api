@@ -10,11 +10,13 @@ import { PropertySeasonHolidays } from '../entities/property-season-holidays.ent
 import { CreateBookingService } from '../service/booking/create-booking.service';
 import { AuthenticationModule } from './authentication.module';
 import { User } from '../entities/user.entity';
+import { BookingHistory } from '../entities/booking-history.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Booking,
+      BookingHistory,
       UserProperties,
       PropertyDetails,
       PropertySeasonHolidays,

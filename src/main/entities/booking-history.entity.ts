@@ -10,7 +10,7 @@ import {
 import { User } from './user.entity';
 import { Property } from './property.entity';
 
-@Entity('fxn_booking')
+@Entity('fxn_booking_history')
 export class BookingHistory {
   @PrimaryGeneratedColumn()
   id: number;
@@ -25,6 +25,9 @@ export class BookingHistory {
   @ManyToOne(() => Property, (property) => property.id)
   @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
   property: Property;
+
+  @Column({ type: 'varchar', nullable: false })
+  userAction: string;
 
   @Column({ name: 'checkin_at', nullable: false })
   checkinDate: Date;
@@ -66,9 +69,6 @@ export class BookingHistory {
   })
   noOfChildren: number;
 
-  @Column({ name: 'no_of_infants', type: 'int', nullable: true, default: null })
-  noOfInfants: number;
-
   @Column({ type: 'varchar', length: 1000, nullable: true, default: null })
   notes: string;
 
@@ -97,7 +97,7 @@ export class BookingHistory {
   createdBy: User;
 
   @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'modified_by', referencedColumnName: 'id' })
   modifiedBy: User;
 
   @Column({
