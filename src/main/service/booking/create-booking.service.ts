@@ -131,7 +131,10 @@ export class CreateBookingService {
       if (diffInDaysFromCheckout >= 0 && diffInDaysFromCheckout <= 5) {
         return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
       }
-      if (diffInDaysFromCheckoutToLastCheckin >= -5) {
+      if (
+        diffInDaysFromCheckoutToLastCheckin >= -5 &&
+        diffInDaysFromCheckoutToLastCheckin < 0
+      ) {
         return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
       }
       if (diffInDaysFromCheckin >= 0 && diffInDaysFromCheckin <= 5) {
