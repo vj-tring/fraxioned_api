@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from 'services/user.service';
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from 'entities/user.entity';
 import { Role } from 'src/main/entities/role.entity';
 import { UserContactDetails } from 'entities/user-contact-details.entity';
@@ -63,7 +63,7 @@ describe('UserService', () => {
         password: 'password',
         role: { id: 1 },
         createdBy: 1,
-        contactDetails: [],
+        contactDetails: {},
       } as CreateUserDTO;
 
       const result = await service.createUser(createUserDto);
@@ -82,7 +82,7 @@ describe('UserService', () => {
         password: 'password',
         role: { id: 1 },
         createdBy: 1,
-        contactDetails: [],
+        contactDetails: {},
       } as CreateUserDTO;
 
       const result = await service.createUser(createUserDto);
@@ -106,7 +106,7 @@ describe('UserService', () => {
         password: 'password',
         role: { id: 1 },
         createdBy: 1,
-        contactDetails: [],
+        contactDetails: {},
       } as CreateUserDTO;
 
       const result = await service.createUser(createUserDto);
@@ -129,7 +129,7 @@ describe('UserService', () => {
         password: 'password',
         role: { id: 1 },
         createdBy: 1,
-        contactDetails: [],
+        contactDetails: {},
       } as CreateUserDTO;
 
       await service.createUser(createUserDto);
@@ -150,17 +150,28 @@ describe('UserService', () => {
         password: 'password',
         role: { id: 1 },
         createdBy: 1,
-        contactDetails: [{ type: 'email', value: 'john.doe@example.com' }],
+        contactDetails: {
+          primaryEmail: 'john.doe@example.com',
+          primaryPhone: '1234567890',
+        },
       } as unknown as CreateUserDTO;
 
       await service.createUser(createUserDto);
-      expect(saveContactDetailsSpy).toHaveBeenCalledWith([
-        expect.objectContaining({
-          user: expect.objectContaining({ id: 1 }),
-          type: 'email',
-          value: 'john.doe@example.com',
-        }),
-      ]);
+      expect(saveContactDetailsSpy).toHaveBeenCalledWith({
+        createdAt: undefined,
+        createdBy: {},
+        optionalEmailOne: undefined,
+        optionalEmailTwo: undefined,
+        optionalPhoneOne: undefined,
+        optionalPhoneTwo: undefined,
+        primaryEmail: 'john.doe@example.com',
+        primaryPhone: '1234567890',
+        secondaryEmail: undefined,
+        secondaryPhone: undefined,
+        updatedAt: undefined,
+        updatedBy: {},
+        user: { id: 1 },
+      });
     });
   });
 
@@ -217,7 +228,7 @@ describe('UserService', () => {
         firstName: 'John',
         lastName: 'Doe',
         role: { id: 1 },
-        contactDetails: [],
+        contactDetails: {},
       } as UpdateUserDTO;
 
       const result = await service.updateUser(1, updateUserDto);
@@ -233,7 +244,7 @@ describe('UserService', () => {
         firstName: 'John',
         lastName: 'Doe',
         role: { id: 1 },
-        contactDetails: [],
+        contactDetails: {},
       } as UpdateUserDTO;
 
       const result = await service.updateUser(1, updateUserDto);
@@ -247,27 +258,53 @@ describe('UserService', () => {
         id: 1,
         firstName: 'John',
         lastName: 'Doe',
-        contactDetails: [],
-      } as unknown as User;
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(new Role());
-      jest.spyOn(userRepository, 'save').mockResolvedValue(user);
+        contactDetails: {},
+      } as User;
+
+      const updatedUser = {
+        ...user,
+        firstName: 'John',
+        lastName: 'Doe',
+        role: { id: 1 },
+        contactDetails: {},
+      } as User;
+
+      const role = new Role();
+      role.id = 1;
+
+      const updatedByUser = { id: 2 } as User;
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(user);
+
+      jest.spyOn(roleRepository, 'findOne').mockResolvedValueOnce(role);
+
       jest
-        .spyOn(userContactDetailsRepository, 'delete')
-        .mockResolvedValue({ affected: 1 } as DeleteResult);
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValueOnce(updatedByUser);
+
       jest
-        .spyOn(userContactDetailsRepository, 'save')
-        .mockResolvedValue({ id: 1 } as UserContactDetails);
+        .spyOn(userContactDetailsRepository, 'findOne')
+        .mockResolvedValueOnce(user.contactDetails);
+
+      jest.spyOn(userContactDetailsRepository, 'merge').mockReturnValue(null);
+
+      jest.spyOn(userContactDetailsRepository, 'save').mockReturnValue(null);
+
+      jest.spyOn(userRepository, 'save').mockResolvedValueOnce(updatedUser);
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(updatedUser);
 
       const updateUserDto: UpdateUserDTO = {
         firstName: 'John',
         lastName: 'Doe',
         role: { id: 1 },
-        contactDetails: [],
+        contactDetails: {},
+        updatedBy: 2,
       } as UpdateUserDTO;
 
       const result = await service.updateUser(1, updateUserDto);
-      expect(result).toEqual(USER_RESPONSES.USER_UPDATED(user));
+
+      expect(result).toEqual(USER_RESPONSES.USER_UPDATED(updatedUser));
       expect(logger.log).toHaveBeenCalledWith(
         'User with ID 1 updated successfully',
       );

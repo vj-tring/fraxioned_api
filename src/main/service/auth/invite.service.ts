@@ -62,7 +62,7 @@ export class InviteService {
       this.logger.log(`Inviting user with email: ${email}`);
 
       const existingUserEmail = await this.userContactRepository.findOne({
-        where: { contactValue: email, contactType: 'email' },
+        where: { primaryEmail: email },
       });
       if (existingUserEmail) {
         this.logger.error(`Email already exists: ${email}`);
@@ -114,27 +114,16 @@ export class InviteService {
       });
       await this.userRepository.save(user);
 
-      const userContacts = [
-        {
-          user,
-          contactType: 'email',
-          contactValue: email,
-          createdBy: createdByUser,
-          updatedBy: updatedByUser,
-        },
-        {
-          user,
-          contactType: 'phone',
-          contactValue: phoneNumber,
-          createdBy: createdByUser,
-          updatedBy: updatedByUser,
-        },
-      ];
+      const contact = {
+        user,
+        primaryEmail: email,
+        primaryPhone: phoneNumber,
+        createdBy: createdByUser,
+        updatedBy: updatedByUser,
+      };
 
-      for (const contact of userContacts) {
-        const userContact = this.userContactRepository.create(contact);
-        await this.userContactRepository.save(userContact);
-      }
+      const userContact = this.userContactRepository.create(contact);
+      await this.userContactRepository.save(userContact);
 
       const currentYear = new Date().getFullYear();
       const userPropertyEntities = [];

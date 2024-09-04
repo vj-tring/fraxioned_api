@@ -58,14 +58,22 @@ export class UserService {
 
     const savedUser = await this.userRepository.save(user);
 
-    const contactDetails = createUserDto.contactDetails.map((detail) => {
-      const contactDetail = new UserContactDetails();
-      contactDetail.user = savedUser;
-      contactDetail.createdBy = createdByUser;
-      contactDetail.updatedBy = createdByUser;
-      Object.assign(contactDetail, detail);
-      return contactDetail;
-    });
+    const contactDetails = new UserContactDetails();
+    contactDetails.user = savedUser;
+    contactDetails.primaryEmail = createUserDto.contactDetails.primaryEmail;
+    contactDetails.primaryPhone = createUserDto.contactDetails.primaryPhone;
+    contactDetails.secondaryEmail = createUserDto.contactDetails.secondaryEmail;
+    contactDetails.secondaryPhone = createUserDto.contactDetails.secondaryPhone;
+    contactDetails.optionalEmailOne =
+      createUserDto.contactDetails.optionalEmailOne;
+    contactDetails.optionalPhoneOne =
+      createUserDto.contactDetails.optionalPhoneOne;
+    contactDetails.optionalEmailTwo =
+      createUserDto.contactDetails.optionalEmailTwo;
+    contactDetails.optionalPhoneTwo =
+      createUserDto.contactDetails.optionalPhoneTwo;
+    contactDetails.createdBy = createdByUser;
+    contactDetails.updatedBy = createdByUser;
     await this.userContactDetailsRepository.save(contactDetails);
 
     this.logger.log(`User created with ID ${savedUser.id}`);
@@ -139,7 +147,10 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
-        relations: ['contactDetails'],
+        relations: {
+          contactDetails: true,
+          role: true,
+        },
       });
 
       if (!user) {
@@ -171,45 +182,37 @@ export class UserService {
       }
 
       if (contactDetails) {
-        for (const detail of contactDetails) {
-          const contactValue = detail.contactValue.replace(/\s+/g, '');
-          const existingContact =
-            await this.userContactDetailsRepository.findOne({
-              where: { contactValue, user: { id: user.id } },
-            });
+        const existingContact = await this.userContactDetailsRepository.findOne(
+          {
+            where: { user: { id: user.id } },
+          },
+        );
 
-          if (existingContact && existingContact.id !== detail.id) {
-            return USER_RESPONSES.CONTACT_VALUE_ALREADY_EXISTS(contactValue);
-          }
+        if (!existingContact) {
+          return USER_RESPONSES.USER_NOT_FOUND(user.id);
         }
+
+        delete contactDetails.id;
+
+        const updatedContact = this.userContactDetailsRepository.merge(
+          existingContact,
+          contactDetails,
+        );
+
+        await this.userContactDetailsRepository.save(updatedContact);
+        this.logger.log(
+          `Contact with ID ${existingContact.id} updated successfully`,
+        );
       }
 
-      const updatedUser = await this.userRepository.save(user);
+      await this.userRepository.save(user);
 
-      if (contactDetails) {
-        for (const detail of contactDetails) {
-          if (detail.id) {
-            const existingContactDetail =
-              await this.userContactDetailsRepository.findOne({
-                where: { id: detail.id, user: { id: updatedUser.id } },
-              });
-            if (existingContactDetail) {
-              Object.assign(existingContactDetail, detail);
-              existingContactDetail.updatedBy = updatedByUser;
-              await this.userContactDetailsRepository.save(
-                existingContactDetail,
-              );
-            }
-          } else {
-            const newContactDetail = new UserContactDetails();
-            Object.assign(newContactDetail, detail);
-            newContactDetail.user = updatedUser;
-            newContactDetail.createdBy = updatedByUser;
-            newContactDetail.updatedBy = updatedByUser;
-            await this.userContactDetailsRepository.save(newContactDetail);
-          }
-        }
-      }
+      const updatedUser = await this.userRepository.findOne({
+        where: {
+          id: user.id,
+        },
+        relations: ['contactDetails'],
+      });
 
       this.logger.log(`User with ID ${id} updated successfully`);
       return USER_RESPONSES.USER_UPDATED(updatedUser);

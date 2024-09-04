@@ -57,60 +57,30 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
 
     await userRepository.save([adminUser, ownerUser, ownerUser2]);
 
-    const adminEmail = userContactDetailsRepository.create({
+    const adminContacts = userContactDetailsRepository.create({
       user: adminUser,
-      contactType: 'email',
-      contactValue: 'fraxionedownersportal@gmail.com',
+      primaryEmail: 'fraxionedownersportal@gmail.com',
+      primaryPhone: '1234567890',
       createdBy: adminUser,
       updatedBy: adminUser,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
     });
 
-    const adminPhone = userContactDetailsRepository.create({
-      user: adminUser,
-      contactType: 'phone',
-      contactValue: '1234567890',
-      createdBy: adminUser,
-      updatedBy: adminUser,
-      createdAt: new Date(Date.now()),
-      updatedAt: new Date(Date.now()),
-    });
-
-    const ownerEmail = userContactDetailsRepository.create({
+    const ownerContacts1 = userContactDetailsRepository.create({
       user: ownerUser,
-      contactType: 'email',
-      contactValue: 'owner@fraxioned.com',
+      primaryEmail: 'owner@fraxioned.com',
+      primaryPhone: '0987654321',
       createdBy: ownerUser,
       updatedBy: ownerUser,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
     });
 
-    const ownerPhone = userContactDetailsRepository.create({
-      user: ownerUser,
-      contactType: 'phone',
-      contactValue: '0987654321',
-      createdBy: ownerUser,
-      updatedBy: ownerUser,
-      createdAt: new Date(Date.now()),
-      updatedAt: new Date(Date.now()),
-    });
-
-    const ownerEmail2 = userContactDetailsRepository.create({
+    const ownerContacts2 = userContactDetailsRepository.create({
       user: ownerUser2,
-      contactType: 'email',
-      contactValue: 'fraxowner1@gmail.com',
-      createdBy: ownerUser2,
-      updatedBy: ownerUser2,
-      createdAt: new Date(Date.now()),
-      updatedAt: new Date(Date.now()),
-    });
-
-    const ownerPhone2 = userContactDetailsRepository.create({
-      user: ownerUser2,
-      contactType: 'phone',
-      contactValue: '0987654321',
+      primaryEmail: 'fraxowner1@gmail.com',
+      primaryPhone: '0987654321',
       createdBy: ownerUser2,
       updatedBy: ownerUser2,
       createdAt: new Date(Date.now()),
@@ -118,12 +88,9 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
     });
 
     await userContactDetailsRepository.save([
-      adminEmail,
-      adminPhone,
-      ownerEmail,
-      ownerPhone,
-      ownerEmail2,
-      ownerPhone2,
+      adminContacts,
+      ownerContacts1,
+      ownerContacts2,
     ]);
   }
 };
