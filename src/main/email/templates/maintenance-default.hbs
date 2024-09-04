@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Fraxioned</title>
+    <title>Ticket Received</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
@@ -14,24 +14,20 @@
 
 <body>
     <div class="container">
-        {{> header logo='https://i.ibb.co/vd2Mp8r/lock.png' alt='lock' text='Password Reset'}}
+        {{> header logo=(constructUrl '/static/assets/gear.png') alt='gear' text='Ticket Received'}}
         <div class="content">
             <p>
                 <b>Hello {{ name }},</b>
             </p>
             <p>
-                We received a request to reset your password.
+                We received your maitenance ticket, and a Fraxioned team member will address the issue as soon as
+                possible. If necessary, we will reach out for further information or clarification from you.
             </p>
             <p>
-                If this was not you, ignore this email. If this was you, follow the link below to create a new password!
+                Thank you, and have a great day!
             </p>
-            <a href={{ link }} class="button">Reset Password</a>
-            <p>
-                <b>Questions?</b>
-            </p>
-            <p>
-                If you need help accessing your account or have any other questions,
-                please contact <a href="mailto:owners@fraxioned.com" class="mail">owners@fraxioned.com</a>
+            <p class="service">
+                Fraxioned Owner Services Team
             </p>
         </div>
         {{> footer }}

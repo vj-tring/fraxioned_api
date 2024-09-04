@@ -51,23 +51,9 @@ export class CreateBookingDTO {
   @IsOptional()
   noOfChildren?: number;
 
-  @IsInt()
-  @IsOptional()
-  noOfInfants?: number;
-
   @IsString()
   @IsOptional()
   notes?: string;
-
-  @IsString()
-  @IsOptional()
-  confirmationCode?: string;
-
-  @IsOptional()
-  cleaningFee?: number;
-
-  @IsOptional()
-  petFee?: number;
 
   @ApiProperty({ example: { id: 1 } })
   @IsNotEmpty({ message: 'createdBy is required' })
