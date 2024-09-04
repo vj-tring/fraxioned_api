@@ -30,6 +30,7 @@ describe('BookingController', () => {
           useValue: {
             getAllBookings: jest.fn(),
             getBookingById: jest.fn(),
+            getBookingsForUser: jest.fn(),
             updateBooking: jest.fn(),
             deleteBooking: jest.fn(),
           },
@@ -121,6 +122,32 @@ describe('BookingController', () => {
 
       expect(await bookingController.getBookingById(1)).toBe(result);
       expect(bookingService.getBookingById).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('getBookingsForUser', () => {
+    it('should return bookings for a user', async () => {
+      const userId = 1;
+      const result = [
+        { id: 1, user: { id: userId } },
+        { id: 2, user: { id: userId } },
+      ];
+      jest
+        .spyOn(bookingService, 'getBookingsForUser')
+        .mockResolvedValue(result);
+
+      expect(await bookingController.getBookingsForUser(userId)).toBe(result);
+      expect(bookingService.getBookingsForUser).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error if service throws', async () => {
+      const userId = 1;
+      const error = new Error('Error fetching bookings for user');
+      jest.spyOn(bookingService, 'getBookingsForUser').mockRejectedValue(error);
+
+      await expect(
+        bookingController.getBookingsForUser(userId),
+      ).rejects.toThrow(error);
     });
   });
 

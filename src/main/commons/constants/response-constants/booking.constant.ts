@@ -12,6 +12,12 @@ export const BOOKING_RESPONSES = {
     message: `Booking with ID ${id} not found`,
     statusCode: 404,
   }),
+  BOOKING_FOR_USER_NOT_FOUND: (
+    id: number,
+  ): { message: string; statusCode: number } => ({
+    message: `No Bookings for UserId: ${id} found`,
+    statusCode: 404,
+  }),
   BOOKING_FETCHED: (
     booking: Booking,
   ): { message: string; data: Booking; statusCode: number } => ({
