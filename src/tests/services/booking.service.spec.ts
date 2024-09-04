@@ -12,7 +12,7 @@ import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.d
 import { BookingService } from 'src/main/service/booking/booking.service';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { CreateBookingService } from 'src/main/service/booking/create-booking';
+import { CreateBookingService } from 'src/main/service/booking/create-booking.service';
 
 describe('BookingService', () => {
   let service: BookingService;
