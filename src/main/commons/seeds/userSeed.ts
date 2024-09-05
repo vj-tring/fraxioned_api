@@ -54,8 +54,19 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
     });
+    const owner1 = userRepository.create({
+      firstName: 'Owner',
+      lastName: '1',
+      password: await bcrypt.hash('Owner@123', 10),
+      role: ownerRole,
+      isActive: true,
+      createdBy: 1,
+      updatedBy: 1,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
 
-    await userRepository.save([adminUser, ownerUser, ownerUser2]);
+    await userRepository.save([adminUser, ownerUser, ownerUser2, owner1]);
 
     const adminContacts = userContactDetailsRepository.create({
       user: adminUser,
@@ -86,11 +97,21 @@ export const seedUser = async (dataSource: DataSource): Promise<void> => {
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
     });
+    const owner1Contacts = userContactDetailsRepository.create({
+      user: owner1,
+      primaryEmail: 'ownercal@gmail.com',
+      primaryPhone: '0987654321',
+      createdBy: owner1,
+      updatedBy: owner1,
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
 
     await userContactDetailsRepository.save([
       adminContacts,
       ownerContacts1,
       ownerContacts2,
+      owner1Contacts,
     ]);
   }
 };
