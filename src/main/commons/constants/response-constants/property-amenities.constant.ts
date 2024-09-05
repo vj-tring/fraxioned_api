@@ -109,6 +109,16 @@ export const PROPERTY_AMENITY_RESPONSES = {
     data: updatedPropertyAmenity,
     statusCode: HttpStatus.OK,
   }),
+  PROPERTY_AMENITIES_UPDATED: (): {
+    success: boolean;
+    message: string;
+    data?: PropertyAmenities[];
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Property Amenities for the selected property updated successfully`,
+    statusCode: HttpStatus.OK,
+  }),
   PROPERTY_AMENITY_DELETED: (
     id: number,
   ): {
@@ -119,5 +129,16 @@ export const PROPERTY_AMENITY_RESPONSES = {
     success: true,
     message: `Property Amenity with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
+  }),
+  AMENITIES_NOT_FOUND: (
+    nonExistingIds: number[],
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Amenities with ID(s) ${nonExistingIds.join(', ')} do not exist`,
+    statusCode: HttpStatus.NOT_FOUND,
   }),
 };

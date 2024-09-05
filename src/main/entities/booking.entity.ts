@@ -66,9 +66,6 @@ export class Booking {
   })
   noOfChildren: number;
 
-  @Column({ name: 'no_of_infants', type: 'int', nullable: true, default: null })
-  noOfInfants: number;
-
   @Column({ type: 'varchar', length: 1000, nullable: true, default: null })
   notes: string;
 

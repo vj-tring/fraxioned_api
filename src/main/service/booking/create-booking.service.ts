@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { Booking } from 'entities/booking.entity';
+import { BookingHistory } from 'entities/booking-history.entity';
 import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
 import { CreateBookingDTO } from '../../dto/requests/booking/create-booking.dto';
@@ -21,6 +22,8 @@ export class CreateBookingService {
     private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     @InjectRepository(PropertySeasonHolidays)
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
+    @InjectRepository(BookingHistory)
+    private readonly bookingHistoryRepository: Repository<BookingHistory>,
     private readonly logger: LoggerService,
   ) {}
 
@@ -297,6 +300,13 @@ export class CreateBookingService {
 
     await this.userPropertiesRepository.save(userProperty);
 
+    const bookingHistory = this.bookingHistoryRepository.create({
+      ...booking,
+    });
+    (bookingHistory.modifiedBy = createBookingDto.createdBy),
+      (bookingHistory.userAction = 'Created'),
+      await this.bookingHistoryRepository.save(bookingHistory);
+
     return BOOKING_RESPONSES.BOOKING_CREATED(booking);
   }
 
@@ -338,10 +348,9 @@ export class CreateBookingService {
   }
 
   private async generateBookingId(propertyId: number): Promise<string> {
-    const randomDigits = Math.floor(1000000 + Math.random() * 90000);
     const baseStartNumber = 1;
-    const propertyIdLength = 5;
-    const incrementingNumberLength = 6;
+
+    const propertyIdLength = Math.max(2, propertyId.toString().length);
 
     const lastBooking = await this.bookingRepository.findOne({
       where: {},
@@ -350,9 +359,13 @@ export class CreateBookingService {
     });
 
     const lastId = lastBooking
-      ? parseInt(lastBooking.bookingId.slice(-incrementingNumberLength), 10)
+      ? parseInt(lastBooking.bookingId.slice(-propertyIdLength), 10)
       : baseStartNumber - 1;
+
     const newId = lastId + 1;
+    const incrementingNumberLength = Math.max(2, newId.toString().length);
+
+    const currentYear = new Date().getFullYear().toString();
 
     const paddedPropertyId = propertyId
       .toString()
@@ -361,6 +374,6 @@ export class CreateBookingService {
       .toString()
       .padStart(incrementingNumberLength, '0');
 
-    return `FXNB${randomDigits}${paddedPropertyId}${paddedNewId}`;
+    return `FX${currentYear}${paddedPropertyId}${paddedNewId}`;
   }
 }
