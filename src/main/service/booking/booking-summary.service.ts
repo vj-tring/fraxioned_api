@@ -281,7 +281,24 @@ export class BookingSummaryService {
     booking.petFee = createBookingDto.noOfPets * propertyDetails.feePerPet;
     booking.isLastMinuteBooking = isLastMinuteBooking;
 
+    const totalAmountDue = booking.cleaningFee + booking.petFee;
+    const dateOfCharge = new Date();
+
     const bookingSummary = {
+      property: property,
+      checkIn: checkinDate,
+      checkOut: checkoutDate,
+      totalNights: nightsSelected,
+      noOfGuests: createBookingDto.noOfGuests,
+      adults: createBookingDto.noOfGuests,
+      children: createBookingDto.noOfChildren,
+      pets: createBookingDto.noOfPets,
+      season: this.isDateInRange(checkinDate, peakSeasonStart, peakSeasonEnd)
+        ? 'Peak'
+        : 'Off-Peak',
+      holiday: isBetweenHolidayNigths(checkinDate) ? 'Holiday' : 'Regular',
+      totalAmountDue,
+      dateOfCharge,
       bookingId: booking.bookingId,
       cleaningFee: booking.cleaningFee,
       petFee: booking.petFee,
@@ -290,6 +307,8 @@ export class BookingSummaryService {
       offNights,
       peakHolidayNights,
       offHolidayNights,
+      checkInTime: propertyDetails.checkInTime,
+      checkOutTime: propertyDetails.checkOutTime,
     };
 
     return bookingSummary;
