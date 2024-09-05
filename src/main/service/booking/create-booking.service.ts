@@ -349,6 +349,7 @@ export class CreateBookingService {
 
   private async generateBookingId(propertyId: number): Promise<string> {
     const baseStartNumber = 1;
+    const maxRetries = 5;
 
     const propertyIdLength = Math.max(2, propertyId.toString().length);
 
@@ -362,7 +363,7 @@ export class CreateBookingService {
       ? parseInt(lastBooking.bookingId.slice(-propertyIdLength), 10)
       : baseStartNumber - 1;
 
-    const newId = lastId + 1;
+    let newId = lastId + 1;
     const incrementingNumberLength = Math.max(2, newId.toString().length);
 
     const currentYear = new Date().getFullYear().toString();
@@ -370,10 +371,28 @@ export class CreateBookingService {
     const paddedPropertyId = propertyId
       .toString()
       .padStart(propertyIdLength, '0');
-    const paddedNewId = newId
-      .toString()
-      .padStart(incrementingNumberLength, '0');
 
-    return `FX${currentYear}${paddedPropertyId}${paddedNewId}`;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const paddedNewId = newId
+        .toString()
+        .padStart(incrementingNumberLength, '0');
+
+      const bookingId = `FX${currentYear}${paddedPropertyId}${paddedNewId}`;
+
+      const existingBooking = await this.bookingRepository.findOne({
+        where: { bookingId },
+        select: ['bookingId'],
+      });
+
+      if (!existingBooking) {
+        return bookingId;
+      }
+
+      newId++;
+    }
+
+    throw new Error(
+      'Failed to generate a unique booking ID after multiple attempts',
+    );
   }
 }
