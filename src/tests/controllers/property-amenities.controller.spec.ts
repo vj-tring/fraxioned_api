@@ -12,6 +12,7 @@ import { Amenities } from 'src/main/entities/amenities.entity';
 import { PROPERTY_AMENITY_RESPONSES } from 'src/main/commons/constants/response-constants/property-amenities.constant';
 import { CreatePropertyAmenitiesDto } from 'src/main/dto/requests/property-amenity/create-property-amenities.dto';
 import { UpdatePropertyAmenitiesDto } from 'src/main/dto/requests/property-amenity/update-property-amenities.dto';
+import { CreateOrDeletePropertyAmenitiesDto } from 'src/main/dto/requests/property-amenity/create-or-delete-property-amenities.dto';
 
 describe('PropertyAmenitiesController', () => {
   let controller: PropertyAmenitiesController;
@@ -28,7 +29,8 @@ describe('PropertyAmenitiesController', () => {
             findAllPropertySAmenities: jest.fn(),
             findPropertyAmenityById: jest.fn(),
             findAmenitiesByPropertyId: jest.fn(),
-            updatePropertyAmenityHoliday: jest.fn(),
+            updatePropertyAmenity: jest.fn(),
+            createOrDeletePropertyAmenities: jest.fn(),
             removePropertyAmenity: jest.fn(),
           },
         },
@@ -313,7 +315,7 @@ describe('PropertyAmenitiesController', () => {
         );
 
       jest
-        .spyOn(service, 'updatePropertyAmenityHoliday')
+        .spyOn(service, 'updatePropertyAmenity')
         .mockResolvedValue(expectedResult);
 
       expect(
@@ -326,9 +328,7 @@ describe('PropertyAmenitiesController', () => {
 
     it('should throw an HttpException if an error occurs', async () => {
       const error = new Error('An error occurred');
-      jest
-        .spyOn(service, 'updatePropertyAmenityHoliday')
-        .mockRejectedValue(error);
+      jest.spyOn(service, 'updatePropertyAmenity').mockRejectedValue(error);
 
       try {
         await controller.updatePropertyAmenityDetail(
@@ -339,6 +339,59 @@ describe('PropertyAmenitiesController', () => {
         expect(err).toBeInstanceOf(HttpException);
         expect(err.message).toBe(
           'An error occurred while updating the property amenity',
+        );
+        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    });
+  });
+
+  describe('createOrDeletePropertyAmenities', () => {
+    it('should create or delete property amenities', async () => {
+      const createOrDeletePropertyAmenitiesDto: CreateOrDeletePropertyAmenitiesDto =
+        {
+          property: {
+            id: 1,
+          } as Property,
+          amenities: [
+            {
+              id: 1,
+            },
+            {
+              id: 2,
+            },
+          ] as Amenities[],
+          updatedBy: {
+            id: 1,
+          } as User,
+        };
+      const expectedResult =
+        PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_UPDATED();
+
+      jest
+        .spyOn(service, 'createOrDeletePropertyAmenities')
+        .mockResolvedValue(expectedResult);
+
+      expect(
+        await controller.createOrDeletePropertyAmenities(
+          createOrDeletePropertyAmenitiesDto,
+        ),
+      ).toEqual(expectedResult);
+    });
+
+    it('should throw an HttpException if an error occurs', async () => {
+      const error = new Error('An error occurred');
+      jest
+        .spyOn(service, 'createOrDeletePropertyAmenities')
+        .mockRejectedValue(error);
+
+      try {
+        await controller.createOrDeletePropertyAmenities(
+          {} as CreateOrDeletePropertyAmenitiesDto,
+        );
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe(
+          'An error occurred while creation or deletion of property amenities for the selected property',
         );
         expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
       }
