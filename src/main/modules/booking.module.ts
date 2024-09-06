@@ -12,6 +12,8 @@ import { AuthenticationModule } from './authentication.module';
 import { User } from '../entities/user.entity';
 import { BookingHistory } from '../entities/booking-history.entity';
 import { BookingSummaryService } from '../service/booking/booking-summary.service';
+import { UserContactDetails } from '../entities/user-contact-details.entity';
+import { MailService } from '../email/mail.service';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { BookingSummaryService } from '../service/booking/booking-summary.servic
       PropertyDetails,
       PropertySeasonHolidays,
       User,
+      UserContactDetails,
     ]),
     AuthenticationModule,
   ],
@@ -31,6 +34,7 @@ import { BookingSummaryService } from '../service/booking/booking-summary.servic
     LoggerService,
     CreateBookingService,
     BookingSummaryService,
+    MailService,
   ],
 })
 export class BookingModule {}

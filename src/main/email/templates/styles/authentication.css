@@ -1,0 +1,72 @@
+.content {
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 25px;
+    text-align: justify;
+}
+
+.content p {
+    font-size: .75rem;
+    line-height: 18px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.content p .ticket-content {
+    padding-inline-end: 20%;
+}
+
+.content p b {
+    font-size: .88rem;
+    line-height: 25px;
+}
+
+.content table {
+    font-size: .82rem;
+}
+
+.content table th td {
+    text-decoration: none;
+    font-weight: lighter;
+}
+
+.content .thead th {
+    padding-right: 40px;
+}
+
+.content th,
+.content td {
+    padding: 5px;
+}
+
+.content span {
+    color: crimson;
+}
+
+.content .highlight-text {
+    font-weight: 450;
+}
+
+.button {
+    display: inline-block;
+    background-color: #d7871e;
+    color: #ffffff;
+    padding: 7px 27px;
+    border-radius: 6px;
+    border: none;
+    text-decoration: none;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.mail, .service {
+    color: #d7871e;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+

@@ -42,7 +42,9 @@ export const mailConfigAsync = {
 
     const templateDir = join('src/main/email', 'templates');
     const partialsDir = join('src/main/email', 'templates', 'partials');
+    const stylesDir = join('src/main/email', 'templates', 'styles');
     const cssPath = join('src/main/email', 'templates', 'style.css');
+
     let baseUrl = `${assetsHostingUrl.production}`;
 
     if (configService.get('SET_ENV') === 'DEV') {
@@ -64,6 +66,17 @@ export const mailConfigAsync = {
       const partialPath = join(partialsDir, file);
       const partialContent = fs.readFileSync(partialPath, 'utf8');
       handlebars.registerPartial(partialName, partialContent);
+    });
+
+    const styleFiles = fs.readdirSync(stylesDir);
+    styleFiles.forEach((file) => {
+      const styleName = file.split('.')[0];
+      const stylePath = join(stylesDir, file);
+      const styleContent = fs.readFileSync(stylePath, 'utf8');
+      handlebars.registerHelper(
+        styleName,
+        () => `<style>${styleContent}</style>`,
+      );
     });
 
     return {
