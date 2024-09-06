@@ -42,6 +42,9 @@ MAIL_USER=user@email.com
 MAIL_PASSWORD=grge xxxx xxxx xxxx
 MAIL_FROM=user@gmail.com
 
+# Set Environment (Use 'PROD' or 'DEV')
+SET_ENV = 'DEV'
+
 # AWS credentials
 AWS_ACCESS_KEY_ID=ABCDEFGHIJKLMNOPQRST
 AWS_SECRET_ACCESS_KEY=vxxxxxxxxxxxxxxxxxxxxxxxxx
