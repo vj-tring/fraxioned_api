@@ -13,6 +13,8 @@ import { BookingService } from 'src/main/service/booking/booking.service';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { CreateBookingService } from 'src/main/service/booking/create-booking.service';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
+import { MailService } from 'src/main/email/mail.service';
 
 describe('BookingService', () => {
   let service: BookingService;
@@ -23,6 +25,7 @@ describe('BookingService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BookingService,
+        { provide: MailService, useValue: { sendMail: jest.fn() } },
         {
           provide: LoggerService,
           useValue: {
@@ -45,6 +48,14 @@ describe('BookingService', () => {
         },
         {
           provide: getRepositoryToken(PropertySeasonHolidays),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(UserContactDetails),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(User),
           useClass: Repository,
         },
       ],

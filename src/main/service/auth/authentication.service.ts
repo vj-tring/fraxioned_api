@@ -136,7 +136,7 @@ export class AuthenticationService {
     const subject = mailSubject.auth.forgotPassword;
     const template = mailTemplates.auth.forgotPassword;
     const context = {
-      name: user.firstName,
+      name: `${user.firstName} ${user.lastName}`,
       link: resetLink,
     };
 

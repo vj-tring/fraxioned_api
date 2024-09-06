@@ -238,7 +238,7 @@ export class InviteService {
       const subject = mailSubject.auth.registration;
       const template = mailTemplates.auth.registration;
       const context = {
-        name: firstName,
+        name: `${firstName} ${lastName}`,
         username: email,
         password: tempPassword,
         link: loginLink,
