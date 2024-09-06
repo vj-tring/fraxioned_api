@@ -13,6 +13,7 @@ import { BookingService } from 'src/main/service/booking/booking.service';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { CreateBookingService } from 'src/main/service/booking/create-booking.service';
+import { BookingHistory } from 'src/main/entities/booking-history.entity';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { MailService } from 'src/main/email/mail.service';
 
@@ -36,6 +37,10 @@ describe('BookingService', () => {
         CreateBookingService,
         {
           provide: getRepositoryToken(Booking),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(BookingHistory),
           useClass: Repository,
         },
         {

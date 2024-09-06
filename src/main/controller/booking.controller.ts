@@ -15,6 +15,7 @@ import { UpdateBookingDTO } from '../dto/requests/booking/update-booking.dto';
 import { CreateBookingService } from '../service/booking/create-booking.service';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { AuthGuard } from '../commons/guards/auth.guard';
+import { BookingSummaryService } from '../service/booking/booking-summary.service';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
@@ -24,6 +25,7 @@ export class BookingController {
   constructor(
     private readonly bookingService: BookingService,
     private readonly createBookingService: CreateBookingService,
+    private readonly bookingSummaryService: BookingSummaryService,
   ) {}
 
   @Post('booking')
@@ -31,6 +33,13 @@ export class BookingController {
     @Body() createBookingDto: CreateBookingDTO,
   ): Promise<object> {
     return this.createBookingService.createBooking(createBookingDto);
+  }
+
+  @Post('booking/booking-summary')
+  async bookingSummary(
+    @Body() createBookingDto: CreateBookingDTO,
+  ): Promise<object> {
+    return this.bookingSummaryService.bookingSummary(createBookingDto);
   }
 
   @Get()

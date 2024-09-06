@@ -15,10 +15,12 @@ import { UserSession } from 'src/main/entities/user-session.entity';
 import { MailService } from 'src/main/email/mail.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import { MailerService } from '@nestjs-modules/mailer';
+import { BookingSummaryService } from 'src/main/service/booking/booking-summary.service';
 
 describe('BookingController', () => {
   let bookingController: BookingController;
   let bookingService: BookingService;
+  let bookingSummaryService: BookingSummaryService;
   let createBookingService: CreateBookingService;
 
   beforeEach(async () => {
@@ -39,6 +41,12 @@ describe('BookingController', () => {
           provide: CreateBookingService,
           useValue: {
             createBooking: jest.fn(),
+          },
+        },
+        {
+          provide: BookingSummaryService,
+          useValue: {
+            bookingSummary: jest.fn(),
           },
         },
         {
@@ -68,6 +76,9 @@ describe('BookingController', () => {
 
     bookingController = module.get<BookingController>(BookingController);
     bookingService = module.get<BookingService>(BookingService);
+    bookingSummaryService = module.get<BookingSummaryService>(
+      BookingSummaryService,
+    );
     createBookingService =
       module.get<CreateBookingService>(CreateBookingService);
   });
@@ -93,6 +104,80 @@ describe('BookingController', () => {
         result,
       );
       expect(createBookingService.createBooking).toHaveBeenCalledWith(
+        createBookingDto,
+      );
+    });
+  });
+
+  describe('bookingSummary', () => {
+    it('should return booking summary', async () => {
+      const createBookingDto: CreateBookingDTO = {
+        user: new User(),
+        property: new Property(),
+        checkinDate: new Date('2023-12-10'),
+        checkoutDate: new Date('2023-12-15'),
+        noOfGuests: 2,
+        noOfPets: 1,
+        isLastMinuteBooking: false,
+        createdBy: new User(),
+      };
+      const result = { summary: 'booking summary' };
+      jest
+        .spyOn(bookingSummaryService, 'bookingSummary')
+        .mockResolvedValue(result);
+
+      expect(await bookingController.bookingSummary(createBookingDto)).toBe(
+        result,
+      );
+      expect(bookingSummaryService.bookingSummary).toHaveBeenCalledWith(
+        createBookingDto,
+      );
+    });
+
+    it('should handle errors', async () => {
+      const createBookingDto: CreateBookingDTO = {
+        user: new User(),
+        property: new Property(),
+        checkinDate: new Date('2023-12-10'),
+        checkoutDate: new Date('2023-12-15'),
+        noOfGuests: 2,
+        noOfPets: 1,
+        isLastMinuteBooking: false,
+        createdBy: new User(),
+      };
+      const error = new Error('Error generating booking summary');
+      jest
+        .spyOn(bookingSummaryService, 'bookingSummary')
+        .mockRejectedValue(error);
+
+      await expect(
+        bookingController.bookingSummary(createBookingDto),
+      ).rejects.toThrow(error);
+      expect(bookingSummaryService.bookingSummary).toHaveBeenCalledWith(
+        createBookingDto,
+      );
+    });
+
+    it('should validate booking dates', async () => {
+      const createBookingDto: CreateBookingDTO = {
+        user: new User(),
+        property: new Property(),
+        checkinDate: new Date('2023-12-10'),
+        checkoutDate: new Date('2023-12-15'),
+        noOfGuests: 2,
+        noOfPets: 1,
+        isLastMinuteBooking: false,
+        createdBy: new User(),
+      };
+      const result = { error: 'Checkout date must be after checkin date' };
+      jest
+        .spyOn(bookingSummaryService, 'bookingSummary')
+        .mockResolvedValue(result);
+
+      expect(await bookingController.bookingSummary(createBookingDto)).toBe(
+        result,
+      );
+      expect(bookingSummaryService.bookingSummary).toHaveBeenCalledWith(
         createBookingDto,
       );
     });

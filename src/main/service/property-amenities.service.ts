@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { LoggerService } from './logger.service';
 import { Property } from '../entities/property.entity';
@@ -9,6 +9,7 @@ import { Amenities } from '../entities/amenities.entity';
 import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
 import { PROPERTY_AMENITY_RESPONSES } from '../commons/constants/response-constants/property-amenities.constant';
 import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
+import { CreateOrDeletePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-or-delete-property-amenities.dto';
 
 @Injectable()
 export class PropertyAmenitiesService {
@@ -284,7 +285,7 @@ export class PropertyAmenitiesService {
     }
   }
 
-  async updatePropertyAmenityHoliday(
+  async updatePropertyAmenity(
     id: number,
     updatePropertyAmenitiesDto: UpdatePropertyAmenitiesDto,
   ): Promise<{
@@ -382,6 +383,114 @@ export class PropertyAmenitiesService {
       );
       throw new HttpException(
         'An error occurred while updating the property amenity',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async createOrDeletePropertyAmenities(
+    createOrDeletePropertyAmenitiesDto: CreateOrDeletePropertyAmenitiesDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyAmenities[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: {
+          id: createOrDeletePropertyAmenitiesDto.updatedBy.id,
+        },
+      });
+      if (!user) {
+        this.logger.error(
+          `User with ID ${createOrDeletePropertyAmenitiesDto.updatedBy.id} does not exist`,
+        );
+        return PROPERTY_AMENITY_RESPONSES.USER_NOT_FOUND(
+          createOrDeletePropertyAmenitiesDto.updatedBy.id,
+        );
+      }
+
+      const existingProperty = await this.propertiesRepository.findOne({
+        where: {
+          id: createOrDeletePropertyAmenitiesDto.property.id,
+        },
+      });
+      if (!existingProperty) {
+        this.logger.error(
+          `Property with ID ${createOrDeletePropertyAmenitiesDto.property.id} does not exist`,
+        );
+        return PROPERTY_AMENITY_RESPONSES.PROPERTY_NOT_FOUND(
+          createOrDeletePropertyAmenitiesDto.property.id,
+        );
+      }
+
+      const amenityIds = createOrDeletePropertyAmenitiesDto.amenities.map(
+        (amenity) => amenity.id,
+      );
+      const existingAmenities = await this.amenityRepository.findBy({
+        id: In(amenityIds),
+      });
+
+      if (amenityIds.length > 0) {
+        const nonExistingIds = amenityIds.filter(
+          (id) => !existingAmenities.some((amenity) => amenity.id === id),
+        );
+        if (nonExistingIds.length > 0) {
+          this.logger.error(
+            `Amenities with ID(s) ${nonExistingIds.join(', ')} do not exist`,
+          );
+          return PROPERTY_AMENITY_RESPONSES.AMENITIES_NOT_FOUND(nonExistingIds);
+        }
+      }
+
+      const existingMappings = await this.propertyAmenitiesRepository.find({
+        where: {
+          property: { id: createOrDeletePropertyAmenitiesDto.property.id },
+        },
+        relations: ['amenity'],
+      });
+
+      const existingAmenityIds = existingMappings.map((m) => m.amenity.id);
+
+      const toDelete = existingMappings.filter(
+        (mapping) => !amenityIds.includes(mapping.amenity.id),
+      );
+
+      const toCreate = amenityIds.filter(
+        (id) => !existingAmenityIds.includes(id),
+      );
+
+      if (toDelete.length > 0) {
+        await this.propertyAmenitiesRepository.remove(toDelete);
+      }
+
+      if (toCreate.length > 0) {
+        const newMappings = toCreate.map((amenityId) => {
+          const amenity = new Amenities();
+          amenity.id = amenityId;
+
+          const propertyAmenity = new PropertyAmenities();
+          propertyAmenity.property = existingProperty;
+          propertyAmenity.amenity = amenity;
+          propertyAmenity.createdBy = user;
+          propertyAmenity.updatedBy = user;
+
+          return propertyAmenity;
+        });
+        await this.propertyAmenitiesRepository.save(newMappings);
+      }
+
+      this.logger.log(
+        `Property Amenities for the selected property updated successfully`,
+      );
+      return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_UPDATED();
+    } catch (error) {
+      this.logger.error(
+        `Error creating property amenities: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while creation or deletion of property amenities for the selected property',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

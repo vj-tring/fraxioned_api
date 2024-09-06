@@ -10,6 +10,8 @@ import { PropertySeasonHolidays } from '../entities/property-season-holidays.ent
 import { CreateBookingService } from '../service/booking/create-booking.service';
 import { AuthenticationModule } from './authentication.module';
 import { User } from '../entities/user.entity';
+import { BookingHistory } from '../entities/booking-history.entity';
+import { BookingSummaryService } from '../service/booking/booking-summary.service';
 import { UserContactDetails } from '../entities/user-contact-details.entity';
 import { MailService } from '../email/mail.service';
 
@@ -17,6 +19,7 @@ import { MailService } from '../email/mail.service';
   imports: [
     TypeOrmModule.forFeature([
       Booking,
+      BookingHistory,
       UserProperties,
       PropertyDetails,
       PropertySeasonHolidays,
@@ -26,6 +29,12 @@ import { MailService } from '../email/mail.service';
     AuthenticationModule,
   ],
   controllers: [BookingController],
-  providers: [BookingService, LoggerService, CreateBookingService, MailService],
+  providers: [
+    BookingService,
+    LoggerService,
+    CreateBookingService,
+    BookingSummaryService,
+    MailService,
+  ],
 })
 export class BookingModule {}

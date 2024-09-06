@@ -10,17 +10,9 @@ import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { PropertyDetails } from '../../entities/property-details.entity';
 import { BookingRules } from '../../commons/constants/enumerations/booking-rules';
-import {
-  mailSubject,
-  mailTemplates,
-} from 'src/main/commons/constants/email/mail.constants';
-import { MailService } from 'src/main/email/mail.service';
-import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
-import { User } from 'src/main/entities/user.entity';
-import { format } from 'date-fns';
 
 @Injectable()
-export class CreateBookingService {
+export class BookingSummaryService {
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
@@ -32,15 +24,10 @@ export class CreateBookingService {
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
     @InjectRepository(BookingHistory)
     private readonly bookingHistoryRepository: Repository<BookingHistory>,
-    @InjectRepository(UserContactDetails)
-    private readonly userContactDetailsRepository: Repository<UserContactDetails>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly logger: LoggerService,
-    private readonly mailService: MailService,
   ) {}
 
-  async createBooking(createBookingDto: CreateBookingDTO): Promise<object> {
+  async bookingSummary(createBookingDto: CreateBookingDTO): Promise<object> {
     this.logger.log('Creating a new booking');
 
     const {
@@ -293,71 +280,38 @@ export class CreateBookingService {
     booking.cleaningFee = propertyDetails.cleaningFee;
     booking.petFee = createBookingDto.noOfPets * propertyDetails.feePerPet;
     booking.isLastMinuteBooking = isLastMinuteBooking;
-    const savedBooking = await this.bookingRepository.save(booking);
 
-    // Update user properties after successful booking
-    userProperty.peakRemainingNights -= peakNights;
-    userProperty.offRemainingNights -= offNights;
-    userProperty.peakRemainingHolidayNights -= peakHolidayNights;
-    userProperty.offRemainingHolidayNights -= offHolidayNights;
+    const totalAmountDue = booking.cleaningFee + booking.petFee;
+    const dateOfCharge = new Date();
 
-    userProperty.peakBookedNights += peakNights;
-    userProperty.offBookedNights += offNights;
-    userProperty.peakBookedHolidayNights += peakHolidayNights;
-    userProperty.offBookedHolidayNights += offHolidayNights;
-
-    if (isLastMinuteBooking) {
-      userProperty.lastMinuteRemainingNights -= nightsSelected;
-      userProperty.lastMinuteBookedNights += nightsSelected;
-    }
-
-    await this.userPropertiesRepository.save(userProperty);
-
-    const owner = await this.userRepository.findOne({
-      where: {
-        id: savedBooking.user.id,
-      },
-    });
-
-    const contact = await this.userContactDetailsRepository.find({
-      where: {
-        user: {
-          id: savedBooking.user.id,
-        },
-      },
-      select: ['primaryEmail'],
-    });
-
-    // Confirmation Mail
-    const { primaryEmail: email } = contact[0];
-    const subject = mailSubject.booking.confirmation;
-    const template = mailTemplates.booking.confirmation;
-    const context = {
-      ownerName: `${owner.firstName} ${owner.lastName}`,
-      propertyName: savedBooking.property.propertyName,
-      bookingId: savedBooking.bookingId,
-      checkIn: format(savedBooking.checkinDate, 'MM/dd/yyyy @ KK:mm aa'),
-      checkOut: format(savedBooking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa'),
-      adults: savedBooking.noOfAdults,
-      children: savedBooking.noOfChildren,
-      pets: savedBooking.noOfPets,
-      notes: savedBooking.notes,
+    const bookingSummary = {
+      property: property,
+      checkIn: checkinDate,
+      checkOut: checkoutDate,
+      totalNights: nightsSelected,
+      noOfGuests: createBookingDto.noOfGuests,
+      adults: createBookingDto.noOfGuests,
+      children: createBookingDto.noOfChildren,
+      pets: createBookingDto.noOfPets,
+      season: this.isDateInRange(checkinDate, peakSeasonStart, peakSeasonEnd)
+        ? 'Peak'
+        : 'Off-Peak',
+      holiday: isBetweenHolidayNigths(checkinDate) ? 'Holiday' : 'Regular',
+      totalAmountDue,
+      dateOfCharge,
+      bookingId: booking.bookingId,
+      cleaningFee: booking.cleaningFee,
+      petFee: booking.petFee,
+      isLastMinuteBooking: booking.isLastMinuteBooking,
+      peakNights,
+      offNights,
+      peakHolidayNights,
+      offHolidayNights,
+      checkInTime: propertyDetails.checkInTime,
+      checkOutTime: propertyDetails.checkOutTime,
     };
 
-    await this.mailService.sendMail(email, subject, template, context);
-
-    this.logger.log(
-      `Booking confirmation mail has been sent to mail : ${email}`,
-    );
-
-    const bookingHistory = this.bookingHistoryRepository.create({
-      ...booking,
-    });
-    (bookingHistory.modifiedBy = createBookingDto.createdBy),
-      (bookingHistory.userAction = 'Created'),
-      await this.bookingHistoryRepository.save(bookingHistory);
-
-    return BOOKING_RESPONSES.BOOKING_CREATED(booking);
+    return bookingSummary;
   }
 
   private normalizeDate(date: Date | string): Date {
@@ -399,20 +353,21 @@ export class CreateBookingService {
 
   private async generateBookingId(propertyId: number): Promise<string> {
     const baseStartNumber = 1;
+    const maxRetries = 5;
 
     const propertyIdLength = Math.max(2, propertyId.toString().length);
 
     const lastBooking = await this.bookingRepository.findOne({
       where: {},
-      order: { createdAt: 'DESC' },
+      order: { bookingId: 'DESC' },
       select: ['bookingId'],
     });
 
     const lastId = lastBooking
-      ? parseInt(lastBooking.bookingId.slice(6 + propertyIdLength), 10)
+      ? parseInt(lastBooking.bookingId.slice(-propertyIdLength), 10)
       : baseStartNumber - 1;
 
-    const newId = lastId + 1;
+    let newId = lastId + 1;
     const incrementingNumberLength = Math.max(2, newId.toString().length);
 
     const currentYear = new Date().getFullYear().toString();
@@ -420,10 +375,28 @@ export class CreateBookingService {
     const paddedPropertyId = propertyId
       .toString()
       .padStart(propertyIdLength, '0');
-    const paddedNewId = newId
-      .toString()
-      .padStart(incrementingNumberLength, '0');
 
-    return `FX${currentYear}${paddedPropertyId}${paddedNewId}`;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const paddedNewId = newId
+        .toString()
+        .padStart(incrementingNumberLength, '0');
+
+      const bookingId = `FX${currentYear}${paddedPropertyId}${paddedNewId}`;
+
+      const existingBooking = await this.bookingRepository.findOne({
+        where: { bookingId },
+        select: ['bookingId'],
+      });
+
+      if (!existingBooking) {
+        return bookingId;
+      }
+
+      newId++;
+    }
+
+    throw new Error(
+      'Failed to generate a unique booking ID after multiple attempts',
+    );
   }
 }
