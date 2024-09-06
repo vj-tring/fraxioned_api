@@ -11,6 +11,9 @@ export const mailTemplates = {
     default: './contact-us-default',
     enquiry: './contact-us',
   },
+  booking: {
+    confirmation: './booking-confirmation',
+  },
 };
 
 export const mailSubject = {
@@ -25,6 +28,9 @@ export const mailSubject = {
   contactUs: {
     default: 'Thank You for Reaching Out',
     enquiry: 'Owner Enquiry',
+  },
+  booking: {
+    confirmation: 'Booking Confirmed',
   },
 };
 

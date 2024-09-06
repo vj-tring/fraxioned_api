@@ -10,6 +10,8 @@ import { PropertySeasonHolidays } from '../entities/property-season-holidays.ent
 import { CreateBookingService } from '../service/booking/create-booking.service';
 import { AuthenticationModule } from './authentication.module';
 import { User } from '../entities/user.entity';
+import { UserContactDetails } from '../entities/user-contact-details.entity';
+import { MailService } from '../email/mail.service';
 
 @Module({
   imports: [
@@ -19,10 +21,11 @@ import { User } from '../entities/user.entity';
       PropertyDetails,
       PropertySeasonHolidays,
       User,
+      UserContactDetails,
     ]),
     AuthenticationModule,
   ],
   controllers: [BookingController],
-  providers: [BookingService, LoggerService, CreateBookingService],
+  providers: [BookingService, LoggerService, CreateBookingService, MailService],
 })
 export class BookingModule {}
