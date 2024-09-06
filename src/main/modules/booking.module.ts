@@ -11,6 +11,7 @@ import { CreateBookingService } from '../service/booking/create-booking.service'
 import { AuthenticationModule } from './authentication.module';
 import { User } from '../entities/user.entity';
 import { BookingHistory } from '../entities/booking-history.entity';
+import { BookingSummaryService } from '../service/booking/booking-summary.service';
 
 @Module({
   imports: [
@@ -25,6 +26,11 @@ import { BookingHistory } from '../entities/booking-history.entity';
     AuthenticationModule,
   ],
   controllers: [BookingController],
-  providers: [BookingService, LoggerService, CreateBookingService],
+  providers: [
+    BookingService,
+    LoggerService,
+    CreateBookingService,
+    BookingSummaryService,
+  ],
 })
 export class BookingModule {}
