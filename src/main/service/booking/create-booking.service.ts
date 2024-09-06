@@ -354,7 +354,7 @@ export class CreateBookingService {
 
     const lastBooking = await this.bookingRepository.findOne({
       where: {},
-      order: { bookingId: 'DESC' },
+      order: { createdAt: 'DESC' },
       select: ['bookingId'],
     });
 
