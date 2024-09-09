@@ -53,7 +53,7 @@ export class CreateBookingDTO {
 
   @IsString()
   @IsOptional()
-  notes?: string;
+  notes?: string = 'None';
 
   @ApiProperty({ example: { id: 1 } })
   @IsNotEmpty({ message: 'createdBy is required' })

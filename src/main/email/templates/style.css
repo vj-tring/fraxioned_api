@@ -1,3 +1,4 @@
+/* Base Style */
 body {
     padding: 20px;
     margin: 0px;
@@ -6,40 +7,6 @@ body {
     font-style: normal;
     background-color: #f9f9f9;
     color: #333;
-}
-
-.content p {
-    font-size: .75rem;
-    line-height: 18px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-}
-
-.content p .ticket-content {
-    padding-inline-end: 20%;
-}
-
-.content p b {
-    font-size: .88rem;
-    line-height: 25px;
-}
-
-.content table {
-    font-size: .82rem;
-}
-
-.content table th td {
-    text-decoration: none;
-    font-weight: lighter;
-}
-
-.content .thead th {
-    padding-right: 40px;
-}
-
-.content th,
-.content td {
-    padding: 5px;
 }
 
 .container {
@@ -53,21 +20,20 @@ body {
     box-sizing: border-box;
 }
 
-.content {
-    padding-left: 50px;
-    padding-right: 50px;
-    padding-bottom: 25px;
-    text-align: justify;
+/* Banner */
+.banner img {
+    width: 100%;
+    max-height: 180px;
+    min-height: 150px;
 }
 
-.content span {
-    color: crimson;
+.banner {
+    max-width: 550px;
+    min-width: 450px;
+    height: auto;
 }
 
-.content .highlight-text {
-    font-weight: 450;
-}
-
+/* Header */
 .header {
     padding-left: 50px;
     padding-right: 50px;
@@ -100,28 +66,7 @@ body {
     max-width: 90%;
 }
 
-.button {
-    display: inline-block;
-    background-color: #d7871e;
-    color: #ffffff;
-    padding: 7px 27px;
-    border-radius: 6px;
-    border: none;
-    text-decoration: none;
-    text-align: center;
-    font-size: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.mail, .service {
-    color: #d7871e;
-    font-weight: 600;
-    text-decoration: none;
-}
-
+/* Footer */
 .footer {
     background-color: #E9F7F8;
     padding: 5px;

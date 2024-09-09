@@ -10,6 +10,15 @@ import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { PropertyDetails } from '../../entities/property-details.entity';
 import { BookingRules } from '../../commons/constants/enumerations/booking-rules';
+import {
+  mailSubject,
+  mailTemplates,
+} from 'src/main/commons/constants/email/mail.constants';
+import { MailService } from 'src/main/email/mail.service';
+import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
+import { User } from 'src/main/entities/user.entity';
+import { format } from 'date-fns';
+import { Property } from 'src/main/entities/property.entity';
 
 @Injectable()
 export class CreateBookingService {
@@ -24,7 +33,12 @@ export class CreateBookingService {
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
     @InjectRepository(BookingHistory)
     private readonly bookingHistoryRepository: Repository<BookingHistory>,
+    @InjectRepository(UserContactDetails)
+    private readonly userContactDetailsRepository: Repository<UserContactDetails>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly logger: LoggerService,
+    private readonly mailService: MailService,
   ) {}
 
   async createBooking(createBookingDto: CreateBookingDTO): Promise<object> {
@@ -280,7 +294,7 @@ export class CreateBookingService {
     booking.cleaningFee = propertyDetails.cleaningFee;
     booking.petFee = createBookingDto.noOfPets * propertyDetails.feePerPet;
     booking.isLastMinuteBooking = isLastMinuteBooking;
-    await this.bookingRepository.save(booking);
+    const savedBooking = await this.bookingRepository.save(booking);
 
     // Update user properties after successful booking
     userProperty.peakRemainingNights -= peakNights;
@@ -300,6 +314,54 @@ export class CreateBookingService {
 
     await this.userPropertiesRepository.save(userProperty);
 
+    if (peakHolidayNights > 0) {
+      await this.validatePeakSeasonHoliday(
+        user,
+        property,
+        checkinDate,
+        userProperty.acquisitionDate,
+        today,
+        peakHolidayNights,
+      );
+    }
+
+    const owner = await this.userRepository.findOne({
+      where: {
+        id: savedBooking.user.id,
+      },
+    });
+
+    const contact = await this.userContactDetailsRepository.find({
+      where: {
+        user: {
+          id: savedBooking.user.id,
+        },
+      },
+      select: ['primaryEmail'],
+    });
+
+    // Confirmation Mail
+    const { primaryEmail: email } = contact[0];
+    const subject = mailSubject.booking.confirmation;
+    const template = mailTemplates.booking.confirmation;
+    const context = {
+      ownerName: `${owner.firstName} ${owner.lastName}`,
+      propertyName: savedBooking.property.propertyName,
+      bookingId: savedBooking.bookingId,
+      checkIn: format(savedBooking.checkinDate, 'MM/dd/yyyy @ KK:mm aa'),
+      checkOut: format(savedBooking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa'),
+      adults: savedBooking.noOfAdults,
+      children: savedBooking.noOfChildren,
+      pets: savedBooking.noOfPets,
+      notes: savedBooking.notes,
+    };
+
+    await this.mailService.sendMail(email, subject, template, context);
+
+    this.logger.log(
+      `Booking confirmation mail has been sent to mail : ${email}`,
+    );
+
     const bookingHistory = this.bookingHistoryRepository.create({
       ...booking,
     });
@@ -308,6 +370,52 @@ export class CreateBookingService {
       await this.bookingHistoryRepository.save(bookingHistory);
 
     return BOOKING_RESPONSES.BOOKING_CREATED(booking);
+  }
+
+  async validatePeakSeasonHoliday(
+    user: User,
+    property: Property,
+    checkinDate: Date,
+    acquisitionDate: Date,
+    today: Date,
+    peakHolidayNights: number,
+  ): Promise<void> {
+    if (peakHolidayNights > 0) {
+      const checkInYear = checkinDate.getFullYear();
+      const acquisitionYear = acquisitionDate.getFullYear();
+      const currentYearForValidation = today.getFullYear();
+      const diffOfAcquisitionAndCheckInYear = checkInYear - acquisitionYear + 1;
+      const isEven = diffOfAcquisitionAndCheckInYear % 2 === 0;
+
+      let targetYear, userPropertyToUpdate;
+
+      // If odd, check next year; if even, check previous year
+      if (
+        !isEven &&
+        (currentYearForValidation === checkInYear ||
+          currentYearForValidation + 1 === checkInYear)
+      ) {
+        targetYear = checkInYear + 1;
+      } else if (
+        isEven &&
+        (currentYearForValidation + 1 === checkInYear ||
+          currentYearForValidation + 2 === checkInYear)
+      ) {
+        targetYear = checkInYear - 1;
+      }
+
+      if (targetYear) {
+        userPropertyToUpdate = await this.userPropertiesRepository.findOne({
+          where: { user: user, property: property, year: targetYear },
+        });
+
+        if (userPropertyToUpdate) {
+          userPropertyToUpdate.peakRemainingHolidayNights -= peakHolidayNights;
+          userPropertyToUpdate.peakBookedHolidayNights += peakHolidayNights;
+          await this.userPropertiesRepository.save(userPropertyToUpdate);
+        }
+      }
+    }
   }
 
   private normalizeDate(date: Date | string): Date {

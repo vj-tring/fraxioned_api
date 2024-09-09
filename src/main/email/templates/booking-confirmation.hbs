@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    {{{ css }}}
+    {{{ booking-confirmation }}}
+</head>
+
+<body>
+    <div class="container">
+        {{> banner image='https://i.ibb.co/r0SLfDx/paradise.jpg' alt='paradise' }}
+        {{> header logo='https://i.ibb.co/pndBYJN/booking-confirmed.png' alt='booking-confirmed' text='Booking Confirmed'}}
+        <div class="content">
+            <div class="before-content">
+                <p>
+                    <b>Hello {{ ownerName }}!</b>
+                </p>
+                <table class="confirm-table">
+                    <tr>
+                        <td class="confirm-icon">
+                            <img src="https://i.ibb.co/bNN4ZgK/check.png" alt="check">
+                        </td>
+                        <td class="confirm-text">
+                            <p>Your {{ propertyName }} booking is confirmed.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="booking-number">
+                            <p>Your booking number is #{{ bookingId }}</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="middle-content">
+                <table class="booking-table">
+                    <tr>
+                        <td colspan="2">Booking Details</td>
+                    </tr>
+                    <tr>
+                        <td>Check-In</td>
+                        <td>Check-Out</td>
+                    </tr>
+                    <tr>
+                        <td>{{ checkIn }}</td>
+                        <td>{{ checkOut }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Guests: {{ adults }} Adults, {{ children }} Children, {{ pets }} Pets</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Notes: {{ notes }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="after-content">
+                <p>
+                    <b>What's Next?</b>
+                </p>
+                <p>
+                    You're all set! You will receive reminder emails with important check-in information before your
+                    stay.
+                    But if you need, here are some helpful links:
+                </p>
+                <a href='https://www.google.com' class="button">Modify Booking</a>
+                <a href='https://www.google.com' class="button">Cancel Booking</a>
+            </div>
+        </div>
+        {{> footer }}
+    </div>
+</body>
+
+</html>
