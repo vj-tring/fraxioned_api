@@ -437,6 +437,37 @@ describe('Booking API Test', () => {
         'You should wait atleast 5 nights from last booking to book again.',
       );
     });
+    it('Booking is made beyond the 730-day rolling calendar limit', async () => {
+      const credentials = {
+        user: {
+          id: 2,
+        },
+        property: {
+          id: 1,
+        },
+        createdBy: {
+          id: 1,
+        },
+        checkinDate: '2025-04-15T11:51:55.260Z',
+        checkoutDate: '2030-04-20T11:51:55.260Z',
+        noOfGuests: 10,
+        noOfPets: 2,
+        isLastMinuteBooking: true,
+        noOfAdults: 5,
+        noOfChildren: 5,
+        notes: 'string',
+      };
+      const response = await request(url1)
+        .post('/booking')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe(
+        'Booking dates are out of the allowed range',
+      );
+    });
     it('Last Minute Booking is made within 24 hours', async () => {
       const todaydate = new Date();
       const checkin = todaydate;
