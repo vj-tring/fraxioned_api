@@ -86,7 +86,6 @@ export class BookingService {
       return BOOKING_RESPONSES.BOOKING_NOT_FOUND(id);
     }
 
-    // Update booking details
     Object.assign(booking, updateBookingDto);
     await this.bookingRepository.save(booking);
     return BOOKING_RESPONSES.BOOKING_UPDATED(booking);
