@@ -76,13 +76,13 @@ export async function validatePeakSeasonHoliday(
   userPropertiesRepository: Repository<UserProperties>,
   user: User,
   property: Property,
-  checkinDate: Date,
+  holidayYear: number,
   acquisitionDate: Date,
   today: Date,
   peakHolidayNights: number,
 ): Promise<void> {
   if (peakHolidayNights > 0) {
-    const checkInYear = checkinDate.getFullYear();
+    const checkInYear = holidayYear;
     const acquisitionYear = acquisitionDate.getFullYear();
     const currentYearForValidation = today.getFullYear();
     const diffOfAcquisitionAndCheckInYear = checkInYear - acquisitionYear + 1;

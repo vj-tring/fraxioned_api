@@ -200,6 +200,7 @@ export class CreateBookingService {
     const checkoutYear = checkoutDate.getFullYear();
 
     const countedHolidays = new Set<number>();
+    let holidayYear = 0;
 
     for (
       let date = new Date(checkinDate);
@@ -218,6 +219,7 @@ export class CreateBookingService {
         ) {
           if (!countedHolidays.has(PropertyHoliday.holiday.id)) {
             countedHolidays.add(PropertyHoliday.holiday.id);
+            holidayYear = PropertyHoliday.holiday.year;
             if (isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
               if (currentYear === checkinYear) {
                 peakHolidayNightsInFirstYear++;
@@ -373,7 +375,7 @@ export class CreateBookingService {
         this.userPropertiesRepository,
         user,
         property,
-        checkinDate,
+        holidayYear,
         userProperty.acquisitionDate,
         today,
         peakHolidayNightsInFirstYear + peakHolidayNightsInSecondYear,
