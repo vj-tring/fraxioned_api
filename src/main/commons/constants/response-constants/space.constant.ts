@@ -53,4 +53,66 @@ export const SPACE_RESPONSES = {
     data: savedSpace,
     statusCode: HttpStatus.CREATED,
   }),
+  SPACE_NOT_FOUND: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    data?: Space;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Space with ID ${id} not found`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
+  SPACE_FETCHED: (
+    space: Space,
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    data?: Space;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Space with ID ${id} retrieved successfully`,
+    data: space,
+    statusCode: HttpStatus.OK,
+  }),
+  SPACE_UPDATED: (
+    updatedSpace: Space,
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    data?: Space;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Space with ID ${id} updated successfully`,
+    data: updatedSpace,
+    statusCode: HttpStatus.OK,
+  }),
+  SPACE_FOREIGN_KEY_CONFLICT: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Space ID ${id} exists and is mapped to space type, hence cannot be deleted.`,
+    statusCode: HttpStatus.CONFLICT,
+  }),
+  SPACE_DELETED: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Space with ID ${id} deleted successfully`,
+    statusCode: HttpStatus.NO_CONTENT,
+  }),
 };
