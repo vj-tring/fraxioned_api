@@ -1,13 +1,16 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
-import { createConnection } from 'mysql2/promise';
+// import { createConnection,Connection } from 'mysql2/promise';
+// import { exec } from 'child_process';
+// import { promisify } from 'util';
 
+// const execAsync = promisify(exec);
 describe('Booking API Test', () => {
   const url = `${baseurl}/authentication`;
   const url1 = `${baseurl}/bookings`;
   let token: string;
   let userid: number;
-  let connection: any;
+  // let connection: Connection;
   beforeAll(async () => {
     const login_credentials = {
       email: 'owner@fraxioned.com',
@@ -21,17 +24,18 @@ describe('Booking API Test', () => {
     token = session.token;
     userid = user.id;
   });
-  afterAll(async () => {
-    connection = await createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '1234',
-      database: 'fraxioned',
-    });
-    await connection.query(`DROP DATABASE fraxioned`);
-    await connection.query(`CREATE DATABASE fraxioned`);
-    await connection.end();
-  });
+  // afterAll(async () => {
+  //   connection = await createConnection({
+  //     host: 'localhost',
+  //     user: 'root',
+  //     password: '1234',
+  //     database: 'fraxioned',
+  //   });
+  //   await connection.query(`DROP DATABASE fraxioned`);
+  //   await connection.query(`CREATE DATABASE fraxioned`);
+  //   await connection.end();
+  //   await execAsync('npm run start:dev');
+  // });
   describe('Successful Flows', () => {
     it('Booking nights in peak season', async () => {
       const credentials = {
