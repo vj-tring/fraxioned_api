@@ -176,13 +176,6 @@ export class CreateBookingService {
           date <= this.normalizeDate(booking.checkoutDate),
       );
 
-    const isBetweenHolidayNigths = (date: Date): boolean =>
-      PropertyHolidays.some(
-        (PropertyHoliday) =>
-          date >= this.normalizeDate(PropertyHoliday.holiday.startDate) &&
-          date <= this.normalizeDate(PropertyHoliday.holiday.endDate),
-      );
-
     const peakSeasonStart = this.normalizeDate(
       new Date(propertyDetails.peakSeasonStartDate),
     );
@@ -203,6 +196,8 @@ export class CreateBookingService {
     const checkinYear = checkinDate.getFullYear();
     const checkoutYear = checkoutDate.getFullYear();
 
+    const countedHolidays = new Set<number>();
+
     for (
       let date = new Date(checkinDate);
       date < checkoutDate;
@@ -213,35 +208,43 @@ export class CreateBookingService {
       }
       const currentYear = date.getFullYear();
 
-      if (isBetweenHolidayNigths(date)) {
+      PropertyHolidays.forEach((PropertyHoliday) => {
+        if (
+          date >= this.normalizeDate(PropertyHoliday.holiday.startDate) &&
+          date <= this.normalizeDate(PropertyHoliday.holiday.endDate)
+        ) {
+          if (!countedHolidays.has(PropertyHoliday.holiday.id)) {
+            countedHolidays.add(PropertyHoliday.holiday.id);
+            if (this.isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
+              if (currentYear === checkinYear) {
+                peakHolidayNightsInFirstYear++;
+              } else {
+                peakHolidayNightsInSecondYear++;
+              }
+            } else {
+              if (currentYear === checkinYear) {
+                offHolidayNightsInFirstYear++;
+              } else {
+                offHolidayNightsInSecondYear++;
+              }
+            }
+          }
+        }
+      });
+
+      if (!countedHolidays.has(date.getTime())) {
         if (this.isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
           if (currentYear === checkinYear) {
-            peakHolidayNightsInFirstYear++;
             peakNightsInFirstYear++;
           } else {
-            peakHolidayNightsInSecondYear++;
             peakNightsInSecondYear++;
           }
         } else {
           if (currentYear === checkinYear) {
-            offHolidayNightsInFirstYear++;
             offNightsInFirstYear++;
           } else {
-            offHolidayNightsInSecondYear++;
             offNightsInSecondYear++;
           }
-        }
-      } else if (this.isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
-        if (currentYear === checkinYear) {
-          peakNightsInFirstYear++;
-        } else {
-          peakNightsInSecondYear++;
-        }
-      } else {
-        if (currentYear === checkinYear) {
-          offNightsInFirstYear++;
-        } else {
-          offNightsInSecondYear++;
         }
       }
     }
@@ -452,7 +455,6 @@ export class CreateBookingService {
       );
     }
   }
-
   private async generateBookingId(propertyId: number): Promise<string> {
     const baseStartNumber = 1;
 
