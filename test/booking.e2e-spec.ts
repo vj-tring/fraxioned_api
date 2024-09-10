@@ -1,11 +1,13 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
+import { createConnection } from 'mysql2/promise';
 
 describe('Booking API Test', () => {
   const url = `${baseurl}/authentication`;
   const url1 = `${baseurl}/bookings`;
   let token: string;
   let userid: number;
+  let connection: any;
   beforeAll(async () => {
     const login_credentials = {
       email: 'owner@fraxioned.com',
@@ -19,7 +21,18 @@ describe('Booking API Test', () => {
     token = session.token;
     userid = user.id;
   });
-  describe.skip('Successful Flows', () => {
+  afterAll(async () => {
+    connection = await createConnection({
+      host: 'localhost',
+      user: 'root',
+      password: '1234',
+      database: 'fraxioned',
+    });
+    await connection.query(`DROP DATABASE fraxioned`);
+    await connection.query(`CREATE DATABASE fraxioned`);
+    await connection.end();
+  });
+  describe('Successful Flows', () => {
     it('Booking nights in peak season', async () => {
       const credentials = {
         user: {
@@ -210,6 +223,64 @@ describe('Booking API Test', () => {
         },
         checkinDate: checkin,
         checkoutDate: checkout,
+        noOfGuests: 10,
+        noOfPets: 2,
+        isLastMinuteBooking: true,
+        noOfAdults: 5,
+        noOfChildren: 5,
+        notes: 'string',
+      };
+      const response = await request(url1)
+        .post('/booking')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe('Booking created successfully');
+    });
+    it('Booking holiday nights in peak season', async () => {
+      const credentials = {
+        user: {
+          id: 2,
+        },
+        property: {
+          id: 1,
+        },
+        createdBy: {
+          id: 1,
+        },
+        checkinDate: '2025-05-15T11:51:55.260Z',
+        checkoutDate: '2025-05-17T11:51:55.260Z',
+        noOfGuests: 10,
+        noOfPets: 2,
+        isLastMinuteBooking: true,
+        noOfAdults: 5,
+        noOfChildren: 5,
+        notes: 'string',
+      };
+      const response = await request(url1)
+        .post('/booking')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe('Booking created successfully');
+    });
+    it('Booking holiday nights in off season', async () => {
+      const credentials = {
+        user: {
+          id: 2,
+        },
+        property: {
+          id: 1,
+        },
+        createdBy: {
+          id: 1,
+        },
+        checkinDate: '2025-09-17T11:51:55.260Z',
+        checkoutDate: '2025-09-20T11:51:55.260Z',
         noOfGuests: 10,
         noOfPets: 2,
         isLastMinuteBooking: true,
@@ -448,7 +519,7 @@ describe('Booking API Test', () => {
         createdBy: {
           id: 1,
         },
-        checkinDate: '2025-04-15T11:51:55.260Z',
+        checkinDate: '2030-04-15T11:51:55.260Z',
         checkoutDate: '2030-04-20T11:51:55.260Z',
         noOfGuests: 10,
         noOfPets: 2,
