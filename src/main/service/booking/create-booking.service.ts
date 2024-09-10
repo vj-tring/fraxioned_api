@@ -212,6 +212,11 @@ export class CreateBookingService {
       }
       const currentYear = date.getFullYear();
 
+      const adjustedYear =
+        date.getMonth() === 11 && date.getDate() === 31
+          ? currentYear + 1
+          : currentYear;
+
       PropertyHolidays.forEach((PropertyHoliday) => {
         if (
           date >= normalizeDate(PropertyHoliday.holiday.startDate) &&
@@ -221,13 +226,13 @@ export class CreateBookingService {
             countedHolidays.add(PropertyHoliday.holiday.id);
             holidayYear = PropertyHoliday.holiday.year;
             if (isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
-              if (currentYear === checkinYear) {
+              if (adjustedYear === checkinYear) {
                 peakHolidayNightsInFirstYear++;
               } else {
                 peakHolidayNightsInSecondYear++;
               }
             } else {
-              if (currentYear === checkinYear) {
+              if (adjustedYear === checkinYear) {
                 offHolidayNightsInFirstYear++;
               } else {
                 offHolidayNightsInSecondYear++;
@@ -239,13 +244,13 @@ export class CreateBookingService {
 
       if (!countedHolidays.has(date.getTime())) {
         if (isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
-          if (currentYear === checkinYear) {
+          if (adjustedYear === checkinYear) {
             peakNightsInFirstYear++;
           } else {
             peakNightsInSecondYear++;
           }
         } else {
-          if (currentYear === checkinYear) {
+          if (adjustedYear === checkinYear) {
             offNightsInFirstYear++;
           } else {
             offNightsInSecondYear++;
