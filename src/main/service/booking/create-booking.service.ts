@@ -24,6 +24,7 @@ import {
   generateBookingId,
   validatePeakSeasonHoliday,
 } from 'src/main/service/booking/utils/booking.util';
+import { Property } from 'src/main/entities/property.entity';
 
 @Injectable()
 export class CreateBookingService {
@@ -32,6 +33,8 @@ export class CreateBookingService {
     private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(UserProperties)
     private readonly userPropertiesRepository: Repository<UserProperties>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
     @InjectRepository(PropertyDetails)
     private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     @InjectRepository(PropertySeasonHolidays)
@@ -52,9 +55,12 @@ export class CreateBookingService {
     const {
       checkinDate: checkinDateStr,
       checkoutDate: checkoutDateStr,
-      property,
       user,
     } = createBookingDto;
+
+    const property = await this.propertyRepository.findOne({
+      where: { id: createBookingDto.property.id },
+    });
 
     const today = new Date();
     const checkinDate = normalizeDate(checkinDateStr);
