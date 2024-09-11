@@ -15,7 +15,6 @@ import { seedSpaceType } from './main/commons/seeds/space-types-seed';
 export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
-  // Seeder
   const dataSource = app.get(DataSource);
   await seedRole(dataSource);
   await seedUser(dataSource);
@@ -25,7 +24,6 @@ export async function bootstrap(): Promise<void> {
   await seedSpace(dataSource);
   await seedSpaceType(dataSource);
 
-  // Global Pipes
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -34,17 +32,13 @@ export async function bootstrap(): Promise<void> {
     }),
   );
 
-  // Global Exception Filters
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // Set global prefix for API endpoints
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
 
-  // Swagger configuration
   setupSwagger(app, globalPrefix);
 
-  // Enable CORS
   app.enableCors();
 
   await app.listen(3008);
