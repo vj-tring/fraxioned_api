@@ -46,6 +46,12 @@ export class BookingService {
     this.logger.log(`Fetching booking with ID ${id}`);
     const booking = await this.bookingRepository.findOne({
       relations: ['user', 'property', 'createdBy', 'updatedBy'],
+      select: {
+        user: { id: true },
+        property: { id: true, propertyName: true },
+        createdBy: { id: true },
+        updatedBy: { id: true },
+      },
       where: { id },
     });
     if (!booking) {
@@ -61,7 +67,7 @@ export class BookingService {
       relations: ['user', 'property', 'createdBy', 'updatedBy'],
       select: {
         user: { id: true },
-        property: { id: true },
+        property: { id: true, propertyName: true },
         createdBy: { id: true },
         updatedBy: { id: true },
       },

@@ -12,6 +12,10 @@ export const BOOKING_RESPONSES = {
     message: `Booking with ID ${id} not found`,
     statusCode: 404,
   }),
+  BOOKINGS_NOT_FOUND: (): { message: string; statusCode: number } => ({
+    message: `Bookings not found`,
+    statusCode: 404,
+  }),
   BOOKING_FOR_USER_NOT_FOUND: (
     id: number,
   ): { message: string; statusCode: number } => ({
@@ -19,10 +23,17 @@ export const BOOKING_RESPONSES = {
     statusCode: 404,
   }),
   BOOKING_FETCHED: (
-    booking: Booking,
-  ): { message: string; data: Booking; statusCode: number } => ({
+    booking: object,
+  ): { message: string; data: object; statusCode: number } => ({
     message: 'Booking fetched successfully',
     data: booking,
+    statusCode: 200,
+  }),
+  BOOKINGS_FETCHED: (
+    bookings: object[],
+  ): { message: string; data: object[]; statusCode: number } => ({
+    message: 'Bookings fetched successfully',
+    data: bookings,
     statusCode: 200,
   }),
   BOOKING_UPDATED: (
