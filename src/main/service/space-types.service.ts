@@ -231,11 +231,13 @@ export class SpaceTypesService {
         return SPACE_RESPONSES.USER_NOT_FOUND(updateSpaceTypeDto.updatedBy.id);
       }
 
-      const space = await this.spaceTypesRepository.findOne({
+      const space = await this.spaceRepository.findOne({
         where: { id: updateSpaceTypeDto.space.id },
       });
       if (!space) {
-        this.logger.error(`Space with ID ${space.space.id} does not exist`);
+        this.logger.error(
+          `Space with ID ${updateSpaceTypeDto.space.id} does not exist`,
+        );
         return SPACE_TYPES_RESPONSES.SPACE_NOT_FOUND(
           updateSpaceTypeDto.space.id,
         );
