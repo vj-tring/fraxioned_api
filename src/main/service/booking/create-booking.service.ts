@@ -101,10 +101,13 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
-    const checkinTime = new Date(checkinDate);
-    checkinTime.setHours(propertyDetails.checkInTime, 0, 0, 0);
+    const checkinDateTime = new Date(checkinDate);
+    checkinDateTime.setHours(propertyDetails.checkInTime, 0, 0, 0);
 
-    const timeDifference = checkinTime.getTime() - today.getTime();
+    const checkoutDateTime = new Date(checkoutDate);
+    checkoutDateTime.setHours(propertyDetails.checkOutTime, 0, 0, 0);
+
+    const timeDifference = checkinDateTime.getTime() - today.getTime();
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference < 24) {
@@ -334,6 +337,9 @@ export class CreateBookingService {
     booking.cleaningFee = propertyDetails.cleaningFee;
     booking.petFee = createBookingDto.noOfPets * propertyDetails.feePerPet;
     booking.isLastMinuteBooking = isLastMinuteBooking;
+    booking.totalNights = nightsSelected;
+    booking.checkinDate = checkinDateTime;
+    booking.checkoutDate = checkoutDateTime;
     const savedBooking = await this.bookingRepository.save(booking);
 
     userProperty.peakRemainingNights -= peakNightsInFirstYear;

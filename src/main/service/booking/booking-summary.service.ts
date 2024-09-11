@@ -319,7 +319,7 @@ export class BookingSummaryService {
     const bookingSummary = {
       propertyId: property.id,
       propertyName: property.propertyName,
-      checkIn: checkinDate,
+      checkIn: checkinTime,
       checkOut: checkoutDate,
       totalNights: nightsSelected,
       noOfGuests: createBookingDto.noOfGuests,
