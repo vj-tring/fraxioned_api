@@ -85,7 +85,7 @@ describe('AmenitiesController', () => {
     } as User,
   };
 
-  describe('createHolcreateAmenityiday', () => {
+  describe('createAmenity', () => {
     it('should create an amenity', async () => {
       const expectedAmenity: Amenities = {
         id: 1,
