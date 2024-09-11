@@ -61,4 +61,55 @@ export const SPACE_TYPES_RESPONSES = {
     data: savedSpaceType,
     statusCode: HttpStatus.CREATED,
   }),
+  SPACE_TYPE_NOT_FOUND: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    data?: SpaceTypes;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Space Type with ID ${id} not found`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
+  SPACE_TYPE_FETCHED: (
+    spaceType: SpaceTypes,
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    data?: SpaceTypes;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Space Type with ID ${id} retrieved successfully`,
+    data: spaceType,
+    statusCode: HttpStatus.OK,
+  }),
+  SPACE_TYPE_UPDATED: (
+    updatedSpaceType: SpaceTypes,
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    data?: SpaceTypes;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Space Type with ID ${id} updated successfully`,
+    data: updatedSpaceType,
+    statusCode: HttpStatus.OK,
+  }),
+  SPACE_TYPE_DELETED: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Space Type with ID ${id} deleted successfully`,
+    statusCode: HttpStatus.NO_CONTENT,
+  }),
 };
