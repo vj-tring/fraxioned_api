@@ -48,6 +48,10 @@ describe('BookingService', () => {
           useClass: Repository,
         },
         {
+          provide: getRepositoryToken(Property),
+          useClass: Repository,
+        },
+        {
           provide: getRepositoryToken(PropertyDetails),
           useClass: Repository,
         },
