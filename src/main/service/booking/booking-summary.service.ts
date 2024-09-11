@@ -18,6 +18,7 @@ import {
   isDateInRange,
   generateBookingId,
 } from 'src/main/service/booking/utils/booking.util';
+import { Property } from 'src/main/entities/property.entity';
 
 @Injectable()
 export class BookingSummaryService {
@@ -26,6 +27,8 @@ export class BookingSummaryService {
     private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(UserProperties)
     private readonly userPropertiesRepository: Repository<UserProperties>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
     @InjectRepository(PropertyDetails)
     private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     @InjectRepository(PropertySeasonHolidays)
@@ -46,9 +49,12 @@ export class BookingSummaryService {
     const {
       checkinDate: checkinDateStr,
       checkoutDate: checkoutDateStr,
-      property,
       user,
     } = createBookingDto;
+
+    const property = await this.propertyRepository.findOne({
+      where: { id: createBookingDto.property.id },
+    });
 
     const today = new Date();
     const checkinDate = normalizeDate(checkinDateStr);
@@ -311,8 +317,9 @@ export class BookingSummaryService {
       createBookingDto.noOfPets * propertyDetails.feePerPet;
     const dateOfCharge = new Date();
     const bookingSummary = {
-      property: property,
-      checkIn: checkinDate,
+      propertyId: property.id,
+      propertyName: property.propertyName,
+      checkIn: checkinTime,
       checkOut: checkoutDate,
       totalNights: nightsSelected,
       noOfGuests: createBookingDto.noOfGuests,

@@ -14,6 +14,7 @@ import { BookingHistory } from '../entities/booking-history.entity';
 import { BookingSummaryService } from '../service/booking/booking-summary.service';
 import { UserContactDetails } from '../entities/user-contact-details.entity';
 import { MailService } from '../email/mail.service';
+import { Property } from '../entities/property.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { MailService } from '../email/mail.service';
       BookingHistory,
       UserProperties,
       PropertyDetails,
+      Property,
       PropertySeasonHolidays,
       User,
       UserContactDetails,

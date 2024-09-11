@@ -24,6 +24,7 @@ import {
   generateBookingId,
   validatePeakSeasonHoliday,
 } from 'src/main/service/booking/utils/booking.util';
+import { Property } from 'src/main/entities/property.entity';
 
 @Injectable()
 export class CreateBookingService {
@@ -32,6 +33,8 @@ export class CreateBookingService {
     private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(UserProperties)
     private readonly userPropertiesRepository: Repository<UserProperties>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
     @InjectRepository(PropertyDetails)
     private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     @InjectRepository(PropertySeasonHolidays)
@@ -52,9 +55,12 @@ export class CreateBookingService {
     const {
       checkinDate: checkinDateStr,
       checkoutDate: checkoutDateStr,
-      property,
       user,
     } = createBookingDto;
+
+    const property = await this.propertyRepository.findOne({
+      where: { id: createBookingDto.property.id },
+    });
 
     const today = new Date();
     const checkinDate = normalizeDate(checkinDateStr);
@@ -95,10 +101,13 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
-    const checkinTime = new Date(checkinDate);
-    checkinTime.setHours(propertyDetails.checkInTime, 0, 0, 0);
+    const checkinDateTime = new Date(checkinDate);
+    checkinDateTime.setHours(propertyDetails.checkInTime, 0, 0, 0);
 
-    const timeDifference = checkinTime.getTime() - today.getTime();
+    const checkoutDateTime = new Date(checkoutDate);
+    checkoutDateTime.setHours(propertyDetails.checkOutTime, 0, 0, 0);
+
+    const timeDifference = checkinDateTime.getTime() - today.getTime();
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference < 24) {
@@ -328,6 +337,9 @@ export class CreateBookingService {
     booking.cleaningFee = propertyDetails.cleaningFee;
     booking.petFee = createBookingDto.noOfPets * propertyDetails.feePerPet;
     booking.isLastMinuteBooking = isLastMinuteBooking;
+    booking.totalNights = nightsSelected;
+    booking.checkinDate = checkinDateTime;
+    booking.checkoutDate = checkoutDateTime;
     const savedBooking = await this.bookingRepository.save(booking);
 
     userProperty.peakRemainingNights -= peakNightsInFirstYear;
