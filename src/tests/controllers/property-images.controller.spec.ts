@@ -124,11 +124,10 @@ describe('PropertyImagesController', () => {
           spaceType: { id: 1 },
           imageFiles: mockFiles.imageFiles[0],
         },
-      ];
+      ] as unknown as PropertyImages[];
 
-      const result = PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_CREATED(
-        processedDto.length,
-      );
+      const result =
+        PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_CREATED(processedDto);
 
       jest.spyOn(service, 'createPropertyImages').mockResolvedValue(result);
 

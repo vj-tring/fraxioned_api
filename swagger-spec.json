@@ -1,0 +1,1 @@
+{"openapi":"3.0.0","paths":{},"info":{"title":"Fraxioned API","description":"Welcome to Fraxioned","version":"1.0","contact":{}},"tags":[{"name":"Fraxioned","description":""}],"servers":[],"components":{"securitySchemes":{"bearer":{"scheme":"bearer","bearerFormat":"JWT","type":"http"}},"schemas":{}}}
