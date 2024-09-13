@@ -185,7 +185,7 @@ export class CreateBookingService {
       bookedDates.some(
         (booking) =>
           date >= normalizeDate(booking.checkinDate) &&
-          date <= normalizeDate(booking.checkoutDate),
+          date < normalizeDate(booking.checkoutDate),
       );
 
     const peakSeasonStart = normalizeDate(
