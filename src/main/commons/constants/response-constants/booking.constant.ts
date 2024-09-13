@@ -103,6 +103,11 @@ export const BOOKING_RESPONSES = {
     error: 'Forbidden',
     statusCode: 403,
   },
+  INSUFFICIENT_LAST_MIN_BOOKING_NIGHTS: {
+    message: `You don't have sufficient Last minute remaining nights to select this checkout date`,
+    error: 'Forbidden',
+    statusCode: 403,
+  },
   INSUFFICIENT_OFF_NIGHTS: {
     message: `You don't have sufficient off-season remaining nights to select this checkout date`,
     error: 'Forbidden',
@@ -138,4 +143,11 @@ export const BOOKING_RESPONSES = {
     error: 'Bad Request',
     statusCode: 400,
   },
+  EXCEEDED_PEAK_HOLIDAY_NIGHTS: (
+    userShares: number,
+  ): { message: string; error: string; statusCode: number } => ({
+    message: `You have exceeded the allowed peak holiday nights. You are allowed ${userShares * 2} peak holiday nights.`,
+    error: 'Forbidden',
+    statusCode: 403,
+  }),
 };
