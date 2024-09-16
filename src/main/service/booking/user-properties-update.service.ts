@@ -101,7 +101,7 @@ export class UserPropertiesUpdateService {
       secondYear,
     );
 
-    const updateProperty = (property: UserProperties, nights: number) => {
+    const updateProperty = (property: UserProperties, nights: number): void => {
       property.peakRemainingNights -=
         nights * (peakNights / (peakNights + offNights));
       property.offRemainingNights -=

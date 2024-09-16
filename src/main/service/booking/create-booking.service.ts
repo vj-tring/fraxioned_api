@@ -34,17 +34,24 @@ export class CreateBookingService {
   async createBooking(createBookingDto: CreateBookingDTO): Promise<object> {
     this.logger.log('Creating a new booking');
 
-    const validationResult = await this.bookingValidationService.validateBooking(createBookingDto);
+    const validationResult =
+      await this.bookingValidationService.validateBooking(createBookingDto);
     if (validationResult !== true) {
       return validationResult;
     }
 
-    const calculationResult = await this.bookingCalculationService.calculateBookingDetails(createBookingDto);
-    
+    const calculationResult =
+      await this.bookingCalculationService.calculateBookingDetails(
+        createBookingDto,
+      );
+
     const booking = this.bookingRepository.create({
       ...createBookingDto,
       ...calculationResult,
-      bookingId: await generateBookingId(this.bookingRepository, createBookingDto.property.id),
+      bookingId: await generateBookingId(
+        this.bookingRepository,
+        createBookingDto.property.id,
+      ),
     });
 
     const savedBooking = await this.bookingRepository.save(booking);
@@ -72,7 +79,17 @@ export class CreateBookingService {
       throw new Error('User contact details not found');
     }
 
-    const { user, property, bookingId, checkinDate, checkoutDate, noOfAdults, noOfChildren, noOfPets, notes } = booking;
+    const {
+      user,
+      property,
+      bookingId,
+      checkinDate,
+      checkoutDate,
+      noOfAdults,
+      noOfChildren,
+      noOfPets,
+      notes,
+    } = booking;
     const email = contact.primaryEmail;
     const subject = 'Booking Confirmation';
     const template = 'booking-confirmation';
@@ -89,10 +106,15 @@ export class CreateBookingService {
     };
 
     await this.mailService.sendMail(email, subject, template, context);
-    this.logger.log(`Booking confirmation mail has been sent to mail : ${email}`);
+    this.logger.log(
+      `Booking confirmation mail has been sent to mail : ${email}`,
+    );
   }
 
-  private async createBookingHistory(booking: Booking, createdBy: User): Promise<void> {
+  private async createBookingHistory(
+    booking: Booking,
+    createdBy: User,
+  ): Promise<void> {
     const bookingHistory = this.bookingHistoryRepository.create({
       ...booking,
     });
