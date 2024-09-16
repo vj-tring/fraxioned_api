@@ -15,6 +15,9 @@ import { BookingSummaryService } from '../service/booking/booking-summary.servic
 import { UserContactDetails } from '../entities/user-contact-details.entity';
 import { MailService } from '../email/mail.service';
 import { Property } from '../entities/property.entity';
+import { BookingCalculationService } from '../service/booking/booking-calculation.service';
+import { BookingValidationService } from '../service/booking/booking-validation.service';
+import { UserPropertiesUpdateService } from '../service/booking/user-properties-update.service';
 
 @Module({
   imports: [
@@ -37,6 +40,9 @@ import { Property } from '../entities/property.entity';
     CreateBookingService,
     BookingSummaryService,
     MailService,
+    BookingCalculationService,
+    BookingValidationService,
+    UserPropertiesUpdateService,
   ],
 })
 export class BookingModule {}
