@@ -25,6 +25,9 @@ import {
   updatePeakHoliday,
 } from 'src/main/service/booking/utils/booking.util';
 import { Property } from 'src/main/entities/property.entity';
+import { SpaceTypes } from 'src/main/entities/space-types.entity';
+import { PropertyImages } from 'src/main/entities/property_images.entity';
+import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
 
 @Injectable()
 export class CreateBookingService {
@@ -45,6 +48,10 @@ export class CreateBookingService {
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(SpaceTypes)
+    private readonly spaceTypesRepository: Repository<SpaceTypes>,
+    @InjectRepository(PropertyImages)
+    private readonly propertyImagesRepository: Repository<PropertyImages>,
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
   ) {}
@@ -391,6 +398,28 @@ export class CreateBookingService {
       select: ['primaryEmail'],
     });
 
+    const banner = await this.spaceTypesRepository.findOne({
+      where: {
+        name: 'Banner',
+        space: {
+          id: 1,
+        },
+      },
+    });
+
+    const image = await this.propertyImagesRepository.findOne({
+      where: {
+        spaceType: {
+          id: banner.id,
+        },
+        property: {
+          id: savedBooking.property.id,
+        },
+      },
+    });
+
+    this.logger.log(`Banner Image URL: ${image.imageUrl}`);
+
     const { primaryEmail: email } = contact[0];
     const subject = mailSubject.booking.confirmation;
     const template = mailTemplates.booking.confirmation;
@@ -404,6 +433,10 @@ export class CreateBookingService {
       children: savedBooking.noOfChildren,
       pets: savedBooking.noOfPets,
       notes: savedBooking.notes,
+      banner: image.imageUrl,
+      totalNights: savedBooking.totalNights,
+      modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+      cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
     };
 
     await this.mailService.sendMail(email, subject, template, context);
