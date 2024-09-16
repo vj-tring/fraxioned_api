@@ -72,48 +72,45 @@ export async function generateBookingId(
   return `FX${currentYear}${paddedPropertyId}${paddedNewId}`;
 }
 
-export async function validatePeakSeasonHoliday(
+export async function updatePeakHoliday(
+  holidayYear: number,
+  peakHolidayNights: number,
   userPropertiesRepository: Repository<UserProperties>,
+  acquisitionDate: Date,
   user: User,
   property: Property,
-  holidayYear: number,
-  acquisitionDate: Date,
-  today: Date,
-  peakHolidayNights: number,
 ): Promise<void> {
-  if (peakHolidayNights > 0) {
-    const checkInYear = holidayYear;
-    const acquisitionYear = acquisitionDate.getFullYear();
-    const currentYearForValidation = today.getFullYear();
-    const diffOfAcquisitionAndCheckInYear = checkInYear - acquisitionYear + 1;
-    const isEven = diffOfAcquisitionAndCheckInYear % 2 === 0;
+  const today = new Date();
+  const acquisitionYear = acquisitionDate.getFullYear();
+  const currentYearForValidation = today.getFullYear();
+  const diffOfAcquisitionAndCheckInYear = holidayYear - acquisitionYear + 1;
+  const isEven = diffOfAcquisitionAndCheckInYear % 2 === 0;
 
-    let targetYear: number, userPropertyToUpdate: UserProperties;
+  let targetYear: number, userPropertyToUpdate: UserProperties;
 
-    if (
-      !isEven &&
-      (currentYearForValidation === checkInYear ||
-        currentYearForValidation + 1 === checkInYear)
-    ) {
-      targetYear = checkInYear + 1;
-    } else if (
-      isEven &&
-      (currentYearForValidation + 1 === checkInYear ||
-        currentYearForValidation + 2 === checkInYear)
-    ) {
-      targetYear = checkInYear - 1;
-    }
+  if (
+    !isEven &&
+    (currentYearForValidation === holidayYear ||
+      currentYearForValidation + 1 === holidayYear)
+  ) {
+    targetYear = holidayYear + 1;
+  } else if (
+    isEven &&
+    (currentYearForValidation + 1 === holidayYear ||
+      currentYearForValidation + 2 === holidayYear)
+  ) {
+    targetYear = holidayYear - 1;
+  }
 
-    if (targetYear) {
-      userPropertyToUpdate = await userPropertiesRepository.findOne({
-        where: { user: user, property: property, year: targetYear },
-      });
+  if (targetYear) {
+    userPropertyToUpdate = await userPropertiesRepository.findOne({
+      where: { user: user, property: property, year: targetYear },
+    });
 
-      if (userPropertyToUpdate) {
-        userPropertyToUpdate.peakRemainingHolidayNights -= peakHolidayNights;
-        userPropertyToUpdate.peakBookedHolidayNights += peakHolidayNights;
-        await userPropertiesRepository.save(userPropertyToUpdate);
-      }
+    if (userPropertyToUpdate) {
+      userPropertyToUpdate.peakRemainingHolidayNights -= peakHolidayNights;
+      userPropertyToUpdate.peakBookedHolidayNights += peakHolidayNights;
+      await userPropertiesRepository.save(userPropertyToUpdate);
     }
   }
 }
