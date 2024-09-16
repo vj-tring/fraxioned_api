@@ -497,7 +497,7 @@ export class CreateBookingService {
         await this.userPropertiesRepository.save(userPropertySecondYear);
       }
     }
-    if (nights.peakHolidayNightsInFirstYear > 0) {
+    if (nights.peakHolidayNightsInFirstYear > 0 && !isLastMinuteBooking) {
       const holidayYear = checkinDate.getFullYear();
       await updatePeakHoliday(
         holidayYear,
@@ -508,7 +508,7 @@ export class CreateBookingService {
         property,
       );
     }
-    if (nights.peakHolidayNightsInSecondYear > 0) {
+    if (nights.peakHolidayNightsInSecondYear > 0 && !isLastMinuteBooking) {
       const holidayYear = checkoutDate.getFullYear();
       await updatePeakHoliday(
         holidayYear,
