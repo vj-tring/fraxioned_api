@@ -115,4 +115,26 @@ export class Booking {
     default: false,
   })
   isCompleted: boolean;
+
+  @Column({ name: 'peak_nights', type: 'int', nullable: true, default: 0 })
+  peakNights: number;
+
+  @Column({ name: 'off_nights', type: 'int', nullable: true, default: 0 })
+  offNights: number;
+
+  @Column({
+    name: 'peak_holiday_nights',
+    type: 'int',
+    nullable: true,
+    default: 0,
+  })
+  peakHolidayNights: number;
+
+  @Column({
+    name: 'off_holiday_nights',
+    type: 'int',
+    nullable: true,
+    default: 0,
+  })
+  offHolidayNights: number;
 }
