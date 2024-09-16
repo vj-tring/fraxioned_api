@@ -74,20 +74,8 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.CHECKOUT_BEFORE_CHECKIN;
     }
 
-    const checkInEndDate = normalizeDate(
-      new Date(today.getFullYear(), today.getMonth(), today.getDate() + 730),
-    );
-
-    const isLeapYear = (year: number): boolean => {
-      return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    };
-
-    const daysInYear = isLeapYear(today.getFullYear()) ? 366 : 365;
-    const daysInNextYear = isLeapYear(today.getFullYear() + 1) ? 366 : 365;
-
-    if (daysInYear === 366 || daysInNextYear === 366) {
-      checkInEndDate.setDate(checkInEndDate.getDate() + 1);
-    }
+    const checkInEndDate = new Date(today);
+    checkInEndDate.setFullYear(today.getFullYear() + 2);
 
     if (checkinDate > checkInEndDate) {
       return BOOKING_RESPONSES.DATES_OUT_OF_RANGE;
@@ -120,11 +108,17 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.INVALID_BOOKING_YEAR;
     }
 
-    const userProperty = await this.userPropertiesRepository.findOne({
-      where: { user: user, property: property, year: bookingYear },
+    const checkinYear = checkinDate.getFullYear();
+    const checkoutYear = checkoutDate.getFullYear();
+
+    const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
+      where: { user: user, property: property, year: checkinYear },
+    });
+    const userPropertySecondYear = await this.userPropertiesRepository.findOne({
+      where: { user: user, property: property, year: checkoutYear },
     });
 
-    if (!userProperty) {
+    if (!userPropertyFirstYear || !userPropertySecondYear) {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
@@ -205,8 +199,16 @@ export class CreateBookingService {
     let peakHolidayNightsInSecondYear = 0;
     let offHolidayNightsInSecondYear = 0;
 
-    const checkinYear = checkinDate.getFullYear();
-    const checkoutYear = checkoutDate.getFullYear();
+    const nightsFirstYear =
+      peakNightsInFirstYear +
+      offNightsInFirstYear +
+      peakHolidayNightsInFirstYear +
+      offHolidayNightsInFirstYear;
+    const nightsSecondYear =
+      peakNightsInSecondYear +
+      offNightsInSecondYear +
+      peakHolidayNightsInSecondYear +
+      offHolidayNightsInSecondYear;
 
     const countedHolidays = new Set<number>();
 
@@ -284,7 +286,10 @@ export class CreateBookingService {
           BookingRules.LAST_MAX_NIGHTS,
         );
       }
-      if (nightsSelected > userProperty.lastMinuteRemainingNights) {
+      if (
+        nightsFirstYear > userPropertyFirstYear.lastMinuteRemainingNights ||
+        nightsSecondYear > userPropertySecondYear.lastMinuteRemainingNights
+      ) {
         return BOOKING_RESPONSES.INSUFFICIENT_LAST_MIN_BOOKING_NIGHTS;
       }
     } else {
@@ -293,19 +298,23 @@ export class CreateBookingService {
           BookingRules.REGULAR_MIN_NIGHTS,
         );
       }
-      if (nightsSelected > userProperty.maximumStayLength) {
+      if (
+        nightsFirstYear > userPropertyFirstYear.maximumStayLength ||
+        nightsSecondYear > userPropertySecondYear.maximumStayLength
+      ) {
         return BOOKING_RESPONSES.MAX_STAY_LENGTH_EXCEEDED;
       }
       if (
-        peakNightsInFirstYear + peakHolidayNightsInSecondYear >
-        userProperty.peakRemainingNights
+        peakNightsInFirstYear > userPropertyFirstYear.peakRemainingNights ||
+        peakHolidayNightsInSecondYear >
+          userPropertySecondYear.peakRemainingNights
       ) {
         return BOOKING_RESPONSES.INSUFFICIENT_PEAK_NIGHTS;
       }
 
       if (
-        offNightsInFirstYear + offNightsInSecondYear >
-        userProperty.offRemainingNights
+        offNightsInFirstYear > userPropertyFirstYear.offRemainingNights ||
+        offNightsInSecondYear > userPropertySecondYear.offRemainingNights
       ) {
         return BOOKING_RESPONSES.INSUFFICIENT_OFF_NIGHTS;
       }
@@ -323,8 +332,10 @@ export class CreateBookingService {
       }
 
       if (
-        offHolidayNightsInFirstYear + offHolidayNightsInSecondYear >
-        userProperty.offRemainingHolidayNights
+        offHolidayNightsInFirstYear >
+          userPropertyFirstYear.offRemainingHolidayNights ||
+        offHolidayNightsInSecondYear >
+          userPropertySecondYear.offRemainingHolidayNights
       ) {
         return BOOKING_RESPONSES.INSUFFICIENT_OFF_HOLIDAY_NIGHTS;
       }
@@ -351,7 +362,7 @@ export class CreateBookingService {
       checkoutYear,
       checkinDate,
       checkoutDate,
-      userProperty.acquisitionDate,
+      userPropertyFirstYear.acquisitionDate,
 
       {
         peakNightsInFirstYear,
