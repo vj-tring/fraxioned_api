@@ -284,6 +284,9 @@ export class CreateBookingService {
           BookingRules.LAST_MAX_NIGHTS,
         );
       }
+      if (nightsSelected > userProperty.lastMinuteRemainingNights) {
+        return BOOKING_RESPONSES.INSUFFICIENT_LAST_MIN_BOOKING_NIGHTS;
+      }
     } else {
       if (nightsSelected < BookingRules.REGULAR_MIN_NIGHTS) {
         return BOOKING_RESPONSES.REGULAR_MIN_NIGHTS(
@@ -293,39 +296,38 @@ export class CreateBookingService {
       if (nightsSelected > userProperty.maximumStayLength) {
         return BOOKING_RESPONSES.MAX_STAY_LENGTH_EXCEEDED;
       }
-    }
+      if (
+        peakNightsInFirstYear + peakHolidayNightsInSecondYear >
+        userProperty.peakRemainingNights
+      ) {
+        return BOOKING_RESPONSES.INSUFFICIENT_PEAK_NIGHTS;
+      }
 
-    if (
-      peakNightsInFirstYear + peakHolidayNightsInSecondYear >
-      userProperty.peakRemainingNights
-    ) {
-      return BOOKING_RESPONSES.INSUFFICIENT_PEAK_NIGHTS;
-    }
+      if (
+        offNightsInFirstYear + offNightsInSecondYear >
+        userProperty.offRemainingNights
+      ) {
+        return BOOKING_RESPONSES.INSUFFICIENT_OFF_NIGHTS;
+      }
 
-    if (
-      offNightsInFirstYear + offNightsInSecondYear >
-      userProperty.offRemainingNights
-    ) {
-      return BOOKING_RESPONSES.INSUFFICIENT_OFF_NIGHTS;
-    }
+      const isValidCrossYearHoliday = await this.validatePeakSeasonHolidays(
+        user,
+        property,
+        checkinDate,
+        peakHolidayNightsInFirstYear,
+        peakHolidayNightsInSecondYear,
+      );
 
-    const isValidCrossYearHoliday = await this.validatePeakSeasonHolidays(
-      user,
-      property,
-      checkinDate,
-      peakHolidayNightsInFirstYear,
-      peakHolidayNightsInSecondYear,
-    );
+      if (!isValidCrossYearHoliday) {
+        return BOOKING_RESPONSES.INSUFFICIENT_PEAK_HOLIDAY_NIGHTS;
+      }
 
-    if (!isValidCrossYearHoliday) {
-      return BOOKING_RESPONSES.INSUFFICIENT_PEAK_HOLIDAY_NIGHTS;
-    }
-
-    if (
-      offHolidayNightsInFirstYear + offHolidayNightsInSecondYear >
-      userProperty.offRemainingHolidayNights
-    ) {
-      return BOOKING_RESPONSES.INSUFFICIENT_OFF_HOLIDAY_NIGHTS;
+      if (
+        offHolidayNightsInFirstYear + offHolidayNightsInSecondYear >
+        userProperty.offRemainingHolidayNights
+      ) {
+        return BOOKING_RESPONSES.INSUFFICIENT_OFF_HOLIDAY_NIGHTS;
+      }
     }
 
     const booking = this.bookingRepository.create(createBookingDto);
