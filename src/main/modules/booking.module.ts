@@ -15,6 +15,9 @@ import { BookingSummaryService } from '../service/booking/booking-summary.servic
 import { UserContactDetails } from '../entities/user-contact-details.entity';
 import { MailService } from '../email/mail.service';
 import { Property } from '../entities/property.entity';
+import { Space } from '../entities/space.entity';
+import { SpaceTypes } from '../entities/space-types.entity';
+import { PropertyImages } from '../entities/property_images.entity';
 
 @Module({
   imports: [
@@ -27,6 +30,9 @@ import { Property } from '../entities/property.entity';
       PropertySeasonHolidays,
       User,
       UserContactDetails,
+      Space,
+      SpaceTypes,
+      PropertyImages,
     ]),
     AuthenticationModule,
   ],
