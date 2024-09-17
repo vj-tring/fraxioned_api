@@ -159,7 +159,8 @@
     padding-top: 5%;
 }
 
-.booking-table tr:nth-of-type(6) td {
+.booking-table tr:nth-of-type(6) td,
+.booking-table tr:nth-of-type(7) td {
     vertical-align: middle;
     line-height: 5px;
 }
