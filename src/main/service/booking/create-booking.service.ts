@@ -693,52 +693,96 @@ export class CreateBookingService {
     }
   }
 
-  private async sendBookingConfirmationEmail(booking: Booking): Promise<void> {
-    const owner = await this.userRepository.findOne({
-      where: { id: booking.user.id },
-    });
+  private async sendBookingConfirmationEmail(
+    booking: Booking,
+  ): Promise<void | Error> {
+    try {
+      if (!booking || !booking.user || !booking.property) {
+        return new Error('Invalid booking data');
+      }
 
-    const contact = await this.userContactDetailsRepository.find({
-      where: { user: { id: booking.user.id } },
-      select: ['primaryEmail'],
-    });
+      const owner = await this.userRepository.findOne({
+        where: { id: booking.user.id },
+      });
 
-    const banner = await this.spaceTypesRepository.findOne({
-      where: { name: 'Banners', space: { id: 1 } },
-    });
+      if (!owner) {
+        return new Error(`Owner not found for user ID: ${booking.user.id}`);
+      }
 
-    const image = await this.propertyImagesRepository.findOne({
-      where: {
-        spaceType: { id: banner.id },
-        property: { id: booking.property.id },
-      },
-    });
+      const contacts = await this.userContactDetailsRepository.find({
+        where: { user: { id: booking.user.id } },
+        select: ['primaryEmail'],
+      });
 
-    this.logger.log(`Banner Image URL: ${image.imageUrl}`);
+      if (!contacts || contacts.length === 0) {
+        return new Error(
+          `Contact details not found for user ID: ${booking.user.id}`,
+        );
+      }
 
-    const { primaryEmail: email } = contact[0];
-    const subject = mailSubject.booking.confirmation;
-    const template = mailTemplates.booking.confirmation;
-    const context = {
-      ownerName: `${owner.firstName} ${owner.lastName}`,
-      propertyName: booking.property.propertyName,
-      bookingId: booking.bookingId,
-      checkIn: format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa'),
-      checkOut: format(booking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa'),
-      adults: booking.noOfAdults,
-      children: booking.noOfChildren,
-      pets: booking.noOfPets,
-      notes: booking.notes,
-      banner: image.imageUrl,
-      totalNights: booking.totalNights,
-      modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
-      cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
-    };
+      const banner = await this.spaceTypesRepository.findOne({
+        where: { name: 'Banners', space: { id: 1 } },
+      });
 
-    await this.mailService.sendMail(email, subject, template, context);
-    this.logger.log(
-      `Booking confirmation mail has been sent to mail : ${email}`,
-    );
+      if (!banner) {
+        this.logger.warn('Banner space type not found');
+      }
+
+      let imageUrl = '';
+      if (banner) {
+        const image = await this.propertyImagesRepository.findOne({
+          where: {
+            spaceType: { id: banner.id },
+            property: { id: booking.property.id },
+          },
+        });
+
+        if (image) {
+          imageUrl = image.imageUrl;
+          this.logger.log(`Banner Image URL: ${imageUrl}`);
+        } else {
+          this.logger.warn(
+            `No banner image found for property ID: ${booking.property.id}`,
+          );
+        }
+      }
+
+      const { primaryEmail: email } = contacts[0];
+      if (!email) {
+        throw new Error(
+          `Primary email not found for user ID: ${booking.user.id}`,
+        );
+      }
+
+      const subject = mailSubject.booking.confirmation;
+      const template = mailTemplates.booking.confirmation;
+      const context = {
+        ownerName: `${owner.firstName} ${owner.lastName}`,
+        propertyName: booking.property.propertyName || 'N/A',
+        bookingId: booking.bookingId || 'N/A',
+        checkIn: booking.checkinDate
+          ? format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa')
+          : 'N/A',
+        checkOut: booking.checkoutDate
+          ? format(booking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa')
+          : 'N/A',
+        adults: booking.noOfAdults || 0,
+        children: booking.noOfChildren || 0,
+        pets: booking.noOfPets || 0,
+        notes: booking.notes || 'No additional notes',
+        banner: imageUrl || 'default-banner-url.jpg',
+        totalNights: booking.totalNights || 0,
+        modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+        cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+      };
+
+      await this.mailService.sendMail(email, subject, template, context);
+      this.logger.log(`Booking confirmation email has been sent to: ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send booking confirmation email: ${error.message}`,
+      );
+    }
   }
 
   private async createBookingHistory(
