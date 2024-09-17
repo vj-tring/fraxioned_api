@@ -69,14 +69,16 @@ export const PROPERTY_IMAGES_RESPONSES = {
     statusCode: HttpStatus.NOT_FOUND,
   }),
   PROPERTY_IMAGES_CREATED: (
-    propertyImagesLength: number,
+    propertyImages: PropertyImages[],
   ): {
     success: boolean;
     message: string;
+    data?: PropertyImages[];
     statusCode: HttpStatus;
   } => ({
     success: true,
-    message: `${propertyImagesLength} property images created successfully`,
+    message: `${propertyImages.length} property images created successfully`,
+    data: propertyImages,
     statusCode: HttpStatus.CREATED,
   }),
   PROPERTY_IMAGES_NOT_FOUND: (): {

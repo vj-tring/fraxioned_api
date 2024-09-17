@@ -181,9 +181,9 @@ describe('PropertyImagesService', () => {
         createPropertyImagesDtos,
       );
 
-      const expectedResult = PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_CREATED(
-        createPropertyImagesDtos.length,
-      );
+      const expectedResult = PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_CREATED([
+        savedImage,
+      ]);
       expect(result).toEqual(expectedResult);
     });
 

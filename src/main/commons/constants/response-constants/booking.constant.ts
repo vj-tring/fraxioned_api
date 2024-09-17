@@ -12,6 +12,10 @@ export const BOOKING_RESPONSES = {
     message: `Booking with ID ${id} not found`,
     statusCode: 404,
   }),
+  BOOKINGS_NOT_FOUND: (): { message: string; statusCode: number } => ({
+    message: `Bookings not found`,
+    statusCode: 404,
+  }),
   BOOKING_FOR_USER_NOT_FOUND: (
     id: number,
   ): { message: string; statusCode: number } => ({
@@ -19,10 +23,17 @@ export const BOOKING_RESPONSES = {
     statusCode: 404,
   }),
   BOOKING_FETCHED: (
-    booking: Booking,
-  ): { message: string; data: Booking; statusCode: number } => ({
+    booking: object,
+  ): { message: string; data: object; statusCode: number } => ({
     message: 'Booking fetched successfully',
     data: booking,
+    statusCode: 200,
+  }),
+  BOOKINGS_FETCHED: (
+    bookings: object[],
+  ): { message: string; data: object[]; statusCode: number } => ({
+    message: 'Bookings fetched successfully',
+    data: bookings,
     statusCode: 200,
   }),
   BOOKING_UPDATED: (
@@ -92,6 +103,11 @@ export const BOOKING_RESPONSES = {
     error: 'Forbidden',
     statusCode: 403,
   },
+  INSUFFICIENT_LAST_MIN_BOOKING_NIGHTS: {
+    message: `You don't have sufficient Last minute remaining nights to select this checkout date`,
+    error: 'Forbidden',
+    statusCode: 403,
+  },
   INSUFFICIENT_OFF_NIGHTS: {
     message: `You don't have sufficient off-season remaining nights to select this checkout date`,
     error: 'Forbidden',
@@ -127,4 +143,11 @@ export const BOOKING_RESPONSES = {
     error: 'Bad Request',
     statusCode: 400,
   },
+  EXCEEDED_PEAK_HOLIDAY_NIGHTS: (
+    userShares: number,
+  ): { message: string; error: string; statusCode: number } => ({
+    message: `You have exceeded the allowed peak holiday nights. You are allowed ${userShares * 2} peak holiday nights.`,
+    error: 'Forbidden',
+    statusCode: 403,
+  }),
 };

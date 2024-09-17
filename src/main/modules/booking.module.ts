@@ -14,6 +14,10 @@ import { BookingHistory } from '../entities/booking-history.entity';
 import { BookingSummaryService } from '../service/booking/booking-summary.service';
 import { UserContactDetails } from '../entities/user-contact-details.entity';
 import { MailService } from '../email/mail.service';
+import { Property } from '../entities/property.entity';
+import { Space } from '../entities/space.entity';
+import { SpaceTypes } from '../entities/space-types.entity';
+import { PropertyImages } from '../entities/property_images.entity';
 
 @Module({
   imports: [
@@ -22,9 +26,13 @@ import { MailService } from '../email/mail.service';
       BookingHistory,
       UserProperties,
       PropertyDetails,
+      Property,
       PropertySeasonHolidays,
       User,
       UserContactDetails,
+      Space,
+      SpaceTypes,
+      PropertyImages,
     ]),
     AuthenticationModule,
   ],

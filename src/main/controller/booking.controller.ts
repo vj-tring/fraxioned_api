@@ -43,7 +43,7 @@ export class BookingController {
   }
 
   @Get()
-  async getAllBookings(): Promise<object[]> {
+  async getAllBookings(): Promise<object[] | object> {
     try {
       return await this.bookingService.getAllBookings();
     } catch (error) {

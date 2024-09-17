@@ -15,7 +15,7 @@
 
 <body>
     <div class="container">
-        {{> banner image='https://i.ibb.co/r0SLfDx/paradise.jpg' alt='paradise' }}
+        {{> banner image=banner alt='paradise' }}
         {{> header logo='https://i.ibb.co/pndBYJN/booking-confirmed.png' alt='booking-confirmed' text='Booking Confirmed'}}
         <div class="content">
             <div class="before-content">
@@ -25,7 +25,8 @@
                 <table class="confirm-table">
                     <tr>
                         <td class="confirm-icon">
-                            <img src="https://i.ibb.co/bNN4ZgK/check.png" alt="check">
+                            <img src="https://i.ibb.co/bNN4ZgK/check.png" alt="confirm">
+                            {{!-- (constructUrl '/static/assets/confirm.png') --}}
                         </td>
                         <td class="confirm-text">
                             <p>Your {{ propertyName }} booking is confirmed.</p>
@@ -52,6 +53,9 @@
                         <td>{{ checkOut }}</td>
                     </tr>
                     <tr>
+                        <td colspan="2">Number of nights booked: {{ totalNights }}</td>
+                    </tr>
+                    <tr>
                         <td colspan="2">Guests: {{ adults }} Adults, {{ children }} Children, {{ pets }} Pets</td>
                     </tr>
                     <tr>
@@ -68,8 +72,8 @@
                     stay.
                     But if you need, here are some helpful links:
                 </p>
-                <a href='https://www.google.com' class="button">Modify Booking</a>
-                <a href='https://www.google.com' class="button">Cancel Booking</a>
+                <a href={{ modify }} class="button">Modify Booking</a>
+                <a href={{ cancel }} class="button">Cancel Booking</a>
             </div>
         </div>
         {{> footer }}
