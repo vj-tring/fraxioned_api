@@ -16,6 +16,7 @@ import { CreateBookingService } from '../service/booking/create-booking.service'
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { BookingSummaryService } from '../service/booking/booking-summary.service';
+import { UpdateBookingService } from '../service/booking/booking-update.service';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
@@ -26,6 +27,7 @@ export class BookingController {
     private readonly bookingService: BookingService,
     private readonly createBookingService: CreateBookingService,
     private readonly bookingSummaryService: BookingSummaryService,
+    private readonly updateBookingService: UpdateBookingService,
   ) {}
 
   @Post('booking')
@@ -72,7 +74,7 @@ export class BookingController {
     @Param('id') id: number,
     @Body() updateBookingDto: UpdateBookingDTO,
   ): Promise<object> {
-    return this.bookingService.updateBooking(id, updateBookingDto);
+    return this.updateBookingService.updateBooking(id, updateBookingDto);
   }
 
   @Delete('booking/:id')
