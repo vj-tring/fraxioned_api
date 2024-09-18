@@ -17,6 +17,7 @@ import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { BookingSummaryService } from '../service/booking/booking-summary.service';
 import { UpdateBookingService } from '../service/booking/booking-update.service';
+import { CancelBookingService } from '../service/booking/booking-cancel.service';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
@@ -28,6 +29,7 @@ export class BookingController {
     private readonly createBookingService: CreateBookingService,
     private readonly bookingSummaryService: BookingSummaryService,
     private readonly updateBookingService: UpdateBookingService,
+    private readonly cancelBookingService: CancelBookingService,
   ) {}
 
   @Post('booking')
@@ -80,5 +82,13 @@ export class BookingController {
   @Delete('booking/:id')
   async deleteBooking(@Param('id') id: number): Promise<object> {
     return this.bookingService.deleteBooking(id);
+  }
+
+  @Post(':id/:user/cancel')
+  async cancelBooking(
+    @Param('id') id: number,
+    @Param('user') user: number,
+  ): Promise<object> {
+    return this.cancelBookingService.cancelBooking(id, user);
   }
 }
