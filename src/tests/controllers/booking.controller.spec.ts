@@ -16,6 +16,7 @@ import { LoggerService } from 'src/main/service/logger.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { BookingSummaryService } from 'src/main/service/booking/booking-summary.service';
 import { UpdateBookingService } from 'src/main/service/booking/booking-update.service';
+import { CancelBookingService } from 'src/main/service/booking/booking-cancel.service';
 
 describe('BookingController', () => {
   let bookingController: BookingController;
@@ -41,6 +42,12 @@ describe('BookingController', () => {
           provide: CreateBookingService,
           useValue: {
             createBooking: jest.fn(),
+          },
+        },
+        {
+          provide: CancelBookingService,
+          useValue: {
+            cancelBooking: jest.fn(),
           },
         },
         {
