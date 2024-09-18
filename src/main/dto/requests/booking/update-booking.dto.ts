@@ -51,10 +51,6 @@ export class UpdateBookingDTO {
   @IsOptional()
   noOfChildren?: number;
 
-  @IsInt()
-  @IsOptional()
-  noOfInfants?: number;
-
   @IsString()
   @IsOptional()
   notes?: string;
@@ -70,9 +66,9 @@ export class UpdateBookingDTO {
   petFee?: number;
 
   @ApiProperty({ example: { id: 1 } })
-  @IsNotEmpty({ message: 'createdBy is required' })
+  @IsNotEmpty({ message: 'updatedBy is required' })
   @IsValidId({
-    message: 'createdBy must be an object with a valid id where (id >= 1)',
+    message: 'updatedBy must be an object with a valid id where (id >= 1)',
   })
   updatedBy: User;
 }
