@@ -1,3 +1,4 @@
+import { HttpStatus } from '@nestjs/common';
 import { Booking } from 'entities/booking.entity';
 
 export const BOOKING_RESPONSES = {
@@ -150,4 +151,27 @@ export const BOOKING_RESPONSES = {
     error: 'Forbidden',
     statusCode: 403,
   }),
+  BOOKING_CANCELLED: (
+    cancelledBooking: Booking,
+  ): { message: string; data: Booking; statusCode: number } => ({
+    message: 'Booking cancelled successfully',
+    data: cancelledBooking,
+    statusCode: 200,
+  }),
+  BOOKING_ALREADY_CANCELLED: {
+    message: 'Booking is already cancelled',
+    statusCode: 400,
+  },
+  CANNOT_CANCEL_PAST_BOOKING: {
+    message: 'Cannot cancel a past booking',
+    statusCode: 400,
+  },
+  TOO_LATE_TO_CANCEL: {
+    message: 'Too late to cancel the booking',
+    statusCode: 400,
+  },
+  CANNOT_CANCEL_LAST_MINUTE_BOOKING: {
+    status: HttpStatus.BAD_REQUEST,
+    message: 'Last-minute bookings cannot be cancelled.',
+  },
 };
