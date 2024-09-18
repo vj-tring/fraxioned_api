@@ -109,7 +109,6 @@ export class InviteService {
         updatedBy: updatedByUser.id,
         role: role,
       });
-      await this.userRepository.save(user);
 
       const contact = {
         user,
@@ -120,7 +119,6 @@ export class InviteService {
       };
 
       const userContact = this.userContactRepository.create(contact);
-      await this.userContactRepository.save(userContact);
 
       const currentYear = new Date().getFullYear();
       const userPropertyEntities = [];
@@ -138,6 +136,22 @@ export class InviteService {
           this.logger.error(`Property not found with ID: ${propertyId}`);
           return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
         }
+
+        if (propertyDetail.noOfShares > userProperty.propertyRemainingShare) {
+          this.logger.error(
+            `Not enough remaining shares for property ID: ${propertyId}`,
+          );
+          return USER_PROPERTY_RESPONSES.INSUFFICIENT_SHARES(
+            propertyId,
+            userProperty.propertyRemainingShare,
+          );
+        }
+        await this.userRepository.save(user);
+
+        await this.userContactRepository.save(userContact);
+
+        userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
+        await this.propertyRepository.save(userProperty);
 
         const peakAllottedNights = this.calculateAllottedNights(
           propertyDetail.noOfShares,
@@ -174,7 +188,6 @@ export class InviteService {
           const year = currentYear + yearOffset;
           const isCurrentYear = year === currentYear;
 
-          // Validate peak season end date
           const peakSeasonEndDate = new Date(
             userPropertyDetails.peakSeasonEndDate,
           );
