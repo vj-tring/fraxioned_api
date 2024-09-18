@@ -584,7 +584,7 @@ export class CreateBookingService {
     return this.bookingRepository.save(booking);
   }
 
-  async updateUserProperties(
+  private async updateUserProperties(
     user: User,
     property: Property,
     checkinDate: Date,
