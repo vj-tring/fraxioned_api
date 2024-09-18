@@ -20,6 +20,8 @@ import {
   mailSubject,
   mailTemplates,
 } from 'src/main/commons/constants/email/mail.constants';
+import { PropertyImages } from 'src/main/entities/property_images.entity';
+import { SpaceTypes } from 'src/main/entities/space-types.entity';
 @Injectable()
 export class UpdateBookingService {
   constructor(
@@ -31,10 +33,17 @@ export class UpdateBookingService {
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(PropertyImages)
+    private readonly propertyImagesRepository: Repository<PropertyImages>,
+    @InjectRepository(SpaceTypes)
+    private readonly spaceTypesRepository: Repository<SpaceTypes>,
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
     private readonly createBookingService: CreateBookingService,
   ) {}
+
+  private lastCheckInDate: Date;
+  private lastCheckOutDate: Date;
 
   async updateBooking(
     id: number,
@@ -46,6 +55,9 @@ export class UpdateBookingService {
       where: { id },
       relations: ['user', 'property'],
     });
+
+    this.lastCheckInDate = existingBooking.checkinDate;
+    this.lastCheckOutDate = existingBooking.checkoutDate;
 
     if (!existingBooking) {
       return BOOKING_RESPONSES.BOOKING_NOT_FOUND;
@@ -169,7 +181,7 @@ export class UpdateBookingService {
       nightsSelected,
     );
 
-    await this.sendBookingUpdateEmail(updatedBooking);
+    await this.sendBookingModificationEmail(updatedBooking);
 
     const userAction = 'Updated';
     await this.createBookingService.createBookingHistory(
@@ -423,12 +435,16 @@ export class UpdateBookingService {
     }
   }
 
-  private async sendBookingUpdateEmail(
+  private async sendBookingModificationEmail(
     booking: Booking,
   ): Promise<void | Error> {
     try {
       if (!booking || !booking.user || !booking.property) {
         return new Error('Invalid booking data');
+      }
+
+      if (!this.lastCheckInDate || !this.lastCheckOutDate) {
+        return new Error('Invalid existing booking date');
       }
 
       const owner = await this.userRepository.findOne({
@@ -450,6 +466,33 @@ export class UpdateBookingService {
         );
       }
 
+      const banner = await this.spaceTypesRepository.findOne({
+        where: { name: 'Banner', space: { id: 1 } },
+      });
+
+      if (!banner) {
+        this.logger.warn('Banner space type not found');
+      }
+
+      let imageUrl = '';
+      if (banner) {
+        const image = await this.propertyImagesRepository.findOne({
+          where: {
+            spaceType: { id: banner.id },
+            property: { id: booking.property.id },
+          },
+        });
+
+        if (image) {
+          imageUrl = image.imageUrl;
+          this.logger.log(`Banner Image URL: ${imageUrl}`);
+        } else {
+          this.logger.warn(
+            `No banner image found for property ID: ${booking.property.id}`,
+          );
+        }
+      }
+
       const { primaryEmail: email } = contacts[0];
       if (!email) {
         throw new Error(
@@ -457,12 +500,22 @@ export class UpdateBookingService {
         );
       }
 
-      const subject = mailSubject.booking.confirmation;
-      const template = mailTemplates.booking.confirmation;
+      const propertyName = await this.createBookingService.getProperty(
+        booking.property.id,
+      );
+
+      const subject = mailSubject.booking.modification;
+      const template = mailTemplates.booking.modification;
       const context = {
         ownerName: `${owner.firstName} ${owner.lastName}`,
-        propertyName: booking.property.propertyName || 'N/A',
+        propertyName: propertyName.propertyName || 'N/A',
         bookingId: booking.bookingId || 'N/A',
+        lastCheckIn: this.lastCheckInDate
+          ? format(this.lastCheckInDate, 'MM/dd/yyyy @ KK:mm aa')
+          : 'N/A',
+        lastCheckOut: this.lastCheckOutDate
+          ? format(this.lastCheckOutDate, 'MM/dd/yyyy @ KK:mm aa')
+          : 'N/A',
         checkIn: booking.checkinDate
           ? format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa')
           : 'N/A',
@@ -472,7 +525,8 @@ export class UpdateBookingService {
         adults: booking.noOfAdults || 0,
         children: booking.noOfChildren || 0,
         pets: booking.noOfPets || 0,
-        notes: booking.notes || 'No additional notes',
+        notes: booking.notes || 'None',
+        banner: imageUrl || 'default-banner-url.jpg',
         totalNights: booking.totalNights || 0,
         modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
         cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,

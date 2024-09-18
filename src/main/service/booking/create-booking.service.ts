@@ -167,6 +167,7 @@ export class CreateBookingService {
     );
 
     await this.sendBookingConfirmationEmail(savedBooking);
+
     const userAction = 'Created';
     await this.createBookingHistory(
       savedBooking,
@@ -584,7 +585,7 @@ export class CreateBookingService {
     return this.bookingRepository.save(booking);
   }
 
-  private async updateUserProperties(
+  async updateUserProperties(
     user: User,
     property: Property,
     checkinDate: Date,
@@ -718,7 +719,7 @@ export class CreateBookingService {
       }
 
       const banner = await this.spaceTypesRepository.findOne({
-        where: { name: 'Banners', space: { id: 1 } },
+        where: { name: 'Banner', space: { id: 1 } },
       });
 
       if (!banner) {
@@ -751,11 +752,13 @@ export class CreateBookingService {
         );
       }
 
+      const propertyName = await this.getProperty(booking.property.id);
+
       const subject = mailSubject.booking.confirmation;
       const template = mailTemplates.booking.confirmation;
       const context = {
         ownerName: `${owner.firstName} ${owner.lastName}`,
-        propertyName: booking.property.propertyName || 'N/A',
+        propertyName: propertyName.propertyName || 'N/A',
         bookingId: booking.bookingId || 'N/A',
         checkIn: booking.checkinDate
           ? format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa')
@@ -766,7 +769,7 @@ export class CreateBookingService {
         adults: booking.noOfAdults || 0,
         children: booking.noOfChildren || 0,
         pets: booking.noOfPets || 0,
-        notes: booking.notes || 'No additional notes',
+        notes: booking.notes || 'None',
         banner: imageUrl || 'default-banner-url.jpg',
         totalNights: booking.totalNights || 0,
         modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
