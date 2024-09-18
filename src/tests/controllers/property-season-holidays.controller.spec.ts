@@ -77,6 +77,7 @@ describe('PropertySeasonHolidaysController', () => {
       longitude: 0,
       isActive: false,
       displayOrder: 0,
+      propertyRemainingShare: 0,
     },
     holiday: {
       id: 1,
@@ -304,6 +305,7 @@ describe('PropertySeasonHolidaysController', () => {
           longitude: 0,
           isActive: false,
           displayOrder: 0,
+          propertyRemainingShare: 0,
         },
         holiday: {
           id: 1,
