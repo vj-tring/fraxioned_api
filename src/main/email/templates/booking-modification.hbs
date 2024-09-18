@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Confirmation</title>
+    <title>Booking Modification</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
@@ -26,7 +26,8 @@
                 <table class="confirm-table">
                     <tr>
                         <td class="confirm-icon">
-                            <img src="https://i.ibb.co/bNN4ZgK/check.png" alt="check">
+                            <img src="https://i.ibb.co/bNN4ZgK/confirm.png" alt="confirm">
+                            {{!-- (constructUrl '/static/assets/confirm.png') --}}
                         </td>
                         <td class="confirm-text">
                             <p>Your {{ propertyName }} booking has been modified.</p>
@@ -53,8 +54,8 @@
                         <td>{{ checkOut }}</td>
                     </tr>
                     <tr>
-                        <td><s>{{ checkIn }}</s></td>
-                        <td><s>{{ checkOut }}</s></td>
+                        <td><s>{{ lastCheckIn }}</s></td>
+                        <td><s>{{ lastCheckOut }}</s></td>
                     </tr>
                     <tr>
                         <td colspan="2">Number of nights booked: {{ totalNights }}</td>
