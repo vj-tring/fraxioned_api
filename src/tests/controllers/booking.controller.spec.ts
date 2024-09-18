@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookingController } from 'src/main/controller/booking.controller';
 import { BookingService } from 'src/main/service/booking/booking.service';
 import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.dto';
-import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.dto';
 import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 import { CreateBookingService } from 'src/main/service/booking/create-booking.service';
@@ -16,6 +15,7 @@ import { MailService } from 'src/main/email/mail.service';
 import { LoggerService } from 'src/main/service/logger.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { BookingSummaryService } from 'src/main/service/booking/booking-summary.service';
+import { UpdateBookingService } from 'src/main/service/booking/booking-update.service';
 
 describe('BookingController', () => {
   let bookingController: BookingController;
@@ -47,6 +47,12 @@ describe('BookingController', () => {
           provide: BookingSummaryService,
           useValue: {
             bookingSummary: jest.fn(),
+          },
+        },
+        {
+          provide: UpdateBookingService,
+          useValue: {
+            updateBooking: jest.fn(),
           },
         },
         {
@@ -233,31 +239,6 @@ describe('BookingController', () => {
       await expect(
         bookingController.getBookingsForUser(userId),
       ).rejects.toThrow(error);
-    });
-  });
-
-  describe('updateBooking', () => {
-    it('should update a booking', async () => {
-      const updateBookingDto: UpdateBookingDTO = {
-        user: new User(),
-        property: new Property(),
-        checkinDate: undefined,
-        checkoutDate: undefined,
-        noOfGuests: 0,
-        noOfPets: 0,
-        isLastMinuteBooking: false,
-        updatedBy: new User(),
-      };
-      const result = { id: 1 };
-      jest.spyOn(bookingService, 'updateBooking').mockResolvedValue(result);
-
-      expect(await bookingController.updateBooking(1, updateBookingDto)).toBe(
-        result,
-      );
-      expect(bookingService.updateBooking).toHaveBeenCalledWith(
-        1,
-        updateBookingDto,
-      );
     });
   });
 

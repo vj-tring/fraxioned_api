@@ -28,7 +28,7 @@ import { Property } from 'src/main/entities/property.entity';
 import { SpaceTypes } from 'src/main/entities/space-types.entity';
 import { PropertyImages } from 'src/main/entities/property_images.entity';
 import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
-import { NightCounts } from './utils/interface/bookingInterfaces';
+import { NightCounts } from './interface/bookingInterface';
 
 @Injectable()
 export class CreateBookingService {
@@ -167,25 +167,27 @@ export class CreateBookingService {
     );
 
     await this.sendBookingConfirmationEmail(savedBooking);
-
-    await this.createBookingHistory(savedBooking, createBookingDto.createdBy);
+    const userAction = 'Created';
+    await this.createBookingHistory(
+      savedBooking,
+      createBookingDto.createdBy,
+      userAction,
+    );
 
     return BOOKING_RESPONSES.BOOKING_CREATED(savedBooking);
   }
 
-  private async getProperty(propertyId: number): Promise<Property> {
+  async getProperty(propertyId: number): Promise<Property> {
     return this.propertyRepository.findOne({ where: { id: propertyId } });
   }
 
-  private async getPropertyDetails(
-    property: Property,
-  ): Promise<PropertyDetails> {
+  async getPropertyDetails(property: Property): Promise<PropertyDetails> {
     return this.propertyDetailsRepository.findOne({
       where: { property: property },
     });
   }
 
-  private normalizeDates(
+  normalizeDates(
     checkinDateStr: Date,
     checkoutDateStr: Date,
   ): { checkinDate: Date; checkoutDate: Date } {
@@ -194,7 +196,7 @@ export class CreateBookingService {
     return { checkinDate, checkoutDate };
   }
 
-  private validateDates(
+  validateDates(
     checkinDate: Date,
     checkoutDate: Date,
     propertyDetails: PropertyDetails,
@@ -229,7 +231,7 @@ export class CreateBookingService {
     return true;
   }
 
-  private async validateUserProperty(
+  async validateUserProperty(
     user: User,
     property: Property,
     checkinDate: Date,
@@ -252,7 +254,7 @@ export class CreateBookingService {
     return true;
   }
 
-  private validateGuestLimits(
+  validateGuestLimits(
     createBookingDto: CreateBookingDTO,
     propertyDetails: PropertyDetails,
   ): true | object {
@@ -266,7 +268,7 @@ export class CreateBookingService {
     return true;
   }
 
-  private async validateBookingGap(
+  async validateBookingGap(
     user: User,
     property: Property,
     checkinDate: Date,
@@ -312,7 +314,7 @@ export class CreateBookingService {
     return true;
   }
 
-  private async validateBookedDates(
+  async validateBookedDates(
     property: Property,
     checkinDate: Date,
     checkoutDate: Date,
@@ -342,7 +344,7 @@ export class CreateBookingService {
     return true;
   }
 
-  private async calculateNightCounts(
+  async calculateNightCounts(
     property: Property,
     checkinDate: Date,
     checkoutDate: Date,
@@ -445,23 +447,20 @@ export class CreateBookingService {
     };
   }
 
-  private isLastMinuteBooking(checkinDate: Date): boolean {
+  isLastMinuteBooking(checkinDate: Date): boolean {
     const today = new Date();
     const diffInDays =
       (checkinDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
     return diffInDays <= BookingRules.LAST_MAX_DAYS;
   }
 
-  private calculateNightsSelected(
-    checkinDate: Date,
-    checkoutDate: Date,
-  ): number {
+  calculateNightsSelected(checkinDate: Date, checkoutDate: Date): number {
     return (
       (checkoutDate.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24)
     );
   }
 
-  private async validateBookingRules(
+  async validateBookingRules(
     isLastMinuteBooking: boolean,
     nightsSelected: number,
     nightCounts: NightCounts,
@@ -560,7 +559,7 @@ export class CreateBookingService {
     return true;
   }
 
-  private async saveBooking(
+  async saveBooking(
     createBookingDto: CreateBookingDTO,
     property: Property,
     propertyDetails: PropertyDetails,
@@ -652,7 +651,7 @@ export class CreateBookingService {
     }
   }
 
-  private updateNightCounts(
+  updateNightCounts(
     userProperty: UserProperties,
     nightCounts: NightCounts,
     yearType: 'FirstYear' | 'SecondYear',
@@ -672,7 +671,7 @@ export class CreateBookingService {
       nightCounts[`offHolidayNightsIn${yearType}`];
   }
 
-  private async updatePeakHoliday(
+  async updatePeakHoliday(
     year: number,
     nights: number,
     user: User,
@@ -693,9 +692,7 @@ export class CreateBookingService {
     }
   }
 
-  private async sendBookingConfirmationEmail(
-    booking: Booking,
-  ): Promise<void | Error> {
+  async sendBookingConfirmationEmail(booking: Booking): Promise<void | Error> {
     try {
       if (!booking || !booking.user || !booking.property) {
         return new Error('Invalid booking data');
@@ -785,19 +782,20 @@ export class CreateBookingService {
     }
   }
 
-  private async createBookingHistory(
+  async createBookingHistory(
     booking: Booking,
     createdBy: User,
+    userAction: string,
   ): Promise<void> {
     const bookingHistory = this.bookingHistoryRepository.create({
       ...booking,
       modifiedBy: createdBy,
-      userAction: 'Created',
+      userAction: userAction,
     });
     await this.bookingHistoryRepository.save(bookingHistory);
   }
 
-  private async validatePeakSeasonHolidays(
+  async validatePeakSeasonHolidays(
     user: User,
     property: Property,
     checkinDate: Date,

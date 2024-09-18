@@ -18,6 +18,7 @@ import { Property } from '../entities/property.entity';
 import { Space } from '../entities/space.entity';
 import { SpaceTypes } from '../entities/space-types.entity';
 import { PropertyImages } from '../entities/property_images.entity';
+import { UpdateBookingService } from '../service/booking/booking-update.service';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { PropertyImages } from '../entities/property_images.entity';
     CreateBookingService,
     BookingSummaryService,
     MailService,
+    UpdateBookingService,
   ],
 })
 export class BookingModule {}
