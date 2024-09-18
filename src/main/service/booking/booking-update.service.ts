@@ -20,6 +20,8 @@ import {
   mailSubject,
   mailTemplates,
 } from 'src/main/commons/constants/email/mail.constants';
+import { PropertyImages } from 'src/main/entities/property_images.entity';
+import { SpaceTypes } from 'src/main/entities/space-types.entity';
 @Injectable()
 export class UpdateBookingService {
   constructor(
@@ -31,6 +33,10 @@ export class UpdateBookingService {
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(PropertyImages)
+    private readonly propertyImagesRepository: Repository<PropertyImages>,
+    @InjectRepository(SpaceTypes)
+    private readonly spaceTypesRepository: Repository<SpaceTypes>,
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
     private readonly createBookingService: CreateBookingService,
