@@ -551,7 +551,13 @@ export class UpdateBookingService {
   ): Promise<true | object> {
     const bookedDates = await this.bookingRepository.find({
       where: { property: property },
-      select: ['id', 'checkinDate', 'checkoutDate'],
+      select: [
+        'id',
+        'checkinDate',
+        'checkoutDate',
+        'isCompleted',
+        'isCancelled',
+      ],
     });
 
     const isBookedDate = (date: Date): boolean =>
@@ -559,7 +565,9 @@ export class UpdateBookingService {
         (booking) =>
           booking.id !== existingBooking.id &&
           date >= normalizeDate(booking.checkinDate) &&
-          date < normalizeDate(booking.checkoutDate),
+          date < normalizeDate(booking.checkoutDate) &&
+          !booking.isCompleted &&
+          !booking.isCancelled,
       );
 
     for (

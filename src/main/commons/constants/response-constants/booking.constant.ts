@@ -158,8 +158,8 @@ export const BOOKING_RESPONSES = {
     data: cancelledBooking,
     statusCode: 200,
   }),
-  BOOKING_ALREADY_CANCELLED: {
-    message: 'Booking is already cancelled',
+  BOOKING_ALREADY_CANCELLED_OR_COMPLETED: {
+    message: 'Booking is already cancelled or completed',
     statusCode: 400,
   },
   CANNOT_CANCEL_PAST_BOOKING: {
