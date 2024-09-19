@@ -242,10 +242,18 @@ export class CreateBookingService {
     const checkoutYear = checkoutDate.getFullYear();
 
     const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property: property, year: checkinYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: checkinYear,
+      },
     });
     const userPropertySecondYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property: property, year: checkoutYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: checkoutYear,
+      },
     });
 
     if (!userPropertyFirstYear || !userPropertySecondYear) {
@@ -476,14 +484,14 @@ export class CreateBookingService {
     const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
       where: {
         user: { id: user.id },
-        property: property,
+        property: { id: property.id },
         year: checkinDate.getFullYear(),
       },
     });
     const userPropertySecondYear = await this.userPropertiesRepository.findOne({
       where: {
         user: { id: user.id },
-        property: property,
+        property: { id: property.id },
         year: checkinDate.getFullYear() + 1,
       },
     });
@@ -601,11 +609,19 @@ export class CreateBookingService {
     const secondYear = checkoutDate.getFullYear();
 
     const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: firstYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: firstYear,
+      },
     });
 
     const userPropertySecondYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: secondYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: secondYear,
+      },
     });
 
     if (userPropertyFirstYear) {
@@ -683,7 +699,7 @@ export class CreateBookingService {
     property: Property,
   ): Promise<void> {
     const userProperty = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year },
+      where: { user: { id: user.id }, property: { id: property.id }, year },
     });
     if (userProperty) {
       await updatePeakHoliday(
@@ -812,7 +828,11 @@ export class CreateBookingService {
     const firstYear = checkinDate.getFullYear();
 
     const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: firstYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: firstYear,
+      },
     });
 
     if (!userPropertyFirstYear) {

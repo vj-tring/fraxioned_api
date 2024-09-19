@@ -260,11 +260,19 @@ export class UpdateBookingService {
     const secondYear = newCheckoutDate.getFullYear();
 
     const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: firstYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: firstYear,
+      },
     });
 
     const userPropertySecondYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: secondYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: secondYear,
+      },
     });
 
     if (userPropertyFirstYear) {
@@ -338,11 +346,19 @@ export class UpdateBookingService {
     const secondYear = checkoutDate.getFullYear();
 
     const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: firstYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: firstYear,
+      },
     });
 
     const userPropertySecondYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: secondYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: secondYear,
+      },
     });
 
     if (userPropertyFirstYear) {
@@ -426,7 +442,7 @@ export class UpdateBookingService {
     property: Property,
   ): Promise<void> {
     const userProperty = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year },
+      where: { user: { id: user.id }, property: { id: property.id }, year },
     });
     if (userProperty) {
       userProperty.peakRemainingHolidayNights += nights;
