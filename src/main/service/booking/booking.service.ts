@@ -5,44 +5,69 @@ import { Booking } from 'entities/booking.entity';
 import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
 import { UpdateBookingDTO } from '../../dto/requests/booking/update-booking.dto';
+import { User } from 'src/main/entities/user.entity';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly logger: LoggerService,
   ) {}
 
-  async getAllBookings(): Promise<object[]> {
+  private async setPropertyName(
+    booking: Booking,
+    requestedUser: number,
+  ): Promise<Booking> {
+    const shouldApplyFilter =
+      await this.shouldApplyPropertyNameFilter(requestedUser);
+    if (
+      shouldApplyFilter &&
+      (booking.property.id === 1 || booking.property.id === 2)
+    ) {
+      booking.property.propertyName = 'Paradise Shores';
+    }
+    return booking;
+  }
+
+  private async shouldApplyPropertyNameFilter(
+    userId: number,
+  ): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role'],
+      select: { role: { id: true } },
+    });
+    return user?.role.id !== 1;
+  }
+
+  async getAllBookings(requestedUser: number): Promise<object[]> {
     try {
-      const existingProperties = await this.bookingRepository.find({
+      const existingBookings = await this.bookingRepository.find({
         relations: ['user', 'property', 'createdBy', 'updatedBy'],
         select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-          user: {
-            id: true,
-          },
-          property: {
-            id: true,
-          },
+          createdBy: { id: true },
+          updatedBy: { id: true },
+          user: { id: true },
+          property: { id: true, propertyName: true },
         },
       });
-      if (existingProperties.length === 0) {
-        throw new NotFoundException(`Properties not found`);
+      if (existingBookings.length === 0) {
+        throw new NotFoundException(`Bookings not found`);
       }
-      return existingProperties;
+      return Promise.all(
+        existingBookings.map((booking) =>
+          this.setPropertyName(booking, requestedUser),
+        ),
+      );
     } catch (error) {
       throw error;
     }
   }
 
-  async getBookingById(id: number): Promise<object> {
+  async getBookingById(id: number, requestedUser: number): Promise<object> {
     this.logger.log(`Fetching booking with ID ${id}`);
     const booking = await this.bookingRepository.findOne({
       relations: ['user', 'property', 'createdBy', 'updatedBy'],
@@ -58,10 +83,13 @@ export class BookingService {
       this.logger.warn(`Booking with ID ${id} not found`);
       return BOOKING_RESPONSES.BOOKING_NOT_FOUND(id);
     }
-    return BOOKING_RESPONSES.BOOKING_FETCHED(booking);
+    return this.setPropertyName(booking, requestedUser);
   }
 
-  async getBookingsForUser(userId: number): Promise<object[] | object> {
+  async getBookingsForUser(
+    userId: number,
+    requestedUser: number,
+  ): Promise<object[] | object> {
     this.logger.log(`Fetching bookings for user with ID ${userId}`);
     const bookings = await this.bookingRepository.find({
       relations: ['user', 'property', 'createdBy', 'updatedBy'],
@@ -77,7 +105,9 @@ export class BookingService {
       this.logger.warn(`No bookings found for user with ID ${userId}`);
       return BOOKING_RESPONSES.BOOKING_FOR_USER_NOT_FOUND(userId);
     }
-    return bookings;
+    return Promise.all(
+      bookings.map((booking) => this.setPropertyName(booking, requestedUser)),
+    );
   }
 
   async updateBooking(
