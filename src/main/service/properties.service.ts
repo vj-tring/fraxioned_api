@@ -122,12 +122,9 @@ export class PropertiesService {
 
   async compareAndUpdateProperties(): Promise<CommonPropertiesResponseDto[]> {
     const updatedProperties: CommonPropertiesResponseDto[] = [];
-
-    // Basic Auth credentials
     const username = 'invoice@fraxioned.com';
     const password = 'pt_82y3fsmphj7gc0kze0u0p16gp2yn6pap';
 
-    // Fetch data from the ownerRez Property API with Basic Auth
     const response = await axios.get('https://api.ownerrez.com/v2/properties', {
       auth: {
         username,
@@ -148,7 +145,6 @@ export class PropertiesService {
           });
 
         if (existingPropertyDetails) {
-          // Update only similar columns
           if (existingProperty.address !== item.address.street1) {
             existingProperty.address = item.address.street1;
           }
@@ -250,7 +246,11 @@ export class PropertiesService {
         const uniqueUsers = new Map();
         userProperties.forEach((userProperty) => {
           if (!uniqueUsers.has(userProperty.user.id)) {
-            uniqueUsers.set(userProperty.user.id, userProperty.user);
+            uniqueUsers.set(userProperty.user.id, {
+              user: userProperty.user,
+              noOfShare: userProperty.noOfShare,
+              acquisitionDate: userProperty.acquisitionDate,
+            });
           }
         });
 
@@ -263,10 +263,13 @@ export class PropertiesService {
           propertyDetailsId,
           ...propertyWithoutId,
           ...propertyDetailsWithoutId,
-          users: Array.from(uniqueUsers.values()).map((user) => ({
-            userId: user.id,
-            ...user,
-          })),
+          owners: Array.from(uniqueUsers.values()).map(
+            ({ user, noOfShare, acquisitionDate }) => ({
+              userId: user.id,
+              noOfShare,
+              acquisitionDate,
+            }),
+          ),
         };
       } else {
         const properties = await this.propertiesRepository.find({
@@ -300,7 +303,11 @@ export class PropertiesService {
             const uniqueUsers = new Map();
             userProperties.forEach((userProperty) => {
               if (!uniqueUsers.has(userProperty.user.id)) {
-                uniqueUsers.set(userProperty.user.id, userProperty.user);
+                uniqueUsers.set(userProperty.user.id, {
+                  user: userProperty.user,
+                  noOfShare: userProperty.noOfShare,
+                  acquisitionDate: userProperty.acquisitionDate,
+                });
               }
             });
 
@@ -309,10 +316,13 @@ export class PropertiesService {
                 propertyId: property.id,
                 propertyDetailsId: null,
                 ...property,
-                users: Array.from(uniqueUsers.values()).map((user) => ({
-                  userId: user.id,
-                  ...user,
-                })),
+                owners: Array.from(uniqueUsers.values()).map(
+                  ({ user, noOfShare, acquisitionDate }) => ({
+                    userId: user.id,
+                    noOfShare,
+                    acquisitionDate,
+                  }),
+                ),
               };
             }
 
@@ -325,9 +335,13 @@ export class PropertiesService {
               propertyDetailsId,
               ...propertyWithoutId,
               ...propertyDetailsWithoutId,
-              owners: Array.from(uniqueUsers.values()).map((user) => ({
-                userId: user.id,
-              })),
+              owners: Array.from(uniqueUsers.values()).map(
+                ({ user, noOfShare, acquisitionDate }) => ({
+                  userId: user.id,
+                  noOfShare,
+                  acquisitionDate,
+                }),
+              ),
             };
           }),
         );
