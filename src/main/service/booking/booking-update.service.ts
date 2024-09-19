@@ -596,6 +596,8 @@ export class UpdateBookingService {
         user: user,
         property: property,
         checkoutDate: MoreThanOrEqual(today),
+        isCompleted: false,
+        isCancelled: false,
       },
       order: { checkoutDate: 'DESC' },
     });
