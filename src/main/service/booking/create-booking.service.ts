@@ -184,7 +184,7 @@ export class CreateBookingService {
 
   async getPropertyDetails(property: Property): Promise<PropertyDetails> {
     return this.propertyDetailsRepository.findOne({
-      where: { property: property },
+      where: { property: { id: property.id } },
     });
   }
 
@@ -281,6 +281,8 @@ export class CreateBookingService {
         user: user,
         property: property,
         checkoutDate: MoreThanOrEqual(today),
+        isCompleted: false,
+        isCancelled: false,
       },
       order: { checkoutDate: 'DESC' },
     });
