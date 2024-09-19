@@ -113,7 +113,11 @@ export class CancelBookingService {
     const checkinDate = new Date(booking.checkinDate);
 
     if (booking.isCancelled === true) {
-      return BOOKING_RESPONSES.BOOKING_ALREADY_CANCELLED;
+      return BOOKING_RESPONSES.BOOKING_ALREADY_CANCELLED_OR_COMPLETED;
+    }
+
+    if (booking.isCompleted === true) {
+      return BOOKING_RESPONSES.BOOKING_ALREADY_CANCELLED_OR_COMPLETED;
     }
 
     if (checkinDate < currentDate) {

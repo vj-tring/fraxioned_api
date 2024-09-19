@@ -322,14 +322,16 @@ export class CreateBookingService {
   ): Promise<true | object> {
     const bookedDates = await this.bookingRepository.find({
       where: { property: property },
-      select: ['checkinDate', 'checkoutDate'],
+      select: ['checkinDate', 'checkoutDate', 'isCompleted', 'isCancelled'],
     });
 
     const isBookedDate = (date: Date): boolean =>
       bookedDates.some(
         (booking) =>
           date >= normalizeDate(booking.checkinDate) &&
-          date < normalizeDate(booking.checkoutDate),
+          date < normalizeDate(booking.checkoutDate) &&
+          !booking.isCompleted &&
+          !booking.isCancelled,
       );
 
     for (
