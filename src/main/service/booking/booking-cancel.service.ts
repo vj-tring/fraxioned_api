@@ -96,6 +96,7 @@ export class CancelBookingService {
 
     existingBooking.isCancelled = true;
     const cancelledBooking = await this.bookingRepository.save(existingBooking);
+
     await this.sendBookingCancellationEmail(cancelledBooking);
 
     const userAction = 'Cancelled';
@@ -299,11 +300,15 @@ export class CancelBookingService {
         );
       }
 
-      const subject = mailSubject.booking.confirmation;
-      const template = mailTemplates.booking.confirmation;
+      const propertyName = await this.createBookingService.getProperty(
+        booking.property.id,
+      );
+
+      const subject = mailSubject.booking.cancellation;
+      const template = mailTemplates.booking.cancellation;
       const context = {
         ownerName: `${owner.firstName} ${owner.lastName}`,
-        propertyName: booking.property.propertyName || 'N/A',
+        propertyName: propertyName.propertyName || 'N/A',
         bookingId: booking.bookingId || 'N/A',
         checkIn: booking.checkinDate
           ? format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa')
@@ -311,8 +316,13 @@ export class CancelBookingService {
         checkOut: booking.checkoutDate
           ? format(booking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa')
           : 'N/A',
-        cancellationDate: format(new Date(), 'MM/dd/yyyy @ KK:mm aa'),
-        rebookLink: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+        adults: booking.noOfAdults || 0,
+        children: booking.noOfChildren || 0,
+        pets: booking.noOfPets || 0,
+        notes: booking.notes || 'None',
+        totalNights: booking.totalNights || 0,
+        modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+        cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
       };
 
       await this.mailService.sendMail(email, subject, template, context);
