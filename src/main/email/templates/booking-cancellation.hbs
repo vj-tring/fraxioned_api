@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    {{{ css }}}
+    {{{ booking-cancellation }}}
+</head>
+
+<body>
+    <div class="container">
+        {{!-- (constructUrl '/static/assets/cancellation.png') --}}
+        {{> header logo='https://i.ibb.co/rfp2MWZ/cancellation.png' alt='booking-cancelled' text='Booking Cancelled'}}
+        <div class="content">
+            <div class="before-content">
+                <p>
+                    <b>Hello {{ ownerName }},</b>
+                </p>
+                <table class="confirm-table">
+                    <tr>
+                        <td class="confirm-icon">
+                            <img src="https://i.ibb.co/qWY6zzp/cancel.png" alt="cancel">
+                            {{!-- (constructUrl '/static/assets/cancel.png') --}}
+                        </td>
+                        <td class="confirm-text">
+                            <p>Your {{ propertyName }} booking has been cancelled.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="booking-number">
+                            <p>The number of the cancelled booking is #{{ bookingId }}</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="middle-content">
+                <table class="booking-table">
+                    <tr>
+                        <td colspan="2">Cancelled Booking Details</td>
+                    </tr>
+                    <tr>
+                        <td>Check-In</td>
+                        <td>Check-Out</td>
+                    </tr>
+                    <tr>
+                        <td>{{ checkIn }}</td>
+                        <td>{{ checkOut }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Number of nights booked: {{ totalNights }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Guests: {{ adults }} Adults, {{ children }} Children, {{ pets }} Pets</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Notes: {{ notes }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="after-content">
+                <p>
+                    <b>Cancellation Policy</b>
+                </p>
+                <p>
+                    If you cancel a booking more than seven nights before the scheduled stay starts, you will reclaim
+                    the number of nights in the booking to your total number of allotted annual nights. if you cancel a
+                    booking with less than seven nights' notice, you will not reclaim the nights to your total number of
+                    allotted annual nights. Furthermore, if you neglect to cancel until after the time of check-in, you
+                    will still be charged a cleaning fee for the booking.
+                </p>
+                <p>
+                    <b>What's Next?</b>
+                </p>
+                <p>
+                    If there has been a mistake, or you have any questions, please contact the Fraxioned Owner Services
+                    team. If you would like to create a new booking, follow the link below.
+                </p>
+                <a href={{ modify }} class="button">My Bookings</a>
+                <a href={{ cancel }} class="button">Create Booking</a>
+            </div>
+        </div>
+        {{> footer }}
+    </div>
+</body>
+
+</html>
