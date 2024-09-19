@@ -15,7 +15,7 @@ export class BookingHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', nullable: false, unique: true })
+  @Column({ type: 'varchar', nullable: false })
   bookingId: string;
 
   @ManyToOne(() => User, (user) => user.id)
