@@ -12,7 +12,7 @@ export const mailTemplates = {
     enquiry: './contact-us',
   },
   booking: {
-    confirmation: './upcoming-reminder', // './booking-confirmation',
+    confirmation: './booking-confirmation',
     modification: './booking-modification',
     cancellation: './booking-cancellation',
   },
