@@ -16,6 +16,11 @@ export const mailTemplates = {
     modification: './booking-modification',
     cancellation: './booking-cancellation',
   },
+  reminder: {
+    upcoming: './upcoming-reminder',
+    final: './final-reminder',
+    instructions: './checkout-instructions',
+  },
 };
 
 export const mailSubject = {
@@ -35,6 +40,11 @@ export const mailSubject = {
     confirmation: 'Booking Confirmed',
     modification: 'Booking Modified',
     cancellation: 'Booking Cancelled',
+  },
+  reminder: {
+    upcoming: './upcoming-reminder',
+    final: './final-reminder',
+    instructions: './checkout-instructions',
   },
 };
 
