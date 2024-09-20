@@ -1,0 +1,124 @@
+/* Anchor Button */
+.button {
+    display: inline-block;
+    color: #ffffff;
+    padding: 7px 27px;
+    border-radius: 6px;
+    border: none;
+    text-decoration: none;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Content */
+.content p {
+    font-size: .75rem;
+    line-height: 18px;
+}
+
+.content p b {
+    font-size: .88rem;
+    line-height: 25px;
+}
+
+.content table {
+    font-size: .82rem;
+}
+
+.content table th td {
+    text-decoration: none;
+    font-weight: lighter;
+}
+
+.content th,
+.content td {
+    padding: 5px;
+}
+
+.content .before-content,
+.content .after-content {
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 10px;
+    text-align: justify;
+}
+
+.middle-content {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.content a:first-of-type {
+    background-color: #E1AA64;
+}
+
+.content a:last-of-type {
+    background-color: #d7871e;
+}
+
+.content a {
+    margin-right: 2%;
+}
+
+/* Property Name Highlight */
+.content .before-content span {
+    color: #d7871e;
+    font-weight: 500;
+}
+
+.content .after-content .sign-waiver {
+    color: #d7871e;
+    background-color: white;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+/* Booking Details table */
+.booking-table {
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.booking-table tr:nth-of-type(1) td {
+    font-weight: bold;
+    font-size: .88rem;
+}
+
+.booking-table tr:nth-of-type(2) td {
+    padding-bottom: 2%;
+}
+
+.booking-table tr:not(:first-of-type) td {
+    font-size: .75rem;
+}
+
+.booking-table tr:nth-of-type(3) td {
+    font-weight: 500;
+    padding-block-start: 2%;
+    padding-block-end: 2%;
+}
+
+.booking-table tr:nth-of-type(3) td:first-of-type {
+    border-right: 1px solid black;
+    width: 50%;
+}
+
+.booking-table tr:nth-of-type(4) td {
+    vertical-align: middle;
+    line-height: 5px;
+    padding-top: 5%;
+}
+
+.booking-table tr:nth-of-type(5) td,
+.booking-table tr:nth-of-type(6) td {
+    vertical-align: middle;
+    line-height: 5px;
+}

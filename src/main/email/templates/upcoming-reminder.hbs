@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    {{{ css }}}
+    {{{ upcoming-reminder }}}
+</head>
+
+<body>
+    <div class="container">
+        {{> banner image=banner alt='banner' }}
+        {{!-- (constructUrl '/static/assets/booking-confirmed.png') --}}
+        {{> header logo='https://i.ibb.co/pndBYJN/booking-confirmed.png' alt='upcoming-reminder' text='Upcoming Booking Reminder'}}
+        <div class="content">
+            <div class="before-content">
+                <p>
+                    <b>Hello {{ ownerName }},</b>
+                </p>
+                <p>
+                    We hope you are excited for your upcoming stay at <span>{{ propertyName }}</span>! You will get an
+                    email with access codes and other important information a couple days before you check in.
+                </p>
+            </div>
+            <div class="middle-content">
+                <table class="booking-table">
+                    <tr>
+                        <td colspan="2">Booking Details</td>
+                    </tr>
+                    <tr>
+                        <td>Check-In</td>
+                        <td>Check-Out</td>
+                    </tr>
+                    <tr>
+                        <td>{{ checkIn }}</td>
+                        <td>{{ checkOut }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Number of nights booked: {{ totalNights }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Guests: {{ adults }} Adults, {{ children }} Children, {{ pets }} Pets</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Notes: {{ notes }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="after-content">
+                {{#if isSignWaiverEnabled}}
+                <p>
+                    <b>Required Waiver Signature</b>
+                </p>
+                <p>
+                    All guests must sign this one-time sign waiver before using the Lagoon, community pools, or other
+                    community amenities. It only takes a second, and once signed, it does not expire. Please ensure all
+                    new guests you bring have filled it out before your stay. <a
+                        href="http://www.fraxioned.com" class="sign-waiver">Sign the waiver here</a>
+                </p>
+                {{else}}
+                <p>
+                    <b>What's Next?</b>
+                </p>
+                <p>
+                    You're all set! You will receive reminder emails with important check-in information before your
+                    stay.
+                    But if you need, here are some helpful links:
+                </p>
+                <a href={{ modify }} class="button">Modify Booking</a>
+                <a href={{ cancel }} class="button">Cancel Booking</a>
+                {{/if}}
+            </div>
+        </div>
+        {{> footer }}
+    </div>
+</body>
+
+</html>
