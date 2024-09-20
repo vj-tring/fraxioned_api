@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
 import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
@@ -15,6 +20,8 @@ import { UserPropertyWithDetailsResponseDto } from '../dto/responses/userPropert
 import { PropertyWithDetails } from '../commons/interface/userPropertyDetails';
 import { CreatePropertiesDto } from '../dto/requests/property/create-property.dto';
 import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.dto';
+import { User } from '../entities/user.entity';
+import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 
 @Injectable()
 export class PropertiesService {
@@ -25,8 +32,30 @@ export class PropertiesService {
     private propertyDetailsRepository: Repository<PropertyDetails>,
     @InjectRepository(UserProperties)
     private userPropertiesRepository: Repository<UserProperties>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
+  private async shouldApplyPropertyNameFilter(
+    userId: number,
+  ): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role'],
+      select: { role: { id: true } },
+    });
+    return user?.role.id !== 1;
+  }
 
+  private async setPropertyName(
+    property: Property,
+    userId: number,
+  ): Promise<Property> {
+    const shouldApplyFilter = await this.shouldApplyPropertyNameFilter(userId);
+    if (shouldApplyFilter && (property.id === 1 || property.id === 2)) {
+      property.propertyName = 'Paradise Shores';
+    }
+    return property;
+  }
   async createProperties(
     createPropertiesDto: CreatePropertiesDto,
   ): Promise<CreatePropertiesResponseDto> {
@@ -34,51 +63,6 @@ export class PropertiesService {
       const properties = this.propertiesRepository.create(createPropertiesDto);
       const savedProperties = await this.propertiesRepository.save(properties);
       return savedProperties;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getAllProperties(): Promise<CommonPropertiesResponseDto[]> {
-    try {
-      const existingProperties = await this.propertiesRepository.find({
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
-      if (existingProperties.length === 0) {
-        throw new NotFoundException(`Properties not found`);
-      }
-      return existingProperties;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getPropertiesById(id: number): Promise<CommonPropertiesResponseDto> {
-    try {
-      const existingProperties = await this.propertiesRepository.findOne({
-        where: { id },
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
-      if (!existingProperties) {
-        throw new NotFoundException(`Properties with ID ${id} not found`);
-      }
-      return existingProperties;
     } catch (error) {
       throw error;
     }
@@ -206,8 +190,63 @@ export class PropertiesService {
     return updatedProperties;
   }
 
+  async getAllProperties(
+    userId: number,
+  ): Promise<CommonPropertiesResponseDto[]> {
+    try {
+      const existingProperties = await this.propertiesRepository.find({
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+      if (existingProperties.length === 0) {
+        throw new NotFoundException(`Properties not found`);
+      }
+      return Promise.all(
+        existingProperties.map((property) =>
+          this.setPropertyName(property, userId),
+        ),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getPropertiesById(
+    id: number,
+    userId: number,
+  ): Promise<CommonPropertiesResponseDto> {
+    try {
+      const existingProperties = await this.propertiesRepository.findOne({
+        where: { id },
+        relations: ['createdBy', 'updatedBy'],
+        select: {
+          createdBy: {
+            id: true,
+          },
+          updatedBy: {
+            id: true,
+          },
+        },
+      });
+      if (!existingProperties) {
+        throw new NotFoundException(`Properties with ID ${id} not found`);
+      }
+      return this.setPropertyName(existingProperties, userId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getPropertiesWithDetails(
     id?: number,
+    requestedUser?: number,
   ): Promise<
     PropertyWithDetailsResponseDto | PropertyWithDetailsResponseDto[] | object
   > {
@@ -254,7 +293,8 @@ export class PropertiesService {
           }
         });
 
-        const { id: propertyId, ...propertyWithoutId } = property;
+        const { id: propertyId, ...propertyWithoutId } =
+          await this.setPropertyName(property, requestedUser);
         const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
           propertyDetails;
 
@@ -311,6 +351,8 @@ export class PropertiesService {
               }
             });
 
+            property = await this.setPropertyName(property, requestedUser);
+
             if (!propertyDetails) {
               return {
                 propertyId: property.id,
@@ -351,11 +393,18 @@ export class PropertiesService {
       throw error;
     }
   }
-
   async getAllPropertiesWithDetailsByUser(
     userId: number,
+    requestedUser: number,
   ): Promise<UserPropertyWithDetailsResponseDto[] | object> {
     try {
+      const userExists = await this.userRepository.exists({
+        where: { id: userId },
+      });
+      if (!userExists) {
+        return USER_RESPONSES.USER_NOT_FOUND(userId);
+      }
+
       const userProperties = await this.userPropertiesRepository.find({
         where: { user: { id: userId } },
         relations: ['property', 'user'],
@@ -373,11 +422,20 @@ export class PropertiesService {
             where: { property: { id: userProperty.property.id } },
           });
 
+          userProperty.property = await this.setPropertyName(
+            userProperty.property,
+            requestedUser,
+          );
+
           const {
             property: { id: propertyId, ...propertyWithoutId },
             ...userPropertyWithoutId
           } = userProperty;
 
+          const { user, ...userPropertyWithoutUser } = userPropertyWithoutId;
+          if (!user) {
+            return USER_RESPONSES.USER_NOT_FOUND(user.id);
+          }
           if (!propertyDetails) {
             if (!propertyMap.has(propertyId)) {
               propertyMap.set(propertyId, {
@@ -389,7 +447,7 @@ export class PropertiesService {
             }
             propertyMap
               .get(propertyId)!
-              .userProperties.push(userPropertyWithoutId);
+              .userProperties.push(userPropertyWithoutUser);
             return;
           }
 
@@ -407,13 +465,19 @@ export class PropertiesService {
           }
           propertyMap
             .get(propertyId)!
-            .userProperties.push(userPropertyWithoutId);
+            .userProperties.push(userPropertyWithoutUser);
         }),
       );
 
       return Array.from(propertyMap.values());
     } catch (error) {
-      throw error;
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new HttpException(
+        'An error occurred while fetching properties with details for the user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

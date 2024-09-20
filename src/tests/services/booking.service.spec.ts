@@ -22,6 +22,7 @@ import { PropertyImages } from 'src/main/entities/property_images.entity';
 describe('BookingService', () => {
   let service: BookingService;
   let bookingRepository: Repository<Booking>;
+  let userRepository: Repository<User>;
   let loggerService: LoggerService;
 
   beforeEach(async () => {
@@ -84,40 +85,64 @@ describe('BookingService', () => {
     bookingRepository = module.get<Repository<Booking>>(
       getRepositoryToken(Booking),
     );
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     loggerService = module.get<LoggerService>(LoggerService);
   });
 
   describe('getAllBookings', () => {
     it('should return all bookings', async () => {
-      const bookings = [{ id: 1 } as Booking, { id: 2 } as Booking];
+      const bookings = [
+        {
+          id: 1,
+          property: { id: 1, propertyName: 'Test Property' },
+        } as Booking,
+        {
+          id: 2,
+          property: { id: 2, propertyName: 'Test Property' },
+        } as Booking,
+      ];
+      const requestedUser = 1;
       jest.spyOn(bookingRepository, 'find').mockResolvedValue(bookings);
-
-      const result = await service.getAllBookings();
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue({ role: { id: 2 } } as User);
+      const result = await service.getAllBookings(requestedUser);
       expect(result).toEqual(bookings);
     });
 
     it('should throw NotFoundException if no bookings found', async () => {
       jest.spyOn(bookingRepository, 'find').mockResolvedValue([]);
-
-      await expect(service.getAllBookings()).rejects.toThrow(NotFoundException);
+      const requestedUser = 1;
+      await expect(service.getAllBookings(requestedUser)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('getBookingById', () => {
     it('should return a booking by ID', async () => {
-      const booking = { id: 1 } as Booking;
+      const booking = {
+        id: 1,
+        property: { id: 1, propertyName: 'Test Property' },
+      } as Booking;
       jest
         .spyOn(bookingRepository, 'findOne')
         .mockResolvedValue(booking as Booking);
-
-      const result = await service.getBookingById(1);
-      expect(result).toEqual(BOOKING_RESPONSES.BOOKING_FETCHED(booking));
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue({ role: { id: 2 } } as User);
+      const requestedUser = 1;
+      const result = await service.getBookingById(1, requestedUser);
+      expect(result).toEqual({
+        ...booking,
+        property: { ...booking.property, propertyName: 'Paradise Shores' },
+      });
     });
 
     it('should return BOOKING_NOT_FOUND if booking does not exist', async () => {
       jest.spyOn(bookingRepository, 'findOne').mockResolvedValue(null);
-
-      const result = await service.getBookingById(1);
+      const requestedUser = 1;
+      const result = await service.getBookingById(1, requestedUser);
       expect(result).toEqual(BOOKING_RESPONSES.BOOKING_NOT_FOUND(1));
     });
   });
@@ -126,12 +151,23 @@ describe('BookingService', () => {
     it('should return bookings for a user', async () => {
       const userId = 1;
       const bookings = [
-        { id: 1, user: { id: userId } } as Booking,
-        { id: 2, user: { id: userId } } as Booking,
+        {
+          id: 1,
+          user: { id: userId },
+          property: { id: 1, propertyName: 'Test Property' },
+        } as Booking,
+        {
+          id: 2,
+          user: { id: userId },
+          property: { id: 2, propertyName: 'Test Property' },
+        } as Booking,
       ];
       jest.spyOn(bookingRepository, 'find').mockResolvedValue(bookings);
-
-      const result = await service.getBookingsForUser(userId);
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue({ role: { id: 2 } } as User);
+      const requestedUser = 1;
+      const result = await service.getBookingsForUser(requestedUser, userId);
       expect(result).toEqual(bookings);
       expect(loggerService.log).toHaveBeenCalledWith(
         `Fetching bookings for user with ID ${userId}`,
@@ -140,9 +176,9 @@ describe('BookingService', () => {
 
     it('should return BOOKING_FOR_USER_NOT_FOUND if no bookings found for user', async () => {
       const userId = 1;
+      const requestedUser = 1;
       jest.spyOn(bookingRepository, 'find').mockResolvedValue([]);
-
-      const result = await service.getBookingsForUser(userId);
+      const result = await service.getBookingsForUser(requestedUser, userId);
       expect(result).toEqual(
         BOOKING_RESPONSES.BOOKING_FOR_USER_NOT_FOUND(userId),
       );
@@ -153,10 +189,12 @@ describe('BookingService', () => {
 
     it('should handle unexpected errors', async () => {
       const userId = 1;
+      const requestedUser = 1;
       const error = new Error('Unexpected error');
       jest.spyOn(bookingRepository, 'find').mockRejectedValue(error);
-
-      await expect(service.getBookingsForUser(userId)).rejects.toThrow(error);
+      await expect(
+        service.getBookingsForUser(requestedUser, userId),
+      ).rejects.toThrow(error);
       expect(loggerService.log).toHaveBeenCalledWith(
         `Fetching bookings for user with ID ${userId}`,
       );
@@ -165,7 +203,10 @@ describe('BookingService', () => {
 
   describe('updateBooking', () => {
     it('should update a booking', async () => {
-      const booking = { id: 1 } as Booking;
+      const booking = {
+        id: 1,
+        property: { id: 1, propertyName: 'Test Property' },
+      } as Booking;
       const updateBookingDto: UpdateBookingDTO = {
         checkinDate: new Date('2023-01-01'),
         user: new User(),
@@ -182,7 +223,6 @@ describe('BookingService', () => {
       jest
         .spyOn(bookingRepository, 'save')
         .mockResolvedValue({ ...booking, ...updateBookingDto });
-
       const result = await service.updateBooking(1, updateBookingDto);
       expect(result).toEqual(
         BOOKING_RESPONSES.BOOKING_UPDATED({
@@ -198,7 +238,6 @@ describe('BookingService', () => {
 
     it('should return BOOKING_NOT_FOUND if booking does not exist', async () => {
       jest.spyOn(bookingRepository, 'findOne').mockResolvedValue(null);
-
       const result = await service.updateBooking(1, {} as UpdateBookingDTO);
       expect(result).toEqual(BOOKING_RESPONSES.BOOKING_NOT_FOUND(1));
     });
@@ -206,17 +245,18 @@ describe('BookingService', () => {
 
   describe('deleteBooking', () => {
     it('should delete a booking', async () => {
-      const booking = { id: 1 } as Booking;
+      const booking = {
+        id: 1,
+        property: { id: 1, propertyName: 'Test Property' },
+      } as Booking;
       jest.spyOn(bookingRepository, 'findOne').mockResolvedValue(booking);
       jest.spyOn(bookingRepository, 'remove').mockResolvedValue(booking);
-
       const result = await service.deleteBooking(1);
       expect(result).toEqual(BOOKING_RESPONSES.BOOKING_DELETED(1));
     });
 
     it('should return BOOKING_NOT_FOUND if booking does not exist', async () => {
       jest.spyOn(bookingRepository, 'findOne').mockResolvedValue(null);
-
       const result = await service.deleteBooking(1);
       expect(result).toEqual(BOOKING_RESPONSES.BOOKING_NOT_FOUND(1));
     });

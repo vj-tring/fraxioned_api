@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpException,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
@@ -29,32 +30,17 @@ import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
+  private getUserIdFromRequest(req: Request): number {
+    const userId = req.headers['user-id'];
+    return userId ? parseInt(userId as string, 10) : 0;
+  }
+
   @Post('property')
   async createProperties(
     @Body() createPropertiesDto: CreatePropertiesDto,
   ): Promise<CreatePropertiesResponseDto> {
     try {
       return await this.propertiesService.createProperties(createPropertiesDto);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get()
-  async getAllProperties(): Promise<CommonPropertiesResponseDto[]> {
-    try {
-      return await this.propertiesService.getAllProperties();
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get('property/:id')
-  async getPropertiesById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<CommonPropertiesResponseDto> {
-    try {
-      return await this.propertiesService.getPropertiesById(id);
     } catch (error) {
       throw error;
     }
@@ -98,12 +84,39 @@ export class PropertiesController {
     }
   }
 
+  @Get()
+  async getAllProperties(
+    @Req() req: Request,
+  ): Promise<CommonPropertiesResponseDto[]> {
+    try {
+      const userId = this.getUserIdFromRequest(req);
+      return await this.propertiesService.getAllProperties(userId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('property/:id')
+  async getPropertiesById(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ): Promise<CommonPropertiesResponseDto> {
+    try {
+      const userId = this.getUserIdFromRequest(req);
+      return await this.propertiesService.getPropertiesById(id, userId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get('property/:id/details')
   async getPropertyWithDetailsById(
     @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
   ): Promise<PropertyWithDetailsResponseDto | object> {
     try {
-      return await this.propertiesService.getPropertiesWithDetails(id);
+      const userId = this.getUserIdFromRequest(req);
+      return await this.propertiesService.getPropertiesWithDetails(id, userId);
     } catch (error) {
       throw new HttpException(
         `An error occurred while fetching property details for ID ${id}`,
@@ -113,11 +126,15 @@ export class PropertiesController {
   }
 
   @Get('properties-with-details')
-  async getAllPropertiesWithDetails(): Promise<
-    PropertyWithDetailsResponseDto[] | object
-  > {
+  async getAllPropertiesWithDetails(
+    @Req() req: Request,
+  ): Promise<PropertyWithDetailsResponseDto[] | object> {
     try {
-      return await this.propertiesService.getPropertiesWithDetails();
+      const requestedUser = this.getUserIdFromRequest(req);
+      return await this.propertiesService.getPropertiesWithDetails(
+        undefined,
+        requestedUser,
+      );
     } catch (error) {
       throw new HttpException(
         'An error occurred while fetching properties with details',
@@ -129,10 +146,13 @@ export class PropertiesController {
   @Get(':userId/user-properties-with-details')
   async getAllPropertiesWithDetailsByUser(
     @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request,
   ): Promise<PropertyWithDetailsResponseDto[] | object> {
     try {
+      const requestedUser = this.getUserIdFromRequest(req);
       return await this.propertiesService.getAllPropertiesWithDetailsByUser(
         userId,
+        requestedUser,
       );
     } catch (error) {
       throw new HttpException(

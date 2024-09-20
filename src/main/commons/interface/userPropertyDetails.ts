@@ -32,7 +32,6 @@ export interface PropertyDetailsInterface {
 
 interface UserProperty {
   id: number;
-  user: User;
   property: Property;
   noOfShare: number;
   acquisitionDate: Date;

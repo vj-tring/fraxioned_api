@@ -7,6 +7,7 @@ import {
   Patch,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { BookingService } from 'src/main/service/booking/booking.service';
@@ -46,26 +47,41 @@ export class BookingController {
     return this.bookingSummaryService.bookingSummary(createBookingDto);
   }
 
+  private getUserIdFromRequest(req: Request): number {
+    const userId = req.headers['user-id'];
+    return userId ? parseInt(userId as string, 10) : 0;
+  }
+
   @Get()
-  async getAllBookings(): Promise<object[] | object> {
+  async getAllBookings(@Req() req: Request): Promise<object[] | object> {
     try {
-      return await this.bookingService.getAllBookings();
+      const requestedUser = this.getUserIdFromRequest(req);
+      return await this.bookingService.getAllBookings(requestedUser);
     } catch (error) {
       throw error;
     }
   }
 
   @Get('booking/:id')
-  async getBookingById(@Param('id') id: number): Promise<object> {
-    return this.bookingService.getBookingById(id);
+  async getBookingById(
+    @Param('id') id: number,
+    @Req() req: Request,
+  ): Promise<object> {
+    const requestedUser = this.getUserIdFromRequest(req);
+    return this.bookingService.getBookingById(id, requestedUser);
   }
 
   @Get('user/:userId')
   async getBookingsForUser(
     @Param('userId') userId: number,
+    @Req() req: Request,
   ): Promise<object[] | object> {
     try {
-      return await this.bookingService.getBookingsForUser(userId);
+      const requestedUser = this.getUserIdFromRequest(req);
+      return await this.bookingService.getBookingsForUser(
+        userId,
+        requestedUser,
+      );
     } catch (error) {
       throw error;
     }
