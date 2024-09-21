@@ -42,9 +42,9 @@ export const mailSubject = {
     cancellation: 'Booking Cancelled',
   },
   reminder: {
-    upcoming: './upcoming-reminder',
-    final: './final-reminder',
-    instructions: './checkout-instructions',
+    upcoming: 'Upcoming Booking Reminder',
+    final: 'Get Ready for Your Stay',
+    instructions: 'Check-out Instructions',
   },
 };
 
