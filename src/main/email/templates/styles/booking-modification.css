@@ -135,25 +135,32 @@
     font-size: .75rem;
 }
 
-.booking-table tr:nth-of-type(3) td {
+.booking-table tr:nth-of-type(4) td {
+    opacity: 50%;
+}
+
+.booking-table tr:nth-of-type(3) td,
+.booking-table tr:nth-of-type(4) td {
+    line-height: 5px;
     font-weight: 500;
     padding-block-start: 2%;
     padding-block-end: 2%;
 }
 
-.booking-table tr:nth-of-type(3) td:first-of-type {
+.booking-table tr:nth-of-type(3) td:first-of-type,
+.booking-table tr:nth-of-type(4) td:first-of-type {
     border-right: 1px solid black;
     width: 50%;
 }
 
-.booking-table tr:nth-of-type(4) td {
+.booking-table tr:nth-of-type(5) td {
     vertical-align: middle;
     line-height: 5px;
     padding-top: 5%;
 }
 
-.booking-table tr:nth-of-type(5) td,
-.booking-table tr:nth-of-type(6) td {
+.booking-table tr:nth-of-type(6) td,
+.booking-table tr:nth-of-type(7) td {
     vertical-align: middle;
     line-height: 5px;
 }

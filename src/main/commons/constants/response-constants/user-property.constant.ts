@@ -9,6 +9,14 @@ interface UserPropertySuccessResponse {
 }
 
 export const USER_PROPERTY_RESPONSES = {
+  INSUFFICIENT_SHARES: (
+    propertyId: number,
+    remainingShares: number,
+  ): { status: number; message: string } => ({
+    status: HttpStatus.BAD_REQUEST,
+    message: `Insufficient shares available for property ID ${propertyId}. Remaining shares: ${remainingShares}`,
+  }),
+
   USER_PROPERTY_ALREADY_EXISTS: (
     userId: number,
     propertyId: number,

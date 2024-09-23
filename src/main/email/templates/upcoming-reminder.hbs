@@ -10,35 +10,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     {{{ css }}}
-    {{{ booking-confirmation }}}
+    {{{ upcoming-reminder }}}
 </head>
 
 <body>
     <div class="container">
         {{> banner image=banner alt='banner' }}
         {{!-- (constructUrl '/static/assets/booking-confirmed.png') --}}
-        {{> header logo='https://i.ibb.co/pndBYJN/booking-confirmed.png' alt='booking-confirmed' text='Booking Confirmed'}}
+        {{> header logo='https://i.ibb.co/pndBYJN/booking-confirmed.png' alt='upcoming-reminder' text='Upcoming Booking Reminder'}}
         <div class="content">
             <div class="before-content">
                 <p>
-                    <b>Hello {{ ownerName }}!</b>
+                    <b>Hello {{ ownerName }},</b>
                 </p>
-                <table class="confirm-table">
-                    <tr>
-                        <td class="confirm-icon">
-                            <img src="https://i.ibb.co/bNN4ZgK/check.png" alt="confirm">
-                            {{!-- (constructUrl '/static/assets/confirm.png') --}}
-                        </td>
-                        <td class="confirm-text">
-                            <p>Your {{ propertyName }} booking is confirmed.</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="booking-number">
-                            <p>Your booking number is #{{ bookingId }}</p>
-                        </td>
-                    </tr>
-                </table>
+                <p>
+                    We hope you are excited for your upcoming stay at <span>{{ propertyName }}</span>! You will get an
+                    email with access codes and other important information a couple days before you check in.
+                </p>
             </div>
             <div class="middle-content">
                 <table class="booking-table">
@@ -65,6 +53,17 @@
                 </table>
             </div>
             <div class="after-content">
+                {{#if isSignWaiverEnabled}}
+                <p>
+                    <b>Required Waiver Signature</b>
+                </p>
+                <p>
+                    All guests must sign this one-time sign waiver before using the Lagoon, community pools, or other
+                    community amenities. It only takes a second, and once signed, it does not expire. Please ensure all
+                    new guests you bring have filled it out before your stay. <a
+                        href="http://www.fraxioned.com" class="sign-waiver">Sign the waiver here</a>
+                </p>
+                {{else}}
                 <p>
                     <b>What's Next?</b>
                 </p>
@@ -75,6 +74,7 @@
                 </p>
                 <a href={{ modify }} class="button">Modify Booking</a>
                 <a href={{ cancel }} class="button">Cancel Booking</a>
+                {{/if}}
             </div>
         </div>
         {{> footer }}

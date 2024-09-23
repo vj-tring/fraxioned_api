@@ -119,9 +119,7 @@ export class PropertyImagesService {
       this.logger.log(
         `${uploadedImages.length} property images created successfully`,
       );
-      return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_CREATED(
-        uploadedImages.length,
-      );
+      return PROPERTY_IMAGES_RESPONSES.PROPERTY_IMAGES_CREATED(uploadedImages);
     } catch (error) {
       this.logger.error(
         `Error creating property images: ${error.message} - ${error.stack}`,

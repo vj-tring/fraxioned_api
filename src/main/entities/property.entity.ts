@@ -78,6 +78,13 @@ export class Property {
   propertyShare: number;
 
   @Column({
+    name: 'property_remaining_share',
+    type: 'integer',
+    default: 0,
+  })
+  propertyRemainingShare: number;
+
+  @Column({
     name: 'latitude',
     type: 'double',
     precision: 10,

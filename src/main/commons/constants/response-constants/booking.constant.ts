@@ -1,3 +1,4 @@
+import { HttpStatus } from '@nestjs/common';
 import { Booking } from 'entities/booking.entity';
 
 export const BOOKING_RESPONSES = {
@@ -103,6 +104,11 @@ export const BOOKING_RESPONSES = {
     error: 'Forbidden',
     statusCode: 403,
   },
+  INSUFFICIENT_LAST_MIN_BOOKING_NIGHTS: {
+    message: `You don't have sufficient Last minute remaining nights to select this checkout date`,
+    error: 'Forbidden',
+    statusCode: 403,
+  },
   INSUFFICIENT_OFF_NIGHTS: {
     message: `You don't have sufficient off-season remaining nights to select this checkout date`,
     error: 'Forbidden',
@@ -137,5 +143,35 @@ export const BOOKING_RESPONSES = {
     message: 'Number of guests or pets exceeds property limits',
     error: 'Bad Request',
     statusCode: 400,
+  },
+  EXCEEDED_PEAK_HOLIDAY_NIGHTS: (
+    userShares: number,
+  ): { message: string; error: string; statusCode: number } => ({
+    message: `You have exceeded the allowed peak holiday nights. You are allowed ${userShares * 2} peak holiday nights.`,
+    error: 'Forbidden',
+    statusCode: 403,
+  }),
+  BOOKING_CANCELLED: (
+    cancelledBooking: Booking,
+  ): { message: string; data: Booking; statusCode: number } => ({
+    message: 'Booking cancelled successfully',
+    data: cancelledBooking,
+    statusCode: 200,
+  }),
+  BOOKING_ALREADY_CANCELLED_OR_COMPLETED: {
+    message: 'Booking is already cancelled or completed',
+    statusCode: 400,
+  },
+  CANNOT_CANCEL_PAST_BOOKING: {
+    message: 'Cannot cancel a past booking',
+    statusCode: 400,
+  },
+  TOO_LATE_TO_CANCEL: {
+    message: 'Too late to cancel the booking',
+    statusCode: 400,
+  },
+  CANNOT_CANCEL_LAST_MINUTE_BOOKING: {
+    status: HttpStatus.BAD_REQUEST,
+    message: 'Last-minute bookings cannot be cancelled.',
   },
 };

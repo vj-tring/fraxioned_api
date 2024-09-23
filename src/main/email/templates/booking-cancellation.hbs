@@ -10,32 +10,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     {{{ css }}}
-    {{{ booking-confirmation }}}
+    {{{ booking-cancellation }}}
 </head>
 
 <body>
     <div class="container">
-        {{> banner image=banner alt='banner' }}
-        {{!-- (constructUrl '/static/assets/booking-confirmed.png') --}}
-        {{> header logo='https://i.ibb.co/pndBYJN/booking-confirmed.png' alt='booking-confirmed' text='Booking Confirmed'}}
+        {{!-- (constructUrl '/static/assets/cancellation.png') --}}
+        {{> header logo='https://i.ibb.co/rfp2MWZ/cancellation.png' alt='booking-cancelled' text='Booking Cancelled'}}
         <div class="content">
             <div class="before-content">
                 <p>
-                    <b>Hello {{ ownerName }}!</b>
+                    <b>Hello {{ ownerName }},</b>
                 </p>
                 <table class="confirm-table">
                     <tr>
                         <td class="confirm-icon">
-                            <img src="https://i.ibb.co/bNN4ZgK/check.png" alt="confirm">
-                            {{!-- (constructUrl '/static/assets/confirm.png') --}}
+                            <img src="https://i.ibb.co/qWY6zzp/cancel.png" alt="cancel">
+                            {{!-- (constructUrl '/static/assets/cancel.png') --}}
                         </td>
                         <td class="confirm-text">
-                            <p>Your {{ propertyName }} booking is confirmed.</p>
+                            <p>Your {{ propertyName }} booking has been cancelled.</p>
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2" class="booking-number">
-                            <p>Your booking number is #{{ bookingId }}</p>
+                            <p>The number of the cancelled booking is #{{ bookingId }}</p>
                         </td>
                     </tr>
                 </table>
@@ -43,7 +42,7 @@
             <div class="middle-content">
                 <table class="booking-table">
                     <tr>
-                        <td colspan="2">Booking Details</td>
+                        <td colspan="2">Cancelled Booking Details</td>
                     </tr>
                     <tr>
                         <td>Check-In</td>
@@ -66,15 +65,24 @@
             </div>
             <div class="after-content">
                 <p>
+                    <b>Cancellation Policy</b>
+                </p>
+                <p>
+                    If you cancel a booking more than seven nights before the scheduled stay starts, you will reclaim
+                    the number of nights in the booking to your total number of allotted annual nights. if you cancel a
+                    booking with less than seven nights' notice, you will not reclaim the nights to your total number of
+                    allotted annual nights. Furthermore, if you neglect to cancel until after the time of check-in, you
+                    will still be charged a cleaning fee for the booking.
+                </p>
+                <p>
                     <b>What's Next?</b>
                 </p>
                 <p>
-                    You're all set! You will receive reminder emails with important check-in information before your
-                    stay.
-                    But if you need, here are some helpful links:
+                    If there has been a mistake, or you have any questions, please contact the Fraxioned Owner Services
+                    team. If you would like to create a new booking, follow the link below.
                 </p>
-                <a href={{ modify }} class="button">Modify Booking</a>
-                <a href={{ cancel }} class="button">Cancel Booking</a>
+                <a href={{ modify }} class="button">My Bookings</a>
+                <a href={{ cancel }} class="button">Create Booking</a>
             </div>
         </div>
         {{> footer }}

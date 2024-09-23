@@ -7,10 +7,11 @@ import { AuthenticationModule } from 'src/main/modules/authentication.module';
 import { PropertyDetailsModule } from './property-details.module';
 import { PropertyDetails } from '../entities/property-details.entity';
 import { UserProperties } from '../entities/user-properties.entity';
+import { User } from '../entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Property, PropertyDetails, UserProperties]),
+    TypeOrmModule.forFeature([Property, PropertyDetails, UserProperties, User]),
     AuthenticationModule,
     PropertyDetailsModule,
   ],
