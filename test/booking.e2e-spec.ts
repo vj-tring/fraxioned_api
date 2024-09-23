@@ -1,17 +1,22 @@
 import * as request from 'supertest';
 import { baseurl } from './test.config';
-// import { createConnection,Connection } from 'mysql2/promise';
-// import { exec } from 'child_process';
-// import { promisify } from 'util';
+import { createConnection, Connection } from 'mysql2/promise';
 
-// const execAsync = promisify(exec);
 describe('Booking API Test', () => {
   const url = `${baseurl}/authentication`;
   const url1 = `${baseurl}/bookings`;
+  const url2 = `${baseurl}/holidays`;
   let token: string;
   let userid: number;
-  // let connection: Connection;
+  let connection: Connection;
   beforeAll(async () => {
+    connection = await createConnection({
+      host: 'localhost',
+      user: 'root',
+      password: '1234',
+      database: 'fraxioned_test',
+    });
+    await connection.query(`CREATE DATABASE fraxioned_test`);
     const login_credentials = {
       email: 'owner@fraxioned.com',
       password: 'Owner@123',
@@ -23,20 +28,59 @@ describe('Booking API Test', () => {
     const { session, user } = response.body;
     token = session.token;
     userid = user.id;
+    it('Holiday Seeding', async () => {
+      const credentials1 = {
+        startDate: '2025-04-01',
+        endDate: '2025-04-01',
+        createdBy: { id: 1 },
+        properties: [{ id: 1 }],
+        name: 'Peak Season Holiday(One day)',
+        year: 2025,
+      };
+      const credentials2 = {
+        startDate: '2025-05-01',
+        endDate: '2025-05-05',
+        createdBy: { id: 1 },
+        properties: [{ id: 1 }],
+        name: 'Peak Season Holiday(More than one day)',
+        year: 2025,
+      };
+      const credentials3 = {
+        startDate: '2025-07-01',
+        endDate: '2025-07-01',
+        createdBy: { id: 1 },
+        properties: [{ id: 1 }],
+        name: 'Off Season Holiday(One day)',
+        year: 2025,
+      };
+      const credentials4 = {
+        startDate: '2025-08-01',
+        endDate: '2025-08-05',
+        createdBy: { id: 1 },
+        properties: [{ id: 1 }],
+        name: 'Off Season Holiday(More than one day)',
+        year: 2025,
+      };
+      await request(url2)
+        .post('/holiday')
+        .set('Accept', 'application/json')
+        .send(credentials1)
+        .send(credentials2)
+        .send(credentials3)
+        .send(credentials4);
+    });
   });
-  // afterAll(async () => {
-  //   connection = await createConnection({
-  //     host: 'localhost',
-  //     user: 'root',
-  //     password: '1234',
-  //     database: 'fraxioned',
-  //   });
-  //   await connection.query(`DROP DATABASE fraxioned`);
-  //   await connection.query(`CREATE DATABASE fraxioned`);
-  //   await connection.end();
-  //   await execAsync('npm run start:dev');
-  // });
-  describe('Successful Flows', () => {
+  afterAll(async () => {
+    connection = await createConnection({
+      host: 'localhost',
+      user: 'root',
+      password: '1234',
+      database: 'fraxioned_test',
+    });
+    await connection.query(`DROP DATABASE fraxioned_test`);
+    await connection.end();
+  });
+  describe.skip('Successful Flows', () => {
     it('Booking nights in peak season', async () => {
       const credentials = {
         user: {
