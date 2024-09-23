@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Ready for Your Stay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    {{{ css }}}
+    {{{ final-reminder }}}
+</head>
+
+<body>
+    <div class="container">
+        {{> banner image=banner alt='banner' }}
+        {{!-- (constructUrl '/static/assets/booking-confirmed.png') --}}
+        {{> headerWithSubTitle logo='https://i.ibb.co/pndBYJN/booking-confirmed.png' alt='final-reminder'
+        text='Get Ready for Your Stay' subHead='Important Check-in Information'}}
+        <div class="content">
+            <div class="before-content">
+                <p>
+                    <b>Hello {{ ownerName }},</b>
+                </p>
+                <p>
+                    This is a final reminder about your upcoming staty at <span>{{ propertyName }}</span>! Please be
+                    sure
+                    to read the rest of this email, as codes and rules may have changed since your last
+                    stay.
+                </p>
+                <p>
+                    As a reminder, the home address is <span>{{ propertyAddress }}</span>.
+                </p>
+            </div>
+            <div class="middle-content">
+                <table class="booking-table">
+                    <tr>
+                        <td colspan="2">Booking Details</td>
+                    </tr>
+                    <tr>
+                        <td>Check-In</td>
+                        <td>Check-Out</td>
+                    </tr>
+                    <tr>
+                        <td>{{ checkIn }}</td>
+                        <td>{{ checkOut }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Number of nights booked: {{ totalNights }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Guests: {{ adults }} Adults, {{ children }} Children, {{ pets }} Pets</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Notes: {{ notes }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="after-content">
+                <p>
+                    <b>Access Codes and Wi-Fi</b>
+                </p>
+                <div class="rules">
+                    <ul>
+                        {{#each codes}}
+                        <li>{{@key}}: <b>{{this}}</b></li>
+                        {{/each}}
+                    </ul>
+                </div>
+                {{#if isSignWaiverEnabled}}
+                <p>
+                    <b>Required Waiver Signature</b>
+                </p>
+                <p>
+                    All guests must sign this one-time sign waiver before using the Lagoon, community pools, or other
+                    community amenities. It only takes a second, and once signed, it does not expire. Please ensure all
+                    new guests you bring have filled it out before your stay. <a href="http://www.fraxioned.com"
+                        class="sign-waiver">Sign the waiver here</a>
+                </p>
+                {{/if}}
+                <p>
+                    <b>House Rules</b>
+                </p>
+                <p>
+                    We want your stay to be nothing short of fantastic, so here are some friendly reminders of the house
+                    rules:
+                </p>
+                <div class="rules">
+                    <ol>
+                        <li>Respect your neighbors and maintain a peaceful atmosphere.</li>
+                        <li>Please, no smoking inside the house, on the balconies, or in the yard.</li>
+                        <li>Help us conserve energy by turning off lights and appliances when not in use.</li>
+                        <li>Dispose of trash in the provided bins.</li>
+                        <li>Enjoy your stay to the fullest, but please be mindful of noise after 10 PM.</li>
+                    </ol>
+                </div>
+                <p>
+                    Remember, these rules are here to ensure a pleasant experience for everyone!
+                </p>
+                <p>
+                    If you have any questions or need assistance during your stay, our friendly team is just a call or
+                    message away. We're here to help make your vacation unforgettable!
+                </p>
+                <p>
+                    Once again, we hope you have a fantastic stay in your beautiful vacation home.
+                </p>
+            </div>
+        </div>
+        {{> footer }}
+    </div>
+</body>
+
+</html>
