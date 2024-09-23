@@ -1,0 +1,73 @@
+/* Anchor Button */
+.button {
+    display: inline-block;
+    color: #ffffff;
+    padding: 7px 27px;
+    border-radius: 6px;
+    border: none;
+    text-decoration: none;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Content */
+.content p {
+    font-size: .75rem;
+    line-height: 18px;
+}
+
+.content p b {
+    font-size: .88rem;
+    line-height: 25px;
+}
+
+.content table {
+    font-size: .82rem;
+}
+
+.content table th td {
+    text-decoration: none;
+    font-weight: lighter;
+}
+
+.content th,
+.content td {
+    padding: 5px;
+}
+
+.content {
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 10px;
+    text-align: justify;
+}
+
+.content a:first-of-type {
+    background-color: #d7871e;
+}
+
+.content a:last-of-type {
+    background-color: #d7871e;
+}
+
+.content a {
+    margin-right: 2%;
+}
+
+/* Property Name Highlight */
+.content span {
+    color: #d7871e;
+    font-weight: 500;
+}
+
+/* Rules List */
+.rules ol,
+.rules ul{
+    font-size: .75rem;
+    line-height: 18px;
+    padding-left: 15px;
+}

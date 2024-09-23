@@ -52,6 +52,9 @@ body {
     border: 0px solid;
     height: 50px;
     width: 20px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    line-height: 0px;
 }
 
 .header-logo img {
@@ -64,6 +67,17 @@ body {
     border: 0px solid;
     width: 90%;
     max-width: 90%;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+    line-height: 0px;
+}
+
+.sub-header {
+    font-size: .88rem;
+    font-weight: 800;
+    opacity: 50%;
+    line-height: 5px;
+    padding-bottom: 20px;
 }
 
 /* Footer */
