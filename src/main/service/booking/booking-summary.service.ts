@@ -9,8 +9,11 @@ import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { PropertyDetails } from '../../entities/property-details.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { CreateBookingService } from './create-booking.service';
-import { generateBookingId } from 'src/main/service/booking/utils/booking.util';
+import {
+  BookingUtilService,
+  generateBookingId,
+  normalizeDates,
+} from 'src/main/service/booking/utils/booking.service.util';
 import { NightCounts } from './interface/bookingInterface';
 
 @Injectable()
@@ -27,7 +30,7 @@ export class BookingSummaryService {
     @InjectRepository(PropertySeasonHolidays)
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
     private readonly logger: LoggerService,
-    private readonly createBookingService: CreateBookingService,
+    private readonly bookingUtilService: BookingUtilService,
   ) {}
 
   async bookingSummary(createBookingDto: CreateBookingDTO): Promise<object> {
@@ -39,20 +42,22 @@ export class BookingSummaryService {
       user,
     } = createBookingDto;
 
-    const property = await this.createBookingService.getProperty(
+    const property = await this.bookingUtilService.getProperty(
       createBookingDto.property.id,
     );
     const propertyDetails =
-      await this.createBookingService.getPropertyDetails(property);
+      await this.bookingUtilService.getPropertyDetails(property);
 
     if (!propertyDetails) {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
-    const { checkinDate, checkoutDate } =
-      this.createBookingService.normalizeDates(checkinDateStr, checkoutDateStr);
+    const { checkinDate, checkoutDate } = normalizeDates(
+      checkinDateStr,
+      checkoutDateStr,
+    );
 
-    const dateValidationResult = this.createBookingService.validateDates(
+    const dateValidationResult = this.bookingUtilService.validateDates(
       checkinDate,
       checkoutDate,
       propertyDetails,
@@ -62,7 +67,7 @@ export class BookingSummaryService {
     }
 
     const userPropertyValidationResult =
-      await this.createBookingService.validateUserProperty(
+      await this.bookingUtilService.validateUserProperty(
         user,
         property,
         checkinDate,
@@ -72,7 +77,7 @@ export class BookingSummaryService {
       return userPropertyValidationResult;
     }
 
-    const guestValidationResult = this.createBookingService.validateGuestLimits(
+    const guestValidationResult = this.bookingUtilService.validateGuestLimits(
       createBookingDto,
       propertyDetails,
     );
@@ -81,7 +86,7 @@ export class BookingSummaryService {
     }
 
     const bookingGapValidationResult =
-      await this.createBookingService.validateBookingGap(
+      await this.bookingUtilService.validateBookingGap(
         user,
         property,
         checkinDate,
@@ -92,7 +97,7 @@ export class BookingSummaryService {
     }
 
     const bookedDatesValidationResult =
-      await this.createBookingService.validateBookedDates(
+      await this.bookingUtilService.validateBookedDates(
         property,
         checkinDate,
         checkoutDate,
@@ -102,7 +107,7 @@ export class BookingSummaryService {
     }
 
     const nightCounts: NightCounts =
-      await this.createBookingService.calculateNightCounts(
+      await this.bookingUtilService.calculateNightCounts(
         property,
         checkinDate,
         checkoutDate,
@@ -110,14 +115,14 @@ export class BookingSummaryService {
       );
 
     const isLastMinuteBooking =
-      this.createBookingService.isLastMinuteBooking(checkinDate);
-    const nightsSelected = this.createBookingService.calculateNightsSelected(
+      this.bookingUtilService.isLastMinuteBooking(checkinDate);
+    const nightsSelected = this.bookingUtilService.calculateNightsSelected(
       checkinDate,
       checkoutDate,
     );
 
     const bookingRulesValidationResult =
-      await this.createBookingService.validateBookingRules(
+      await this.bookingUtilService.validateBookingRules(
         isLastMinuteBooking,
         nightsSelected,
         nightCounts,
