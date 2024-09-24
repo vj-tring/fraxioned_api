@@ -2,49 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from 'entities/booking.entity';
-import { BookingHistory } from 'entities/booking-history.entity';
 import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
 import { CreateBookingDTO } from '../../dto/requests/booking/create-booking.dto';
-import { UserProperties } from 'entities/user-properties.entity';
-import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { PropertyDetails } from '../../entities/property-details.entity';
-import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
-import { User } from 'src/main/entities/user.entity';
-import {
-  generateBookingId,
-  normalizeDates,
-  BookingUtilService,
-} from 'src/main/service/booking/utils/booking.service.util';
+import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
-import { SpaceTypes } from 'src/main/entities/space-types.entity';
-import { PropertyImages } from 'src/main/entities/property_images.entity';
+import { normalizeDates } from './utils/date.util';
+import { generateBookingId } from './utils/booking-id.util';
+import { BookingMailService } from './utils/mail.util';
+import { BookingValidationService } from './utils/validation.util';
 
 @Injectable()
 export class CreateBookingService {
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
-    @InjectRepository(UserProperties)
-    private readonly userPropertiesRepository: Repository<UserProperties>,
-    @InjectRepository(Property)
-    private readonly propertyRepository: Repository<Property>,
-    @InjectRepository(PropertyDetails)
-    private readonly propertyDetailsRepository: Repository<PropertyDetails>,
-    @InjectRepository(PropertySeasonHolidays)
-    private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
-    @InjectRepository(BookingHistory)
-    private readonly bookingHistoryRepository: Repository<BookingHistory>,
-    @InjectRepository(UserContactDetails)
-    private readonly userContactDetailsRepository: Repository<UserContactDetails>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(SpaceTypes)
-    private readonly spaceTypesRepository: Repository<SpaceTypes>,
-    @InjectRepository(PropertyImages)
-    private readonly propertyImagesRepository: Repository<PropertyImages>,
     private readonly logger: LoggerService,
     private readonly bookingUtilService: BookingUtilService,
+    private readonly bookingMailService: BookingMailService,
+    private readonly bookingValidationService: BookingValidationService,
   ) {}
 
   async createBooking(createBookingDto: CreateBookingDTO): Promise<object> {
@@ -71,7 +48,7 @@ export class CreateBookingService {
       checkoutDateStr,
     );
 
-    const dateValidationResult = this.bookingUtilService.validateDates(
+    const dateValidationResult = this.bookingValidationService.validateDates(
       checkinDate,
       checkoutDate,
       propertyDetails,
@@ -81,7 +58,7 @@ export class CreateBookingService {
     }
 
     const userPropertyValidationResult =
-      await this.bookingUtilService.validateUserProperty(
+      await this.bookingValidationService.validateUserProperty(
         user,
         property,
         checkinDate,
@@ -91,16 +68,17 @@ export class CreateBookingService {
       return userPropertyValidationResult;
     }
 
-    const guestValidationResult = this.bookingUtilService.validateGuestLimits(
-      createBookingDto,
-      propertyDetails,
-    );
+    const guestValidationResult =
+      this.bookingValidationService.validateGuestLimits(
+        createBookingDto,
+        propertyDetails,
+      );
     if (guestValidationResult !== true) {
       return guestValidationResult;
     }
 
     const bookingGapValidationResult =
-      await this.bookingUtilService.validateBookingGap(
+      await this.bookingValidationService.validateBookingGap(
         user,
         property,
         checkinDate,
@@ -111,7 +89,7 @@ export class CreateBookingService {
     }
 
     const bookedDatesValidationResult =
-      await this.bookingUtilService.validateBookedDates(
+      await this.bookingValidationService.validateBookedDates(
         property,
         checkinDate,
         checkoutDate,
@@ -135,7 +113,7 @@ export class CreateBookingService {
     );
 
     const bookingValidationResult =
-      await this.bookingUtilService.validateBookingRules(
+      await this.bookingValidationService.validateBookingRules(
         isLastMinuteBooking,
         nightsSelected,
         nightCounts,
@@ -164,7 +142,7 @@ export class CreateBookingService {
       isLastMinuteBooking,
     );
 
-    await this.bookingUtilService.sendBookingConfirmationEmail(savedBooking);
+    await this.bookingMailService.sendBookingConfirmationEmail(savedBooking);
 
     const userAction = 'Created';
     await this.bookingUtilService.createBookingHistory(

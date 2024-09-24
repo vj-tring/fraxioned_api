@@ -8,12 +8,10 @@ import { User } from 'entities/user.entity';
 import { BookingHistory } from 'entities/booking-history.entity';
 import { LoggerService } from 'services/logger.service';
 import { CreateBookingDTO } from '../../dto/requests/booking/create-booking.dto';
-import {
-  BookingUtilService,
-  generateBookingId,
-  normalizeDate,
-} from './utils/booking.service.util';
+import { BookingUtilService } from './utils/booking.service.util';
 import { NightCounts } from './interface/bookingInterface';
+import { normalizeDate } from './utils/date.util';
+import { generateBookingId } from './utils/booking-id.util';
 
 @Injectable()
 export class AdminBookingService {

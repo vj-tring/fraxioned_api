@@ -11,11 +11,7 @@ import { MailService } from 'src/main/email/mail.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
 import { format } from 'date-fns';
-import {
-  BookingUtilService,
-  normalizeDate,
-  normalizeDates,
-} from 'src/main/service/booking/utils/booking.service.util';
+import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
 import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
 import { NightCounts } from './interface/bookingInterface';
@@ -25,6 +21,8 @@ import {
 } from 'src/main/commons/constants/email/mail.constants';
 import { PropertyImages } from 'src/main/entities/property_images.entity';
 import { SpaceTypes } from 'src/main/entities/space-types.entity';
+import { normalizeDates, normalizeDate } from './utils/date.util';
+import { BookingValidationService } from './utils/validation.util';
 @Injectable()
 export class UpdateBookingService {
   constructor(
@@ -43,6 +41,7 @@ export class UpdateBookingService {
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
     private readonly bookingUtilService: BookingUtilService,
+    private readonly bookingValidationService: BookingValidationService,
   ) {}
 
   private lastCheckInDate: Date;
@@ -88,7 +87,7 @@ export class UpdateBookingService {
         newCheckoutDateStr || existingBooking.checkoutDate,
       );
 
-    const dateValidationResult = this.bookingUtilService.validateDates(
+    const dateValidationResult = this.bookingValidationService.validateDates(
       newCheckinDate,
       newCheckoutDate,
       propertyDetails,
@@ -98,7 +97,7 @@ export class UpdateBookingService {
     }
 
     const userPropertyValidationResult =
-      await this.bookingUtilService.validateUserProperty(
+      await this.bookingValidationService.validateUserProperty(
         user || existingBooking.user,
         property,
         newCheckinDate,
@@ -153,7 +152,7 @@ export class UpdateBookingService {
     );
 
     const bookingValidationResult =
-      await this.bookingUtilService.validateBookingRules(
+      await this.bookingValidationService.validateBookingRules(
         isLastMinuteBooking,
         nightsSelected,
         nightCounts,
