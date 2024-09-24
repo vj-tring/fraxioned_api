@@ -24,6 +24,8 @@ import { SpaceModule } from './main/modules/space.module';
 import { SpaceTypesModule } from './main/modules/space-types.module';
 import { BookingModule } from './main/modules/booking.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
+import { ReportsModule } from './main/modules/reports.module';
+
 
 @Module({
   imports: [
@@ -48,11 +50,13 @@ import { ContactUsModule } from './main/modules/contact-us.module';
     S3UtilsModule,
     SpaceModule,
     SpaceTypesModule,
+    
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/static',
       exclude: ['/api/(.*)'],
     }),
+    ReportsModule,
     MaintenanceModule,
     ContactUsModule,
   ],
