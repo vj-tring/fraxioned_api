@@ -3,15 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from 'entities/booking.entity';
 import { BookingHistory } from 'entities/booking-history.entity';
-import { LoggerService } from 'services/logger.service';
 import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
-import { MailService } from 'src/main/email/mail.service';
-import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { SpaceTypes } from 'src/main/entities/space-types.entity';
-import { PropertyImages } from 'src/main/entities/property_images.entity';
 import { BookingRules } from 'src/main/commons/constants/enumerations/booking-rules';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { NightCounts } from '../interface/bookingInterface';
@@ -20,8 +15,6 @@ import { isDateInRange, normalizeDate } from './date.util';
 @Injectable()
 export class BookingUtilService {
   constructor(
-    @InjectRepository(Booking)
-    private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(UserProperties)
     private readonly userPropertiesRepository: Repository<UserProperties>,
     @InjectRepository(Property)
@@ -32,16 +25,6 @@ export class BookingUtilService {
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
     @InjectRepository(BookingHistory)
     private readonly bookingHistoryRepository: Repository<BookingHistory>,
-    @InjectRepository(UserContactDetails)
-    private readonly userContactDetailsRepository: Repository<UserContactDetails>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(SpaceTypes)
-    private readonly spaceTypesRepository: Repository<SpaceTypes>,
-    @InjectRepository(PropertyImages)
-    private readonly propertyImagesRepository: Repository<PropertyImages>,
-    private readonly logger: LoggerService,
-    private readonly mailService: MailService,
   ) {}
 
   async getProperty(propertyId: number): Promise<Property> {

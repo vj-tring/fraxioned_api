@@ -6,11 +6,15 @@ import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.d
 import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 import { AuthenticationService } from 'src/main/service/auth/authentication.service';
+import { AdminBookingService } from 'src/main/service/booking/admin-booking.service';
 import { CancelBookingService } from 'src/main/service/booking/booking-cancel.service';
 import { BookingSummaryService } from 'src/main/service/booking/booking-summary.service';
 import { UpdateBookingService } from 'src/main/service/booking/booking-update.service';
 import { BookingService } from 'src/main/service/booking/booking.service';
 import { CreateBookingService } from 'src/main/service/booking/create-booking.service';
+import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
+import { BookingMailService } from 'src/main/service/booking/utils/mail.util';
+import { BookingValidationService } from 'src/main/service/booking/utils/validation.util';
 
 describe('BookingController', () => {
   let controller: BookingController;
@@ -56,6 +60,36 @@ describe('BookingController', () => {
           provide: CancelBookingService,
           useValue: {
             cancelBooking: jest.fn(),
+          },
+        },
+        {
+          provide: AdminBookingService,
+          useValue: {
+            createAdminBooking: jest.fn(),
+          },
+        },
+        {
+          provide: BookingUtilService,
+          useValue: {
+            getProperty: jest.fn(),
+            getPropertyDetails: jest.fn(),
+          },
+        },
+        {
+          provide: BookingValidationService,
+          useValue: {
+            validateBookingRules: jest.fn(),
+            validateBookedDates: jest.fn(),
+            validateBookingGap: jest.fn(),
+            validateGuestLimits: jest.fn(),
+            validateUserProperty: jest.fn(),
+            validateDates: jest.fn(),
+          },
+        },
+        {
+          provide: BookingMailService,
+          useValue: {
+            sendBookingConfirmationEmail: jest.fn(),
           },
         },
         {
