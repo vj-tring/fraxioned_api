@@ -713,6 +713,90 @@ export class CreateBookingService {
     }
   }
 
+  async getBannerImage(booking: Booking): Promise<string> {
+    const banner = await this.spaceTypesRepository.findOne({
+      where: { name: 'Banner', space: { id: 1 } },
+    });
+
+    if (!banner) {
+      this.logger.warn('Banner space type not found');
+      return;
+    }
+
+    let imageUrl = '';
+    if (banner) {
+      const image = await this.propertyImagesRepository.findOne({
+        where: {
+          spaceType: { id: banner.id },
+          property: { id: booking.property.id },
+        },
+      });
+
+      if (image) {
+        imageUrl = image.imageUrl;
+        this.logger.log(`Banner Image URL: ${imageUrl}`);
+      } else {
+        this.logger.warn(
+          `No banner image found for property ID: ${booking.property.id}`,
+        );
+      }
+
+      return imageUrl;
+    }
+  }
+
+  async getPrimaryEmail(booking: Booking): Promise<string> {
+    const contacts = await this.userContactDetailsRepository.find({
+      where: { user: { id: booking.user.id } },
+      select: ['primaryEmail'],
+    });
+
+    if (contacts || contacts.length !== 0) {
+      const { primaryEmail: email } = contacts[0];
+      return email;
+    }
+
+    return;
+  }
+
+  async createEmailContext(
+    booking: Booking,
+    property: Property,
+    user: User,
+    imageUrl: string = '',
+    lastCheckInDate: Date = undefined,
+    lastCheckOutDate: Date = undefined,
+  ): Promise<object> {
+    const context = {
+      ownerName: `${user.firstName} ${user.lastName}`,
+      propertyName: property.propertyName || 'N/A',
+      propertyAddress: property.address || 'N/A',
+      bookingId: booking.bookingId || 'N/A',
+      lastCheckIn: lastCheckInDate
+        ? format(lastCheckInDate, 'MM/dd/yyyy @ KK:mm aa')
+        : 'N/A',
+      lastCheckOut: lastCheckOutDate
+        ? format(lastCheckOutDate, 'MM/dd/yyyy @ KK:mm aa')
+        : 'N/A',
+      checkIn: booking.checkinDate
+        ? format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa')
+        : 'N/A',
+      checkOut: booking.checkoutDate
+        ? format(booking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa')
+        : 'N/A',
+      adults: booking.noOfAdults || 0,
+      children: booking.noOfChildren || 0,
+      pets: booking.noOfPets || 0,
+      notes: booking.notes || 'None',
+      banner: imageUrl || 'default-banner-url.jpg',
+      totalNights: booking.totalNights || 0,
+      modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+      cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+    };
+
+    return context;
+  }
+
   async sendBookingConfirmationEmail(booking: Booking): Promise<void | Error> {
     try {
       if (!booking || !booking.user || !booking.property) {
@@ -727,74 +811,26 @@ export class CreateBookingService {
         return new Error(`Owner not found for user ID: ${booking.user.id}`);
       }
 
-      const contacts = await this.userContactDetailsRepository.find({
-        where: { user: { id: booking.user.id } },
-        select: ['primaryEmail'],
-      });
+      const email = await this.getPrimaryEmail(booking);
 
-      if (!contacts || contacts.length === 0) {
-        return new Error(
-          `Contact details not found for user ID: ${booking.user.id}`,
-        );
-      }
-
-      const banner = await this.spaceTypesRepository.findOne({
-        where: { name: 'Banner', space: { id: 1 } },
-      });
-
-      if (!banner) {
-        this.logger.warn('Banner space type not found');
-      }
-
-      let imageUrl = '';
-      if (banner) {
-        const image = await this.propertyImagesRepository.findOne({
-          where: {
-            spaceType: { id: banner.id },
-            property: { id: booking.property.id },
-          },
-        });
-
-        if (image) {
-          imageUrl = image.imageUrl;
-          this.logger.log(`Banner Image URL: ${imageUrl}`);
-        } else {
-          this.logger.warn(
-            `No banner image found for property ID: ${booking.property.id}`,
-          );
-        }
-      }
-
-      const { primaryEmail: email } = contacts[0];
       if (!email) {
         throw new Error(
           `Primary email not found for user ID: ${booking.user.id}`,
         );
       }
 
+      const imageUrl = await this.getBannerImage(booking);
+
       const propertyName = await this.getProperty(booking.property.id);
 
       const subject = mailSubject.booking.confirmation;
       const template = mailTemplates.booking.confirmation;
-      const context = {
-        ownerName: `${owner.firstName} ${owner.lastName}`,
-        propertyName: propertyName.propertyName || 'N/A',
-        bookingId: booking.bookingId || 'N/A',
-        checkIn: booking.checkinDate
-          ? format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa')
-          : 'N/A',
-        checkOut: booking.checkoutDate
-          ? format(booking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa')
-          : 'N/A',
-        adults: booking.noOfAdults || 0,
-        children: booking.noOfChildren || 0,
-        pets: booking.noOfPets || 0,
-        notes: booking.notes || 'None',
-        banner: imageUrl || 'default-banner-url.jpg',
-        totalNights: booking.totalNights || 0,
-        modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
-        cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
-      };
+      const context = await this.createEmailContext(
+        booking,
+        propertyName,
+        owner,
+        imageUrl,
+      );
 
       await this.mailService.sendMail(email, subject, template, context);
       this.logger.log(`Booking confirmation email has been sent to: ${email}`);

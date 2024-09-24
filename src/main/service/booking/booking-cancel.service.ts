@@ -14,8 +14,7 @@ import {
   mailSubject,
   mailTemplates,
 } from 'src/main/commons/constants/email/mail.constants';
-import { format, differenceInDays } from 'date-fns';
-import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
+import { differenceInDays } from 'date-fns';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 import { NightCounts } from './interface/bookingInterface';
 
@@ -282,18 +281,8 @@ export class CancelBookingService {
         return new Error(`Owner not found for user ID: ${booking.user.id}`);
       }
 
-      const contacts = await this.userContactDetailsRepository.find({
-        where: { user: { id: booking.user.id } },
-        select: ['primaryEmail'],
-      });
+      const email = await this.createBookingService.getPrimaryEmail(booking);
 
-      if (!contacts || contacts.length === 0) {
-        return new Error(
-          `Contact details not found for user ID: ${booking.user.id}`,
-        );
-      }
-
-      const { primaryEmail: email } = contacts[0];
       if (!email) {
         throw new Error(
           `Primary email not found for user ID: ${booking.user.id}`,
@@ -306,24 +295,11 @@ export class CancelBookingService {
 
       const subject = mailSubject.booking.cancellation;
       const template = mailTemplates.booking.cancellation;
-      const context = {
-        ownerName: `${owner.firstName} ${owner.lastName}`,
-        propertyName: propertyName.propertyName || 'N/A',
-        bookingId: booking.bookingId || 'N/A',
-        checkIn: booking.checkinDate
-          ? format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa')
-          : 'N/A',
-        checkOut: booking.checkoutDate
-          ? format(booking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa')
-          : 'N/A',
-        adults: booking.noOfAdults || 0,
-        children: booking.noOfChildren || 0,
-        pets: booking.noOfPets || 0,
-        notes: booking.notes || 'None',
-        totalNights: booking.totalNights || 0,
-        modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
-        cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
-      };
+      const context = await this.createBookingService.createEmailContext(
+        booking,
+        propertyName,
+        owner,
+      );
 
       await this.mailService.sendMail(email, subject, template, context);
       this.logger.log(`Booking cancellation email has been sent to: ${email}`);
