@@ -109,6 +109,7 @@ export class InviteService {
         updatedBy: updatedByUser.id,
         role: role,
       });
+      await this.userRepository.save(user);
 
       const contact = {
         user,
@@ -119,6 +120,7 @@ export class InviteService {
       };
 
       const userContact = this.userContactRepository.create(contact);
+      await this.userContactRepository.save(userContact);
 
       const currentYear = new Date().getFullYear();
       const userPropertyEntities = [];
@@ -146,9 +148,6 @@ export class InviteService {
             userProperty.propertyRemainingShare,
           );
         }
-        await this.userRepository.save(user);
-
-        await this.userContactRepository.save(userContact);
 
         userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
         await this.propertyRepository.save(userProperty);

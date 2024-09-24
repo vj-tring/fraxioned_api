@@ -20,6 +20,10 @@ import { SpaceTypes } from '../entities/space-types.entity';
 import { PropertyImages } from '../entities/property_images.entity';
 import { UpdateBookingService } from '../service/booking/booking-update.service';
 import { CancelBookingService } from '../service/booking/booking-cancel.service';
+import { AdminBookingService } from '../service/booking/admin-booking.service';
+import { BookingUtilService } from '../service/booking/utils/booking.service.util';
+import { BookingMailService } from '../service/booking/utils/mail.util';
+import { BookingValidationService } from '../service/booking/utils/validation.util';
 
 @Module({
   imports: [
@@ -47,6 +51,10 @@ import { CancelBookingService } from '../service/booking/booking-cancel.service'
     MailService,
     UpdateBookingService,
     CancelBookingService,
+    AdminBookingService,
+    BookingUtilService,
+    BookingMailService,
+    BookingValidationService,
   ],
 })
 export class BookingModule {}

@@ -10,16 +10,18 @@ import { PropertyDetails } from '../../entities/property-details.entity';
 import { MailService } from 'src/main/email/mail.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
-import { normalizeDate } from 'src/main/service/booking/utils/booking.util';
+import { format } from 'date-fns';
+import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
 import { NightCounts } from './interface/bookingInterface';
-import { CreateBookingService } from './create-booking.service';
 import {
   mailSubject,
   mailTemplates,
 } from 'src/main/commons/constants/email/mail.constants';
 import { PropertyImages } from 'src/main/entities/property_images.entity';
 import { SpaceTypes } from 'src/main/entities/space-types.entity';
+import { normalizeDates, normalizeDate } from './utils/date.util';
+import { BookingValidationService } from './utils/validation.util';
 @Injectable()
 export class UpdateBookingService {
   constructor(
@@ -37,7 +39,8 @@ export class UpdateBookingService {
     private readonly spaceTypesRepository: Repository<SpaceTypes>,
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
-    private readonly createBookingService: CreateBookingService,
+    private readonly bookingUtilService: BookingUtilService,
+    private readonly bookingValidationService: BookingValidationService,
   ) {}
 
   private lastCheckInDate: Date;
@@ -67,23 +70,23 @@ export class UpdateBookingService {
       user,
     } = updateBookingDto;
 
-    const property = await this.createBookingService.getProperty(
+    const property = await this.bookingUtilService.getProperty(
       existingBooking.property.id,
     );
     const propertyDetails =
-      await this.createBookingService.getPropertyDetails(property);
+      await this.bookingUtilService.getPropertyDetails(property);
 
     if (!propertyDetails) {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
     const { checkinDate: newCheckinDate, checkoutDate: newCheckoutDate } =
-      this.createBookingService.normalizeDates(
+      normalizeDates(
         newCheckinDateStr || existingBooking.checkinDate,
         newCheckoutDateStr || existingBooking.checkoutDate,
       );
 
-    const dateValidationResult = this.createBookingService.validateDates(
+    const dateValidationResult = this.bookingValidationService.validateDates(
       newCheckinDate,
       newCheckoutDate,
       propertyDetails,
@@ -93,7 +96,7 @@ export class UpdateBookingService {
     }
 
     const userPropertyValidationResult =
-      await this.createBookingService.validateUserProperty(
+      await this.bookingValidationService.validateUserProperty(
         user || existingBooking.user,
         property,
         newCheckinDate,
@@ -133,7 +136,7 @@ export class UpdateBookingService {
       return bookedDatesValidationResult;
     }
 
-    const nightCounts = await this.createBookingService.calculateNightCounts(
+    const nightCounts = await this.bookingUtilService.calculateNightCounts(
       property,
       newCheckinDate,
       newCheckoutDate,
@@ -141,14 +144,14 @@ export class UpdateBookingService {
     );
 
     const isLastMinuteBooking =
-      this.createBookingService.isLastMinuteBooking(newCheckinDate);
-    const nightsSelected = this.createBookingService.calculateNightsSelected(
+      this.bookingUtilService.isLastMinuteBooking(newCheckinDate);
+    const nightsSelected = this.bookingUtilService.calculateNightsSelected(
       newCheckinDate,
       newCheckoutDate,
     );
 
     const bookingValidationResult =
-      await this.createBookingService.validateBookingRules(
+      await this.bookingValidationService.validateBookingRules(
         isLastMinuteBooking,
         nightsSelected,
         nightCounts,
@@ -182,7 +185,7 @@ export class UpdateBookingService {
     await this.sendBookingModificationEmail(updatedBooking);
 
     const userAction = 'Updated';
-    await this.createBookingService.createBookingHistory(
+    await this.bookingUtilService.createBookingHistory(
       updatedBooking,
       updateBookingDto.updatedBy,
       userAction,
@@ -238,11 +241,11 @@ export class UpdateBookingService {
     existingBooking: Booking,
   ): Promise<void> {
     const existingNightCounts =
-      await this.createBookingService.calculateNightCounts(
+      await this.bookingUtilService.calculateNightCounts(
         property,
         existingBooking.checkinDate,
         existingBooking.checkoutDate,
-        await this.createBookingService.getPropertyDetails(property),
+        await this.bookingUtilService.getPropertyDetails(property),
       );
 
     await this.revertUserProperties(
@@ -281,7 +284,7 @@ export class UpdateBookingService {
         userPropertyFirstYear.lastMinuteRemainingNights -= totalNightsFirstYear;
         userPropertyFirstYear.lastMinuteBookedNights += totalNightsFirstYear;
       } else {
-        this.createBookingService.updateNightCounts(
+        this.bookingUtilService.updateNightCounts(
           userPropertyFirstYear,
           newNightCounts,
           'FirstYear',
@@ -299,7 +302,7 @@ export class UpdateBookingService {
           totalNightsSecondYear;
         userPropertySecondYear.lastMinuteBookedNights += totalNightsSecondYear;
       } else {
-        this.createBookingService.updateNightCounts(
+        this.bookingUtilService.updateNightCounts(
           userPropertySecondYear,
           newNightCounts,
           'SecondYear',
@@ -312,7 +315,7 @@ export class UpdateBookingService {
       newNightCounts.peakHolidayNightsInFirstYear > 0 &&
       !isLastMinuteBooking
     ) {
-      await this.createBookingService.updatePeakHoliday(
+      await this.bookingUtilService.updatePeakHoliday(
         firstYear,
         newNightCounts.peakHolidayNightsInFirstYear,
         user,
@@ -323,7 +326,7 @@ export class UpdateBookingService {
       newNightCounts.peakHolidayNightsInSecondYear > 0 &&
       !isLastMinuteBooking
     ) {
-      await this.createBookingService.updatePeakHoliday(
+      await this.bookingUtilService.updatePeakHoliday(
         secondYear,
         newNightCounts.peakHolidayNightsInSecondYear,
         user,
@@ -477,9 +480,7 @@ export class UpdateBookingService {
         );
       }
 
-      const imageUrl = await this.createBookingService.getBannerImage(booking);
-
-      const propertyName = await this.createBookingService.getProperty(
+      const propertyName = await this.bookingUtilService.getProperty(
         booking.property.id,
       );
 
