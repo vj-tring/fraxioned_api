@@ -10,18 +10,14 @@ import { PropertyDetails } from '../../entities/property-details.entity';
 import { MailService } from 'src/main/email/mail.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
-import { format } from 'date-fns';
 import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
 import { NightCounts } from './interface/bookingInterface';
-import {
-  mailSubject,
-  mailTemplates,
-} from 'src/main/commons/constants/email/mail.constants';
 import { PropertyImages } from 'src/main/entities/property_images.entity';
 import { SpaceTypes } from 'src/main/entities/space-types.entity';
 import { normalizeDates, normalizeDate } from './utils/date.util';
 import { BookingValidationService } from './utils/validation.util';
+import { BookingMailService } from './utils/mail.util';
 @Injectable()
 export class UpdateBookingService {
   constructor(
@@ -41,6 +37,7 @@ export class UpdateBookingService {
     private readonly mailService: MailService,
     private readonly bookingUtilService: BookingUtilService,
     private readonly bookingValidationService: BookingValidationService,
+    private readonly bookingMailService: BookingMailService,
   ) {}
 
   private lastCheckInDate: Date;
@@ -182,7 +179,11 @@ export class UpdateBookingService {
       nightsSelected,
     );
 
-    await this.sendBookingModificationEmail(updatedBooking);
+    await this.bookingMailService.sendBookingModificationEmail(
+      updatedBooking,
+      this.lastCheckInDate,
+      this.lastCheckOutDate,
+    );
 
     const userAction = 'Updated';
     await this.bookingUtilService.createBookingHistory(
@@ -449,60 +450,6 @@ export class UpdateBookingService {
       userProperty.peakRemainingHolidayNights += nights;
       userProperty.peakBookedHolidayNights -= nights;
       await this.userPropertiesRepository.save(userProperty);
-    }
-  }
-
-  private async sendBookingModificationEmail(
-    booking: Booking,
-  ): Promise<void | Error> {
-    try {
-      if (!booking || !booking.user || !booking.property) {
-        return new Error('Invalid booking data');
-      }
-
-      if (!this.lastCheckInDate || !this.lastCheckOutDate) {
-        return new Error('Invalid existing booking date');
-      }
-
-      const owner = await this.userRepository.findOne({
-        where: { id: booking.user.id },
-      });
-
-      if (!owner) {
-        return new Error(`Owner not found for user ID: ${booking.user.id}`);
-      }
-
-      const email = await this.createBookingService.getPrimaryEmail(booking);
-
-      if (!email) {
-        throw new Error(
-          `Primary email not found for user ID: ${booking.user.id}`,
-        );
-      }
-
-      const propertyName = await this.bookingUtilService.getProperty(
-        booking.property.id,
-      );
-
-      const subject = mailSubject.booking.modification;
-      const template = mailTemplates.booking.modification;
-      const context = await this.createBookingService.createEmailContext(
-        booking,
-        propertyName,
-        owner,
-        imageUrl,
-        this.lastCheckInDate,
-        this.lastCheckOutDate,
-      );
-
-      await this.mailService.sendMail(email, subject, template, context);
-      this.logger.log(
-        `Booking update confirmation email has been sent to: ${email}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Failed to send booking update confirmation email: ${error.message}`,
-      );
     }
   }
 
