@@ -6,7 +6,7 @@ import { ReportsController } from '../controller/reports.controller';
 import { AuthenticationModule } from './authentication.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BookingHistory]),AuthenticationModule,],
+  imports: [TypeOrmModule.forFeature([BookingHistory]), AuthenticationModule],
   controllers: [ReportsController],
   providers: [ReportsService],
 })

@@ -9,7 +9,10 @@ import {
   Headers,
 } from '@nestjs/common';
 import { ReportsService } from '../service/reports.service';
-import { BookingReportDto, ReportFormat } from '../dto/requests/booking-report.dto';
+import {
+  BookingReportDto,
+  ReportFormat,
+} from '../dto/requests/booking-report.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
@@ -27,23 +30,38 @@ export class ReportsController {
     @Res() res: Response,
     @Headers('user-id') userId: string,
     @Headers('access-token') accessToken: string,
-  ) {
+  ): Promise<Response> {
     if (!userId || !accessToken) {
-      return res.status(HttpStatus.UNAUTHORIZED).send('User ID and access token must be provided.');
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .send('User ID and access token must be provided.');
     }
 
-    const hasFilters = reportDto.propertyId || reportDto.userId || (reportDto.fromDate && reportDto.toDate);
-    
+    const hasFilters =
+      reportDto.propertyId ||
+      reportDto.userId ||
+      (reportDto.fromDate && reportDto.toDate);
+
     if (!hasFilters) {
-      return res.status(HttpStatus.BAD_REQUEST).send('At least one filter (propertyId, userId, or date range) must be provided.');
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send(
+          'At least one filter (propertyId, userId, or date range) must be provided.',
+        );
     }
 
     const reportBuffer = await this.reportsService.generateReport(reportDto);
 
     switch (reportDto.format) {
       case ReportFormat.EXCEL:
-        res.setHeader('Content-Disposition', 'attachment; filename=report.xlsx');
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader(
+          'Content-Disposition',
+          'attachment; filename=report.xlsx',
+        );
+        res.setHeader(
+          'Content-Type',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        );
         return res.send(reportBuffer);
       case ReportFormat.PDF:
         res.setHeader('Content-Disposition', 'attachment; filename=report.pdf');

@@ -24,5 +24,5 @@ export class BookingReportDto {
   toDate?: string;
 
   @IsEnum(ReportFormat)
-  format: ReportFormat; 
+  format: ReportFormat;
 }

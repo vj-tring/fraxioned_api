@@ -26,7 +26,6 @@ import { BookingModule } from './main/modules/booking.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
 import { ReportsModule } from './main/modules/reports.module';
 
-
 @Module({
   imports: [
     DatabaseModule,
@@ -50,7 +49,7 @@ import { ReportsModule } from './main/modules/reports.module';
     S3UtilsModule,
     SpaceModule,
     SpaceTypesModule,
-    
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/static',
