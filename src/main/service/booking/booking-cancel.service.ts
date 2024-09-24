@@ -9,7 +9,6 @@ import { MailService } from 'src/main/email/mail.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { CreateBookingService } from './create-booking.service';
 import {
   mailSubject,
   mailTemplates,
@@ -18,6 +17,7 @@ import { format, differenceInDays } from 'date-fns';
 import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 import { NightCounts } from './interface/bookingInterface';
+import { BookingUtilService } from './utils/booking.service.util';
 
 @Injectable()
 export class CancelBookingService {
@@ -32,7 +32,7 @@ export class CancelBookingService {
     private readonly userRepository: Repository<User>,
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
-    private readonly createBookingService: CreateBookingService,
+    private readonly bookingUtilService: BookingUtilService,
   ) {}
 
   async cancelBooking(id: number, user: number): Promise<object> {
@@ -61,17 +61,17 @@ export class CancelBookingService {
       return cancellationValidation;
     }
 
-    const property = await this.createBookingService.getProperty(
+    const property = await this.bookingUtilService.getProperty(
       existingBooking.property.id,
     );
     const propertyDetails =
-      await this.createBookingService.getPropertyDetails(property);
+      await this.bookingUtilService.getPropertyDetails(property);
 
     if (!propertyDetails) {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
-    const nightCounts = await this.createBookingService.calculateNightCounts(
+    const nightCounts = await this.bookingUtilService.calculateNightCounts(
       property,
       existingBooking.checkinDate,
       existingBooking.checkoutDate,
@@ -100,7 +100,7 @@ export class CancelBookingService {
     await this.sendBookingCancellationEmail(cancelledBooking);
 
     const userAction = 'Cancelled';
-    await this.createBookingService.createBookingHistory(
+    await this.bookingUtilService.createBookingHistory(
       cancelledBooking,
       cancelledBy,
       userAction,
@@ -300,7 +300,7 @@ export class CancelBookingService {
         );
       }
 
-      const propertyName = await this.createBookingService.getProperty(
+      const propertyName = await this.bookingUtilService.getProperty(
         booking.property.id,
       );
 
