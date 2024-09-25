@@ -17,7 +17,7 @@ import { PropertyCodeCategory } from '../entities/property-code-category.entity'
 import { CreatePropertyCodeCategoryDto } from '../dto/requests/property-code-category/create-property-code-category.dto';
 
 @ApiTags('Property Code Category')
-@Controller('v1/propertyCodeCategories')
+@Controller('v1/property-code-categories')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class PropertyCodeCategoryController {
@@ -67,7 +67,7 @@ export class PropertyCodeCategoryController {
     }
   }
 
-  @Get('propertyCodeCategory/:id')
+  @Get('property-code-category/:id')
   async getPropertyCodeCategoryById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -86,7 +86,7 @@ export class PropertyCodeCategoryController {
     }
   }
 
-  @Delete('propertyCodeCategory/:id')
+  @Delete('property-code-category/:id')
   async deletePropertyCodeCategory(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {

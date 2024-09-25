@@ -36,7 +36,7 @@ import {
 } from '../utils/image-file.utils';
 
 @ApiTags('Property Images')
-@Controller('v1/propertyImages')
+@Controller('v1/property-images')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class PropertyImagesController {
@@ -130,7 +130,7 @@ export class PropertyImagesController {
     }
   }
 
-  @Get('propertyImage/:id')
+  @Get('property-image/:id')
   async getByPropertyImageId(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -148,7 +148,7 @@ export class PropertyImagesController {
     }
   }
 
-  @Patch('propertyImage/:id')
+  @Patch('property-image/:id')
   @UseInterceptors(FileInterceptor('imageFile'))
   async updatePropertyImageId(
     @Param('id') id: number,
@@ -207,7 +207,7 @@ export class PropertyImagesController {
     }
   }
 
-  @Delete('propertyImage/:id')
+  @Delete('property-image/:id')
   async deletePropertyImage(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {

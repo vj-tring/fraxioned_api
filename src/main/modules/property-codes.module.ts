@@ -5,10 +5,11 @@ import { PropertyCodes } from '../entities/property_codes.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Property } from '../entities/property.entity';
 import { AuthenticationModule } from './authentication.module';
+import { PropertyCodeCategory } from '../entities/property-code-category.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PropertyCodes, Property]),
+    TypeOrmModule.forFeature([PropertyCodes, Property, PropertyCodeCategory]),
     AuthenticationModule,
   ],
   controllers: [PropertyCodesController],
