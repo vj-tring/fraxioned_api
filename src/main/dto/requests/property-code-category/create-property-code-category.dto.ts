@@ -3,8 +3,8 @@ import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateHouseCodeCategoryDto {
-  @IsNotEmpty({ message: 'house code name is required' })
+export class CreatePropertyCodeCategoryDto {
+  @IsNotEmpty({ message: 'property code name is required' })
   @IsString()
   name: string;
 

@@ -11,8 +11,8 @@ import {
 import { User } from './user.entity';
 // import { PropertyCodes } from './property_codes.entity';
 
-@Entity('fxn_house_code_category')
-export class HouseCodeCategory {
+@Entity('fxn_property_code_category')
+export class PropertyCodeCategory {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -33,6 +33,6 @@ export class HouseCodeCategory {
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
 
-  // @OneToMany(() => PropertyCodes, (propertyCode) => propertyCode.houseCodeCategory)
+  // @OneToMany(() => PropertyCodes, (propertyCode) => propertyCode.propertyCodeCategory)
   // propertyCodes: PropertyCodes[];
 }

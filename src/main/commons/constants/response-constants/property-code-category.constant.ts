@@ -1,12 +1,12 @@
 import { HttpStatus } from '@nestjs/common';
-import { HouseCodeCategory } from 'src/main/entities/house-code-category.entity';
+import { PropertyCodeCategory } from 'src/main/entities/property-code-category.entity';
 
-export const HOUSE_CODE_CATEGORY_RESPONSES = {
-  HOUSE_CODE_CATEGORY_ALREADY_EXISTS: (
-    houseCodeCategoryName: string,
+export const PROPERTY_CODE_CATEGORY_RESPONSES = {
+  PROPERTY_CODE_CATEGORY_ALREADY_EXISTS: (
+    propertyCodeCategoryName: string,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: false,
-    message: `House code category ${houseCodeCategoryName} already exists`,
+    message: `Property code category ${propertyCodeCategoryName} already exists`,
     statusCode: HttpStatus.CONFLICT,
   }),
   USER_NOT_FOUND: (
@@ -16,67 +16,67 @@ export const HOUSE_CODE_CATEGORY_RESPONSES = {
     message: `User with ID ${createdBy} does not exist`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
-  HOUSE_CODE_CATEGORY_CREATED: (
-    savedHouseCodeCategory: HouseCodeCategory,
+  PROPERTY_CODE_CATEGORY_CREATED: (
+    savedPropertyCodeCategory: PropertyCodeCategory,
   ): {
     success: boolean;
     message: string;
-    data: HouseCodeCategory;
+    data: PropertyCodeCategory;
     statusCode: HttpStatus;
   } => ({
     success: true,
-    message: `House code category ${savedHouseCodeCategory.name} created with ID ${savedHouseCodeCategory.id}`,
-    data: savedHouseCodeCategory,
+    message: `Property code category ${savedPropertyCodeCategory.name} created with ID ${savedPropertyCodeCategory.id}`,
+    data: savedPropertyCodeCategory,
     statusCode: HttpStatus.CREATED,
   }),
-  HOUSE_CODE_CATEGORIES_NOT_FOUND: (): {
+  PROPERTY_CODE_CATEGORIES_NOT_FOUND: (): {
     success: boolean;
     message: string;
-    data?: HouseCodeCategory[];
+    data?: PropertyCodeCategory[];
     statusCode: number;
   } => ({
     success: true,
-    message: 'No house code categories are available',
+    message: 'No property code categories are available',
     data: [],
     statusCode: HttpStatus.OK,
   }),
-  HOUSE_CODE_CATEGORIES_FETCHED: (
-    houseCodeCategories: HouseCodeCategory[],
+  PROPERTY_CODE_CATEGORIES_FETCHED: (
+    propertyCodeCategories: PropertyCodeCategory[],
   ): {
     success: boolean;
     message: string;
-    data?: HouseCodeCategory[];
+    data?: PropertyCodeCategory[];
     statusCode: number;
   } => ({
     success: true,
-    message: `Retrieved ${houseCodeCategories.length} house code categories successfully.`,
-    data: houseCodeCategories,
+    message: `Retrieved ${propertyCodeCategories.length} property code categories successfully.`,
+    data: propertyCodeCategories,
     statusCode: HttpStatus.OK,
   }),
-  HOUSE_CODE_CATEGORY_NOT_FOUND: (
+  PROPERTY_CODE_CATEGORY_NOT_FOUND: (
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: HouseCodeCategory;
+    data?: PropertyCodeCategory;
     statusCode: number;
   } => ({
     success: false,
-    message: `House code category with ID ${id} not found`,
+    message: `Property code category with ID ${id} not found`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
-  HOUSE_CODE_CATEGORY_FETCHED: (
-    houseCodeCategory: HouseCodeCategory,
+  PROPERTY_CODE_CATEGORY_FETCHED: (
+    propertyCodeCategory: PropertyCodeCategory,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: HouseCodeCategory;
+    data?: PropertyCodeCategory;
     statusCode: number;
   } => ({
     success: true,
-    message: `House code category with ID ${id} retrieved successfully`,
-    data: houseCodeCategory,
+    message: `Property code category with ID ${id} retrieved successfully`,
+    data: propertyCodeCategory,
     statusCode: HttpStatus.OK,
   }),
   //   SPACE_FOREIGN_KEY_CONFLICT: (
@@ -90,7 +90,7 @@ export const HOUSE_CODE_CATEGORY_RESPONSES = {
   //     message: `Space ID ${id} exists and is mapped to space type, hence cannot be deleted.`,
   //     statusCode: HttpStatus.CONFLICT,
   //   }),
-  HOUSE_CODE_CATEGORY_DELETED: (
+  PROPERTY_CODE_CATEGORY_DELETED: (
     id: number,
   ): {
     success: boolean;
@@ -98,7 +98,7 @@ export const HOUSE_CODE_CATEGORY_RESPONSES = {
     statusCode: number;
   } => ({
     success: true,
-    message: `House code category with ID ${id} deleted successfully`,
+    message: `Property code category with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
 };
