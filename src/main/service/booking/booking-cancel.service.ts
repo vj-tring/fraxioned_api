@@ -9,15 +9,11 @@ import { MailService } from 'src/main/email/mail.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { CreateBookingService } from './create-booking.service';
-import {
-  mailSubject,
-  mailTemplates,
-} from 'src/main/commons/constants/email/mail.constants';
-import { format, differenceInDays } from 'date-fns';
-import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
+import { differenceInDays } from 'date-fns';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
 import { NightCounts } from './interface/bookingInterface';
+import { BookingUtilService } from './utils/booking.service.util';
+import { BookingMailService } from './utils/mail.util';
 
 @Injectable()
 export class CancelBookingService {
@@ -32,7 +28,8 @@ export class CancelBookingService {
     private readonly userRepository: Repository<User>,
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
-    private readonly createBookingService: CreateBookingService,
+    private readonly bookingUtilService: BookingUtilService,
+    private readonly bookingMailService: BookingMailService,
   ) {}
 
   async cancelBooking(id: number, user: number): Promise<object> {
@@ -61,17 +58,17 @@ export class CancelBookingService {
       return cancellationValidation;
     }
 
-    const property = await this.createBookingService.getProperty(
+    const property = await this.bookingUtilService.getProperty(
       existingBooking.property.id,
     );
     const propertyDetails =
-      await this.createBookingService.getPropertyDetails(property);
+      await this.bookingUtilService.getPropertyDetails(property);
 
     if (!propertyDetails) {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
-    const nightCounts = await this.createBookingService.calculateNightCounts(
+    const nightCounts = await this.bookingUtilService.calculateNightCounts(
       property,
       existingBooking.checkinDate,
       existingBooking.checkoutDate,
@@ -97,10 +94,12 @@ export class CancelBookingService {
     existingBooking.isCancelled = true;
     const cancelledBooking = await this.bookingRepository.save(existingBooking);
 
-    await this.sendBookingCancellationEmail(cancelledBooking);
+    await this.bookingMailService.sendBookingCancellationEmail(
+      cancelledBooking,
+    );
 
     const userAction = 'Cancelled';
-    await this.createBookingService.createBookingHistory(
+    await this.bookingUtilService.createBookingHistory(
       cancelledBooking,
       cancelledBy,
       userAction,
@@ -263,74 +262,6 @@ export class CancelBookingService {
       }
       userProperty.peakBookedHolidayNights -= nights;
       await this.userPropertiesRepository.save(userProperty);
-    }
-  }
-
-  private async sendBookingCancellationEmail(
-    booking: Booking,
-  ): Promise<void | Error> {
-    try {
-      if (!booking || !booking.user || !booking.property) {
-        return new Error('Invalid booking data');
-      }
-
-      const owner = await this.userRepository.findOne({
-        where: { id: booking.user.id },
-      });
-
-      if (!owner) {
-        return new Error(`Owner not found for user ID: ${booking.user.id}`);
-      }
-
-      const contacts = await this.userContactDetailsRepository.find({
-        where: { user: { id: booking.user.id } },
-        select: ['primaryEmail'],
-      });
-
-      if (!contacts || contacts.length === 0) {
-        return new Error(
-          `Contact details not found for user ID: ${booking.user.id}`,
-        );
-      }
-
-      const { primaryEmail: email } = contacts[0];
-      if (!email) {
-        throw new Error(
-          `Primary email not found for user ID: ${booking.user.id}`,
-        );
-      }
-
-      const propertyName = await this.createBookingService.getProperty(
-        booking.property.id,
-      );
-
-      const subject = mailSubject.booking.cancellation;
-      const template = mailTemplates.booking.cancellation;
-      const context = {
-        ownerName: `${owner.firstName} ${owner.lastName}`,
-        propertyName: propertyName.propertyName || 'N/A',
-        bookingId: booking.bookingId || 'N/A',
-        checkIn: booking.checkinDate
-          ? format(booking.checkinDate, 'MM/dd/yyyy @ KK:mm aa')
-          : 'N/A',
-        checkOut: booking.checkoutDate
-          ? format(booking.checkoutDate, 'MM/dd/yyyy @ KK:mm aa')
-          : 'N/A',
-        adults: booking.noOfAdults || 0,
-        children: booking.noOfChildren || 0,
-        pets: booking.noOfPets || 0,
-        notes: booking.notes || 'None',
-        totalNights: booking.totalNights || 0,
-        modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
-        cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
-      };
-
-      await this.mailService.sendMail(email, subject, template, context);
-      this.logger.log(`Booking cancellation email has been sent to: ${email}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send booking cancellation email: ${error.message}`,
-      );
     }
   }
 }
