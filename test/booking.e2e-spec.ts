@@ -8,15 +8,9 @@ describe('Booking API Test', () => {
   const url2 = `${baseurl}/holidays`;
   let token: string;
   let userid: number;
+  let psbid: number;
   let connection: Connection;
   beforeAll(async () => {
-    connection = await createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '1234',
-      database: 'fraxioned_test',
-    });
-    await connection.query(`CREATE DATABASE fraxioned_test`);
     const login_credentials = {
       email: 'owner@fraxioned.com',
       password: 'Owner@123',
@@ -28,47 +22,64 @@ describe('Booking API Test', () => {
     const { session, user } = response.body;
     token = session.token;
     userid = user.id;
-    it('Holiday Seeding', async () => {
-      const credentials1 = {
-        startDate: '2025-04-01',
-        endDate: '2025-04-01',
-        createdBy: { id: 1 },
-        properties: [{ id: 1 }],
-        name: 'Peak Season Holiday(One day)',
-        year: 2025,
-      };
-      const credentials2 = {
-        startDate: '2025-05-01',
-        endDate: '2025-05-05',
-        createdBy: { id: 1 },
-        properties: [{ id: 1 }],
-        name: 'Peak Season Holiday(More than one day)',
-        year: 2025,
-      };
-      const credentials3 = {
-        startDate: '2025-07-01',
-        endDate: '2025-07-01',
-        createdBy: { id: 1 },
-        properties: [{ id: 1 }],
-        name: 'Off Season Holiday(One day)',
-        year: 2025,
-      };
-      const credentials4 = {
-        startDate: '2025-08-01',
-        endDate: '2025-08-05',
-        createdBy: { id: 1 },
-        properties: [{ id: 1 }],
-        name: 'Off Season Holiday(More than one day)',
-        year: 2025,
-      };
-      await request(url2)
-        .post('/holiday')
-        .set('Accept', 'application/json')
-        .send(credentials1)
-        .send(credentials2)
-        .send(credentials3)
-        .send(credentials4);
-    });
+  });
+  it('Holiday Seeding', async () => {
+    const credentials1 = {
+      startDate: '2025-04-20',
+      endDate: '2025-04-20',
+      createdBy: { id: 1 },
+      properties: [{ id: 1 }],
+      name: 'Peak Season Holiday(One day)',
+      year: 2025,
+    };
+    const credentials2 = {
+      startDate: '2025-05-01',
+      endDate: '2025-05-05',
+      createdBy: { id: 1 },
+      properties: [{ id: 1 }],
+      name: 'Peak Season Holiday(More than one day)',
+      year: 2025,
+    };
+    const credentials3 = {
+      startDate: '2025-07-23',
+      endDate: '2025-07-23',
+      createdBy: { id: 1 },
+      properties: [{ id: 1 }],
+      name: 'Off Season Holiday(One day)',
+      year: 2025,
+    };
+    const credentials4 = {
+      startDate: '2025-11-01',
+      endDate: '2025-11-05',
+      createdBy: { id: 1 },
+      properties: [{ id: 1 }],
+      name: 'Off Season Holiday(More than one day)',
+      year: 2025,
+    };
+    await request(url2)
+      .post('/holiday')
+      .set('Accept', 'application/json')
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`)
+      .send(credentials1);
+    await request(url2)
+      .post('/holiday')
+      .set('Accept', 'application/json')
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`)
+      .send(credentials2);
+    await request(url2)
+      .post('/holiday')
+      .set('Accept', 'application/json')
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`)
+      .send(credentials3);
+    await request(url2)
+      .post('/holiday')
+      .set('Accept', 'application/json')
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`)
+      .send(credentials4);
   });
   afterAll(async () => {
     connection = await createConnection({
@@ -78,9 +89,64 @@ describe('Booking API Test', () => {
       database: 'fraxioned_test',
     });
     await connection.query(`DROP DATABASE fraxioned_test`);
+    await connection.query(`CREATE DATABASE fraxioned_test`);
     await connection.end();
   });
-  describe.skip('Successful Flows', () => {
+  describe('Successful Flows', () => {
+    it('Booking nights consecutively in peak season', async () => {
+      const credentials = {
+        user: {
+          id: 2,
+        },
+        property: {
+          id: 1,
+        },
+        createdBy: {
+          id: 1,
+        },
+        checkinDate: '2025-04-01T11:51:55.260Z',
+        checkoutDate: '2025-04-15T11:51:55.260Z',
+        noOfGuests: 10,
+        noOfPets: 2,
+        isLastMinuteBooking: true,
+        noOfAdults: 5,
+        noOfChildren: 5,
+        notes: 'None',
+      };
+      const response = await request(url1)
+        .post('/booking')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe('Booking created successfully');
+      psbid = response.body.data.id;
+    });
+    it('Cancel booking nights consecutively in peak season', async () => {
+      const response = await request(url1)
+        .post(`/${psbid}/${userid}/cancel`)
+        .set('Accept', 'application/json')
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .set('id', `${psbid}`)
+        .set('user', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe('Booking cancelled successfully');
+    });
+    it('Trying to cancel already cancelled booking', async () => {
+      const response = await request(url1)
+        .post(`/${psbid}/${userid}/cancel`)
+        .set('Accept', 'application/json')
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .set('id', `${psbid}`)
+        .set('user', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe(
+        'Booking is already cancelled or completed',
+      );
+    });
     it('Booking nights in peak season', async () => {
       const credentials = {
         user: {
@@ -99,7 +165,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -121,43 +187,14 @@ describe('Booking API Test', () => {
         createdBy: {
           id: 1,
         },
-        checkinDate: '2025-09-01T11:51:55.260Z',
-        checkoutDate: '2025-09-05T11:51:55.260Z',
+        checkinDate: '2025-08-01T11:51:55.260Z',
+        checkoutDate: '2025-08-05T11:51:55.260Z',
         noOfGuests: 10,
         noOfPets: 2,
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(credentials)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Booking created successfully');
-    });
-    it('Booking nights consecutively in peak season', async () => {
-      const credentials = {
-        user: {
-          id: 2,
-        },
-        property: {
-          id: 2,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: '2025-04-01T11:51:55.260Z',
-        checkoutDate: '2025-04-14T11:51:55.260Z',
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -179,14 +216,14 @@ describe('Booking API Test', () => {
         createdBy: {
           id: 1,
         },
-        checkinDate: '2025-08-01T11:51:55.260Z',
-        checkoutDate: '2025-08-14T11:51:55.260Z',
+        checkinDate: '2025-08-11T11:51:55.260Z',
+        checkoutDate: '2025-08-26T11:51:55.260Z',
         noOfGuests: 10,
         noOfPets: 2,
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -215,7 +252,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -244,7 +281,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -264,7 +301,7 @@ describe('Booking API Test', () => {
           id: 2,
         },
         property: {
-          id: 2,
+          id: 1,
         },
         createdBy: {
           id: 1,
@@ -276,7 +313,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -287,7 +324,7 @@ describe('Booking API Test', () => {
         .expect('Content-Type', /json/);
       expect(response.body.message).toBe('Booking created successfully');
     });
-    it('Booking holiday nights in peak season', async () => {
+    it('Booking holiday nights in peak season(only one day holiday)', async () => {
       const credentials = {
         user: {
           id: 2,
@@ -298,14 +335,14 @@ describe('Booking API Test', () => {
         createdBy: {
           id: 1,
         },
-        checkinDate: '2025-05-15T11:51:55.260Z',
-        checkoutDate: '2025-05-17T11:51:55.260Z',
+        checkinDate: '2025-04-20T11:51:55.260Z',
+        checkoutDate: '2025-04-23T11:51:55.260Z',
         noOfGuests: 10,
         noOfPets: 2,
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -316,7 +353,7 @@ describe('Booking API Test', () => {
         .expect('Content-Type', /json/);
       expect(response.body.message).toBe('Booking created successfully');
     });
-    it('Booking holiday nights in off season', async () => {
+    it('Booking holiday nights in peak season(multiple days holiday)', async () => {
       const credentials = {
         user: {
           id: 2,
@@ -327,14 +364,72 @@ describe('Booking API Test', () => {
         createdBy: {
           id: 1,
         },
-        checkinDate: '2025-09-17T11:51:55.260Z',
-        checkoutDate: '2025-09-20T11:51:55.260Z',
+        checkinDate: '2025-05-01T11:51:55.260Z',
+        checkoutDate: '2025-05-05T11:51:55.260Z',
         noOfGuests: 10,
         noOfPets: 2,
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
+      };
+      const response = await request(url1)
+        .post('/booking')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe('Booking created successfully');
+    });
+    it('Booking holiday nights in off season(only one day holiday)', async () => {
+      const credentials = {
+        user: {
+          id: 2,
+        },
+        property: {
+          id: 1,
+        },
+        createdBy: {
+          id: 1,
+        },
+        checkinDate: '2025-07-23T11:51:55.260Z',
+        checkoutDate: '2025-07-27T11:51:55.260Z',
+        noOfGuests: 10,
+        noOfPets: 2,
+        isLastMinuteBooking: true,
+        noOfAdults: 5,
+        noOfChildren: 5,
+        notes: 'None',
+      };
+      const response = await request(url1)
+        .post('/booking')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe('Booking created successfully');
+    });
+    it('Booking holiday nights in off season(multiple days holiday)', async () => {
+      const credentials = {
+        user: {
+          id: 2,
+        },
+        property: {
+          id: 1,
+        },
+        createdBy: {
+          id: 1,
+        },
+        checkinDate: '2025-11-01T11:51:55.260Z',
+        checkoutDate: '2025-11-05T11:51:55.260Z',
+        noOfGuests: 10,
+        noOfPets: 2,
+        isLastMinuteBooking: true,
+        noOfAdults: 5,
+        noOfChildren: 5,
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -365,7 +460,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -387,14 +482,14 @@ describe('Booking API Test', () => {
         createdBy: {
           id: 1,
         },
-        checkinDate: '2025-11-01T05:40:48.669Z',
-        checkoutDate: '2025-11-02T05:40:48.669Z',
+        checkinDate: '2025-12-01T05:40:48.669Z',
+        checkoutDate: '2025-12-02T05:40:48.669Z',
         noOfGuests: 10,
         noOfPets: 2,
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -423,7 +518,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -452,7 +547,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -481,7 +576,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -507,12 +602,12 @@ describe('Booking API Test', () => {
         },
         checkinDate: '2025-07-01T05:40:48.669Z',
         checkoutDate: '2025-07-05T05:40:48.669Z',
-        noOfGuests: 50,
-        noOfPets: 10,
+        noOfGuests: 100,
+        noOfPets: 50,
         isLastMinuteBooking: true,
         noOfAdults: 30,
         noOfChildren: 20,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -525,25 +620,25 @@ describe('Booking API Test', () => {
         'Number of guests or pets exceeds property limits',
       );
     });
-    it.skip('Booking is made without allowing the required 5-night gap', async () => {
+    it('Booking is made without allowing the required 5-night gap', async () => {
       const credentials = {
         user: {
           id: 2,
         },
         property: {
-          id: 2,
+          id: 1,
         },
         createdBy: {
           id: 1,
         },
-        checkinDate: '2025-04-15T11:51:55.260Z',
-        checkoutDate: '2025-04-20T11:51:55.260Z',
+        checkinDate: '2025-08-06T11:51:55.260Z',
+        checkoutDate: '2025-08-11T11:51:55.260Z',
         noOfGuests: 10,
         noOfPets: 2,
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -574,7 +669,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -589,8 +684,10 @@ describe('Booking API Test', () => {
     });
     it('Last Minute Booking is made within 24 hours', async () => {
       const todaydate = new Date();
+      console.log(todaydate);
       const checkin = todaydate;
       const checkout = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
+      console.log(checkout);
       const credentials = {
         user: {
           id: 2,
@@ -608,7 +705,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
@@ -630,7 +727,7 @@ describe('Booking API Test', () => {
           id: 2,
         },
         property: {
-          id: 1,
+          id: 2,
         },
         createdBy: {
           id: 1,
@@ -642,7 +739,7 @@ describe('Booking API Test', () => {
         isLastMinuteBooking: true,
         noOfAdults: 5,
         noOfChildren: 5,
-        notes: 'string',
+        notes: 'None',
       };
       const response = await request(url1)
         .post('/booking')
