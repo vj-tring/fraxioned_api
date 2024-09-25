@@ -24,6 +24,7 @@ import { SpaceModule } from './main/modules/space.module';
 import { SpaceTypesModule } from './main/modules/space-types.module';
 import { BookingModule } from './main/modules/booking.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
+import { HouseCodeCategoryModule } from './main/modules/house-code-category.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ContactUsModule } from './main/modules/contact-us.module';
     }),
     MaintenanceModule,
     ContactUsModule,
+    HouseCodeCategoryModule,
   ],
 })
 export class AppModule {}
