@@ -7,6 +7,7 @@ import { Amenities } from '../entities/amenities.entity';
 import { AmenitiesController } from '../controller/amenities.controller';
 import { AmenitiesService } from '../service/amenities.service';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
+import { PropertyDocumentsModule } from './property-document.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PropertyAmenities } from '../entities/property_amenities.entity';
     PropertyAmenities,
     LoggerModule,
     AuthenticationModule,
+    PropertyDocumentsModule,
   ],
   controllers: [AmenitiesController],
   providers: [AmenitiesService],

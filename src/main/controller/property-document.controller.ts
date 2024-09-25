@@ -1,0 +1,109 @@
+// Controller
+import {
+  Controller,
+  Post,
+  Body,
+  UploadedFiles,
+  UseInterceptors,
+  HttpException,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../commons/guards/auth.guard';
+import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { PropertyDocuments } from '../entities/property-document.entity';
+import { PropertyDocumentsService } from '../service/property-document.service';
+import { PROPERTY_DOCUMENTS_RESPONSES } from '../commons/constants/response-constants/property-document.constant';
+import {
+  getMaxFileSize,
+  isFileSizeValid,
+  isFileExtensionValid,
+  getAllowedDocumentExtensions,
+  getMaxFileCount,
+} from '../utils/image-file.utils';
+import {
+  CreatePropertyDocumentsRequestDto,
+  CreatePropertyDocumentsDto,
+} from '../dto/requests/property-document/create-property-document.dto';
+
+@ApiTags('Property Documents')
+@Controller('v1/propertyDocuments')
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
+export class PropertyDocumentsController {
+  constructor(
+    private readonly propertyDocumentsService: PropertyDocumentsService,
+  ) {}
+
+  @Post('propertyDocument')
+  @UseInterceptors(FilesInterceptor('documentFiles', getMaxFileCount()))
+  async createPropertyDocuments(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body()
+    createPropertyDocumentsRequestDto: CreatePropertyDocumentsRequestDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyDocuments[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const max_file_size = getMaxFileSize();
+      const allowedExtensions = getAllowedDocumentExtensions();
+
+      const hasOversizedFile = files.some(
+        (file) => !isFileSizeValid(file, max_file_size),
+      );
+
+      if (hasOversizedFile) {
+        return PROPERTY_DOCUMENTS_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
+      }
+
+      const hasUnsupportedExtension = files.some(
+        (file) => !isFileExtensionValid(file, allowedExtensions),
+      );
+
+      if (hasUnsupportedExtension) {
+        return PROPERTY_DOCUMENTS_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
+          allowedExtensions,
+        );
+      }
+
+      const propertyDocumentDetails: CreatePropertyDocumentsDto[] = JSON.parse(
+        createPropertyDocumentsRequestDto.propertyDocuments,
+      );
+
+      if (propertyDocumentDetails.length !== files.length) {
+        return PROPERTY_DOCUMENTS_RESPONSES.MISMATCHED_DTO_AND_DOCUMENTS();
+      }
+
+      const processedPropertyDocumentsDtos = propertyDocumentDetails.map(
+        (dto, index) => ({
+          ...dto,
+          documentFile: files[index],
+        }),
+      );
+
+      const result =
+        await this.propertyDocumentsService.createPropertyDocuments(
+          processedPropertyDocumentsDtos,
+        );
+      return result;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new HttpException(
+          `Invalid request body format. Please provide a valid JSON string for propertyDocuments.`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException(
+        'An error occurred while creating the property documents',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // Implement other methods (GET, PATCH, DELETE) here
+}
