@@ -15,5 +15,6 @@ import { PropertyCodeCategoryService } from '../service/property-code-category.s
   ],
   controllers: [PropertyCodeCategoryController],
   providers: [PropertyCodeCategoryService],
+  exports: [PropertyCodeCategoryService],
 })
 export class PropertyCodeCategoryModule {}
