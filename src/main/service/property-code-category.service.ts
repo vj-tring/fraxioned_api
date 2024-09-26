@@ -6,6 +6,7 @@ import { User } from '../entities/user.entity';
 import { PropertyCodeCategory } from '../entities/property-code-category.entity';
 import { CreatePropertyCodeCategoryDto } from '../dto/requests/property-code-category/create-property-code-category.dto';
 import { PROPERTY_CODE_CATEGORY_RESPONSES } from '../commons/constants/response-constants/property-code-category.constant';
+import { PropertyCodes } from '../entities/property_codes.entity';
 
 @Injectable()
 export class PropertyCodeCategoryService {
@@ -14,8 +15,8 @@ export class PropertyCodeCategoryService {
     private readonly propertyCodeCategoryRepository: Repository<PropertyCodeCategory>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    // @InjectRepository(SpaceTypes)
-    // private readonly spaceTypesRepository: Repository<SpaceTypes>,
+    @InjectRepository(PropertyCodes)
+    private propertyCodesRepository: Repository<PropertyCodes>,
     private readonly logger: LoggerService,
   ) {}
 
@@ -170,15 +171,17 @@ export class PropertyCodeCategoryService {
     statusCode: number;
   }> {
     try {
-      // const spaceType = await this.spaceTypesRepository.findOne({
-      //   where: { space: { id: id } },
-      // });
-      // if (spaceType) {
-      //   this.logger.log(
-      //     `Space ID ${id} exists and is mapped to space type, hence cannot be deleted.`,
-      //   );
-      //   return SPACE_RESPONSES.SPACE_FOREIGN_KEY_CONFLICT(id);
-      // }
+      const propertyCode = await this.propertyCodesRepository.findOne({
+        where: { propertyCodeCategory: { id: id } },
+      });
+      if (propertyCode) {
+        this.logger.log(
+          `Property code category ID ${id} exists and is mapped to property code, hence cannot be deleted.`,
+        );
+        return PROPERTY_CODE_CATEGORY_RESPONSES.PROPERTY_CODE_CATEGORY_FOREIGN_KEY_CONFLICT(
+          id,
+        );
+      }
       const result = await this.propertyCodeCategoryRepository.delete(id);
       if (result.affected === 0) {
         this.logger.error(`Property code category with ID ${id} not found`);

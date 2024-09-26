@@ -2,14 +2,14 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  // OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-// import { PropertyCodes } from './property_codes.entity';
+import { PropertyCodes } from './property_codes.entity';
 
 @Entity('fxn_property_code_category')
 export class PropertyCodeCategory {
@@ -33,6 +33,9 @@ export class PropertyCodeCategory {
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
 
-  // @OneToMany(() => PropertyCodes, (propertyCode) => propertyCode.propertyCodeCategory)
-  // propertyCodes: PropertyCodes[];
+  @OneToMany(
+    () => PropertyCodes,
+    (propertyCode) => propertyCode.propertyCodeCategory,
+  )
+  propertyCodes: PropertyCodes[];
 }

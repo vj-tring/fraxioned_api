@@ -79,17 +79,17 @@ export const PROPERTY_CODE_CATEGORY_RESPONSES = {
     data: propertyCodeCategory,
     statusCode: HttpStatus.OK,
   }),
-  //   SPACE_FOREIGN_KEY_CONFLICT: (
-  //     id: number,
-  //   ): {
-  //     success: boolean;
-  //     message: string;
-  //     statusCode: number;
-  //   } => ({
-  //     success: false,
-  //     message: `Space ID ${id} exists and is mapped to space type, hence cannot be deleted.`,
-  //     statusCode: HttpStatus.CONFLICT,
-  //   }),
+  PROPERTY_CODE_CATEGORY_FOREIGN_KEY_CONFLICT: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Property code category ID ${id} exists and is mapped to property code, hence cannot be deleted.`,
+    statusCode: HttpStatus.CONFLICT,
+  }),
   PROPERTY_CODE_CATEGORY_DELETED: (
     id: number,
   ): {
