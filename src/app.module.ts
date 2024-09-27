@@ -24,6 +24,10 @@ import { SpaceModule } from './main/modules/space.module';
 import { SpaceTypesModule } from './main/modules/space-types.module';
 import { BookingModule } from './main/modules/booking.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
+import { CronJobsService } from './main/scheduler/cron-jobs.service';
+import { MailSchedulerService } from './main/scheduler/mail-scheduler.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { LoggerModule } from './main/modules/logger.module';
 
 @Module({
   imports: [
@@ -55,6 +59,9 @@ import { ContactUsModule } from './main/modules/contact-us.module';
     }),
     MaintenanceModule,
     ContactUsModule,
+    ScheduleModule.forRoot(),
+    LoggerModule,
   ],
+  providers: [CronJobsService, MailSchedulerService],
 })
 export class AppModule {}
