@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Property } from './property.entity';
 import { User } from './user.entity';
+import { PropertyCodeCategory } from './property-code-category.entity';
 
 @Entity('fxn_property_codes')
 export class PropertyCodes {
@@ -24,11 +25,14 @@ export class PropertyCodes {
   })
   property: Property;
 
-  @Column({
-    name: 'type',
-    type: 'varchar',
+  @ManyToOne(
+    () => PropertyCodeCategory,
+    (propertyCodeCategory) => propertyCodeCategory.id,
+  )
+  @JoinColumn({
+    name: 'property_code_category_id',
   })
-  propertyCodeType: string;
+  propertyCodeCategory: PropertyCodeCategory;
 
   @Column({
     name: 'code',
