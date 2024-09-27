@@ -1,4 +1,3 @@
-// Controller
 import {
   Controller,
   Post,
@@ -8,8 +7,13 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  Get,
+  Param,
+  Delete,
+  Patch,
+  UploadedFile,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
@@ -27,6 +31,10 @@ import {
   CreatePropertyDocumentsRequestDto,
   CreatePropertyDocumentsDto,
 } from '../dto/requests/property-document/create-property-document.dto';
+import {
+  UpdatePropertyDocumentDto,
+  UpdatePropertyDocumentRequestDto,
+} from '../dto/requests/property-document/update-property-document.dto';
 
 @ApiTags('Property Documents')
 @Controller('v1/propertyDocuments')
@@ -37,7 +45,7 @@ export class PropertyDocumentsController {
     private readonly propertyDocumentsService: PropertyDocumentsService,
   ) {}
 
-  @Post('propertyDocument')
+  @Post()
   @UseInterceptors(FilesInterceptor('documentFiles', getMaxFileCount()))
   async createPropertyDocuments(
     @UploadedFiles() files: Express.Multer.File[],
@@ -105,5 +113,119 @@ export class PropertyDocumentsController {
     }
   }
 
-  // Implement other methods (GET, PATCH, DELETE) here
+  @Get()
+  async getAllPropertyDocuments(): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyDocuments[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertyDocumentsService.findAllPropertyDocuments();
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving all property documents',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('propertyDocument/:id')
+  async getByPropertyDocumentId(@Param('id') id: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyDocuments;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertyDocumentsService.findPropertyDocumentById(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the property document',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Patch('propertyDocument/:id')
+  @UseInterceptors(FileInterceptor('documentFile'))
+  async updatePropertyDocumentId(
+    @Param('id') id: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updatePropertyDocumentRequestDto: UpdatePropertyDocumentRequestDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertyDocuments;
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const updatePropertyDocumentDto: UpdatePropertyDocumentDto = JSON.parse(
+        updatePropertyDocumentRequestDto.propertyDocument,
+      );
+
+      if (
+        (file && !updatePropertyDocumentDto) ||
+        (!file && updatePropertyDocumentDto)
+      ) {
+        return PROPERTY_DOCUMENTS_RESPONSES.MISMATCHED_DTO_AND_DOCUMENTS();
+      }
+
+      const max_file_size = getMaxFileSize();
+      const allowedExtensions = getAllowedDocumentExtensions();
+
+      if (file) {
+        if (!isFileSizeValid(file, max_file_size)) {
+          return PROPERTY_DOCUMENTS_RESPONSES.FILE_SIZE_TOO_LARGE(
+            max_file_size,
+          );
+        }
+
+        if (!isFileExtensionValid(file, allowedExtensions)) {
+          return PROPERTY_DOCUMENTS_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
+            allowedExtensions,
+          );
+        }
+      }
+
+      updatePropertyDocumentDto.documentFile = file;
+      const result =
+        await this.propertyDocumentsService.updatePropertyDocumentDetail(
+          id,
+          updatePropertyDocumentDto,
+        );
+      return result;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new HttpException(
+          `Invalid request body format. Please provide a valid JSON string for propertyDocument.`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException(
+        'An error occurred while updating the property document',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('propertyDocument/:id')
+  async deletePropertyDocument(
+    @Param('id') id: number,
+  ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
+    try {
+      const result =
+        await this.propertyDocumentsService.deletePropertyDocumentById(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while deleting the property document',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
