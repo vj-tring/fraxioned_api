@@ -48,6 +48,25 @@ export const mailSubject = {
   },
 };
 
+export enum ReminderType {
+  UPCOMING = 'upcoming',
+  FINAL = 'final',
+  INSTRUCTIONS = 'instructions',
+}
+
+export const reminderDays = {
+  upcoming: 0,
+  final: 0,
+  instructions: 0,
+};
+
+export const SignWaiverRequiredProperties = [
+  'Paradise Shores (eighths)',
+  'Paradise Shores (tenths)',
+  'Crown Jewel',
+  'Modern Lagoon',
+];
+
 export const assetsHostingUrl = {
   development: 'http://192.168.1.223:3008',
   production: 'http://192.168.1.47:3008',

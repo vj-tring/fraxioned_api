@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Equal, MoreThanOrEqual, Repository } from 'typeorm';
 import { Booking } from 'entities/booking.entity';
 import { LoggerService } from 'services/logger.service';
 import {
   mailSubject,
   mailTemplates,
+  ReminderType,
+  SignWaiverRequiredProperties,
 } from 'src/main/commons/constants/email/mail.constants';
 import { MailService } from 'src/main/email/mail.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
@@ -16,6 +18,7 @@ import { PropertyImages } from 'src/main/entities/property_images.entity';
 import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
 import { BookingUtilService } from './booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
+import { PropertyCodes } from 'src/main/entities/property_codes.entity';
 
 @Injectable()
 export class BookingMailService {
@@ -30,12 +33,25 @@ export class BookingMailService {
     private readonly spaceTypesRepository: Repository<SpaceTypes>,
     @InjectRepository(PropertyImages)
     private readonly propertyImagesRepository: Repository<PropertyImages>,
+    @InjectRepository(Booking)
+    private readonly bookingRepository: Repository<Booking>,
+    @InjectRepository(PropertyCodes)
+    private readonly propertyCodesRepository: Repository<PropertyCodes>,
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
     private readonly bookingUtilService: BookingUtilService,
   ) {}
 
-  async getBannerImage(booking: Booking): Promise<string> {
+  private async getScheduledDate(reminderDays: number): Promise<Date> {
+    const d = new Date(Date.now());
+    d.setDate(d.getDate() + Math.abs(reminderDays));
+    d.setHours(0);
+    d.setMinutes(0);
+    d.setSeconds(0);
+    return d;
+  }
+
+  private async getBannerImage(booking: Booking): Promise<string> {
     const banner = await this.spaceTypesRepository.findOne({
       where: { name: 'Banner', space: { id: 1 } },
     });
@@ -67,7 +83,7 @@ export class BookingMailService {
     }
   }
 
-  async getPrimaryEmail(booking: Booking): Promise<string> {
+  private async getPrimaryEmail(booking: Booking): Promise<string> {
     const contacts = await this.userContactDetailsRepository.find({
       where: { user: { id: booking.user.id } },
       select: ['primaryEmail'],
@@ -81,13 +97,23 @@ export class BookingMailService {
     return;
   }
 
-  async createEmailContext(
+  private async getPropertyCodes(id: number): Promise<object> {
+    const codes = await this.propertyCodesRepository.find({
+      where: { property: { id } },
+      relations: ['propertyCodeType'],
+    });
+    console.log(codes[0]);
+    return codes;
+  }
+
+  private async createEmailContext(
     booking: Booking,
     property: Property,
     user: User,
     imageUrl: string = '',
     lastCheckInDate: Date = undefined,
     lastCheckOutDate: Date = undefined,
+    isSignWaiverEnabled: boolean = false,
   ): Promise<object> {
     const context = {
       ownerName: `${user.firstName} ${user.lastName}`,
@@ -114,55 +140,122 @@ export class BookingMailService {
       totalNights: booking.totalNights || 0,
       modify: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
       cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+      link: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
+      isSignWaiverEnabled,
+      codes: {
+        'Wi-Fi Network': 'Paradise12',
+        'Wi-Fi Password': 'Para@12$',
+      },
     };
 
     return context;
   }
 
-  async sendBookingConfirmationEmail(booking: Booking): Promise<void | Error> {
-    try {
-      if (!booking || !booking.user || !booking.property) {
-        return new Error('Invalid booking data');
+  private async prepareEmailData(booking: Booking): Promise<
+    | {
+        owner: User;
+        email: string;
+        imageUrl: string;
+        propertyName: Property;
       }
+    | Error
+  > {
+    if (!booking || !booking.user || !booking.property) {
+      return new Error('Invalid booking data');
+    }
 
-      const owner = await this.userRepository.findOne({
-        where: { id: booking.user.id },
-      });
+    const owner = await this.userRepository.findOne({
+      where: { id: booking.user.id },
+    });
 
-      if (!owner) {
-        return new Error(`Owner not found for user ID: ${booking.user.id}`);
-      }
+    if (!owner) {
+      return new Error(`Owner not found for user ID: ${booking.user.id}`);
+    }
 
-      const email = await this.getPrimaryEmail(booking);
+    const email = await this.getPrimaryEmail(booking);
 
-      if (!email) {
-        throw new Error(
-          `Primary email not found for user ID: ${booking.user.id}`,
-        );
-      }
-
-      const imageUrl = await this.getBannerImage(booking);
-
-      const propertyName = await this.bookingUtilService.getProperty(
-        booking.property.id,
-      );
-
-      const subject = mailSubject.booking.confirmation;
-      const template = mailTemplates.booking.confirmation;
-      const context = await this.createEmailContext(
-        booking,
-        propertyName,
-        owner,
-        imageUrl,
-      );
-
-      await this.mailService.sendMail(email, subject, template, context);
-      this.logger.log(`Booking confirmation email has been sent to: ${email}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send booking confirmation email: ${error.message}`,
+    if (!email) {
+      throw new Error(
+        `Primary email not found for user ID: ${booking.user.id}`,
       );
     }
+
+    const imageUrl: string = await this.getBannerImage(booking);
+
+    const propertyName: Property = await this.bookingUtilService.getProperty(
+      booking.property.id,
+    );
+
+    return {
+      owner,
+      email,
+      imageUrl,
+      propertyName,
+    };
+  }
+
+  private async sendEmail(
+    email: string,
+    subject: string,
+    template: string,
+    context: object,
+    actionType: string,
+  ): Promise<void> {
+    try {
+      await this.mailService.sendMail(email, subject, template, context);
+      this.logger.log(`Booking ${actionType} email has been sent to: ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send booking ${actionType} email: ${error.message}`,
+      );
+    }
+  }
+
+  private async getBookingListForReminder(
+    reminderDays: number,
+  ): Promise<Booking[]> {
+    const scheduledDate = await this.getScheduledDate(reminderDays);
+    const bookingsList: Booking[] = await this.bookingRepository.find({
+      where: {
+        checkinDate: MoreThanOrEqual(scheduledDate),
+        isCancelled: Equal(false),
+        isCompleted: Equal(false),
+      },
+      relations: {
+        user: true,
+        property: true,
+      },
+    });
+
+    return bookingsList;
+  }
+
+  private async getReminderTemplate(
+    reminderType: ReminderType,
+  ): Promise<string> {
+    return mailTemplates.reminder[reminderType];
+  }
+
+  private async getReminderSubject(
+    reminderType: ReminderType,
+  ): Promise<string> {
+    return mailSubject.reminder[reminderType];
+  }
+
+  async sendBookingConfirmationEmail(booking: Booking): Promise<void | Error> {
+    const data = await this.prepareEmailData(booking);
+    if (data instanceof Error) return data;
+    const { owner, email, imageUrl, propertyName } = data;
+    const subject = mailSubject.booking.confirmation;
+    const template = mailTemplates.booking.confirmation;
+    const context = await this.createEmailContext(
+      booking,
+      propertyName,
+      owner,
+      imageUrl,
+    );
+
+    await this.sendEmail(email, subject, template, context, 'confirmation');
   }
 
   async sendBookingModificationEmail(
@@ -170,99 +263,82 @@ export class BookingMailService {
     lastCheckInDate: Date,
     lastCheckOutDate: Date,
   ): Promise<void | Error> {
-    try {
-      if (!booking || !booking.user || !booking.property) {
-        return new Error('Invalid booking data');
+    if (!lastCheckInDate || !lastCheckOutDate) {
+      return new Error('Invalid existing booking date');
+    }
+
+    const data = await this.prepareEmailData(booking);
+    if (data instanceof Error) return data;
+    const { owner, email, imageUrl, propertyName } = data;
+
+    const subject = mailSubject.booking.modification;
+    const template = mailTemplates.booking.modification;
+    const context = await this.createEmailContext(
+      booking,
+      propertyName,
+      owner,
+      imageUrl,
+      lastCheckInDate,
+      lastCheckOutDate,
+    );
+
+    await this.sendEmail(email, subject, template, context, 'modification');
+  }
+
+  async sendBookingCancellationEmail(booking: Booking): Promise<void | Error> {
+    const data = await this.prepareEmailData(booking);
+    if (data instanceof Error) return data;
+    const { owner, email, propertyName } = data;
+
+    const subject = mailSubject.booking.cancellation;
+    const template = mailTemplates.booking.cancellation;
+    const context = await this.createEmailContext(booking, propertyName, owner);
+
+    await this.sendEmail(email, subject, template, context, 'cancellation');
+  }
+
+  async sendReminderEmail(
+    reminderDays: number,
+    name: string,
+    type: ReminderType,
+  ): Promise<void | Error> {
+    const reminderBookingsList =
+      await this.getBookingListForReminder(reminderDays);
+
+    if (!reminderBookingsList || reminderBookingsList.length === 0) {
+      this.logger.warn('Reminder Booking List was empty or not found!');
+      return;
+    }
+
+    for (const booking of reminderBookingsList) {
+      const data = await this.prepareEmailData(booking);
+      if (data instanceof Error) return data;
+      const { owner, email, imageUrl, propertyName } = data;
+
+      let isSignWaiverEnabled: boolean = false;
+      if (
+        SignWaiverRequiredProperties.find(
+          (property) => property === booking.property.propertyName,
+        )
+      ) {
+        isSignWaiverEnabled = true;
       }
 
-      if (!lastCheckInDate || !lastCheckOutDate) {
-        return new Error('Invalid existing booking date');
-      }
-
-      const owner = await this.userRepository.findOne({
-        where: { id: booking.user.id },
-      });
-
-      if (!owner) {
-        return new Error(`Owner not found for user ID: ${booking.user.id}`);
-      }
-
-      const email = await this.getPrimaryEmail(booking);
-
-      if (!email) {
-        throw new Error(
-          `Primary email not found for user ID: ${booking.user.id}`,
-        );
-      }
-
-      const imageUrl = await this.getBannerImage(booking);
-
-      const propertyName = await this.bookingUtilService.getProperty(
-        booking.property.id,
-      );
-
-      const subject = mailSubject.booking.modification;
-      const template = mailTemplates.booking.modification;
+      const subject = await this.getReminderSubject(type);
+      const template = await this.getReminderTemplate(type);
       const context = await this.createEmailContext(
         booking,
         propertyName,
         owner,
         imageUrl,
-        lastCheckInDate,
-        lastCheckOutDate,
+        undefined,
+        undefined,
+        isSignWaiverEnabled,
       );
 
-      await this.mailService.sendMail(email, subject, template, context);
-      this.logger.log(
-        `Booking update confirmation email has been sent to: ${email}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Failed to send booking update confirmation email: ${error.message}`,
-      );
+      await this.sendEmail(email, subject, template, context, name);
     }
-  }
 
-  async sendBookingCancellationEmail(booking: Booking): Promise<void | Error> {
-    try {
-      if (!booking || !booking.user || !booking.property) {
-        return new Error('Invalid booking data');
-      }
-
-      const owner = await this.userRepository.findOne({
-        where: { id: booking.user.id },
-      });
-
-      if (!owner) {
-        return new Error(`Owner not found for user ID: ${booking.user.id}`);
-      }
-
-      const email = await this.getPrimaryEmail(booking);
-
-      if (!email) {
-        throw new Error(
-          `Primary email not found for user ID: ${booking.user.id}`,
-        );
-      }
-
-      const propertyName = await this.bookingUtilService.getProperty(
-        booking.property.id,
-      );
-
-      const subject = mailSubject.booking.cancellation;
-      const template = mailTemplates.booking.cancellation;
-      const context = await this.createEmailContext(
-        booking,
-        propertyName,
-        owner,
-      );
-
-      await this.mailService.sendMail(email, subject, template, context);
-      this.logger.log(`Booking cancellation email has been sent to: ${email}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send booking cancellation email: ${error.message}`,
-      );
-    }
+    return;
   }
 }
