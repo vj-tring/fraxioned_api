@@ -44,6 +44,7 @@ export class UpdatePropertyDocumentDto {
   documentFile: Express.Multer.File;
 }
 export class UpdatePropertyDocumentRequestDto {
-  @ApiProperty({ type: 'string' })
+  @IsNotEmpty()
+  @IsString()
   propertyDocument: string;
 }
