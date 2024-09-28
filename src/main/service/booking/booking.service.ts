@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from 'entities/booking.entity';
@@ -7,6 +7,7 @@ import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants
 import { UpdateBookingDTO } from '../../dto/requests/booking/update-booking.dto';
 import { User } from 'src/main/entities/user.entity';
 
+const paradiseProperty = 'Paradise Shores';
 @Injectable()
 export class BookingService {
   constructor(
@@ -27,7 +28,7 @@ export class BookingService {
       shouldApplyFilter &&
       (booking.property.id === 1 || booking.property.id === 2)
     ) {
-      booking.property.propertyName = 'Paradise Shores';
+      booking.property.propertyName = paradiseProperty;
     }
     return booking;
   }
@@ -43,7 +44,7 @@ export class BookingService {
     return user?.role.id !== 1;
   }
 
-  async getAllBookings(requestedUser: number): Promise<object[]> {
+  async getAllBookings(requestedUser: number): Promise<object[] | object> {
     try {
       const existingBookings = await this.bookingRepository.find({
         relations: ['user', 'property', 'createdBy', 'updatedBy'],
@@ -55,7 +56,7 @@ export class BookingService {
         },
       });
       if (existingBookings.length === 0) {
-        throw new NotFoundException(`Bookings not found`);
+        return BOOKING_RESPONSES.BOOKINGS_NOT_FOUND;
       }
       return Promise.all(
         existingBookings.map((booking) =>

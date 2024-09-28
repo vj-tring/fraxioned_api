@@ -12,6 +12,9 @@ import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { isDateInRange, normalizeDate } from './date.util';
 import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
 
+const FirstYear = 'FirstYear';
+const SecondYear = 'SecondYear';
+
 @Injectable()
 export class BookingUtilService {
   constructor(
@@ -147,11 +150,13 @@ export class BookingUtilService {
       (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
     return diffInDays <= BookingRules.LAST_MAX_DAYS;
   }
+
   calculateNightsSelected(checkinDate: Date, checkoutDate: Date): number {
     return (
       (checkoutDate.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24)
     );
   }
+
   async updateUserProperties(
     user: User,
     property: Property,
@@ -186,7 +191,7 @@ export class BookingUtilService {
         userPropertyFirstYear.lastMinuteRemainingNights -= totalNightsFirstYear;
         userPropertyFirstYear.lastMinuteBookedNights += totalNightsFirstYear;
       } else {
-        this.updateNightCounts(userPropertyFirstYear, nightCounts, 'FirstYear');
+        this.updateNightCounts(userPropertyFirstYear, nightCounts, FirstYear);
       }
       await this.userPropertiesRepository.save(userPropertyFirstYear);
     }
@@ -200,11 +205,7 @@ export class BookingUtilService {
           totalNightsSecondYear;
         userPropertySecondYear.lastMinuteBookedNights += totalNightsSecondYear;
       } else {
-        this.updateNightCounts(
-          userPropertySecondYear,
-          nightCounts,
-          'SecondYear',
-        );
+        this.updateNightCounts(userPropertySecondYear, nightCounts, SecondYear);
       }
       await this.userPropertiesRepository.save(userPropertySecondYear);
     }
@@ -230,7 +231,7 @@ export class BookingUtilService {
   updateNightCounts(
     userProperty: UserProperties,
     nightCounts: NightCounts,
-    yearType: 'FirstYear' | 'SecondYear',
+    yearType: typeof FirstYear | typeof SecondYear,
   ): void {
     userProperty.peakRemainingNights -= nightCounts[`peakNightsIn${yearType}`];
     userProperty.offRemainingNights -= nightCounts[`offNightsIn${yearType}`];
@@ -250,7 +251,7 @@ export class BookingUtilService {
   revertNightCounts(
     userProperty: UserProperties,
     nightCounts: NightCounts,
-    yearType: 'FirstYear' | 'SecondYear',
+    yearType: typeof FirstYear | typeof SecondYear,
   ): void {
     userProperty.peakRemainingNights += nightCounts[`peakNightsIn${yearType}`];
     userProperty.offRemainingNights += nightCounts[`offNightsIn${yearType}`];

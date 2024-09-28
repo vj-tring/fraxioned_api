@@ -12,6 +12,12 @@ import { BookingUtilService } from '../../utils/booking/booking.service.util';
 import { normalizeDate } from '../../utils/booking/date.util';
 import { generateBookingId } from '../../utils/booking/booking-id.util';
 import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
+import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
+
+const adminCreateAction = 'Created by Admin';
+const adminOverrideAction = 'Overridden by Admin';
+const FirstYear = 'FirstYear';
+const SecondYear = 'SecondYear';
 
 @Injectable()
 export class AdminBookingService {
@@ -29,7 +35,7 @@ export class AdminBookingService {
 
   async createAdminBooking(
     createBookingDto: CreateBookingDTO,
-  ): Promise<Booking> {
+  ): Promise<Booking | object> {
     this.logger.log('Creating a new admin booking');
 
     const isLastMinuteBooking = this.bookingUtilService.isLastMinuteBooking(
@@ -40,7 +46,7 @@ export class AdminBookingService {
       where: { id: createBookingDto.property.id },
     });
     if (!property) {
-      throw new Error('Property not found');
+      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(property.id);
     }
 
     await this.overrideExistingBookings(createBookingDto, property);
@@ -65,7 +71,7 @@ export class AdminBookingService {
     await this.bookingUtilService.createBookingHistory(
       savedBooking,
       createBookingDto.createdBy,
-      'Created by Admin',
+      adminCreateAction,
     );
 
     return savedBooking;
@@ -92,7 +98,7 @@ export class AdminBookingService {
       await this.bookingUtilService.createBookingHistory(
         booking,
         createBookingDto.createdBy,
-        'Overridden by Admin',
+        adminOverrideAction,
       );
     }
   }
@@ -123,7 +129,7 @@ export class AdminBookingService {
         userProperty.lastMinuteRemainingNights += totalNights;
         userProperty.lastMinuteBookedNights -= totalNights;
       } else {
-        this.revertNightCounts(userProperty, nightCounts, 'FirstYear');
+        this.revertNightCounts(userProperty, nightCounts, FirstYear);
       }
 
       await this.userPropertiesRepository.save(userProperty);
@@ -153,10 +159,9 @@ export class AdminBookingService {
             this.revertNightCounts(
               userPropertySecondYear,
               nightCounts,
-              'SecondYear',
+              SecondYear,
             );
           }
-
           await this.userPropertiesRepository.save(userPropertySecondYear);
         }
       }
@@ -189,7 +194,7 @@ export class AdminBookingService {
   private revertNightCounts(
     userProperty: UserProperties,
     nightCounts: NightCounts,
-    yearType: 'FirstYear' | 'SecondYear',
+    yearType: typeof FirstYear | typeof SecondYear,
   ): void {
     userProperty.peakRemainingNights += nightCounts[`peakNightsIn${yearType}`];
     userProperty.offRemainingNights += nightCounts[`offNightsIn${yearType}`];
@@ -251,10 +256,9 @@ export class AdminBookingService {
         this.bookingUtilService.updateNightCounts(
           userProperty,
           nightCounts,
-          'FirstYear',
+          FirstYear,
         );
       }
-
       await this.userPropertiesRepository.save(userProperty);
 
       if (
@@ -282,10 +286,9 @@ export class AdminBookingService {
             this.bookingUtilService.updateNightCounts(
               userPropertySecondYear,
               nightCounts,
-              'SecondYear',
+              SecondYear,
             );
           }
-
           await this.userPropertiesRepository.save(userPropertySecondYear);
         }
       }

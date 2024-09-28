@@ -13,6 +13,8 @@ import { generateBookingId } from '../../utils/booking/booking-id.util';
 import { BookingMailService } from '../../utils/booking/mail.util';
 import { BookingValidationService } from '../../utils/booking/validation.util';
 
+const userAction = 'Created';
+
 @Injectable()
 export class CreateBookingService {
   constructor(
@@ -144,7 +146,6 @@ export class CreateBookingService {
 
     await this.bookingMailService.sendBookingConfirmationEmail(savedBooking);
 
-    const userAction = 'Created';
     await this.bookingUtilService.createBookingHistory(
       savedBooking,
       createBookingDto.createdBy,

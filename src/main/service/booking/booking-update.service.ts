@@ -14,6 +14,11 @@ import { normalizeDates, normalizeDate } from '../../utils/booking/date.util';
 import { BookingValidationService } from '../../utils/booking/validation.util';
 import { BookingMailService } from '../../utils/booking/mail.util';
 import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
+
+const userAction = 'Updated';
+const FirstYear = 'FirstYear';
+const SecondYear = 'SecondYear';
+
 @Injectable()
 export class UpdateBookingService {
   constructor(
@@ -172,7 +177,6 @@ export class UpdateBookingService {
       this.lastCheckOutDate,
     );
 
-    const userAction = 'Updated';
     await this.bookingUtilService.createBookingHistory(
       updatedBooking,
       updateBookingDto.updatedBy,
@@ -275,7 +279,7 @@ export class UpdateBookingService {
         this.bookingUtilService.updateNightCounts(
           userPropertyFirstYear,
           newNightCounts,
-          'FirstYear',
+          FirstYear,
         );
       }
       await this.userPropertiesRepository.save(userPropertyFirstYear);
@@ -293,7 +297,7 @@ export class UpdateBookingService {
         this.bookingUtilService.updateNightCounts(
           userPropertySecondYear,
           newNightCounts,
-          'SecondYear',
+          SecondYear,
         );
       }
       await this.userPropertiesRepository.save(userPropertySecondYear);
@@ -363,7 +367,7 @@ export class UpdateBookingService {
         this.bookingUtilService.revertNightCounts(
           userPropertyFirstYear,
           nightCounts,
-          'FirstYear',
+          FirstYear,
         );
       }
       await this.userPropertiesRepository.save(userPropertyFirstYear);
@@ -383,7 +387,7 @@ export class UpdateBookingService {
         this.bookingUtilService.revertNightCounts(
           userPropertySecondYear,
           nightCounts,
-          'SecondYear',
+          SecondYear,
         );
       }
       await this.userPropertiesRepository.save(userPropertySecondYear);

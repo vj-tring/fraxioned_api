@@ -15,6 +15,9 @@ import { BookingUtilService } from '../../utils/booking/booking.service.util';
 import { BookingMailService } from '../../utils/booking/mail.util';
 import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
 
+const FirstYear = 'FirstYear';
+const SecondYear = 'SecondYear';
+
 @Injectable()
 export class CancelBookingService {
   constructor(
@@ -156,7 +159,7 @@ export class CancelBookingService {
       this.handleRegularBooking(
         userPropertyFirstYear,
         nightCounts,
-        'FirstYear',
+        FirstYear,
         isLateCancellation,
       );
       await this.userPropertiesRepository.save(userPropertyFirstYear);
@@ -166,7 +169,7 @@ export class CancelBookingService {
       this.handleRegularBooking(
         userPropertySecondYear,
         nightCounts,
-        'SecondYear',
+        SecondYear,
         isLateCancellation,
       );
       await this.userPropertiesRepository.save(userPropertySecondYear);
@@ -195,7 +198,7 @@ export class CancelBookingService {
   private handleRegularBooking(
     userProperty: UserProperties,
     nightCounts: NightCounts,
-    yearType: 'FirstYear' | 'SecondYear',
+    yearType: typeof FirstYear | typeof SecondYear,
     isLateCancellation: boolean,
   ): void {
     if (isLateCancellation) {
@@ -212,7 +215,7 @@ export class CancelBookingService {
   private addToLostNights(
     userProperty: UserProperties,
     nightCounts: NightCounts,
-    yearType: 'FirstYear' | 'SecondYear',
+    yearType: typeof FirstYear | typeof SecondYear,
   ): void {
     userProperty.peakLostNights += nightCounts[`peakNightsIn${yearType}`];
     userProperty.offLostNights += nightCounts[`offNightsIn${yearType}`];
