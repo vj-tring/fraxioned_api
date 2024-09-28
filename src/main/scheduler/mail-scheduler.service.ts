@@ -24,27 +24,27 @@ export class MailSchedulerService implements OnModuleInit {
   ) {}
 
   async sendBookingReminderEmails(): Promise<void> {
-    this.logger.log('Sending booking reminder emails...');
-    await this.bookingMailService.sendReminderEmail(
-      reminderDays.upcoming,
-      'upcoming reminder',
-      ReminderType.UPCOMING,
-    );
-    await this.bookingMailService.sendReminderEmail(
-      reminderDays.final,
-      'final reminder',
-      ReminderType.FINAL,
-    );
-    await this.bookingMailService.sendReminderEmail(
-      reminderDays.instructions,
-      'checkout instructions reminder',
-      ReminderType.INSTRUCTIONS,
-    );
-    this.logger.log('Sent booking reminder emails!');
-  }
-
-  async sendMarketingEmails(): Promise<void> {
-    this.logger.log('Sending marketing emails...');
+    try {
+      this.logger.log('Sending booking reminder emails...');
+      await this.bookingMailService.sendReminderEmail(
+        reminderDays.upcoming,
+        'upcoming reminder',
+        ReminderType.UPCOMING,
+      );
+      await this.bookingMailService.sendReminderEmail(
+        reminderDays.final,
+        'final reminder',
+        ReminderType.FINAL,
+      );
+      await this.bookingMailService.sendReminderEmail(
+        reminderDays.instructions,
+        'checkout instructions reminder',
+        ReminderType.INSTRUCTIONS,
+      );
+      this.logger.log('Sent booking reminder emails!');
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   async initializeCronJob(jobConfig: CronJobConfig): Promise<void> {
@@ -78,14 +78,9 @@ export class MailSchedulerService implements OnModuleInit {
     const jobConfigs: CronJobConfig[] = [
       {
         name: 'sendBookingReminderEmails',
-        schedule: '0 37 12 * * *',
+        schedule: '0 0 17 * * *',
         handler: this.sendBookingReminderEmails,
       },
-      // {
-      //   name: 'sendMarketingEmails',
-      //   schedule: '0 0 * * *',
-      //   handler: this.sendMarketingEmails,
-      // },
     ];
 
     for (const jobConfig of jobConfigs) {

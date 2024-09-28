@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Equal, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, Equal, Repository } from 'typeorm';
 import { Booking } from 'entities/booking.entity';
 import { LoggerService } from 'services/logger.service';
 import {
@@ -42,13 +42,25 @@ export class BookingMailService {
     private readonly bookingUtilService: BookingUtilService,
   ) {}
 
-  private async getScheduledDate(reminderDays: number): Promise<Date> {
-    const d = new Date(Date.now());
-    d.setDate(d.getDate() + Math.abs(reminderDays));
-    d.setHours(0);
-    d.setMinutes(0);
-    d.setSeconds(0);
-    return d;
+  private async getScheduledDate(
+    reminderDays: number,
+    hour: number = 0,
+  ): Promise<{
+    scheduledDate: Date;
+    startOfDay: Date;
+    endOfDay: Date;
+  }> {
+    const scheduledDate = new Date(Date.now());
+    scheduledDate.setDate(scheduledDate.getDate() + Math.abs(reminderDays));
+    scheduledDate.setHours(hour, 0, 0, 0);
+
+    const startOfDay = new Date(scheduledDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(scheduledDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return { scheduledDate, startOfDay, endOfDay };
   }
 
   private async getBannerImage(booking: Booking): Promise<string> {
@@ -98,12 +110,16 @@ export class BookingMailService {
   }
 
   private async getPropertyCodes(id: number): Promise<object> {
-    const codes = await this.propertyCodesRepository.find({
-      where: { property: { id } },
-      relations: ['propertyCodeType'],
+    const codesObject = new Object();
+    (
+      await this.propertyCodesRepository.find({
+        where: { property: { id } },
+        relations: ['propertyCodeCategory'],
+      })
+    ).map((code) => {
+      codesObject[code.propertyCodeCategory.name] = code.propertyCode;
     });
-    console.log(codes[0]);
-    return codes;
+    return codesObject;
   }
 
   private async createEmailContext(
@@ -115,6 +131,7 @@ export class BookingMailService {
     lastCheckOutDate: Date = undefined,
     isSignWaiverEnabled: boolean = false,
   ): Promise<object> {
+    const codes = await this.getPropertyCodes(property.id);
     const context = {
       ownerName: `${user.firstName} ${user.lastName}`,
       propertyName: property.propertyName || 'N/A',
@@ -142,10 +159,7 @@ export class BookingMailService {
       cancel: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
       link: `${authConstants.hostname}:${authConstants.port}/${authConstants.endpoints.booking}`,
       isSignWaiverEnabled,
-      codes: {
-        'Wi-Fi Network': 'Paradise12',
-        'Wi-Fi Password': 'Para@12$',
-      },
+      codes,
     };
 
     return context;
@@ -214,10 +228,10 @@ export class BookingMailService {
   private async getBookingListForReminder(
     reminderDays: number,
   ): Promise<Booking[]> {
-    const scheduledDate = await this.getScheduledDate(reminderDays);
+    const { startOfDay, endOfDay } = await this.getScheduledDate(reminderDays);
     const bookingsList: Booking[] = await this.bookingRepository.find({
       where: {
-        checkinDate: MoreThanOrEqual(scheduledDate),
+        checkinDate: Between(startOfDay, endOfDay),
         isCancelled: Equal(false),
         isCompleted: Equal(false),
       },
