@@ -7,7 +7,6 @@ import { PropertyDetails } from 'entities/property-details.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
-import { NotFoundException } from '@nestjs/common';
 import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.dto';
 import { BookingService } from 'src/main/service/booking/booking.service';
 import { User } from 'src/main/entities/user.entity';
