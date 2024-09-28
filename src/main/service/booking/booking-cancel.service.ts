@@ -92,6 +92,7 @@ export class CancelBookingService {
     );
 
     existingBooking.isCancelled = true;
+    existingBooking.cancelledAt = new Date();
     const cancelledBooking = await this.bookingRepository.save(existingBooking);
 
     await this.bookingMailService.sendBookingCancellationEmail(
