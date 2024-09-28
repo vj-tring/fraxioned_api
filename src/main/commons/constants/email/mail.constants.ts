@@ -55,9 +55,9 @@ export enum ReminderType {
 }
 
 export const reminderDays = {
-  upcoming: 0,
-  final: 0,
-  instructions: 0,
+  upcoming: 28,
+  final: 3,
+  instructions: 2,
 };
 
 export const SignWaiverRequiredProperties = [
