@@ -136,15 +136,13 @@ describe('BookingService', () => {
       expect(result).toEqual(bookings);
     });
 
-    it('should throw NotFoundException if no bookings found', async () => {
+    it('should return BOOKINGS_NOT_FOUND if no bookings found', async () => {
       jest.spyOn(bookingRepository, 'find').mockResolvedValue([]);
       const requestedUser = 1;
-      await expect(service.getAllBookings(requestedUser)).rejects.toThrow(
-        NotFoundException,
-      );
+      const result = await service.getAllBookings(requestedUser);
+      expect(result).toEqual(BOOKING_RESPONSES.BOOKINGS_NOT_FOUND);
     });
   });
-
   describe('getBookingById', () => {
     it('should return a booking by ID', async () => {
       const booking = {
