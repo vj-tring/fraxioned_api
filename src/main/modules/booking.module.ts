@@ -21,9 +21,9 @@ import { PropertyImages } from '../entities/property_images.entity';
 import { UpdateBookingService } from '../service/booking/booking-update.service';
 import { CancelBookingService } from '../service/booking/booking-cancel.service';
 import { AdminBookingService } from '../service/booking/admin-booking.service';
-import { BookingUtilService } from '../service/booking/utils/booking.service.util';
-import { BookingMailService } from '../service/booking/utils/mail.util';
-import { BookingValidationService } from '../service/booking/utils/validation.util';
+import { BookingUtilService } from '../utils/booking/booking.service.util';
+import { BookingMailService } from '../utils/booking/mail.util';
+import { BookingValidationService } from '../utils/booking/validation.util';
 
 @Module({
   imports: [

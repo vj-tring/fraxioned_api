@@ -11,9 +11,9 @@ import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { differenceInDays } from 'date-fns';
 import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/user.constant';
-import { NightCounts } from './interface/bookingInterface';
-import { BookingUtilService } from './utils/booking.service.util';
-import { BookingMailService } from './utils/mail.util';
+import { BookingUtilService } from '../../utils/booking/booking.service.util';
+import { BookingMailService } from '../../utils/booking/mail.util';
+import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
 
 @Injectable()
 export class CancelBookingService {
@@ -200,28 +200,12 @@ export class CancelBookingService {
     if (isLateCancellation) {
       this.addToLostNights(userProperty, nightCounts, yearType);
     } else {
-      this.revertNightCounts(userProperty, nightCounts, yearType);
+      this.bookingUtilService.revertNightCounts(
+        userProperty,
+        nightCounts,
+        yearType,
+      );
     }
-  }
-
-  private revertNightCounts(
-    userProperty: UserProperties,
-    nightCounts: NightCounts,
-    yearType: 'FirstYear' | 'SecondYear',
-  ): void {
-    userProperty.peakRemainingNights += nightCounts[`peakNightsIn${yearType}`];
-    userProperty.offRemainingNights += nightCounts[`offNightsIn${yearType}`];
-    userProperty.peakRemainingHolidayNights +=
-      nightCounts[`peakHolidayNightsIn${yearType}`];
-    userProperty.offRemainingHolidayNights +=
-      nightCounts[`offHolidayNightsIn${yearType}`];
-
-    userProperty.peakBookedNights -= nightCounts[`peakNightsIn${yearType}`];
-    userProperty.offBookedNights -= nightCounts[`offNightsIn${yearType}`];
-    userProperty.peakBookedHolidayNights -=
-      nightCounts[`peakHolidayNightsIn${yearType}`];
-    userProperty.offBookedHolidayNights -=
-      nightCounts[`offHolidayNightsIn${yearType}`];
   }
 
   private addToLostNights(

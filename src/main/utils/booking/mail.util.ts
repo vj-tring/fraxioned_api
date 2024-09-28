@@ -20,8 +20,6 @@ import { Property } from 'src/main/entities/property.entity';
 @Injectable()
 export class BookingMailService {
   constructor(
-    @InjectRepository(Property)
-    private readonly propertyRepository: Repository<Property>,
     @InjectRepository(UserContactDetails)
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     @InjectRepository(User)

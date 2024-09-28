@@ -9,6 +9,13 @@ export const BOOKING_RESPONSES = {
     data: booking,
     statusCode: 201,
   }),
+  BOOKING_SUMMARY: (
+    booking: object,
+  ): { message: string; data: object; statusCode: number } => ({
+    message: 'Booking summary created successfully',
+    data: booking,
+    statusCode: 201,
+  }),
   BOOKING_NOT_FOUND: (id: number): { message: string; statusCode: number } => ({
     message: `Booking with ID ${id} not found`,
     statusCode: 404,

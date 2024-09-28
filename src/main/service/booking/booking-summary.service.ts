@@ -8,11 +8,11 @@ import { CreateBookingDTO } from '../../dto/requests/booking/create-booking.dto'
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { PropertyDetails } from '../../entities/property-details.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
-import { NightCounts } from './interface/bookingInterface';
-import { normalizeDates } from './utils/date.util';
-import { generateBookingId } from './utils/booking-id.util';
-import { BookingValidationService } from './utils/validation.util';
+import { BookingUtilService } from 'src/main/utils/booking/booking.service.util';
+import { normalizeDates } from '../../utils/booking/date.util';
+import { generateBookingId } from '../../utils/booking/booking-id.util';
+import { BookingValidationService } from '../../utils/booking/validation.util';
+import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
 
 @Injectable()
 export class BookingSummaryService {
@@ -169,7 +169,7 @@ export class BookingSummaryService {
       checkOutTime: propertyDetails.checkOutTime,
     };
 
-    return bookingSummary;
+    return BOOKING_RESPONSES.BOOKING_SUMMARY(bookingSummary);
   }
 
   private getSeason(date: Date, propertyDetails: PropertyDetails): string {

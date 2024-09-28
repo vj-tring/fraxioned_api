@@ -35,6 +35,11 @@ export class BookingController {
     private readonly cancelBookingService: CancelBookingService,
   ) {}
 
+  private getUserIdFromRequest(req: Request): number {
+    const userId = req.headers['user-id'];
+    return userId ? parseInt(userId as string, 10) : 0;
+  }
+
   @Post('booking')
   async createBooking(
     @Body() createBookingDto: CreateBookingDTO,
@@ -47,11 +52,6 @@ export class BookingController {
     @Body() createBookingDto: CreateBookingDTO,
   ): Promise<object> {
     return this.bookingSummaryService.bookingSummary(createBookingDto);
-  }
-
-  private getUserIdFromRequest(req: Request): number {
-    const userId = req.headers['user-id'];
-    return userId ? parseInt(userId as string, 10) : 0;
   }
 
   @Get()

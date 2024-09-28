@@ -9,8 +9,8 @@ import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { BookingRules } from 'src/main/commons/constants/enumerations/booking-rules';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
-import { NightCounts } from '../interface/bookingInterface';
 import { isDateInRange, normalizeDate } from './date.util';
+import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
 
 @Injectable()
 export class BookingUtilService {
@@ -244,6 +244,26 @@ export class BookingUtilService {
     userProperty.peakBookedHolidayNights +=
       nightCounts[`peakHolidayNightsIn${yearType}`];
     userProperty.offBookedHolidayNights +=
+      nightCounts[`offHolidayNightsIn${yearType}`];
+  }
+
+  revertNightCounts(
+    userProperty: UserProperties,
+    nightCounts: NightCounts,
+    yearType: 'FirstYear' | 'SecondYear',
+  ): void {
+    userProperty.peakRemainingNights += nightCounts[`peakNightsIn${yearType}`];
+    userProperty.offRemainingNights += nightCounts[`offNightsIn${yearType}`];
+    userProperty.peakRemainingHolidayNights +=
+      nightCounts[`peakHolidayNightsIn${yearType}`];
+    userProperty.offRemainingHolidayNights +=
+      nightCounts[`offHolidayNightsIn${yearType}`];
+
+    userProperty.peakBookedNights -= nightCounts[`peakNightsIn${yearType}`];
+    userProperty.offBookedNights -= nightCounts[`offNightsIn${yearType}`];
+    userProperty.peakBookedHolidayNights -=
+      nightCounts[`peakHolidayNightsIn${yearType}`];
+    userProperty.offBookedHolidayNights -=
       nightCounts[`offHolidayNightsIn${yearType}`];
   }
 

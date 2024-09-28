@@ -9,8 +9,8 @@ import { Property } from 'src/main/entities/property.entity';
 import { BookingRules } from 'src/main/commons/constants/enumerations/booking-rules';
 import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.dto';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
-import { NightCounts } from '../interface/bookingInterface';
 import { normalizeDate } from './date.util';
+import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
 
 @Injectable()
 export class BookingValidationService {
