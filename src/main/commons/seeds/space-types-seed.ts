@@ -187,6 +187,16 @@ export const seedSpaceType = async (dataSource: DataSource): Promise<void> => {
       space: bathroomSpace,
     });
 
+    const banner = spaceTypesRepository.create({
+      name: 'Banner',
+      space: generalSpace,
+    });
+
+    const banners = spaceTypesRepository.create({
+      name: 'Banners',
+      space: generalSpace,
+    });
+
     await spaceTypesRepository.save([
       diningRoom,
       exterior,
@@ -221,6 +231,8 @@ export const seedSpaceType = async (dataSource: DataSource): Promise<void> => {
       halfBathroom,
       showerOnlyBathroom,
       ensuiteBathroom,
+      banner,
+      banners,
     ]);
   }
 };
