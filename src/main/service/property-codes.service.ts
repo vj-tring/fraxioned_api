@@ -114,7 +114,13 @@ export class PropertyCodesService {
       );
       return PROPERTY_CODES_RESPONSES.PROPERTY_CODE_CREATED(savedPropertyCodes);
     } catch (error) {
-      throw error;
+      this.logger.error(
+        `Error creating property code: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while creating the property code',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
