@@ -168,7 +168,7 @@ export class BookingSummaryService {
       checkOutTime: propertyDetails.checkOutTime,
     };
 
-    return BOOKING_RESPONSES.BOOKING_SUMMARY(bookingSummary);
+    return bookingSummary;
   }
 
   private getSeason(date: Date, propertyDetails: PropertyDetails): string {

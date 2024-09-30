@@ -14,6 +14,9 @@ import { NightCounts } from 'src/main/commons/interface/booking/night-counts.int
 
 @Injectable()
 export class BookingValidationService {
+  private readonly MS_PER_HOUR = 1000 * 60 * 60;
+  private readonly MS_PER_DAY = this.MS_PER_HOUR * 24;
+
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
@@ -27,8 +30,9 @@ export class BookingValidationService {
     propertyDetails: PropertyDetails,
   ): true | object {
     const today = new Date();
+    const normalizedToday = normalizeDate(today);
 
-    if (checkinDate < normalizeDate(today)) {
+    if (checkinDate < normalizedToday) {
       return BOOKING_RESPONSES.CHECKIN_DATE_PAST;
     }
 
@@ -36,10 +40,7 @@ export class BookingValidationService {
       return BOOKING_RESPONSES.CHECKOUT_BEFORE_CHECKIN;
     }
 
-    const checkInEndDate = new Date(today);
-    checkInEndDate.setFullYear(today.getFullYear() + 2);
-    checkInEndDate.setMonth(11);
-    checkInEndDate.setDate(31);
+    const checkInEndDate = new Date(today.getFullYear() + 2, 11, 31);
 
     if (checkinDate > checkInEndDate) {
       return BOOKING_RESPONSES.DATES_OUT_OF_RANGE;
@@ -48,8 +49,8 @@ export class BookingValidationService {
     const checkinDateTime = new Date(checkinDate);
     checkinDateTime.setHours(propertyDetails.checkInTime, 0, 0, 0);
 
-    const timeDifference = checkinDateTime.getTime() - today.getTime();
-    const hoursDifference = timeDifference / (1000 * 60 * 60);
+    const hoursDifference =
+      (checkinDateTime.getTime() - today.getTime()) / this.MS_PER_HOUR;
 
     if (hoursDifference < 24) {
       return BOOKING_RESPONSES.BOOKING_TOO_CLOSE_TO_CHECKIN;
@@ -67,26 +68,30 @@ export class BookingValidationService {
     const checkinYear = checkinDate.getFullYear();
     const checkoutYear = checkoutDate.getFullYear();
 
-    const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: {
-        user: { id: user.id },
-        property: { id: property.id },
-        year: checkinYear,
-      },
-    });
-    const userPropertySecondYear = await this.userPropertiesRepository.findOne({
-      where: {
-        user: { id: user.id },
-        property: { id: property.id },
-        year: checkoutYear,
-      },
-    });
+    const [userPropertyFirstYear, userPropertySecondYear] = await Promise.all([
+      this.getUserProperty(user.id, property.id, checkinYear),
+      this.getUserProperty(user.id, property.id, checkoutYear),
+    ]);
 
     if (!userPropertyFirstYear || !userPropertySecondYear) {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
     return true;
+  }
+
+  private async getUserProperty(
+    userId: number,
+    propertyId: number,
+    year: number,
+  ): Promise<UserProperties | undefined> {
+    return this.userPropertiesRepository.findOne({
+      where: {
+        user: { id: userId },
+        property: { id: propertyId },
+        year,
+      },
+    });
   }
 
   validateGuestLimits(
@@ -112,8 +117,8 @@ export class BookingValidationService {
     const today = new Date();
     const lastBookings = await this.bookingRepository.find({
       where: {
-        user: user,
-        property: property,
+        user,
+        property,
         checkoutDate: MoreThanOrEqual(today),
         isCompleted: false,
         isCancelled: false,
@@ -122,33 +127,51 @@ export class BookingValidationService {
     });
 
     for (const booking of lastBookings) {
-      const lastCheckoutDate = normalizeDate(new Date(booking.checkoutDate));
-      const lastCheckinDate = normalizeDate(new Date(booking.checkinDate));
-      const diffInDaysFromCheckout =
-        (checkinDate.getTime() - lastCheckoutDate.getTime()) /
-        (1000 * 60 * 60 * 24);
-      const diffInDaysFromCheckoutToLastCheckin =
-        (checkoutDate.getTime() - lastCheckinDate.getTime()) /
-        (1000 * 60 * 60 * 24);
-      const diffInDaysFromCheckin =
-        (lastCheckinDate.getTime() - checkinDate.getTime()) /
-        (1000 * 60 * 60 * 24);
+      const lastCheckoutDate = normalizeDate(booking.checkoutDate);
+      const lastCheckinDate = normalizeDate(booking.checkinDate);
 
-      if (diffInDaysFromCheckout >= 0 && diffInDaysFromCheckout <= 5) {
-        return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
-      }
+      const diffInDaysFromCheckout = this.getDaysDifference(
+        checkinDate,
+        lastCheckoutDate,
+      );
+      const diffInDaysFromCheckoutToLastCheckin = this.getDaysDifference(
+        checkoutDate,
+        lastCheckinDate,
+      );
+      const diffInDaysFromCheckin = this.getDaysDifference(
+        lastCheckinDate,
+        checkinDate,
+      );
+
       if (
-        diffInDaysFromCheckoutToLastCheckin >= -5 &&
-        diffInDaysFromCheckoutToLastCheckin < 0
+        this.isInsufficientGap(
+          diffInDaysFromCheckout,
+          diffInDaysFromCheckoutToLastCheckin,
+          diffInDaysFromCheckin,
+        )
       ) {
-        return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
-      }
-      if (diffInDaysFromCheckin >= 0 && diffInDaysFromCheckin <= 5) {
         return BOOKING_RESPONSES.INSUFFICIENT_GAP_BETWEEN_BOOKINGS;
       }
     }
 
     return true;
+  }
+
+  private getDaysDifference(date1: Date, date2: Date): number {
+    return (date1.getTime() - date2.getTime()) / this.MS_PER_DAY;
+  }
+
+  private isInsufficientGap(
+    diffFromCheckout: number,
+    diffFromCheckoutToLastCheckin: number,
+    diffFromCheckin: number,
+  ): boolean {
+    return (
+      (diffFromCheckout >= 0 && diffFromCheckout <= 5) ||
+      (diffFromCheckoutToLastCheckin >= -5 &&
+        diffFromCheckoutToLastCheckin < 0) ||
+      (diffFromCheckin >= 0 && diffFromCheckin <= 5)
+    );
   }
 
   async validateBookedDates(
@@ -157,7 +180,7 @@ export class BookingValidationService {
     checkoutDate: Date,
   ): Promise<true | object> {
     const bookedDates = await this.bookingRepository.find({
-      where: { property: property },
+      where: { property },
       select: ['checkinDate', 'checkoutDate', 'isCompleted', 'isCancelled'],
     });
 
@@ -191,95 +214,177 @@ export class BookingValidationService {
     property: Property,
     checkinDate: Date,
   ): Promise<true | object> {
-    const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: {
-        user: { id: user.id },
-        property: { id: property.id },
-        year: checkinDate.getFullYear(),
-      },
-    });
-    const userPropertySecondYear = await this.userPropertiesRepository.findOne({
-      where: {
-        user: { id: user.id },
-        property: { id: property.id },
-        year: checkinDate.getFullYear() + 1,
-      },
-    });
+    const [userPropertyFirstYear, userPropertySecondYear] = await Promise.all([
+      this.getUserProperty(user.id, property.id, checkinDate.getFullYear()),
+      this.getUserProperty(user.id, property.id, checkinDate.getFullYear() + 1),
+    ]);
+
+    if (!userPropertyFirstYear || !userPropertySecondYear) {
+      return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
+    }
 
     if (isLastMinuteBooking) {
-      if (nightsSelected < BookingRules.LAST_MIN_NIGHTS) {
-        return BOOKING_RESPONSES.LAST_MINUTE_MIN_NIGHTS(
-          BookingRules.LAST_MIN_NIGHTS,
-        );
-      }
-      if (nightsSelected > BookingRules.LAST_MAX_NIGHTS) {
-        return BOOKING_RESPONSES.LAST_MINUTE_MAX_NIGHTS(
-          BookingRules.LAST_MAX_NIGHTS,
-        );
-      }
-      const nightsFirstYear =
-        nightCounts.peakNightsInFirstYear + nightCounts.offNightsInFirstYear;
-      const nightsSecondYear =
-        nightCounts.peakNightsInSecondYear + nightCounts.offNightsInSecondYear;
-      if (
-        nightsFirstYear > userPropertyFirstYear.lastMinuteRemainingNights ||
-        nightsSecondYear > userPropertySecondYear.lastMinuteRemainingNights
-      ) {
-        return BOOKING_RESPONSES.INSUFFICIENT_LAST_MIN_BOOKING_NIGHTS;
-      }
+      return this.validateLastMinuteBooking(
+        nightsSelected,
+        nightCounts,
+        userPropertyFirstYear,
+        userPropertySecondYear,
+      );
     } else {
-      if (nightsSelected < BookingRules.REGULAR_MIN_NIGHTS) {
-        return BOOKING_RESPONSES.REGULAR_MIN_NIGHTS(
-          BookingRules.REGULAR_MIN_NIGHTS,
-        );
-      }
-      const nightsFirstYear =
-        nightCounts.peakNightsInFirstYear + nightCounts.offNightsInFirstYear;
-      const nightsSecondYear =
-        nightCounts.peakNightsInSecondYear + nightCounts.offNightsInSecondYear;
-      if (
-        nightsFirstYear + nightsSecondYear >
-        userPropertyFirstYear.maximumStayLength
-      ) {
-        return BOOKING_RESPONSES.MAX_STAY_LENGTH_EXCEEDED;
-      }
-      if (
-        nightCounts.peakNightsInFirstYear >
-          userPropertyFirstYear.peakRemainingNights ||
-        nightCounts.peakNightsInSecondYear >
-          userPropertySecondYear.peakRemainingNights
-      ) {
-        return BOOKING_RESPONSES.INSUFFICIENT_PEAK_NIGHTS;
-      }
-      if (
-        nightCounts.offNightsInFirstYear >
-          userPropertyFirstYear.offRemainingNights ||
-        nightCounts.offNightsInSecondYear >
-          userPropertySecondYear.offRemainingNights
-      ) {
-        return BOOKING_RESPONSES.INSUFFICIENT_OFF_NIGHTS;
-      }
-      const isValidCrossYearHoliday = await this.validatePeakSeasonHolidays(
+      return this.validateRegularBooking(
+        nightsSelected,
+        nightCounts,
         user,
         property,
         checkinDate,
-        nightCounts.peakHolidayNightsInFirstYear,
-        nightCounts.peakHolidayNightsInSecondYear,
+        userPropertyFirstYear,
+        userPropertySecondYear,
       );
-      if (!isValidCrossYearHoliday) {
-        return BOOKING_RESPONSES.INSUFFICIENT_PEAK_HOLIDAY_NIGHTS;
-      }
-      if (
-        nightCounts.offHolidayNightsInFirstYear >
-          userPropertyFirstYear.offRemainingHolidayNights ||
-        nightCounts.offHolidayNightsInSecondYear >
-          userPropertySecondYear.offRemainingHolidayNights
-      ) {
-        return BOOKING_RESPONSES.INSUFFICIENT_OFF_HOLIDAY_NIGHTS;
-      }
+    }
+  }
+
+  private validateLastMinuteBooking(
+    nightsSelected: number,
+    nightCounts: NightCounts,
+    userPropertyFirstYear: UserProperties,
+    userPropertySecondYear: UserProperties,
+  ): true | object {
+    if (nightsSelected < BookingRules.LAST_MIN_NIGHTS) {
+      return BOOKING_RESPONSES.LAST_MINUTE_MIN_NIGHTS(
+        BookingRules.LAST_MIN_NIGHTS,
+      );
+    }
+    if (nightsSelected > BookingRules.LAST_MAX_NIGHTS) {
+      return BOOKING_RESPONSES.LAST_MINUTE_MAX_NIGHTS(
+        BookingRules.LAST_MAX_NIGHTS,
+      );
+    }
+
+    const nightsFirstYear =
+      nightCounts.peakNightsInFirstYear + nightCounts.offNightsInFirstYear;
+    const nightsSecondYear =
+      nightCounts.peakNightsInSecondYear + nightCounts.offNightsInSecondYear;
+
+    if (
+      nightsFirstYear > userPropertyFirstYear.lastMinuteRemainingNights ||
+      nightsSecondYear > userPropertySecondYear.lastMinuteRemainingNights
+    ) {
+      return BOOKING_RESPONSES.INSUFFICIENT_LAST_MIN_BOOKING_NIGHTS;
     }
 
     return true;
+  }
+
+  private async validateRegularBooking(
+    nightsSelected: number,
+    nightCounts: NightCounts,
+    user: User,
+    property: Property,
+    checkinDate: Date,
+    userPropertyFirstYear: UserProperties,
+    userPropertySecondYear: UserProperties,
+  ): Promise<true | object> {
+    if (nightsSelected < BookingRules.REGULAR_MIN_NIGHTS) {
+      return BOOKING_RESPONSES.REGULAR_MIN_NIGHTS(
+        BookingRules.REGULAR_MIN_NIGHTS,
+      );
+    }
+
+    const totalNights = this.getTotalNights(nightCounts);
+    if (totalNights > userPropertyFirstYear.maximumStayLength) {
+      return BOOKING_RESPONSES.MAX_STAY_LENGTH_EXCEEDED;
+    }
+
+    if (
+      this.isInsufficientPeakNights(
+        nightCounts,
+        userPropertyFirstYear,
+        userPropertySecondYear,
+      )
+    ) {
+      return BOOKING_RESPONSES.INSUFFICIENT_PEAK_NIGHTS;
+    }
+
+    if (
+      this.isInsufficientOffNights(
+        nightCounts,
+        userPropertyFirstYear,
+        userPropertySecondYear,
+      )
+    ) {
+      return BOOKING_RESPONSES.INSUFFICIENT_OFF_NIGHTS;
+    }
+
+    const isValidCrossYearHoliday = await this.validatePeakSeasonHolidays(
+      user,
+      property,
+      checkinDate,
+      nightCounts.peakHolidayNightsInFirstYear,
+      nightCounts.peakHolidayNightsInSecondYear,
+    );
+    if (!isValidCrossYearHoliday) {
+      return BOOKING_RESPONSES.INSUFFICIENT_PEAK_HOLIDAY_NIGHTS;
+    }
+
+    if (
+      this.isInsufficientOffHolidayNights(
+        nightCounts,
+        userPropertyFirstYear,
+        userPropertySecondYear,
+      )
+    ) {
+      return BOOKING_RESPONSES.INSUFFICIENT_OFF_HOLIDAY_NIGHTS;
+    }
+
+    return true;
+  }
+
+  private getTotalNights(nightCounts: NightCounts): number {
+    return (
+      nightCounts.peakNightsInFirstYear +
+      nightCounts.offNightsInFirstYear +
+      nightCounts.peakNightsInSecondYear +
+      nightCounts.offNightsInSecondYear
+    );
+  }
+
+  private isInsufficientPeakNights(
+    nightCounts: NightCounts,
+    userPropertyFirstYear: UserProperties,
+    userPropertySecondYear: UserProperties,
+  ): boolean {
+    return (
+      nightCounts.peakNightsInFirstYear >
+        userPropertyFirstYear.peakRemainingNights ||
+      nightCounts.peakNightsInSecondYear >
+        userPropertySecondYear.peakRemainingNights
+    );
+  }
+
+  private isInsufficientOffNights(
+    nightCounts: NightCounts,
+    userPropertyFirstYear: UserProperties,
+    userPropertySecondYear: UserProperties,
+  ): boolean {
+    return (
+      nightCounts.offNightsInFirstYear >
+        userPropertyFirstYear.offRemainingNights ||
+      nightCounts.offNightsInSecondYear >
+        userPropertySecondYear.offRemainingNights
+    );
+  }
+
+  private isInsufficientOffHolidayNights(
+    nightCounts: NightCounts,
+    userPropertyFirstYear: UserProperties,
+    userPropertySecondYear: UserProperties,
+  ): boolean {
+    return (
+      nightCounts.offHolidayNightsInFirstYear >
+        userPropertyFirstYear.offRemainingHolidayNights ||
+      nightCounts.offHolidayNightsInSecondYear >
+        userPropertySecondYear.offRemainingHolidayNights
+    );
   }
 
   async validatePeakSeasonHolidays(
@@ -290,21 +395,17 @@ export class BookingValidationService {
     peakHolidayNightsInSecondYear: number,
   ): Promise<boolean> {
     const firstYear = checkinDate.getFullYear();
-
-    const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: {
-        user: { id: user.id },
-        property: { id: property.id },
-        year: firstYear,
-      },
-    });
+    const userPropertyFirstYear = await this.getUserProperty(
+      user.id,
+      property.id,
+      firstYear,
+    );
 
     if (!userPropertyFirstYear) {
       return false;
     }
 
     const remainingNights = userPropertyFirstYear.peakRemainingHolidayNights;
-
     return (
       peakHolidayNightsInFirstYear + peakHolidayNightsInSecondYear <=
       remainingNights
