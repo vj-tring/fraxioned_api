@@ -50,7 +50,7 @@ export class UpdateBookingService {
     this.lastCheckOutDate = existingBooking.checkoutDate;
 
     if (!existingBooking) {
-      return BOOKING_RESPONSES.BOOKING_NOT_FOUND;
+      return BOOKING_RESPONSES.BOOKING_NOT_FOUND(updateBookingDto.property.id);
     }
 
     const {

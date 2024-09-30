@@ -56,7 +56,7 @@ export class BookingService {
         },
       });
       if (existingBookings.length === 0) {
-        return BOOKING_RESPONSES.BOOKINGS_NOT_FOUND;
+        return BOOKING_RESPONSES.BOOKINGS_NOT_FOUND();
       }
       return Promise.all(
         existingBookings.map((booking) =>
