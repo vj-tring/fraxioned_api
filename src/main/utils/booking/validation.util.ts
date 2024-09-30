@@ -38,6 +38,8 @@ export class BookingValidationService {
 
     const checkInEndDate = new Date(today);
     checkInEndDate.setFullYear(today.getFullYear() + 2);
+    checkInEndDate.setMonth(11);
+    checkInEndDate.setDate(31);
 
     if (checkinDate > checkInEndDate) {
       return BOOKING_RESPONSES.DATES_OUT_OF_RANGE;

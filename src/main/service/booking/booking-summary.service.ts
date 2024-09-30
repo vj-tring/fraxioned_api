@@ -108,8 +108,7 @@ export class BookingSummaryService {
         propertyDetails,
       );
 
-    const isLastMinuteBooking =
-      this.bookingUtilService.isLastMinuteBooking(checkinDate);
+    const isLastMinuteBooking = createBookingDto.isLastMinuteBooking;
     const nightsSelected = this.bookingUtilService.calculateNightsSelected(
       checkinDate,
       checkoutDate,

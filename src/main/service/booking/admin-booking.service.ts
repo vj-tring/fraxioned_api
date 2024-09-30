@@ -38,10 +38,7 @@ export class AdminBookingService {
   ): Promise<Booking | object> {
     this.logger.log('Creating a new admin booking');
 
-    const isLastMinuteBooking = this.bookingUtilService.isLastMinuteBooking(
-      createBookingDto.checkinDate,
-    );
-
+    const isLastMinuteBooking = createBookingDto.isLastMinuteBooking;
     const property = await this.propertyRepository.findOne({
       where: { id: createBookingDto.property.id },
     });

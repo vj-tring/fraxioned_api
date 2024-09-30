@@ -7,7 +7,6 @@ import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { BookingRules } from 'src/main/commons/constants/enumerations/booking-rules';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { isDateInRange, normalizeDate } from './date.util';
 import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
@@ -79,16 +78,14 @@ export class BookingUtilService {
 
     const countedHolidays = new Set<number>();
 
+    const firstYear = checkinDate.getFullYear();
+
     for (
       let date = new Date(checkinDate);
       date < checkoutDate;
       date.setDate(date.getDate() + 1)
     ) {
       const currentYear = date.getFullYear();
-      const adjustedYear =
-        date.getMonth() === 11 && date.getDate() === 31
-          ? currentYear + 1
-          : currentYear;
 
       PropertyHolidays.forEach((PropertyHoliday) => {
         if (
@@ -98,13 +95,13 @@ export class BookingUtilService {
           if (!countedHolidays.has(PropertyHoliday.holiday.id)) {
             countedHolidays.add(PropertyHoliday.holiday.id);
             if (isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
-              if (adjustedYear === checkinDate.getFullYear()) {
+              if (currentYear === firstYear) {
                 peakHolidayNightsInFirstYear++;
               } else {
                 peakHolidayNightsInSecondYear++;
               }
             } else {
-              if (adjustedYear === checkinDate.getFullYear()) {
+              if (currentYear === firstYear) {
                 offHolidayNightsInFirstYear++;
               } else {
                 offHolidayNightsInSecondYear++;
@@ -116,13 +113,13 @@ export class BookingUtilService {
 
       if (!countedHolidays.has(date.getTime())) {
         if (isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
-          if (adjustedYear === checkinDate.getFullYear()) {
+          if (currentYear === firstYear) {
             peakNightsInFirstYear++;
           } else {
             peakNightsInSecondYear++;
           }
         } else {
-          if (adjustedYear === checkinDate.getFullYear()) {
+          if (currentYear === firstYear) {
             offNightsInFirstYear++;
           } else {
             offNightsInSecondYear++;
@@ -141,14 +138,6 @@ export class BookingUtilService {
       peakHolidayNightsInSecondYear,
       offHolidayNightsInSecondYear,
     };
-  }
-
-  isLastMinuteBooking(checkinDate: Date | string): boolean {
-    const date = new Date(checkinDate);
-    const today = new Date();
-    const diffInDays =
-      (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-    return diffInDays <= BookingRules.LAST_MAX_DAYS;
   }
 
   calculateNightsSelected(checkinDate: Date, checkoutDate: Date): number {
