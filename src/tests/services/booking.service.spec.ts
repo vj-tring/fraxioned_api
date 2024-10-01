@@ -139,7 +139,7 @@ describe('BookingService', () => {
       jest.spyOn(bookingRepository, 'find').mockResolvedValue([]);
       const requestedUser = 1;
       const result = await service.getAllBookings(requestedUser);
-      expect(result).toEqual(BOOKING_RESPONSES.BOOKINGS_NOT_FOUND);
+      expect(result).toEqual(BOOKING_RESPONSES.BOOKINGS_NOT_FOUND());
     });
   });
   describe('getBookingById', () => {
