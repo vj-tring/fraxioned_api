@@ -233,6 +233,7 @@ export class PropertyAmenitiesService {
           'amenity',
           'amenity.createdBy',
           'amenity.updatedBy',
+          'amenity.amenityGroup',
           'createdBy',
           'updatedBy',
         ],
@@ -244,7 +245,10 @@ export class PropertyAmenitiesService {
             id: true,
             amenityName: true,
             amenityDescription: true,
-            amenityType: true,
+            amenityGroup: {
+              id: true,
+              name: true,
+            },
             createdAt: true,
             updatedAt: true,
             createdBy: {
