@@ -133,13 +133,35 @@ export class PropertyAmenitiesService {
   }> {
     try {
       const propertyAmenities = await this.propertyAmenitiesRepository.find({
-        relations: ['property', 'amenity', 'createdBy', 'updatedBy'],
+        relations: [
+          'property',
+          'amenity',
+          'amenity.createdBy',
+          'amenity.updatedBy',
+          'amenity.amenityGroup',
+          'createdBy',
+          'updatedBy',
+        ],
         select: {
           property: {
             id: true,
           },
           amenity: {
             id: true,
+            amenityName: true,
+            amenityDescription: true,
+            amenityGroup: {
+              id: true,
+              name: true,
+            },
+            createdAt: true,
+            updatedAt: true,
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
           },
           createdBy: {
             id: true,
@@ -182,13 +204,35 @@ export class PropertyAmenitiesService {
   }> {
     try {
       const propertyAmenity = await this.propertyAmenitiesRepository.findOne({
-        relations: ['property', 'amenity', 'createdBy', 'updatedBy'],
+        relations: [
+          'property',
+          'amenity',
+          'amenity.createdBy',
+          'amenity.updatedBy',
+          'amenity.amenityGroup',
+          'createdBy',
+          'updatedBy',
+        ],
         select: {
           property: {
             id: true,
           },
           amenity: {
             id: true,
+            amenityName: true,
+            amenityDescription: true,
+            amenityGroup: {
+              id: true,
+              name: true,
+            },
+            createdAt: true,
+            updatedAt: true,
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
           },
           createdBy: {
             id: true,
@@ -300,13 +344,35 @@ export class PropertyAmenitiesService {
   }> {
     try {
       const propertyAmenity = await this.propertyAmenitiesRepository.findOne({
-        relations: ['property', 'amenity', 'createdBy', 'updatedBy'],
+        relations: [
+          'property',
+          'amenity',
+          'amenity.createdBy',
+          'amenity.updatedBy',
+          'amenity.amenityGroup',
+          'createdBy',
+          'updatedBy',
+        ],
         select: {
           property: {
             id: true,
           },
           amenity: {
             id: true,
+            amenityName: true,
+            amenityDescription: true,
+            amenityGroup: {
+              id: true,
+              name: true,
+            },
+            createdAt: true,
+            updatedAt: true,
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
           },
           createdBy: {
             id: true,

@@ -116,8 +116,12 @@ export class AmenitiesService {
   }> {
     try {
       const amenities = await this.amenityRepository.find({
-        relations: ['createdBy', 'updatedBy'],
+        relations: ['createdBy', 'updatedBy', 'amenityGroup'],
         select: {
+          amenityGroup: {
+            id: true,
+            name: true,
+          },
           createdBy: {
             id: true,
           },
@@ -153,8 +157,12 @@ export class AmenitiesService {
   }> {
     try {
       const amenity = await this.amenityRepository.findOne({
-        relations: ['createdBy', 'updatedBy'],
+        relations: ['createdBy', 'updatedBy', 'amenityGroup'],
         select: {
+          amenityGroup: {
+            id: true,
+            name: true,
+          },
           createdBy: {
             id: true,
           },
@@ -194,8 +202,12 @@ export class AmenitiesService {
   }> {
     try {
       const amenity = await this.amenityRepository.findOne({
-        relations: ['createdBy', 'updatedBy'],
+        relations: ['createdBy', 'updatedBy', 'amenityGroup'],
         select: {
+          amenityGroup: {
+            id: true,
+            name: true,
+          },
           createdBy: {
             id: true,
           },
