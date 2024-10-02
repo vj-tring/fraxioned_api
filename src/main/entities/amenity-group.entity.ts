@@ -6,8 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Amenities } from './amenities.entity';
 
 @Entity('fxn_amenity_group')
 export class AmenityGroup {
@@ -31,6 +33,6 @@ export class AmenityGroup {
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
 
-  // @OneToMany(() => SpaceTypes, (spaceType) => spaceType.space)
-  // spaceTypes: SpaceTypes[];
+  @OneToMany(() => Amenities, (amenities) => amenities.amenityGroup)
+  amenities: Amenities[];
 }

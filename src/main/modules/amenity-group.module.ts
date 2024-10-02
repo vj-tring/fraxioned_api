@@ -7,6 +7,7 @@ import { AmenityGroupController } from '../controller/amenity-group.controller';
 import { AmenityGroupService } from '../service/amenity-group.service';
 import { User } from '../entities/user.entity';
 import { UserModule } from './user.module';
+import { AmenitiesModule } from './amenities.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserModule } from './user.module';
     LoggerModule,
     AuthenticationModule,
     UserModule,
+    AmenitiesModule,
   ],
   controllers: [AmenityGroupController],
   providers: [AmenityGroupService],

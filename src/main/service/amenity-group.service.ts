@@ -6,21 +6,19 @@ import { AmenityGroup } from '../entities/amenity-group.entity';
 import { CreateAmenityGroupDto } from '../dto/requests/amenity-group/create-amenity-group.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { AMENITY_GROUP_RESPONSES } from '../commons/constants/response-constants/amenity-group.constant';
-import { UserService } from './user.service';
 import { User } from '../entities/user.entity';
 import { AMENITIES_RESPONSES } from '../commons/constants/response-constants/amenities.constant';
 import { UpdateAmenityGroupDto } from '../dto/requests/amenity-group/update-amenity-group.dto';
+import { AmenitiesService } from './amenities.service';
 
 @Injectable()
 export class AmenityGroupService {
   constructor(
     @InjectRepository(AmenityGroup)
     private readonly amenityGroupRepository: Repository<AmenityGroup>,
-    private readonly userService: UserService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    // @InjectRepository(SpaceTypes)
-    // private readonly spaceTypesRepository: Repository<SpaceTypes>,
+    private readonly amenitiesService: AmenitiesService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -207,15 +205,14 @@ export class AmenityGroupService {
 
   async deleteAmenityGroupById(id: number): Promise<ApiResponse<AmenityGroup>> {
     try {
-      // const spaceType = await this.spaceTypesRepository.findOne({
-      //   where: { space: { id: id } },
-      // });
-      // if (spaceType) {
-      //   this.logger.log(
-      //     `Space ID ${id} exists and is mapped to space type, hence cannot be deleted.`,
-      //   );
-      //   return SPACE_RESPONSES.SPACE_FOREIGN_KEY_CONFLICT(id);
-      // }
+      const amenity =
+        await this.amenitiesService.findAmenityByAmenityGroupId(id);
+      if (amenity) {
+        this.logger.log(
+          `Amenity group ID ${id} exists and is mapped to amenity, hence cannot be deleted.`,
+        );
+        return AMENITY_GROUP_RESPONSES.AMENITY_GROUP_FOREIGN_KEY_CONFLICT(id);
+      }
       const result = await this.amenityGroupRepository.delete(id);
       if (result.affected === 0) {
         this.logger.error(`Amenity group with ID ${id} not found`);

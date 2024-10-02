@@ -84,17 +84,17 @@ export const AMENITY_GROUP_RESPONSES = {
     data: updatedAmenityGroup,
     statusCode: HttpStatus.OK,
   }),
-  //   SPACE_FOREIGN_KEY_CONFLICT: (
-  //     id: number,
-  //   ): {
-  //     success: boolean;
-  //     message: string;
-  //     statusCode: number;
-  //   } => ({
-  //     success: false,
-  //     message: `Space ID ${id} exists and is mapped to space type, hence cannot be deleted.`,
-  //     statusCode: HttpStatus.CONFLICT,
-  //   }),
+  AMENITY_GROUP_FOREIGN_KEY_CONFLICT: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Amenity group ID ${id} exists and is mapped to amenity, hence cannot be deleted.`,
+    statusCode: HttpStatus.CONFLICT,
+  }),
   AMENITY_GROUP_DELETED: (
     id: number,
   ): {

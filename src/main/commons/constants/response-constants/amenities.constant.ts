@@ -4,10 +4,10 @@ import { Amenities } from 'src/main/entities/amenities.entity';
 export const AMENITIES_RESPONSES = {
   AMENITY_ALREADY_EXISTS: (
     amenityName: string,
-    amenityType: string,
+    amenityGroupId: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: false,
-    message: `Amenity ${amenityName} for the type ${amenityType} already exists`,
+    message: `Amenity ${amenityName} for the type ${amenityGroupId} already exists`,
     statusCode: HttpStatus.CONFLICT,
   }),
 
