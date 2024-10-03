@@ -19,7 +19,7 @@ import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { CreateOrDeletePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-or-delete-property-amenities.dto';
 
-@ApiTags('Property Amenities')
+@ApiTags('PropertyAmenities')
 @Controller('v1/property-amenities')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()

@@ -29,6 +29,7 @@ import { MailSchedulerService } from './main/scheduler/mail-scheduler.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from './main/modules/logger.module';
 import { PropertyCodeCategoryModule } from './main/modules/property-code-category.module';
+import { AmenityGroupModule } from './main/modules/amenity-group.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { PropertyCodeCategoryModule } from './main/modules/property-code-categor
     ScheduleModule.forRoot(),
     LoggerModule,
     PropertyCodeCategoryModule,
+    AmenityGroupModule,
   ],
   providers: [CronJobsService, MailSchedulerService],
 })
