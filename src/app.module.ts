@@ -26,6 +26,8 @@ import { BookingModule } from './main/modules/booking.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
 import { PropertyCodeCategoryModule } from './main/modules/property-code-category.module';
 import { AmenityGroupModule } from './main/modules/amenity-group.module';
+import { FaqCategoryModule } from './main/modules/faqcategory.module';
+import { FaqQuestionsModule } from './main/modules/faqquestions.module';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { AmenityGroupModule } from './main/modules/amenity-group.module';
     ContactUsModule,
     PropertyCodeCategoryModule,
     AmenityGroupModule,
+    FaqCategoryModule,
+    FaqQuestionsModule,
   ],
 })
 export class AppModule {}
