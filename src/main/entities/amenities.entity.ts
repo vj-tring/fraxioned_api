@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { AmenityGroup } from './amenity-group.entity';
 
 @Entity('fxn_amenities')
 export class Amenities {
@@ -26,14 +27,14 @@ export class Amenities {
   @Column({
     name: 'description',
     type: 'varchar',
+    nullable: true,
+    default: null,
   })
   amenityDescription: string;
 
-  @Column({
-    name: 'type',
-    type: 'varchar',
-  })
-  amenityType: string;
+  @ManyToOne(() => AmenityGroup, (amenityGroup) => amenityGroup.amenities)
+  @JoinColumn({ name: 'amenity_group_id' })
+  amenityGroup: AmenityGroup;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
@@ -50,12 +51,14 @@ export class Amenities {
   @CreateDateColumn({
     name: 'created_at',
     nullable: true,
+    default: null,
   })
   createdAt: Date = undefined;
 
   @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
+    default: null,
   })
   updatedAt: Date = undefined;
 }

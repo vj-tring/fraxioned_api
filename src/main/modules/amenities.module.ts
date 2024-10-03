@@ -7,15 +7,21 @@ import { Amenities } from '../entities/amenities.entity';
 import { AmenitiesController } from '../controller/amenities.controller';
 import { AmenitiesService } from '../service/amenities.service';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
+import { AmenityGroup } from '../entities/amenity-group.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Amenities, User, PropertyAmenities]),
-    PropertyAmenities,
+    TypeOrmModule.forFeature([
+      Amenities,
+      User,
+      PropertyAmenities,
+      AmenityGroup,
+    ]),
     LoggerModule,
     AuthenticationModule,
   ],
   controllers: [AmenitiesController],
   providers: [AmenitiesService],
+  exports: [AmenitiesService],
 })
 export class AmenitiesModule {}

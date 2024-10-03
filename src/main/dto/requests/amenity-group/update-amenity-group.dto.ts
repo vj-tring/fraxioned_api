@@ -2,26 +2,12 @@ import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
-import { AmenityGroup } from 'src/main/entities/amenity-group.entity';
 
-export class UpdateAmenitiesDto {
+export class UpdateAmenityGroupDto {
   @IsString()
-  @IsNotEmpty({ message: 'Amenity name must not be an empty string' })
+  @IsNotEmpty({ message: 'amenity name is required' })
   @IsOptional()
-  amenityName: string;
-
-  @IsOptional()
-  @IsString()
-  amenityDescription: string;
-
-  @ApiProperty({
-    example: { id: 1 },
-  })
-  @IsOptional()
-  @IsValidId({
-    message: 'amenityGroup must be an object with a valid id where (id >= 1)',
-  })
-  amenityGroup: AmenityGroup;
+  name: string;
 
   @ApiProperty({
     example: { id: 1 },

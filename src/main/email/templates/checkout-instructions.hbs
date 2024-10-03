@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    {{{ css }}}
+    {{{ checkout-instructions }}}
+</head>
+
+<body>
+    <div class="container">
+        {{> banner image=banner alt='banner' }}
+        {{!-- (constructUrl '/static/assets/booking-confirmed.png') --}}
+        {{> headerWithSubTitle logo='https://i.ibb.co/pndBYJN/booking-confirmed.png' alt='checkout-instructions'
+        text='Check-out Instructions' subHead='A few things to do before you go'}}
+        <div class="content">
+                <p>
+                    <b>Hello {{ ownerName }},</b>
+                </p>
+                <p>
+                    We hope you've had a wonderful stay at <span>{{ propertyName }}</span>! This email contains a few
+                    instructions for your checkout. Please be sure to follow them, as they help keep your home
+                    functioning and well maintained.
+                </p>
+                <p>
+                    <b>Check-Out Instructions</b>
+                </p>
+                <div class="rules">
+                    <ul>
+                        <li>Check-out is on {{ checkOut }}.</li>
+                        <li>Put all furniture back where you found it, including cribs and high chairs.</li>
+                        <li>Close all windows, lock the doors, and shut the garage.</li>
+                        <li>Close the cover of the pool and/or hot tub.</li>
+                        <li>Log out of your streaming services on all TVs.</li>
+                        <li>You may strip the sheets from any used beds and pile the linens at the foot of the bed, but
+                            this is not required.</li>
+                        <li>Any items you leave behind intentionally must be locked in your personal locker.</li>
+                    </ul>
+                </div>
+                <p>
+                    Don't forget to tag us in your vacation posts <span>@fraxioned</span> or use the hashtag
+                    <span>#fraxioned</span> on Instagram!
+                </p>
+                <p>
+                    <b>Ready to Book Another Getaway?</b>
+                </p>
+                <p>
+                    Are you already dreaming of returning to your home away from home? We get it. Head to your Portal
+                    account to create a booking today, and get excited for another adventure!
+                </p>
+                <a href={{ link }} class="button">My Account</a>
+        </div>
+        {{> footer }}
+    </div>
+</body>
+
+</html>

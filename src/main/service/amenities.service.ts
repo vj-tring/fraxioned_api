@@ -8,6 +8,8 @@ import { CreateAmenitiesDto } from '../dto/requests/amenity/create-amenities.dto
 import { AMENITIES_RESPONSES } from '../commons/constants/response-constants/amenities.constant';
 import { PropertyAmenities } from '../entities/property_amenities.entity';
 import { UpdateAmenitiesDto } from '../dto/requests/amenity/update-amenities.dto';
+import { AMENITY_GROUP_RESPONSES } from '../commons/constants/response-constants/amenity-group.constant';
+import { AmenityGroup } from '../entities/amenity-group.entity';
 
 @Injectable()
 export class AmenitiesService {
@@ -18,8 +20,16 @@ export class AmenitiesService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(PropertyAmenities)
     private readonly propertyAmenityRepository: Repository<PropertyAmenities>,
+    @InjectRepository(AmenityGroup)
+    private readonly amenityGroupRepository: Repository<AmenityGroup>,
     private readonly logger: LoggerService,
   ) {}
+
+  async findAmenityByAmenityGroupId(id: number): Promise<Amenities | null> {
+    return await this.amenityRepository.findOne({
+      where: { amenityGroup: { id: id } },
+    });
+  }
 
   async createAmenity(createAmenityDto: CreateAmenitiesDto): Promise<{
     success: boolean;
@@ -29,21 +39,21 @@ export class AmenitiesService {
   }> {
     try {
       this.logger.log(
-        `Creating amenity ${createAmenityDto.amenityName} for the type ${createAmenityDto.amenityType}`,
+        `Creating amenity ${createAmenityDto.amenityName} for the type ${createAmenityDto.amenityGroup.id}`,
       );
       const existingAmenity = await this.amenityRepository.findOne({
         where: {
           amenityName: createAmenityDto.amenityName,
-          amenityType: createAmenityDto.amenityType,
+          amenityGroup: { id: createAmenityDto.amenityGroup.id },
         },
       });
       if (existingAmenity) {
         this.logger.error(
-          `Error creating amenity: Amenity ${createAmenityDto.amenityName} for the type ${createAmenityDto.amenityType} already exists`,
+          `Error creating amenity: Amenity ${createAmenityDto.amenityName} for the type ${createAmenityDto.amenityGroup.id} already exists`,
         );
         return AMENITIES_RESPONSES.AMENITY_ALREADY_EXISTS(
           createAmenityDto.amenityName,
-          createAmenityDto.amenityType,
+          createAmenityDto.amenityGroup.id,
         );
       }
 
@@ -58,6 +68,20 @@ export class AmenitiesService {
         );
         return AMENITIES_RESPONSES.USER_NOT_FOUND(
           createAmenityDto.createdBy.id,
+        );
+      }
+
+      const amenityGroup = await this.amenityGroupRepository.findOne({
+        where: {
+          id: createAmenityDto.amenityGroup.id,
+        },
+      });
+      if (!amenityGroup) {
+        this.logger.error(
+          `Amenity group with ID ${createAmenityDto.amenityGroup.id} does not exist`,
+        );
+        return AMENITY_GROUP_RESPONSES.AMENITY_GROUP_NOT_FOUND(
+          createAmenityDto.amenityGroup.id,
         );
       }
 
@@ -92,8 +116,12 @@ export class AmenitiesService {
   }> {
     try {
       const amenities = await this.amenityRepository.find({
-        relations: ['createdBy', 'updatedBy'],
+        relations: ['createdBy', 'updatedBy', 'amenityGroup'],
         select: {
+          amenityGroup: {
+            id: true,
+            name: true,
+          },
           createdBy: {
             id: true,
           },
@@ -129,8 +157,12 @@ export class AmenitiesService {
   }> {
     try {
       const amenity = await this.amenityRepository.findOne({
-        relations: ['createdBy', 'updatedBy'],
+        relations: ['createdBy', 'updatedBy', 'amenityGroup'],
         select: {
+          amenityGroup: {
+            id: true,
+            name: true,
+          },
           createdBy: {
             id: true,
           },
@@ -170,8 +202,12 @@ export class AmenitiesService {
   }> {
     try {
       const amenity = await this.amenityRepository.findOne({
-        relations: ['createdBy', 'updatedBy'],
+        relations: ['createdBy', 'updatedBy', 'amenityGroup'],
         select: {
+          amenityGroup: {
+            id: true,
+            name: true,
+          },
           createdBy: {
             id: true,
           },
