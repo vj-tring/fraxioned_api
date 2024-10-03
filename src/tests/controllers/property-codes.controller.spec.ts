@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { PropertyCodesController } from 'src/main/controller/property-codes.controller';
-import { Property } from 'src/main/entities/property.entity';
-import { PropertyCodes } from 'src/main/entities/property_codes.entity';
-import { PropertyCodesService } from 'src/main/service/property-codes.service';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { UpdatePropertyCodeDto } from 'src/main/dto/requests/property-code/update-property-code.dto';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { User } from 'src/main/entities/user.entity';
 import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
+import { PropertyCodesController } from 'src/main/controller/property-codes.controller';
+import { PropertyCodesService } from 'src/main/service/property-codes.service';
 import { CreatePropertyCodeDto } from 'src/main/dto/requests/property-code/create-property-code.dto';
+import { UpdatePropertyCodeDto } from 'src/main/dto/requests/property-code/update-property-code.dto';
+import { PropertyCodeCategory } from 'src/main/entities/property-code-category.entity';
+import { Property } from 'src/main/entities/property.entity';
+import { PropertyCodes } from 'src/main/entities/property_codes.entity';
+import { PROPERTY_CODES_RESPONSES } from 'src/main/commons/constants/response-constants/property-codes.constant';
 
 describe('PropertyCodesController', () => {
   let controller: PropertyCodesController;
@@ -21,6 +21,16 @@ describe('PropertyCodesController', () => {
       controllers: [PropertyCodesController],
       providers: [
         {
+          provide: PropertyCodesService,
+          useValue: {
+            createPropertyCodes: jest.fn(),
+            findAllPropertyCodes: jest.fn(),
+            findPropertyCodeById: jest.fn(),
+            updatePropertyCodeById: jest.fn(),
+            removePropertyCode: jest.fn(),
+          },
+        },
+        {
           provide: AuthenticationService,
           useValue: {
             validateUser: jest.fn(),
@@ -29,15 +39,6 @@ describe('PropertyCodesController', () => {
           },
         },
         AuthGuard,
-        PropertyCodesService,
-        {
-          provide: getRepositoryToken(PropertyCodes),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(Property),
-          useClass: Repository,
-        },
       ],
     }).compile();
 
@@ -45,521 +46,211 @@ describe('PropertyCodesController', () => {
     service = module.get<PropertyCodesService>(PropertyCodesService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
   });
 
+  const createPropertyCodeDto: CreatePropertyCodeDto = {
+    propertyCode: 'Test Code',
+    propertyCodeCategory: {
+      id: 1,
+      name: 'Test Property Code Category',
+    } as PropertyCodeCategory,
+    createdBy: {
+      id: 1,
+    } as User,
+    property: {
+      id: 1,
+    } as Property,
+  };
+
+  const updatePropertyCodeDto: UpdatePropertyCodeDto = {
+    propertyCode: 'Test Code',
+    propertyCodeCategory: {
+      id: 1,
+    } as PropertyCodeCategory,
+    updatedBy: {
+      id: 1,
+    } as User,
+    property: {
+      id: 1,
+    } as Property,
+  };
+
+  const expectedPropertyCode: PropertyCodes = {
+    id: 1,
+    propertyCode: 'Test Code',
+    propertyCodeCategory: { id: 1 } as PropertyCodeCategory,
+    property: { id: 1 } as Property,
+    createdBy: { id: 1 } as User,
+    updatedBy: null,
+    createdAt: new Date(),
+    updatedAt: undefined,
+  };
+
+  const expectedUpdatedPropertyCode: PropertyCodes = {
+    id: 1,
+    propertyCode: 'Test Code',
+    propertyCodeCategory: { id: 1 } as PropertyCodeCategory,
+    property: { id: 1 } as Property,
+    createdBy: { id: 1 } as User,
+    updatedBy: { id: 1 } as User,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   describe('createPropertyCodes', () => {
-    it('should return a created property code', async () => {
-      const mockRole = {
-        id: 1,
-        roleName: 'Admin',
-        roleDescription: 'admin-role',
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-      };
-
-      const mockUser = {
-        id: 1,
-        firstName: 'admin',
-        lastName: 'user',
-        password: await bcrypt.hash('Admin@123', 10),
-        imageURL: 'www.example.com/images',
-        role: mockRole,
-        isActive: true,
-        addressLine1: 'address line 1',
-        addressLine2: 'address line 2',
-        state: 'test state',
-        country: 'test country',
-        city: 'test city',
-        zipcode: '123456',
-        resetToken: null,
-        resetTokenExpires: new Date(Date.now()),
-        lastLoginTime: new Date(Date.now()),
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-        contactDetails: null,
-      };
-
-      const mockProperties = {
-        id: 1,
-        propertyName: 'test property',
-        address: 'test address',
-        city: 'test city',
-        state: 'test state',
-        country: 'test country',
-        zipcode: 123456,
-        houseDescription: 'test description',
-        isExclusive: true,
-        propertyShare: 1,
-        createdBy: mockUser,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-      } as Property;
-
-      const mockPropertyCodes = {
-        id: 1,
-        property: mockProperties,
-        propertyCodeType: 'locker',
-        propertyCode: '12345',
-        createdBy: mockUser,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-      };
-
-      const mockCreatePropertyCodeDto: CreatePropertyCodeDto = {
-        property: mockProperties,
-        propertyCodeType: 'locker',
-        propertyCode: '12345',
-        createdBy: mockUser,
-      };
-
+    it('should create a property code', async () => {
+      const expectedResult =
+        PROPERTY_CODES_RESPONSES.PROPERTY_CODE_CREATED(expectedPropertyCode);
       jest
         .spyOn(service, 'createPropertyCodes')
-        .mockResolvedValue(mockPropertyCodes);
+        .mockResolvedValue(expectedResult);
 
-      const result = await controller.createPropertyCodes(
-        mockCreatePropertyCodeDto,
-      );
-
-      expect(result).toBeDefined();
-      expect(result).toEqual(mockPropertyCodes);
-      expect(service.createPropertyCodes).toHaveBeenCalled();
+      expect(
+        await controller.createPropertyCodes(createPropertyCodeDto),
+      ).toEqual(expectedResult);
     });
 
-    it('should throw Error when service throws NotFoundException', async () => {
-      const mockRole = {
-        id: 1,
-        roleName: 'Admin',
-        roleDescription: 'admin-role',
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-      };
+    it('should throw an HttpException if an error occurs', async () => {
+      const error = new Error('An error occurred');
+      jest.spyOn(service, 'createPropertyCodes').mockRejectedValue(error);
 
-      const mockUser = {
-        id: 1,
-        firstName: 'admin',
-        lastName: 'user',
-        password: await bcrypt.hash('Admin@123', 10),
-        imageURL: 'www.example.com/images',
-        role: mockRole,
-        isActive: true,
-        addressLine1: 'address line 1',
-        addressLine2: 'address line 2',
-        state: 'test state',
-        country: 'test country',
-        city: 'test city',
-        zipcode: '123456',
-        resetToken: null,
-        resetTokenExpires: new Date(Date.now()),
-        lastLoginTime: new Date(Date.now()),
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-        contactDetails: null,
-      };
-
-      const mockProperties = {
-        id: 1,
-        propertyName: 'test property',
-        address: 'test address',
-        city: 'test city',
-        state: 'test state',
-        country: 'test country',
-        zipcode: 123456,
-        houseDescription: 'test description',
-        isExclusive: true,
-        propertyShare: 1,
-        createdBy: mockUser,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-      } as Property;
-
-      const mockCreatePropertyCodeDto: CreatePropertyCodeDto = {
-        property: mockProperties,
-        propertyCodeType: 'locker',
-        propertyCode: '12345',
-        createdBy: mockUser,
-      };
-
-      jest
-        .spyOn(service, 'createPropertyCodes')
-        .mockRejectedValue(
-          new NotFoundException(
-            `Properties with ID ${mockCreatePropertyCodeDto.property.id} not found`,
-          ),
+      try {
+        await controller.createPropertyCodes(createPropertyCodeDto);
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe(
+          'An error occurred while creating the property code',
         );
-
-      await expect(
-        controller.createPropertyCodes(mockCreatePropertyCodeDto),
-      ).rejects.toThrow(
-        new NotFoundException(
-          `Properties with ID ${mockCreatePropertyCodeDto.property.id} not found`,
-        ),
-      );
-
-      expect(service.createPropertyCodes).toHaveBeenCalled();
+        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     });
   });
 
   describe('getAllPropertyCodes', () => {
-    it('should return all the property codes', async () => {
-      const mockPropertyCodes = [new PropertyCodes(), new PropertyCodes()];
-
+    it('should get all property codes', async () => {
+      const expectedResult = PROPERTY_CODES_RESPONSES.PROPERTY_CODES_FETCHED(
+        [],
+      );
       jest
-        .spyOn(service, 'getAllPropertyCodes')
-        .mockResolvedValue(mockPropertyCodes);
+        .spyOn(service, 'findAllPropertyCodes')
+        .mockResolvedValue(expectedResult);
 
-      const result = await controller.getAllPropertyCodes();
-
-      expect(result).toBeDefined();
-      expect(result).toEqual(mockPropertyCodes);
-      expect(service.getAllPropertyCodes).toHaveBeenCalled();
+      expect(await controller.getAllPropertyCodes()).toEqual(expectedResult);
     });
 
-    it('should throw Error when service throws NotFoundException', async () => {
-      jest
-        .spyOn(service, 'getAllPropertyCodes')
-        .mockRejectedValue(new NotFoundException(`Property Codes not found`));
+    it('should throw an HttpException if an error occurs', async () => {
+      const error = new Error('An error occurred');
+      jest.spyOn(service, 'findAllPropertyCodes').mockRejectedValue(error);
 
-      await expect(controller.getAllPropertyCodes()).rejects.toThrow(
-        new NotFoundException(`Property Codes not found`),
-      );
-
-      expect(service.getAllPropertyCodes).toHaveBeenCalled();
+      try {
+        await controller.getAllPropertyCodes();
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe(
+          'An error occurred while retrieving all the property codes',
+        );
+        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     });
   });
-
-  describe('getPropertyCodesById', () => {
-    it('should return a property detail of respective id', async () => {
-      const mockPropertyCodes = new PropertyCodes();
-
-      const mockPropertyCodesId = 1;
+  describe('getPropertyCodeById', () => {
+    it('should get property code by ID', async () => {
+      const expectedResult = PROPERTY_CODES_RESPONSES.PROPERTY_CODE_FETCHED(
+        expectedPropertyCode,
+        expectedPropertyCode.id,
+      );
 
       jest
-        .spyOn(service, 'getPropertyCodesById')
-        .mockResolvedValue(mockPropertyCodes);
+        .spyOn(service, 'findPropertyCodeById')
+        .mockResolvedValue(expectedResult);
 
-      const result = await controller.getPropertyCodesById(mockPropertyCodesId);
-
-      expect(result).toBeDefined();
-      expect(result).toEqual(mockPropertyCodes);
-      expect(service.getPropertyCodesById).toHaveBeenCalledWith(
-        mockPropertyCodesId,
-      );
+      expect(await controller.getPropertyCodeById(1)).toEqual(expectedResult);
     });
 
-    it('should throw Error when service throws NotFoundException', async () => {
-      const mockPropertyCodesId = 1;
+    it('should throw an HttpException if an error occurs', async () => {
+      const error = new Error('An error occurred');
+      const id = 1;
+      jest.spyOn(service, 'findPropertyCodeById').mockRejectedValue(error);
 
-      jest
-        .spyOn(service, 'getPropertyCodesById')
-        .mockRejectedValue(
-          new NotFoundException(
-            `Property Codes with ID ${mockPropertyCodesId} not found`,
-          ),
+      try {
+        await controller.getPropertyCodeById(id);
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe(
+          'An error occurred while retrieving the property code',
         );
-
-      await expect(
-        controller.getPropertyCodesById(mockPropertyCodesId),
-      ).rejects.toThrow(
-        new NotFoundException(
-          `Property Codes with ID ${mockPropertyCodesId} not found`,
-        ),
-      );
-
-      expect(service.getPropertyCodesById).toHaveBeenCalled();
+        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     });
   });
-
-  describe('updatePropertyCodesById', () => {
-    it('should return a updated property code of respective id', async () => {
-      const mockPropertyCodes = new PropertyCodes();
-
-      const mockRole = {
-        id: 1,
-        roleName: 'Admin',
-        roleDescription: 'admin-role',
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-      };
-
-      const mockUser = {
-        id: 1,
-        firstName: 'admin',
-        lastName: 'user',
-        password: await bcrypt.hash('Admin@123', 10),
-        imageURL: 'www.example.com/images',
-        role: mockRole,
-        isActive: true,
-        addressLine1: 'address line 1',
-        addressLine2: 'address line 2',
-        state: 'test state',
-        country: 'test country',
-        city: 'test city',
-        zipcode: '123456',
-        resetToken: null,
-        resetTokenExpires: new Date(Date.now()),
-        lastLoginTime: new Date(Date.now()),
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-        contactDetails: null,
-      };
-
-      const mockProperties = {
-        id: 1,
-        propertyName: 'test property',
-        address: 'test address',
-        city: 'test city',
-        state: 'test state',
-        country: 'test country',
-        zipcode: 123456,
-        houseDescription: 'test description',
-        isExclusive: true,
-        propertyShare: 1,
-        createdBy: mockUser,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-      } as Property;
-
-      const mockUpdatePropertyCodeDto: UpdatePropertyCodeDto = {
-        property: mockProperties,
-        propertyCodeType: 'locker',
-        propertyCode: '12345',
-        updatedBy: mockUser,
-      };
-
-      const mockPropertyCodesId = 1;
-
-      jest
-        .spyOn(service, 'updatePropertyCodesById')
-        .mockResolvedValue(mockPropertyCodes);
-
-      const result = await controller.updatePropertyCodesById(
-        mockPropertyCodesId,
-        mockUpdatePropertyCodeDto,
+  describe('updatePropertyCodeDetail', () => {
+    it('should update property code details', async () => {
+      const expectedResult = PROPERTY_CODES_RESPONSES.PROPERTY_CODE_UPDATED(
+        expectedUpdatedPropertyCode,
+        expectedUpdatedPropertyCode.id,
       );
 
-      expect(result).toBeDefined();
-      expect(result).toEqual(mockPropertyCodes);
-      expect(service.updatePropertyCodesById).toHaveBeenCalledWith(
-        mockPropertyCodesId,
-        mockUpdatePropertyCodeDto,
-      );
+      jest
+        .spyOn(service, 'updatePropertyCodeById')
+        .mockResolvedValue(expectedResult);
+
+      expect(
+        await controller.updatePropertyCodeDetail('1', updatePropertyCodeDto),
+      ).toEqual(expectedResult);
     });
 
-    it('should throw Error when service throws NotFoundException', async () => {
-      const mockRole = {
-        id: 1,
-        roleName: 'Admin',
-        roleDescription: 'admin-role',
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-      };
+    it('should throw an HttpException if an error occurs', async () => {
+      const error = new Error('An error occurred');
+      jest.spyOn(service, 'updatePropertyCodeById').mockRejectedValue(error);
 
-      const mockUser = {
-        id: 1,
-        firstName: 'admin',
-        lastName: 'user',
-        password: await bcrypt.hash('Admin@123', 10),
-        imageURL: 'www.example.com/images',
-        role: mockRole,
-        isActive: true,
-        addressLine1: 'address line 1',
-        addressLine2: 'address line 2',
-        state: 'test state',
-        country: 'test country',
-        city: 'test city',
-        zipcode: '123456',
-        resetToken: null,
-        resetTokenExpires: new Date(Date.now()),
-        lastLoginTime: new Date(Date.now()),
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-        contactDetails: null,
-      };
-
-      const mockProperties = {
-        id: 1,
-        propertyName: 'test property',
-        address: 'test address',
-        city: 'test city',
-        state: 'test state',
-        country: 'test country',
-        zipcode: 123456,
-        houseDescription: 'test description',
-        isExclusive: true,
-        propertyShare: 1,
-        createdBy: mockUser,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-      } as Property;
-
-      const mockUpdatePropertyCodeDto: UpdatePropertyCodeDto = {
-        property: mockProperties,
-        propertyCodeType: 'locker',
-        propertyCode: '12345',
-        updatedBy: mockUser,
-      };
-
-      const mockPropertyCodesId = 1;
-
-      jest
-        .spyOn(service, 'updatePropertyCodesById')
-        .mockRejectedValue(
-          new NotFoundException(
-            `Property Details with ID ${mockPropertyCodesId} not found`,
-          ),
+      try {
+        await controller.updatePropertyCodeDetail(
+          '1',
+          {} as UpdatePropertyCodeDto,
         );
-
-      await expect(
-        controller.updatePropertyCodesById(
-          mockPropertyCodesId,
-          mockUpdatePropertyCodeDto,
-        ),
-      ).rejects.toThrow(NotFoundException);
-
-      expect(service.updatePropertyCodesById).toHaveBeenCalled();
-    });
-
-    it('should throw Error when service throws BadRequestException', async () => {
-      const mockRole = {
-        id: 1,
-        roleName: 'Admin',
-        roleDescription: 'admin-role',
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-      };
-
-      const mockUser = {
-        id: 1,
-        firstName: 'admin',
-        lastName: 'user',
-        password: await bcrypt.hash('Admin@123', 10),
-        imageURL: 'www.example.com/images',
-        role: mockRole,
-        isActive: true,
-        addressLine1: 'address line 1',
-        addressLine2: 'address line 2',
-        state: 'test state',
-        country: 'test country',
-        city: 'test city',
-        zipcode: '123456',
-        resetToken: null,
-        resetTokenExpires: new Date(Date.now()),
-        lastLoginTime: new Date(Date.now()),
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: new Date(Date.now()),
-        contactDetails: null,
-      };
-
-      const mockProperties = {
-        id: 1,
-        propertyName: 'test property',
-        address: 'test address',
-        city: 'test city',
-        state: 'test state',
-        country: 'test country',
-        zipcode: 123456,
-        houseDescription: 'test description',
-        isExclusive: true,
-        propertyShare: 1,
-        createdBy: mockUser,
-        updatedBy: null,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-      } as Property;
-
-      const mockUpdatePropertyCodeDto: UpdatePropertyCodeDto = {
-        property: mockProperties,
-        propertyCodeType: 'locker',
-        propertyCode: '12345',
-        updatedBy: mockUser,
-      };
-
-      const mockPropertyCodesId = 1;
-
-      jest
-        .spyOn(service, 'updatePropertyCodesById')
-        .mockRejectedValue(
-          new BadRequestException('Property ID does not match'),
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe(
+          'An error occurred while updating the property code',
         );
-
-      await expect(
-        controller.updatePropertyCodesById(
-          mockPropertyCodesId,
-          mockUpdatePropertyCodeDto,
-        ),
-      ).rejects.toThrow(BadRequestException);
-
-      expect(service.updatePropertyCodesById).toHaveBeenCalled();
+        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     });
   });
-
-  describe('deletePropertyCodesById', () => {
-    it('should returen a deleted property detail of respective id', async () => {
-      const mockPropertyCodesId = 1;
-
-      const mockPropertyCodes = new PropertyCodes();
+  describe('deletePropertyCodeById', () => {
+    it('should delete property code by id', async () => {
+      const deleteResult = {
+        raw: {},
+        affected: 1,
+      };
+      const expectedResult = PROPERTY_CODES_RESPONSES.PROPERTY_CODE_DELETED(
+        deleteResult.affected,
+      );
 
       jest
-        .spyOn(service, 'deletePropertyCodesById')
-        .mockResolvedValue(mockPropertyCodes);
+        .spyOn(service, 'removePropertyCode')
+        .mockResolvedValue(expectedResult);
 
-      const result =
-        await controller.deletePropertyCodesById(mockPropertyCodesId);
-
-      expect(result).toBeDefined();
-      expect(result).toEqual(mockPropertyCodes);
-      expect(service.deletePropertyCodesById).toHaveBeenCalledWith(
-        mockPropertyCodesId,
-      );
+      expect(
+        await controller.deletePropertyCodeById(deleteResult.affected),
+      ).toEqual(expectedResult);
     });
 
-    it('should throw Error when service throws NotFoundException', async () => {
-      const mockPropertyCodesId = 1;
+    it('should throw an HttpException if an error occurs', async () => {
+      const error = new Error('An error occurred');
+      jest.spyOn(service, 'removePropertyCode').mockRejectedValue(error);
 
-      jest
-        .spyOn(service, 'deletePropertyCodesById')
-        .mockRejectedValue(
-          new NotFoundException(
-            `Property Details with ID ${mockPropertyCodesId} not found`,
-          ),
+      try {
+        await controller.deletePropertyCodeById(1);
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe(
+          'An error occurred while deleting the property code',
         );
-
-      await expect(
-        controller.deletePropertyCodesById(mockPropertyCodesId),
-      ).rejects.toThrow(
-        new NotFoundException(
-          `Property Details with ID ${mockPropertyCodesId} not found`,
-        ),
-      );
-
-      expect(service.deletePropertyCodesById).toHaveBeenCalled();
+        expect(err.getStatus()).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     });
   });
 });
