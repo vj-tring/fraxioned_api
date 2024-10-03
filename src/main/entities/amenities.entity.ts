@@ -27,6 +27,8 @@ export class Amenities {
   @Column({
     name: 'description',
     type: 'varchar',
+    nullable: true,
+    default: null,
   })
   amenityDescription: string;
 
@@ -49,12 +51,14 @@ export class Amenities {
   @CreateDateColumn({
     name: 'created_at',
     nullable: true,
+    default: null,
   })
   createdAt: Date = undefined;
 
   @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
+    default: null,
   })
   updatedAt: Date = undefined;
 }
