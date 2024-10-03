@@ -6,6 +6,7 @@ import { AmenityGroup } from 'src/main/entities/amenity-group.entity';
 
 export class UpdateAmenitiesDto {
   @IsString()
+  @IsNotEmpty({ message: 'Amenity name must not be an empty string' })
   @IsOptional()
   amenityName: string;
 
@@ -16,7 +17,7 @@ export class UpdateAmenitiesDto {
   @ApiProperty({
     example: { id: 1 },
   })
-  @IsNotEmpty({ message: 'amenity group is required' })
+  @IsOptional()
   @IsValidId({
     message: 'amenityGroup must be an object with a valid id where (id >= 1)',
   })
