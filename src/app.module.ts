@@ -28,8 +28,11 @@ import { CronJobsService } from './main/scheduler/cron-jobs.service';
 import { MailSchedulerService } from './main/scheduler/mail-scheduler.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from './main/modules/logger.module';
+import { ReportsModule } from './main/modules/reports.module';
 import { PropertyCodeCategoryModule } from './main/modules/property-code-category.module';
 import { AmenityGroupModule } from './main/modules/amenity-group.module';
+import { FaqCategoryModule } from './main/modules/faqcategory.module';
+import { FaqQuestionsModule } from './main/modules/faqquestions.module';
 
 @Module({
   imports: [
@@ -54,17 +57,21 @@ import { AmenityGroupModule } from './main/modules/amenity-group.module';
     S3UtilsModule,
     SpaceModule,
     SpaceTypesModule,
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/static',
       exclude: ['/api/(.*)'],
     }),
+    ReportsModule,
     MaintenanceModule,
     ContactUsModule,
     ScheduleModule.forRoot(),
     LoggerModule,
     PropertyCodeCategoryModule,
     AmenityGroupModule,
+    FaqCategoryModule,
+    FaqQuestionsModule,
   ],
   providers: [CronJobsService, MailSchedulerService],
 })
