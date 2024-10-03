@@ -65,7 +65,7 @@ export class BookingMailService {
 
   private async getBannerImage(booking: Booking): Promise<string> {
     const banner = await this.spaceTypesRepository.findOne({
-      where: { name: 'Banner', space: { id: 1 } },
+      where: { name: 'Banner' },
     });
 
     if (!banner) {
