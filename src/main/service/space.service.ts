@@ -8,6 +8,8 @@ import { CreateSpaceDto } from '../dto/requests/space/create-space.dto';
 import { User } from '../entities/user.entity';
 import { UpdateSpaceDto } from '../dto/requests/space/update-space.dto';
 import { SpaceTypes } from '../entities/space-types.entity';
+import { ApiResponse } from '../commons/response-body/common.responses';
+import { UserService } from './user.service';
 
 @Injectable()
 export class SpaceService {
@@ -18,22 +20,21 @@ export class SpaceService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(SpaceTypes)
     private readonly spaceTypesRepository: Repository<SpaceTypes>,
+    private readonly userService: UserService,
     private readonly logger: LoggerService,
   ) {}
 
-  async createSpace(createSpaceDto: CreateSpaceDto): Promise<{
-    success: boolean;
-    message: string;
-    data?: Space;
-    statusCode: number;
-  }> {
+  async findSpaceByName(name: string): Promise<Space | null> {
+    return await this.spaceRepository.findOne({
+      where: { name },
+    });
+  }
+
+  async createSpace(
+    createSpaceDto: CreateSpaceDto,
+  ): Promise<ApiResponse<Space>> {
     try {
-      this.logger.log(`Creating space ${createSpaceDto.name}`);
-      const existingSpace = await this.spaceRepository.findOne({
-        where: {
-          name: createSpaceDto.name,
-        },
-      });
+      const existingSpace = await this.findSpaceByName(createSpaceDto.name);
       if (existingSpace) {
         this.logger.error(
           `Error creating space: Space ${createSpaceDto.name} already exists`,
@@ -41,12 +42,10 @@ export class SpaceService {
         return SPACE_RESPONSES.SPACE_ALREADY_EXISTS(createSpaceDto.name);
       }
 
-      const user = await this.userRepository.findOne({
-        where: {
-          id: createSpaceDto.createdBy.id,
-        },
-      });
-      if (!user) {
+      const existingUser = await this.userService.findUserById(
+        createSpaceDto.createdBy.id,
+      );
+      if (!existingUser) {
         this.logger.error(
           `User with ID ${createSpaceDto.createdBy.id} does not exist`,
         );
@@ -72,12 +71,7 @@ export class SpaceService {
     }
   }
 
-  async findAllSpaces(): Promise<{
-    success: boolean;
-    message: string;
-    data?: Space[];
-    statusCode: number;
-  }> {
+  async findAllSpaces(): Promise<ApiResponse<Space[]>> {
     try {
       const spaces = await this.spaceRepository.find({
         relations: ['createdBy', 'updatedBy'],
@@ -109,12 +103,7 @@ export class SpaceService {
     }
   }
 
-  async findSpaceById(id: number): Promise<{
-    success: boolean;
-    message: string;
-    data?: Space;
-    statusCode: number;
-  }> {
+  async findSpaceById(id: number): Promise<ApiResponse<Space>> {
     try {
       const space = await this.spaceRepository.findOne({
         relations: ['createdBy', 'updatedBy'],
@@ -150,12 +139,7 @@ export class SpaceService {
   async updateSpaceDetailById(
     id: number,
     updateSpaceDto: UpdateSpaceDto,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data?: Space;
-    statusCode: number;
-  }> {
+  ): Promise<ApiResponse<Space>> {
     try {
       const space = await this.spaceRepository.findOne({
         relations: ['createdBy', 'updatedBy'],
@@ -199,11 +183,7 @@ export class SpaceService {
     }
   }
 
-  async deleteSpaceById(id: number): Promise<{
-    success: boolean;
-    message: string;
-    statusCode: number;
-  }> {
+  async deleteSpaceById(id: number): Promise<ApiResponse<Space>> {
     try {
       const spaceType = await this.spaceTypesRepository.findOne({
         where: { space: { id: id } },

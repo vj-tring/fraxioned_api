@@ -7,12 +7,14 @@ import { SpaceController } from '../controller/space.controller';
 import { SpaceService } from '../service/space.service';
 import { User } from '../entities/user.entity';
 import { SpaceTypes } from '../entities/space-types.entity';
+import { UserModule } from './user.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Space, User, SpaceTypes]),
     LoggerModule,
     AuthenticationModule,
+    UserModule,
   ],
   controllers: [SpaceController],
   providers: [SpaceService],

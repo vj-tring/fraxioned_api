@@ -23,6 +23,32 @@ export class UserService {
     private readonly logger: LoggerService,
   ) {}
 
+  async findUserById(id: number): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { id },
+      relations: ['contactDetails', 'role'],
+      select: {
+        id: true,
+        role: { id: true, roleName: true },
+        firstName: true,
+        lastName: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        zipcode: true,
+        country: true,
+        imageURL: true,
+        isActive: true,
+        lastLoginTime: true,
+        createdAt: true,
+        createdBy: true,
+        updatedAt: true,
+        updatedBy: true,
+      },
+    });
+  }
+
   async createUser(createUserDto: CreateUserDTO): Promise<object> {
     const role = await this.roleRepository.findOne({
       where: { id: createUserDto.role.id },
@@ -113,29 +139,7 @@ export class UserService {
 
   async getUserById(id: number): Promise<object> {
     this.logger.log(`Fetching user with ID ${id}`);
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['contactDetails', 'role'],
-      select: {
-        id: true,
-        role: { id: true, roleName: true },
-        firstName: true,
-        lastName: true,
-        addressLine1: true,
-        addressLine2: true,
-        city: true,
-        state: true,
-        zipcode: true,
-        country: true,
-        imageURL: true,
-        isActive: true,
-        lastLoginTime: true,
-        createdAt: true,
-        createdBy: true,
-        updatedAt: true,
-        updatedBy: true,
-      },
-    });
+    const user = await this.findUserById(id);
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
       return USER_RESPONSES.USER_NOT_FOUND(id);

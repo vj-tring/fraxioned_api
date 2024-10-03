@@ -6,19 +6,18 @@ import { AmenityGroup } from '../entities/amenity-group.entity';
 import { CreateAmenityGroupDto } from '../dto/requests/amenity-group/create-amenity-group.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { AMENITY_GROUP_RESPONSES } from '../commons/constants/response-constants/amenity-group.constant';
-import { User } from '../entities/user.entity';
 import { AMENITIES_RESPONSES } from '../commons/constants/response-constants/amenities.constant';
 import { UpdateAmenityGroupDto } from '../dto/requests/amenity-group/update-amenity-group.dto';
 import { AmenitiesService } from './amenities.service';
+import { UserService } from './user.service';
 
 @Injectable()
 export class AmenityGroupService {
   constructor(
     @InjectRepository(AmenityGroup)
     private readonly amenityGroupRepository: Repository<AmenityGroup>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly amenitiesService: AmenitiesService,
+    private readonly userService: UserService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -57,14 +56,6 @@ export class AmenityGroupService {
     });
   }
 
-  async findUserById(userId: number): Promise<User | null> {
-    return await this.userRepository.findOne({
-      where: {
-        id: userId,
-      },
-    });
-  }
-
   async createAmenityGroup(
     createAmenityGroupDto: CreateAmenityGroupDto,
   ): Promise<ApiResponse<AmenityGroup>> {
@@ -81,7 +72,7 @@ export class AmenityGroupService {
         );
       }
 
-      const existingUser = await this.findUserById(
+      const existingUser = await this.userService.findUserById(
         createAmenityGroupDto.createdBy.id,
       );
       if (!existingUser) {
@@ -175,7 +166,7 @@ export class AmenityGroupService {
         return AMENITY_GROUP_RESPONSES.AMENITY_GROUP_NOT_FOUND(id);
       }
 
-      const existingUser = await this.findUserById(
+      const existingUser = await this.userService.findUserById(
         updateAmenityGroupDto.updatedBy.id,
       );
       if (!existingUser) {
