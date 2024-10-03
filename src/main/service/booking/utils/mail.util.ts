@@ -227,8 +227,26 @@ export class BookingMailService {
 
   private async getBookingListForReminder(
     reminderDays: number,
+    isCheckOut: boolean,
   ): Promise<Booking[]> {
     const { startOfDay, endOfDay } = await this.getScheduledDate(reminderDays);
+
+    if (isCheckOut) {
+      const bookingsList: Booking[] = await this.bookingRepository.find({
+        where: {
+          checkoutDate: Between(startOfDay, endOfDay),
+          isCancelled: Equal(false),
+          isCompleted: Equal(false),
+        },
+        relations: {
+          user: true,
+          property: true,
+        },
+      });
+
+      return bookingsList;
+    }
+
     const bookingsList: Booking[] = await this.bookingRepository.find({
       where: {
         checkinDate: Between(startOfDay, endOfDay),
@@ -315,9 +333,12 @@ export class BookingMailService {
     reminderDays: number,
     name: string,
     type: ReminderType,
+    isCheckOut: boolean = false,
   ): Promise<void | Error> {
-    const reminderBookingsList =
-      await this.getBookingListForReminder(reminderDays);
+    const reminderBookingsList = await this.getBookingListForReminder(
+      reminderDays,
+      isCheckOut,
+    );
 
     if (!reminderBookingsList || reminderBookingsList.length === 0) {
       this.logger.warn('Reminder Booking List was empty or not found!');

@@ -40,6 +40,7 @@ export class MailSchedulerService implements OnModuleInit {
         reminderDays.instructions,
         'checkout instructions reminder',
         ReminderType.INSTRUCTIONS,
+        true,
       );
       this.logger.log('Sent booking reminder emails!');
     } catch (error) {
@@ -78,7 +79,7 @@ export class MailSchedulerService implements OnModuleInit {
     const jobConfigs: CronJobConfig[] = [
       {
         name: 'sendBookingReminderEmails',
-        schedule: '0 0 17 * * *',
+        schedule: '0 12 17 * * *',
         handler: this.sendBookingReminderEmails,
       },
     ];
