@@ -14,7 +14,7 @@ export class SpaceBedType {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ name: 'bed_type', type: 'varchar', length: 255 })
   bedType: string;
 
   @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
