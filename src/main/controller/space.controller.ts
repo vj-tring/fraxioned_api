@@ -17,6 +17,7 @@ import { SpaceService } from '../service/space.service';
 import { Space } from '../entities/space.entity';
 import { CreateSpaceDto } from '../dto/requests/space/create-space.dto';
 import { UpdateSpaceDto } from '../dto/requests/space/update-space.dto';
+import { ApiResponse } from '../commons/response-body/common.responses';
 
 @ApiTags('Space')
 @Controller('v1/spaces')
@@ -26,12 +27,9 @@ export class SpaceController {
   constructor(private readonly spaceService: SpaceService) {}
 
   @Post('space')
-  async createSpace(@Body() createSpaceDto: CreateSpaceDto): Promise<{
-    success: boolean;
-    message: string;
-    data?: Space;
-    statusCode: HttpStatus;
-  }> {
+  async createSpace(
+    @Body() createSpaceDto: CreateSpaceDto,
+  ): Promise<ApiResponse<Space>> {
     try {
       const result = await this.spaceService.createSpace(createSpaceDto);
       return result;
@@ -44,14 +42,9 @@ export class SpaceController {
   }
 
   @Get()
-  async getAllSpaces(): Promise<{
-    success: boolean;
-    message: string;
-    data?: Space[];
-    statusCode: HttpStatus;
-  }> {
+  async getAllSpaces(): Promise<ApiResponse<Space[]>> {
     try {
-      const result = await this.spaceService.findAllSpaces();
+      const result = await this.spaceService.getAllSpaces();
       return result;
     } catch (error) {
       throw new HttpException(
@@ -62,14 +55,9 @@ export class SpaceController {
   }
 
   @Get('space/:id')
-  async getSpaceById(@Param('id') id: number): Promise<{
-    success: boolean;
-    message: string;
-    data?: Space;
-    statusCode: HttpStatus;
-  }> {
+  async getSpaceById(@Param('id') id: number): Promise<ApiResponse<Space>> {
     try {
-      const result = await this.spaceService.findSpaceById(id);
+      const result = await this.spaceService.getSpaceById(id);
       return result;
     } catch (error) {
       throw new HttpException(
@@ -83,12 +71,7 @@ export class SpaceController {
   async updateSpaceDetail(
     @Param('id') id: string,
     @Body() updateSpaceDto: UpdateSpaceDto,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data?: Space;
-    statusCode: HttpStatus;
-  }> {
+  ): Promise<ApiResponse<Space>> {
     try {
       const result = await this.spaceService.updateSpaceDetailById(
         +id,
@@ -104,9 +87,7 @@ export class SpaceController {
   }
 
   @Delete('space/:id')
-  async deleteSpace(
-    @Param('id') id: number,
-  ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
+  async deleteSpace(@Param('id') id: number): Promise<ApiResponse<Space>> {
     try {
       const result = await this.spaceService.deleteSpaceById(id);
       return result;

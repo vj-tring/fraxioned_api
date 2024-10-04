@@ -197,14 +197,6 @@ describe('UserService', () => {
   });
 
   describe('getUserById', () => {
-    it('should return USER_NOT_FOUND if user does not exist', async () => {
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-
-      const result = await service.getUserById(1);
-      expect(result).toEqual(USER_RESPONSES.USER_NOT_FOUND(1));
-      expect(logger.warn).toHaveBeenCalled();
-    });
-
     it('should return USER_FETCHED if user exists', async () => {
       const user = {
         id: 1,

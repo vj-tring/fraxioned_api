@@ -7,8 +7,8 @@ import { SPACE_TYPES_RESPONSES } from '../commons/constants/response-constants/s
 import { CreateSpaceTypeDto } from '../dto/requests/space-types/create-space-types.dto';
 import { Space } from '../entities/space.entity';
 import { User } from '../entities/user.entity';
-import { SPACE_RESPONSES } from '../commons/constants/response-constants/space.constant';
 import { UpdateSpaceTypeDto } from '../dto/requests/space-types/update-space-types.dto';
+import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 
 @Injectable()
 export class SpaceTypesService {
@@ -56,7 +56,7 @@ export class SpaceTypesService {
         this.logger.error(
           `User with ID ${createSpaceTypeDto.createdBy.id} does not exist`,
         );
-        return SPACE_RESPONSES.USER_NOT_FOUND(createSpaceTypeDto.createdBy.id);
+        return USER_RESPONSES.USER_NOT_FOUND(createSpaceTypeDto.createdBy.id);
       }
 
       const existingSpaceType = await this.spaceTypesRepository.findOne({
@@ -228,7 +228,7 @@ export class SpaceTypesService {
         this.logger.error(
           `User with ID ${updateSpaceTypeDto.updatedBy.id} does not exist`,
         );
-        return SPACE_RESPONSES.USER_NOT_FOUND(updateSpaceTypeDto.updatedBy.id);
+        return USER_RESPONSES.USER_NOT_FOUND(updateSpaceTypeDto.updatedBy.id);
       }
 
       const space = await this.spaceRepository.findOne({
