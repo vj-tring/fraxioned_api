@@ -49,7 +49,6 @@ export class UserService {
     this.logger.error(`User with ID ${id} not found`);
     return USER_RESPONSES.USER_NOT_FOUND(id);
   }
-
   async createUser(createUserDto: CreateUserDTO): Promise<object> {
     const role = await this.roleRepository.findOne({
       where: { id: createUserDto.role.id },

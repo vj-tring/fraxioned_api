@@ -29,6 +29,7 @@ import { PropertyCodeCategoryModule } from './main/modules/property-code-categor
 import { AmenityGroupModule } from './main/modules/amenity-group.module';
 import { FaqCategoryModule } from './main/modules/faqcategory.module';
 import { FaqQuestionsModule } from './main/modules/faqquestions.module';
+import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { FaqQuestionsModule } from './main/modules/faqquestions.module';
     AmenityGroupModule,
     FaqCategoryModule,
     FaqQuestionsModule,
+    SpaceBedTypeModule,
   ],
 })
 export class AppModule {}
