@@ -19,6 +19,22 @@ export class Space {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
+  @Column({
+    name: 'is_bed_type_allowed',
+    type: 'boolean',
+    nullable: true,
+    default: false,
+  })
+  isBedTypeAllowed: boolean;
+
+  @Column({
+    name: 'is_bathroom_type_allowed',
+    type: 'boolean',
+    nullable: true,
+    default: false,
+  })
+  isBathroomTypeAllowed: boolean;
+
   @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
   createdAt: Date;
 

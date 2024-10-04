@@ -20,7 +20,7 @@ export const USER_RESPONSES = {
     createdBy: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: false,
-    message: `User with ID ${createdBy} does not exist`,
+    message: `User with ID ${createdBy} not found`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
   USERS_NOT_FOUND: (): { status: number; message: string } => ({

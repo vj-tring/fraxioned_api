@@ -46,9 +46,7 @@ export class UserService {
   }
 
   async handleUserNotFound(id: number): Promise<ApiResponse<null>> {
-    this.logger.error(
-      `Error creating space: User with ID ${id} does not exist`,
-    );
+    this.logger.error(`User with ID ${id} not found`);
     return USER_RESPONSES.USER_NOT_FOUND(id);
   }
   async createUser(createUserDto: CreateUserDTO): Promise<object> {
