@@ -44,7 +44,7 @@ export class SpaceController {
   @Get()
   async getAllSpaces(): Promise<ApiResponse<Space[]>> {
     try {
-      const result = await this.spaceService.findAllSpaces();
+      const result = await this.spaceService.getAllSpaces();
       return result;
     } catch (error) {
       throw new HttpException(
@@ -57,7 +57,7 @@ export class SpaceController {
   @Get('space/:id')
   async getSpaceById(@Param('id') id: number): Promise<ApiResponse<Space>> {
     try {
-      const result = await this.spaceService.findSpaceById(id);
+      const result = await this.spaceService.getSpaceById(id);
       return result;
     } catch (error) {
       throw new HttpException(

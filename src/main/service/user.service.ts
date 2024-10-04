@@ -10,6 +10,7 @@ import { ROLE_RESPONSES } from '../commons/constants/response-constants/role.con
 import * as bcrypt from 'bcrypt';
 import { CreateUserDTO } from '../dto/requests/user/create-user.dto';
 import { UpdateUserDTO } from '../dto/requests/user/update-user.dto';
+import { ApiResponse } from '../commons/response-body/common.responses';
 
 @Injectable()
 export class UserService {
@@ -28,25 +29,25 @@ export class UserService {
       where: { id },
       relations: ['contactDetails', 'role'],
       select: {
-        id: true,
         role: { id: true, roleName: true },
-        firstName: true,
-        lastName: true,
-        addressLine1: true,
-        addressLine2: true,
-        city: true,
-        state: true,
-        zipcode: true,
-        country: true,
-        imageURL: true,
-        isActive: true,
-        lastLoginTime: true,
-        createdAt: true,
-        createdBy: true,
-        updatedAt: true,
-        updatedBy: true,
+        contactDetails: {
+          id: true,
+          optionalEmailOne: true,
+          optionalEmailTwo: true,
+          optionalPhoneOne: true,
+          optionalPhoneTwo: true,
+          primaryEmail: true,
+          primaryPhone: true,
+          secondaryEmail: true,
+          secondaryPhone: true,
+        },
       },
     });
+  }
+
+  async handleUserNotFound(id: number): Promise<ApiResponse<null>> {
+    this.logger.error(`User with ID ${id} not found`);
+    return USER_RESPONSES.USER_NOT_FOUND(id);
   }
 
   async createUser(createUserDto: CreateUserDTO): Promise<object> {
@@ -141,8 +142,7 @@ export class UserService {
     this.logger.log(`Fetching user with ID ${id}`);
     const user = await this.findUserById(id);
     if (!user) {
-      this.logger.warn(`User with ID ${id} not found`);
-      return USER_RESPONSES.USER_NOT_FOUND(id);
+      return await this.handleUserNotFound(id);
     }
     return USER_RESPONSES.USER_FETCHED(user);
   }

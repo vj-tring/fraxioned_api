@@ -30,15 +30,8 @@ export const SPACE_RESPONSES = {
     spaceName: string,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: false,
-    message: `Space ${spaceName} already exists`,
+    message: `Space with name ${spaceName} already exists`,
     statusCode: HttpStatus.CONFLICT,
-  }),
-  USER_NOT_FOUND: (
-    createdBy: number,
-  ): { success: boolean; message: string; statusCode: HttpStatus } => ({
-    success: false,
-    message: `User with ID ${createdBy} does not exist`,
-    statusCode: HttpStatus.NOT_FOUND,
   }),
   SPACE_CREATED: (
     savedSpace: Space,
@@ -58,7 +51,6 @@ export const SPACE_RESPONSES = {
   ): {
     success: boolean;
     message: string;
-    data?: Space;
     statusCode: number;
   } => ({
     success: false,
@@ -81,7 +73,6 @@ export const SPACE_RESPONSES = {
   }),
   SPACE_UPDATED: (
     updatedSpace: Space,
-    id: number,
   ): {
     success: boolean;
     message: string;
@@ -89,7 +80,7 @@ export const SPACE_RESPONSES = {
     statusCode: number;
   } => ({
     success: true,
-    message: `Space with ID ${id} updated successfully`,
+    message: `Space with ID ${updatedSpace.id} updated successfully`,
     data: updatedSpace,
     statusCode: HttpStatus.OK,
   }),

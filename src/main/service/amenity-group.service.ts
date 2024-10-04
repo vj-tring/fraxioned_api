@@ -6,10 +6,10 @@ import { AmenityGroup } from '../entities/amenity-group.entity';
 import { CreateAmenityGroupDto } from '../dto/requests/amenity-group/create-amenity-group.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { AMENITY_GROUP_RESPONSES } from '../commons/constants/response-constants/amenity-group.constant';
-import { AMENITIES_RESPONSES } from '../commons/constants/response-constants/amenities.constant';
 import { UpdateAmenityGroupDto } from '../dto/requests/amenity-group/update-amenity-group.dto';
 import { AmenitiesService } from './amenities.service';
 import { UserService } from './user.service';
+import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 
 @Injectable()
 export class AmenityGroupService {
@@ -79,7 +79,7 @@ export class AmenityGroupService {
         this.logger.error(
           `User with ID ${createAmenityGroupDto.createdBy.id} does not exist`,
         );
-        return AMENITIES_RESPONSES.USER_NOT_FOUND(
+        return USER_RESPONSES.USER_NOT_FOUND(
           createAmenityGroupDto.createdBy.id,
         );
       }
@@ -106,18 +106,18 @@ export class AmenityGroupService {
 
   async getAllAmenityGroups(): Promise<ApiResponse<AmenityGroup[]>> {
     try {
-      const exisitngAmenityGroups = await this.findAllAmenityGroups();
+      const existingAmenityGroups = await this.findAllAmenityGroups();
 
-      if (exisitngAmenityGroups.length === 0) {
+      if (existingAmenityGroups.length === 0) {
         this.logger.log(`No amenity groups are available`);
         return AMENITY_GROUP_RESPONSES.AMENITY_GROUPS_NOT_FOUND();
       }
 
       this.logger.log(
-        `Retrieved ${exisitngAmenityGroups.length} amenity groups successfully.`,
+        `Retrieved ${existingAmenityGroups.length} amenity groups successfully.`,
       );
       return AMENITY_GROUP_RESPONSES.AMENITY_GROUPS_FETCHED(
-        exisitngAmenityGroups,
+        existingAmenityGroups,
       );
     } catch (error) {
       this.logger.error(
@@ -173,7 +173,7 @@ export class AmenityGroupService {
         this.logger.error(
           `User with ID ${updateAmenityGroupDto.updatedBy.id} does not exist`,
         );
-        return AMENITIES_RESPONSES.USER_NOT_FOUND(
+        return USER_RESPONSES.USER_NOT_FOUND(
           updateAmenityGroupDto.updatedBy.id,
         );
       }
