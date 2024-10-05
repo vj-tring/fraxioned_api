@@ -30,6 +30,7 @@ import { AmenityGroupModule } from './main/modules/amenity-group.module';
 import { FaqCategoryModule } from './main/modules/faqcategory.module';
 import { FaqQuestionsModule } from './main/modules/faqquestions.module';
 import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
+import { PropertySpaceBedModule } from './main/modules/property-space-bed.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
     FaqCategoryModule,
     FaqQuestionsModule,
     SpaceBedTypeModule,
+    PropertySpaceBedModule,
   ],
 })
 export class AppModule {}
