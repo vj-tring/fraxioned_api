@@ -4,7 +4,7 @@ import { In, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { LoggerService } from './logger.service';
 import { Property } from '../entities/property.entity';
-import { PropertyAmenities } from '../entities/property_amenities.entity';
+import { PropertyAmenities } from '../entities/property-amenities.entity';
 import { Amenities } from '../entities/amenities.entity';
 import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
 import { PROPERTY_AMENITY_RESPONSES } from '../commons/constants/response-constants/property-amenities.constant';

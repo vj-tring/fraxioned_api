@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { FaqCategory } from 'src/main/entities/faq_category.entity';
+import { FaqCategory } from 'src/main/entities/faq-category.entity';
 
 export const FAQ_CATEGORY_RESPONSES = {
   CATEGORY_ALREADY_EXISTS: (

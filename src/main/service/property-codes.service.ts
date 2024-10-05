@@ -3,7 +3,7 @@ import { CreatePropertyCodeDto } from '../dto/requests/property-code/create-prop
 import { UpdatePropertyCodeDto } from '../dto/requests/property-code/update-property-code.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoggerService } from './logger.service';
-import { PropertyCodes } from '../entities/property_codes.entity';
+import { PropertyCodes } from '../entities/property-codes.entity';
 import { Repository } from 'typeorm';
 import { Property } from '../entities/property.entity';
 import { PropertyCodeCategory } from '../entities/property-code-category.entity';

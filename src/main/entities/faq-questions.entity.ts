@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { FaqCategory } from './faq_category.entity';
+import { FaqCategory } from './faq-category.entity';
 import { User } from './user.entity';
 
 @Entity('fxn_faq_questions')

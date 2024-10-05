@@ -13,8 +13,6 @@ import { User } from 'src/main/entities/user.entity';
 import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
 import { NightCounts } from './interface/bookingInterface';
-import { PropertyImages } from 'src/main/entities/property_images.entity';
-import { SpaceTypes } from 'src/main/entities/space-types.entity';
 import { normalizeDates, normalizeDate } from './utils/date.util';
 import { BookingValidationService } from './utils/validation.util';
 import { BookingMailService } from './utils/mail.util';
@@ -29,10 +27,6 @@ export class UpdateBookingService {
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(PropertyImages)
-    private readonly propertyImagesRepository: Repository<PropertyImages>,
-    @InjectRepository(SpaceTypes)
-    private readonly spaceTypesRepository: Repository<SpaceTypes>,
     private readonly logger: LoggerService,
     private readonly mailService: MailService,
     private readonly bookingUtilService: BookingUtilService,

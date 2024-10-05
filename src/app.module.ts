@@ -18,10 +18,8 @@ import { MailModule } from './main/email/mail.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MaintenanceModule } from './main/modules/maintenance.module';
-import { PropertyImagesModule } from './main/modules/property-images.module';
 import { S3UtilsModule } from './main/modules/s3-utils.module';
 import { SpaceModule } from './main/modules/space.module';
-import { SpaceTypesModule } from './main/modules/space-types.module';
 import { BookingModule } from './main/modules/booking.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
 import { ReportsModule } from './main/modules/reports.module';
@@ -48,12 +46,10 @@ import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
     UserDocumentModule,
     PropertyAmenitiesModule,
     PropertyCodesModule,
-    PropertyImagesModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     S3UtilsModule,
     SpaceModule,
-    SpaceTypesModule,
 
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
