@@ -97,7 +97,7 @@ export class ContactUsService {
       const contactUs = new ContactUs();
       contactUs.subject = contactUsDto.subject;
       contactUs.comments = contactUsDto.comments;
-      contactUs.createdBy.id = contactUsDto.senderId;
+      contactUs.createdBy = user;
 
       await this.contactUsRepository.save(contactUs);
       this.logger.log(`Enquiry have been saved successfully`);
