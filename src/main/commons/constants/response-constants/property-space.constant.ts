@@ -2,7 +2,6 @@ import { HttpStatus } from '@nestjs/common';
 import { PropertySpace } from 'src/main/entities/property-space.entity';
 
 export const PROPERTY_SPACE_RESPONSES = {
-
   PROPERTY_SPACE_ALREADY_EXISTS: (
     propertyName: string,
     spaceName: string,
