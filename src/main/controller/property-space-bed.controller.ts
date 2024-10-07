@@ -113,7 +113,8 @@ export class PropertySpaceBedController {
   }
   @Patch()
   async createOrDeletePropertySpaceBeds(
-    @Body() createOrDeletePropertySpaceBedsDto: CreateOrDeletePropertySpaceBedsDto,
+    @Body()
+    createOrDeletePropertySpaceBedsDto: CreateOrDeletePropertySpaceBedsDto,
   ): Promise<{
     success: boolean;
     message: string;
@@ -133,5 +134,4 @@ export class PropertySpaceBedController {
       );
     }
   }
-
 }

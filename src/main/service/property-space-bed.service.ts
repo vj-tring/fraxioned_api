@@ -255,9 +255,7 @@ export class PropertySpaceBedService {
   ): Promise<DeleteResult> {
     return this.propertySpaceBedRepository.delete(id);
   }
-  async deletePropertySpaceBedByProperty(
-    id: number,
-  ): Promise<DeleteResult> {
+  async deletePropertySpaceBedByProperty(id: number): Promise<DeleteResult> {
     return this.propertySpaceBedRepository.delete(id);
   }
 
@@ -303,9 +301,10 @@ export class PropertySpaceBedService {
         );
       }
 
-      const existingPropertySpace = await this.propertySpaceService.findPropertySpaceById(
-        createOrDeletePropertySpaceBedsDto.propertySpace.id,
-      );
+      const existingPropertySpace =
+        await this.propertySpaceService.findPropertySpaceById(
+          createOrDeletePropertySpaceBedsDto.propertySpace.id,
+        );
       if (!existingPropertySpace) {
         this.logger.error(
           `Property space with ID ${createOrDeletePropertySpaceBedsDto.propertySpace.id} does not exist`,
@@ -315,33 +314,42 @@ export class PropertySpaceBedService {
         );
       }
 
-      const spaceBedTypeIds = createOrDeletePropertySpaceBedsDto.spaceBedTypes.map(
-        (spaceBedType) => spaceBedType.id,
-      );
+      const spaceBedTypeIds =
+        createOrDeletePropertySpaceBedsDto.spaceBedTypes.map(
+          (spaceBedType) => spaceBedType.id,
+        );
 
-      const existingSpaceBedTypes = await this.propertySpaceBedRepository.findBy({
-        id: In(spaceBedTypeIds),
-      });
+      const existingSpaceBedTypes =
+        await this.propertySpaceBedRepository.findBy({
+          id: In(spaceBedTypeIds),
+        });
 
       const nonExistingIds = spaceBedTypeIds.filter(
-        (id) => !existingSpaceBedTypes.some((spaceBedType) => spaceBedType.id === id),
+        (id) =>
+          !existingSpaceBedTypes.some((spaceBedType) => spaceBedType.id === id),
       );
 
       if (nonExistingIds.length > 0) {
         this.logger.error(
           `Space bed types with ID(s) ${nonExistingIds.join(', ')} do not exist`,
         );
-        return PROPERTY_SPACE_BED_RESPONSES.SPACE_BED_TYPES_NOT_FOUND(nonExistingIds);
+        return PROPERTY_SPACE_BED_RESPONSES.SPACE_BED_TYPES_NOT_FOUND(
+          nonExistingIds,
+        );
       }
 
       const existingMappings = await this.propertySpaceBedRepository.find({
         where: {
-          propertySpace: { id: createOrDeletePropertySpaceBedsDto.propertySpace.id },
+          propertySpace: {
+            id: createOrDeletePropertySpaceBedsDto.propertySpace.id,
+          },
         },
         relations: ['spaceBedType'],
       });
 
-      const existingSpaceBedTypeIds = existingMappings.map((m) => m.spaceBedType.id);
+      const existingSpaceBedTypeIds = existingMappings.map(
+        (m) => m.spaceBedType.id,
+      );
 
       const toDelete = existingMappings.filter(
         (mapping) => !spaceBedTypeIds.includes(mapping.spaceBedType.id),
@@ -386,5 +394,4 @@ export class PropertySpaceBedService {
       );
     }
   }
-  
 }
