@@ -29,6 +29,7 @@ import { FaqCategoryModule } from './main/modules/faq-category.module';
 import { FaqQuestionsModule } from './main/modules/faq-questions.module';
 import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
 import { PropertySpaceModule } from './main/modules/property-space.module';
+import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
 
 @Module({
   imports: [
@@ -51,7 +52,7 @@ import { PropertySpaceModule } from './main/modules/property-space.module';
     MailModule,
     S3UtilsModule,
     SpaceModule,
-
+    SpaceTypesModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/static',
@@ -66,6 +67,7 @@ import { PropertySpaceModule } from './main/modules/property-space.module';
     FaqQuestionsModule,
     SpaceBedTypeModule,
     PropertySpaceModule,
+    SpaceBathroomTypesModule,
   ],
 })
 export class AppModule {}
