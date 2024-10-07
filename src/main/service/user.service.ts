@@ -29,7 +29,23 @@ export class UserService {
       where: { id },
       relations: ['contactDetails', 'role'],
       select: {
+        id: true,
         role: { id: true, roleName: true },
+        firstName: true,
+        lastName: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        zipcode: true,
+        country: true,
+        imageURL: true,
+        isActive: true,
+        lastLoginTime: true,
+        createdAt: true,
+        createdBy: true,
+        updatedAt: true,
+        updatedBy: true,
         contactDetails: {
           id: true,
           optionalEmailOne: true,
@@ -113,6 +129,17 @@ export class UserService {
       select: {
         id: true,
         role: { id: true, roleName: true },
+        contactDetails: {
+          id: true,
+          optionalEmailOne: true,
+          optionalEmailTwo: true,
+          optionalPhoneOne: true,
+          optionalPhoneTwo: true,
+          primaryEmail: true,
+          primaryPhone: true,
+          secondaryEmail: true,
+          secondaryPhone: true,
+        },
         firstName: true,
         lastName: true,
         addressLine1: true,
@@ -150,9 +177,12 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
-        relations: {
-          contactDetails: true,
-          role: true,
+        relations: ['contactDetails', 'role'],
+        select: {
+          role: {
+            id: true,
+            roleName: true,
+          },
         },
       });
 
@@ -208,14 +238,7 @@ export class UserService {
         );
       }
 
-      await this.userRepository.save(user);
-
-      const updatedUser = await this.userRepository.findOne({
-        where: {
-          id: user.id,
-        },
-        relations: ['contactDetails'],
-      });
+      const updatedUser = await this.userRepository.save(user);
 
       this.logger.log(`User with ID ${id} updated successfully`);
       return USER_RESPONSES.USER_UPDATED(updatedUser);
