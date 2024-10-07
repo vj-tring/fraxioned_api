@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { LoggerService } from './logger.service';
 import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
 import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
 import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
@@ -22,6 +23,8 @@ import { CreatePropertiesDto } from '../dto/requests/property/create-property.dt
 import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.dto';
 import { User } from '../entities/user.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
+import { ApiResponse } from '../commons/response-body/common.responses';
+import { PROPERTY_RESPONSES } from '../commons/constants/response-constants/property.constant';
 
 @Injectable()
 export class PropertiesService {
@@ -34,6 +37,7 @@ export class PropertiesService {
     private userPropertiesRepository: Repository<UserProperties>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private readonly logger: LoggerService,
   ) {}
   private async shouldApplyPropertyNameFilter(
     userId: number,
@@ -218,23 +222,32 @@ export class PropertiesService {
     }
   }
 
+  async findPropertyById(id: number): Promise<Property | null> {
+    return await this.propertiesRepository.findOne({
+      where: { id },
+      relations: ['createdBy', 'updatedBy'],
+      select: {
+        createdBy: {
+          id: true,
+        },
+        updatedBy: {
+          id: true,
+        },
+      },
+    });
+  }
+
+  async handlePropertyNotFound(id: number): Promise<ApiResponse<null>> {
+    this.logger.error(`Property with ID ${id} not found`);
+    return PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
+  }
+
   async getPropertiesById(
     id: number,
     userId: number,
   ): Promise<CommonPropertiesResponseDto> {
     try {
-      const existingProperties = await this.propertiesRepository.findOne({
-        where: { id },
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
+      const existingProperties = await this.findPropertyById(id);
       if (!existingProperties) {
         throw new NotFoundException(`Properties with ID ${id} not found`);
       }

@@ -16,5 +16,6 @@ import { UserModule } from './user.module';
   ],
   controllers: [SpaceController],
   providers: [SpaceService],
+  exports: [SpaceService],
 })
 export class SpaceModule {}
