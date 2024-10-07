@@ -2,38 +2,20 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { SpaceTypes } from './space-types.entity';
 import { User } from './user.entity';
 
-@Entity('fxn_space')
-export class Space {
+@Entity('fxn_space_bed_types')
+export class SpaceBedType {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  name: string;
-
-  @Column({
-    name: 'is_bed_type_allowed',
-    type: 'boolean',
-    nullable: true,
-    default: false,
-  })
-  isBedTypeAllowed: boolean;
-
-  @Column({
-    name: 'is_bathroom_type_allowed',
-    type: 'boolean',
-    nullable: true,
-    default: false,
-  })
-  isBathroomTypeAllowed: boolean;
+  @Column({ name: 'bed_type', type: 'varchar', length: 255 })
+  bedType: string;
 
   @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
   createdAt: Date;
@@ -48,7 +30,4 @@ export class Space {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
-
-  @OneToMany(() => SpaceTypes, (spaceType) => spaceType.space)
-  spaceTypes: SpaceTypes[];
 }
