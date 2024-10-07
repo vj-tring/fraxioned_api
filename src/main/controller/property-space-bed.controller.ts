@@ -45,7 +45,7 @@ export class PropertySpaceBedController {
     }
   }
 
-  @Get('property-space-bed')
+  @Get()
   async getAllPropertySpaceBeds(): Promise<ApiResponse<PropertySpaceBed[]>> {
     try {
       const result =
