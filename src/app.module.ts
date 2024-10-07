@@ -25,8 +25,8 @@ import { ContactUsModule } from './main/modules/contact-us.module';
 import { ReportsModule } from './main/modules/reports.module';
 import { PropertyCodeCategoryModule } from './main/modules/property-code-category.module';
 import { AmenityGroupModule } from './main/modules/amenity-group.module';
-import { FaqCategoryModule } from './main/modules/faqcategory.module';
-import { FaqQuestionsModule } from './main/modules/faqquestions.module';
+import { FaqCategoryModule } from './main/modules/faq-category.module';
+import { FaqQuestionsModule } from './main/modules/faq-questions.module';
 import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
 import { PropertySpaceModule } from './main/modules/property-space.module';
 
