@@ -84,16 +84,16 @@ export class PropertyAmenitiesService {
 
       const existingPropertySpace =
         await this.propertySpaceService.findPropertySpaceById(
-          createPropertyAmenityDto.propertySpace.id,
+          createPropertyAmenityDto.propertySpace?.id,
         );
       if (!existingPropertySpace) {
         return this.propertySpaceService.handlePropertySpaceNotFound(
           createPropertyAmenityDto.propertySpace.id,
         );
       }
-
-      const existingPropertyAmenity =
-        await this.propertyAmenitiesRepository.findOne({
+      const existingPropertyAmenities =
+        await this.propertyAmenitiesRepository.find({
+          relations: ['property', 'amenity', 'propertySpace'],
           where: {
             property: { id: createPropertyAmenityDto.property.id },
             amenity: { id: createPropertyAmenityDto.amenity.id },
@@ -102,8 +102,19 @@ export class PropertyAmenitiesService {
               : null,
           },
         });
+      const hasExistingWithSpace = existingPropertyAmenities.some(
+        (pa) =>
+          pa.propertySpace?.id === createPropertyAmenityDto.propertySpace?.id,
+      );
 
-      if (existingPropertyAmenity) {
+      const hasExistingWithoutSpace = existingPropertyAmenities.some(
+        (pa) => pa.propertySpace === null,
+      );
+
+      if (
+        (createPropertyAmenityDto.propertySpace && hasExistingWithSpace) ||
+        (!createPropertyAmenityDto.propertySpace && hasExistingWithoutSpace)
+      ) {
         const spaceInfo = createPropertyAmenityDto.propertySpace?.id
           ? ` and Property Space ID ${createPropertyAmenityDto.propertySpace.id}`
           : ' without a specific Property Space';
