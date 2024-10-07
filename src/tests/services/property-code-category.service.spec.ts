@@ -6,7 +6,7 @@ import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
 import { PropertyCodeCategoryService } from 'src/main/service/property-code-category.service';
 import { PropertyCodeCategory } from 'src/main/entities/property-code-category.entity';
-import { PropertyCodes } from 'src/main/entities/property_codes.entity';
+import { PropertyCodes } from 'src/main/entities/property-codes.entity';
 import { CreatePropertyCodeCategoryDto } from 'src/main/dto/requests/property-code-category/create-property-code-category.dto';
 import { PROPERTY_CODE_CATEGORY_RESPONSES } from 'src/main/commons/constants/response-constants/property-code-category.constant';
 

@@ -9,18 +9,28 @@ import {
 } from 'typeorm';
 import { Space } from './space.entity';
 import { User } from './user.entity';
+import { Property } from './property.entity';
 
-@Entity('fxn_space_types')
-export class SpaceTypes {
+@Entity('fxn_property_space')
+export class PropertySpace {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  name: string;
+  @Column({
+    name: 'instance_number',
+    type: 'int',
+    nullable: true,
+    default: null,
+  })
+  instanceNumber: number;
 
-  @ManyToOne(() => Space, (space) => space.spaceTypes)
-  @JoinColumn({ name: 'space_id' })
+  @ManyToOne(() => Space, (space) => space.id)
+  @JoinColumn({ name: 'space_id', referencedColumnName: 'id' })
   space: Space;
+
+  @ManyToOne(() => Property, (property) => property.id)
+  @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
+  property: Property;
 
   @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
   createdAt: Date;

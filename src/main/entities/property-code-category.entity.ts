@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { PropertyCodes } from './property_codes.entity';
+import { PropertyCodes } from './property-codes.entity';
 
 @Entity('fxn_property_code_category')
 export class PropertyCodeCategory {

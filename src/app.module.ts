@@ -18,18 +18,17 @@ import { MailModule } from './main/email/mail.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MaintenanceModule } from './main/modules/maintenance.module';
-import { PropertyImagesModule } from './main/modules/property-images.module';
 import { S3UtilsModule } from './main/modules/s3-utils.module';
 import { SpaceModule } from './main/modules/space.module';
-import { SpaceTypesModule } from './main/modules/space-types.module';
 import { BookingModule } from './main/modules/booking.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
 import { ReportsModule } from './main/modules/reports.module';
 import { PropertyCodeCategoryModule } from './main/modules/property-code-category.module';
 import { AmenityGroupModule } from './main/modules/amenity-group.module';
-import { FaqCategoryModule } from './main/modules/faqcategory.module';
-import { FaqQuestionsModule } from './main/modules/faqquestions.module';
+import { FaqCategoryModule } from './main/modules/faq-category.module';
+import { FaqQuestionsModule } from './main/modules/faq-questions.module';
 import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
+import { PropertySpaceModule } from './main/modules/property-space.module';
 import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
 
 @Module({
@@ -49,12 +48,10 @@ import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.mo
     UserDocumentModule,
     PropertyAmenitiesModule,
     PropertyCodesModule,
-    PropertyImagesModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     S3UtilsModule,
     SpaceModule,
-    SpaceTypesModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/static',
@@ -68,6 +65,7 @@ import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.mo
     FaqCategoryModule,
     FaqQuestionsModule,
     SpaceBedTypeModule,
+    PropertySpaceModule,
     SpaceBathroomTypesModule,
   ],
 })

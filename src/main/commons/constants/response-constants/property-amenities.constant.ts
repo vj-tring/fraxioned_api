@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { PropertyAmenities } from 'src/main/entities/property_amenities.entity';
+import { PropertyAmenities } from 'src/main/entities/property-amenities.entity';
 
 export const PROPERTY_AMENITY_RESPONSES = {
   PROPERTY_NOT_FOUND: (

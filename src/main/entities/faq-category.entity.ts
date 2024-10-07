@@ -8,7 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { FaqQuestions } from './faq_questions.entity';
+import { FaqQuestions } from './faq-questions.entity';
 import { User } from './user.entity';
 
 @Entity('fxn_faq_category')

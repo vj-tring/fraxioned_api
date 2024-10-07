@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { FaqQuestions } from 'src/main/entities/faq_questions.entity';
+import { FaqQuestions } from 'src/main/entities/faq-questions.entity';
 
 export const FAQ_QUESTIONS_RESPONSES = {
   QUESTION_ALREADY_EXISTS: (
