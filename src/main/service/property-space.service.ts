@@ -128,6 +128,18 @@ export class PropertySpaceService {
     });
   }
 
+  async findCountOfSpaceForProperty(
+    propertyId: number,
+    spaceId: number,
+  ): Promise<number> {
+    return this.propertySpaceRepository.count({
+      where: {
+        property: { id: propertyId },
+        space: { id: spaceId },
+      },
+    });
+  }
+
   async handleExistingPropertySpace(
     propertyName: string,
     spaceName: string,
@@ -196,25 +208,32 @@ export class PropertySpaceService {
         );
       }
 
+      const instanceNumber =
+        (await this.findCountOfSpaceForProperty(
+          createPropertySpaceDto.property.id,
+          createPropertySpaceDto.space.id,
+        )) + 1;
+
       const existingPropertySpace = await this.findPropertySpaceByObjectIds(
         createPropertySpaceDto.property.id,
         createPropertySpaceDto.space.id,
-        createPropertySpaceDto.instanceNumber,
+        instanceNumber,
       );
       if (existingPropertySpace) {
         return await this.handleExistingPropertySpace(
           existingProperty.propertyName,
           existingSpace.name,
-          createPropertySpaceDto.instanceNumber,
+          instanceNumber,
         );
       }
       const propertySpace = this.propertySpaceRepository.create({
         ...createPropertySpaceDto,
+        instanceNumber,
       });
       const savedPropertySpace = await this.savePropertySpace(propertySpace);
 
       this.logger.log(
-        `Space ${existingSpace.name} ${createPropertySpaceDto.instanceNumber} for Property ${existingProperty.propertyName} created`,
+        `Space ${existingSpace.name} ${instanceNumber} for Property ${existingProperty.propertyName} created`,
       );
       return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACE_CREATED(
         savedPropertySpace,

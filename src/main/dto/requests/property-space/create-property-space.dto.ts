@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, Min } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -6,11 +6,6 @@ import { Space } from 'src/main/entities/space.entity';
 import { Property } from 'src/main/entities/property.entity';
 
 export class CreatePropertySpaceDto {
-  @IsNotEmpty({ message: 'instance number is required' })
-  @IsNumber()
-  @Min(1, { message: 'instance number must be at least 1' })
-  instanceNumber: number;
-
   @ApiProperty({
     example: { id: 1 },
   })
