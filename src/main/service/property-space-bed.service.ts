@@ -258,13 +258,10 @@ export class PropertySpaceBedService {
   ): Promise<DeleteResult> {
     return this.propertySpaceBedRepository.delete(id);
   }
-  async deletePropertySpaceBedByProperty(
-    propertyId: number,
-  ): Promise<DeleteResult> {
-    const result = await this.propertySpaceBedRepository.delete({
+  async deletePropertySpaceBedByProperty(propertyId: number): Promise<void> {
+    await this.propertySpaceBedRepository.delete({
       propertySpace: { id: propertyId },
     });
-    return result;
   }
 
   async deletePropertySpaceBedById(
