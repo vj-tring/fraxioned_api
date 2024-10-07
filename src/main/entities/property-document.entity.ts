@@ -1,45 +1,46 @@
 import {
-  Entity,
   Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
-  UpdateDateColumn,
   CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { Property } from './property.entity';
+import { User } from './user.entity';
 
-@Entity('fxn_user_documents')
-export class UserDocument {
-  @PrimaryGeneratedColumn()
+@Entity('fxn_property_documents')
+export class PropertyDocuments {
+  @PrimaryGeneratedColumn({
+    name: 'id',
+    comment: 'This is a unique identifier',
+  })
   id: number;
 
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: User;
-
-  @ManyToOne(() => Property, (property) => property.id)
-  @JoinColumn({ name: 'property_id', referencedColumnName: 'id' })
-  property: Property;
+  @Column({
+    name: 'url',
+    type: 'varchar',
+  })
+  documentUrl: string;
 
   @Column({
-    name: 'document_name',
+    name: 'name',
     type: 'varchar',
-    length: 255,
-    nullable: true,
-    default: null,
   })
   documentName: string;
 
   @Column({
-    name: 'document_url',
+    name: 'document_type',
     type: 'varchar',
-    length: 255,
-    nullable: true,
-    default: null,
   })
-  documentURL: string;
+  documentType: string;
+
+  @ManyToOne(() => Property, (properties) => properties.id)
+  @JoinColumn({
+    name: 'property_id',
+  })
+  property: Property;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({

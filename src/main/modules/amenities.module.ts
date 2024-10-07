@@ -7,6 +7,7 @@ import { Amenities } from '../entities/amenities.entity';
 import { AmenitiesController } from '../controller/amenities.controller';
 import { AmenitiesService } from '../service/amenities.service';
 import { PropertyAmenities } from '../entities/property-amenities.entity';
+import { PropertyDocumentsModule } from './property-document.module';
 import { AmenityGroup } from '../entities/amenity-group.entity';
 
 @Module({
@@ -19,6 +20,7 @@ import { AmenityGroup } from '../entities/amenity-group.entity';
     ]),
     LoggerModule,
     AuthenticationModule,
+    PropertyDocumentsModule,
   ],
   controllers: [AmenitiesController],
   providers: [AmenitiesService],
