@@ -52,6 +52,82 @@ export class PropertySpaceService {
     return await this.propertySpaceRepository.save(propertySpace);
   }
 
+  async findAllPropertySpaces(): Promise<PropertySpace[] | null> {
+    return await this.propertySpaceRepository.find({
+      relations: ['property', 'space', 'createdBy', 'updatedBy'],
+      select: {
+        property: {
+          id: true,
+          propertyName: true,
+        },
+        space: {
+          id: true,
+          name: true,
+          isBedTypeAllowed: true,
+          isBathroomTypeAllowed: true,
+        },
+        createdBy: {
+          id: true,
+        },
+        updatedBy: {
+          id: true,
+        },
+      },
+    });
+  }
+
+  async findPropertySpaceById(id: number): Promise<PropertySpace | null> {
+    return await this.propertySpaceRepository.findOne({
+      relations: ['property', 'space', 'createdBy', 'updatedBy'],
+      select: {
+        property: {
+          id: true,
+          propertyName: true,
+        },
+        space: {
+          id: true,
+          name: true,
+          isBedTypeAllowed: true,
+          isBathroomTypeAllowed: true,
+        },
+        createdBy: {
+          id: true,
+        },
+        updatedBy: {
+          id: true,
+        },
+      },
+      where: { id },
+    });
+  }
+
+  async findAllPropertySpacesByPropertyId(
+    id: number,
+  ): Promise<PropertySpace[] | null> {
+    return await this.propertySpaceRepository.find({
+      relations: ['property', 'space', 'createdBy', 'updatedBy'],
+      select: {
+        property: {
+          id: true,
+          propertyName: true,
+        },
+        space: {
+          id: true,
+          name: true,
+          isBedTypeAllowed: true,
+          isBathroomTypeAllowed: true,
+        },
+        createdBy: {
+          id: true,
+        },
+        updatedBy: {
+          id: true,
+        },
+      },
+      where: { property: { id } },
+    });
+  }
+
   async handleExistingPropertySpace(
     propertyName: string,
     spaceName: string,
@@ -64,6 +140,27 @@ export class PropertySpaceService {
       propertyName,
       spaceName,
       instanceNumber,
+    );
+  }
+
+  async handlePropertySpaceNotFound(id: number): Promise<ApiResponse<null>> {
+    this.logger.error(`Property space with ID ${id} not found`);
+    return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACE_NOT_FOUND(id);
+  }
+
+  async handlePropertySpacesNotFound(): Promise<ApiResponse<PropertySpace[]>> {
+    this.logger.error(`No property spaces are available`);
+    return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACES_NOT_FOUND();
+  }
+
+  async returnAvailablePropertySpaces(
+    existingPropertySpaces: PropertySpace[],
+  ): Promise<ApiResponse<PropertySpace[]>> {
+    this.logger.log(
+      `Retrieved ${existingPropertySpaces.length} property spaces successfully.`,
+    );
+    return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACES_FETCHED(
+      existingPropertySpaces,
     );
   }
 
@@ -95,7 +192,7 @@ export class PropertySpaceService {
 
       if (!existingSpace) {
         return await this.spaceService.handleSpaceNotFound(
-          createPropertySpaceDto.property.id,
+          createPropertySpaceDto.space.id,
         );
       }
 
@@ -130,6 +227,71 @@ export class PropertySpaceService {
       );
       throw new HttpException(
         'An error occurred while creating the property space',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getAllPropertySpaces(): Promise<ApiResponse<PropertySpace[]>> {
+    try {
+      const existingPropertySpaces = await this.findAllPropertySpaces();
+
+      if (existingPropertySpaces.length === 0) {
+        return await this.handlePropertySpacesNotFound();
+      }
+
+      return await this.returnAvailablePropertySpaces(existingPropertySpaces);
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property spaces: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving all the property spaces',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getPropertySpaceById(id: number): Promise<ApiResponse<PropertySpace>> {
+    try {
+      const existingPropertySpace = await this.findPropertySpaceById(id);
+
+      if (!existingPropertySpace) {
+        return await this.handlePropertySpaceNotFound(id);
+      }
+
+      this.logger.log(`Property Space with ID ${id} retrieved successfully`);
+      return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACE_FETCHED(
+        existingPropertySpace,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property space with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the property space',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getPropertySpaceByPropertyId(
+    propertyId: number,
+  ): Promise<ApiResponse<PropertySpace[]>> {
+    try {
+      const existingPropertySpaces =
+        await this.findAllPropertySpacesByPropertyId(propertyId);
+
+      if (existingPropertySpaces.length === 0) {
+        return await this.handlePropertySpacesNotFound();
+      }
+      return await this.returnAvailablePropertySpaces(existingPropertySpaces);
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property amenities: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the amenities list for the selected property',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

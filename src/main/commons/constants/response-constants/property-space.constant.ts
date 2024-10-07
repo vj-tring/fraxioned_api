@@ -26,55 +26,54 @@ export const PROPERTY_SPACE_RESPONSES = {
     data: savedPropertySpace,
     statusCode: HttpStatus.CREATED,
   }),
-  //   AMENITY_GROUPS_NOT_FOUND: (): {
-  //     success: boolean;
-  //     message: string;
-  //     data?: AmenityGroup[];
-  //     statusCode: number;
-  //   } => ({
-  //     success: true,
-  //     message: 'No amenity groups are available',
-  //     data: [],
-  //     statusCode: HttpStatus.OK,
-  //   }),
-  //   AMENITY_GROUPS_FETCHED: (
-  //     amenityGroups: AmenityGroup[],
-  //   ): {
-  //     success: boolean;
-  //     message: string;
-  //     data?: AmenityGroup[];
-  //     statusCode: number;
-  //   } => ({
-  //     success: true,
-  //     message: `Retrieved ${amenityGroups.length} amenity groups successfully.`,
-  //     data: amenityGroups,
-  //     statusCode: HttpStatus.OK,
-  //   }),
-
-  //   AMENITY_GROUP_NOT_FOUND: (
-  //     id: number,
-  //   ): {
-  //     success: boolean;
-  //     message: string;
-  //     statusCode: number;
-  //   } => ({
-  //     success: false,
-  //     message: `Amenity group with ID ${id} not found`,
-  //     statusCode: HttpStatus.NOT_FOUND,
-  //   }),
-  //   AMENITY_GROUP_FETCHED: (
-  //     existingAmenityGroup: AmenityGroup,
-  //   ): {
-  //     success: boolean;
-  //     message: string;
-  //     data?: AmenityGroup;
-  //     statusCode: number;
-  //   } => ({
-  //     success: true,
-  //     message: `Amenity group with ID ${existingAmenityGroup.id} retrieved successfully`,
-  //     data: existingAmenityGroup,
-  //     statusCode: HttpStatus.OK,
-  //   }),
+  PROPERTY_SPACES_NOT_FOUND: (): {
+    success: boolean;
+    message: string;
+    data?: PropertySpace[];
+    statusCode: number;
+  } => ({
+    success: true,
+    message: 'No property spaces are available',
+    data: [],
+    statusCode: HttpStatus.OK,
+  }),
+  PROPERTY_SPACES_FETCHED: (
+    propertySpaces: PropertySpace[],
+  ): {
+    success: boolean;
+    message: string;
+    data?: PropertySpace[];
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Retrieved ${propertySpaces.length} property spaces successfully.`,
+    data: propertySpaces,
+    statusCode: HttpStatus.OK,
+  }),
+  PROPERTY_SPACE_NOT_FOUND: (
+    id: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Property space with ID ${id} not found`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
+  PROPERTY_SPACE_FETCHED: (
+    existingPropertySpace: PropertySpace,
+  ): {
+    success: boolean;
+    message: string;
+    data?: PropertySpace;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Property Space with ID ${existingPropertySpace.id} retrieved successfully`,
+    data: existingPropertySpace,
+    statusCode: HttpStatus.OK,
+  }),
   //   AMENITY_GROUP_UPDATED: (
   //     updatedAmenityGroup: AmenityGroup,
   //   ): {

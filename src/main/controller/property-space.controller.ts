@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -38,51 +40,51 @@ export class PropertySpaceController {
     }
   }
 
-  // @Get()
-  // async getAllPropertySpaces(): Promise<ApiResponse<PropertySpace[]>> {
-  //   try {
-  //     const result = await this.propertySpaceService.getAllPropertySpaces();
-  //     return result;
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       'An error occurred while retrieving all the property spaces',
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+  @Get()
+  async getAllPropertySpaces(): Promise<ApiResponse<PropertySpace[]>> {
+    try {
+      const result = await this.propertySpaceService.getAllPropertySpaces();
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving all the property spaces',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
-  // @Get('property-space/:id')
-  // async getPropertySpaceById(
-  //   @Param('id') id: number,
-  // ): Promise<ApiResponse<PropertySpace>> {
-  //   try {
-  //     const result = await this.propertySpaceService.getPropertySpaceById(id);
-  //     return result;
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       'An error occurred while retrieving the property space',
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+  @Get('property-space/:id')
+  async getPropertySpaceById(
+    @Param('id') id: number,
+  ): Promise<ApiResponse<PropertySpace>> {
+    try {
+      const result = await this.propertySpaceService.getPropertySpaceById(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the property space',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
-  // @Get('property/:propertyId')
-  // async getPropertySpaceByPropertyId(
-  //   @Param('propertyId') propertyId: number,
-  // ): Promise<ApiResponse<PropertySpace[]>> {
-  //   try {
-  //     const result =
-  //       await this.propertySpaceService.getPropertySpaceByPropertyId(
-  //         propertyId,
-  //       );
-  //     return result;
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       'An error occurred while retrieving the spaces list for the selected property',
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+  @Get('property/:propertyId')
+  async getPropertySpaceByPropertyId(
+    @Param('propertyId') propertyId: number,
+  ): Promise<ApiResponse<PropertySpace[]>> {
+    try {
+      const result =
+        await this.propertySpaceService.getPropertySpaceByPropertyId(
+          propertyId,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving all the spaces for the selected property',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   // @Delete('property-space/:id')
   // async deleteSpaceType(
