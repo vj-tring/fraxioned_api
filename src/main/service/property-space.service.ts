@@ -307,10 +307,29 @@ export class PropertySpaceService {
       return await this.returnAvailablePropertySpaces(existingPropertySpaces);
     } catch (error) {
       this.logger.error(
-        `Error retrieving property amenities: ${error.message} - ${error.stack}`,
+        `Error retrieving property spaces: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
-        'An error occurred while retrieving the amenities list for the selected property',
+        'An error occurred while retrieving all the spaces for the selected property',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async removePropertySpace(id: number): Promise<ApiResponse<PropertySpace>> {
+    try {
+      const result = await this.propertySpaceRepository.delete(id);
+      if (result.affected === 0) {
+        return await this.handlePropertySpaceNotFound(id);
+      }
+      this.logger.log(`Property space with ID ${id} deleted successfully`);
+      return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACE_DELETED(id);
+    } catch (error) {
+      this.logger.error(
+        `Error deleting property space with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting the property space',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

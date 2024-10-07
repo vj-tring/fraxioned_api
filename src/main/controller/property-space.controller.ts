@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -86,18 +87,18 @@ export class PropertySpaceController {
     }
   }
 
-  // @Delete('property-space/:id')
-  // async deleteSpaceType(
-  //   @Param('id') id: number,
-  // ): Promise<ApiResponse<PropertySpace>> {
-  //   try {
-  //     const result = await this.propertySpaceService.removePropertySpace(id);
-  //     return result;
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       'An error occurred while deleting the property space',
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+  @Delete('property-space/:id')
+  async deleteSpaceType(
+    @Param('id') id: number,
+  ): Promise<ApiResponse<PropertySpace>> {
+    try {
+      const result = await this.propertySpaceService.removePropertySpace(id);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while deleting the property space',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
