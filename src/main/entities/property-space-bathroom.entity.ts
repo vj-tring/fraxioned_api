@@ -21,7 +21,7 @@ export class PropertySpaceBathroom extends BaseEntity {
   @JoinColumn({
     name: 'space_instance_id',
   })
-  spaceInstance: PropertySpace;
+  propertySpace: PropertySpace;
 
   @Column({
     name: 'count',
