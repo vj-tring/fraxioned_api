@@ -9,10 +9,11 @@ import { PropertySpaceBedService } from '../service/property-space-bed.service';
 import { PropertySpaceBed } from '../entities/property-space-bed.entity';
 import { PropertySpaceModule } from './property-space.module';
 import { SpaceBedTypeModule } from './space-bed-type.module';
+import { SpaceBedType } from '../entities/space-bed-type.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PropertySpaceBed, User]),
+    TypeOrmModule.forFeature([PropertySpaceBed, SpaceBedType, User]),
     LoggerModule,
     UserModule,
     AuthenticationModule,

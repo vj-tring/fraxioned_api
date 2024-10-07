@@ -13,12 +13,15 @@ import { PropertySpaceService } from './property-space.service';
 import { PROPERTY_SPACE_RESPONSES } from '../commons/constants/response-constants/property-space.constant';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 import { CreateOrDeletePropertySpaceBedsDto } from '../dto/requests/property-space-bed/create-or-delete.dto';
+import { SpaceBedType } from '../entities/space-bed-type.entity';
 
 @Injectable()
 export class PropertySpaceBedService {
   constructor(
     @InjectRepository(PropertySpaceBed)
     private readonly propertySpaceBedRepository: Repository<PropertySpaceBed>,
+    @InjectRepository(SpaceBedType)
+    private readonly spaceBedTypeRepository: Repository<SpaceBedType>,
     private readonly logger: LoggerService,
     private readonly userService: UserService,
     private readonly propertySpaceService: PropertySpaceService,
@@ -316,13 +319,12 @@ export class PropertySpaceBedService {
 
       const spaceBedTypeIds =
         createOrDeletePropertySpaceBedsDto.spaceBedTypes.map(
-          (spaceBedType) => spaceBedType.id,
+          (spaceBedType) => spaceBedType.spaceBedTypeId.id,
         );
 
-      const existingSpaceBedTypes =
-        await this.propertySpaceBedRepository.findBy({
-          id: In(spaceBedTypeIds),
-        });
+      const existingSpaceBedTypes = await this.spaceBedTypeRepository.findBy({
+        id: In(spaceBedTypeIds),
+      });
 
       const nonExistingIds = spaceBedTypeIds.filter(
         (id) =>
@@ -355,8 +357,9 @@ export class PropertySpaceBedService {
         (mapping) => !spaceBedTypeIds.includes(mapping.spaceBedType.id),
       );
 
-      const toCreate = spaceBedTypeIds.filter(
-        (id) => !existingSpaceBedTypeIds.includes(id),
+      const toCreate = createOrDeletePropertySpaceBedsDto.spaceBedTypes.filter(
+        (spaceBedType) =>
+          !existingSpaceBedTypeIds.includes(spaceBedType.spaceBedTypeId.id),
       );
 
       if (toDelete.length > 0) {
@@ -364,14 +367,15 @@ export class PropertySpaceBedService {
       }
 
       if (toCreate.length > 0) {
-        const newMappings = toCreate.map((spaceBedTypeId) => {
+        const newMappings = toCreate.map((spaceBedTypeCount) => {
           const spaceBedType = existingSpaceBedTypes.find(
-            (type) => type.id === spaceBedTypeId,
+            (type) => type.id === spaceBedTypeCount.spaceBedTypeId.id,
           );
 
           const propertySpaceBed = new PropertySpaceBed();
           propertySpaceBed.propertySpace = existingPropertySpace;
-          propertySpaceBed.spaceBedType = spaceBedType.spaceBedType;
+          propertySpaceBed.spaceBedType = spaceBedType;
+          propertySpaceBed.count = spaceBedTypeCount.count;
           propertySpaceBed.createdBy = user;
           propertySpaceBed.updatedBy = user;
 

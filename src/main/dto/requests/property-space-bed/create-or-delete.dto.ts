@@ -1,5 +1,4 @@
-import { IsNotEmpty, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsNotEmpty, IsArray, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { PropertySpace } from 'src/main/entities/property-space.entity';
@@ -14,11 +13,8 @@ export class CreateOrDeletePropertySpaceBedsDto {
   })
   propertySpace: PropertySpace;
 
-  @ApiProperty({ type: [SpaceBedType] })
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => SpaceBedType)
-  spaceBedTypes: SpaceBedType[];
+  spaceBedTypes: SpaceBedTypeCount[];
 
   @ApiProperty({ example: { id: 1 } })
   @IsNotEmpty({ message: 'Updated by is required' })
@@ -26,4 +22,18 @@ export class CreateOrDeletePropertySpaceBedsDto {
     message: 'updatedBy must be an object with a valid id (id >= 1)',
   })
   updatedBy: User;
+}
+
+export class SpaceBedTypeCount {
+  @ApiProperty({ example: { id: 1 } })
+  @IsNotEmpty({ message: 'spaceBedTypeId is required' })
+  @IsValidId({
+    message: 'spaceBedTypeId must be an object with a valid id (id >= 1)',
+  })
+  spaceBedTypeId: SpaceBedType;
+
+  @ApiProperty({ example: 2 })
+  @IsNotEmpty({ message: 'count is required' })
+  @IsNumber()
+  count: number;
 }
