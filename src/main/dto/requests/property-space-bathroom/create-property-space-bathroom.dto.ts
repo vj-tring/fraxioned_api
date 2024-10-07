@@ -22,7 +22,7 @@ export class CreatePropertySpaceBathroomDto {
   @IsValidId({
     message: 'space instance must be an object with a valid id (id >= 1)',
   })
-  spaceInstance: PropertySpace;
+  propertySpace: PropertySpace;
 
   @IsNotEmpty({ message: 'count is required' })
   @IsNumber()
