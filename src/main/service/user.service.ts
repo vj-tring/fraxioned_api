@@ -129,6 +129,17 @@ export class UserService {
       select: {
         id: true,
         role: { id: true, roleName: true },
+        contactDetails: {
+          id: true,
+          optionalEmailOne: true,
+          optionalEmailTwo: true,
+          optionalPhoneOne: true,
+          optionalPhoneTwo: true,
+          primaryEmail: true,
+          primaryPhone: true,
+          secondaryEmail: true,
+          secondaryPhone: true,
+        },
         firstName: true,
         lastName: true,
         addressLine1: true,
