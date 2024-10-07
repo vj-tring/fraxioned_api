@@ -10,6 +10,7 @@ import { UpdatePropertySpaceBedDto } from '../dto/requests/property-space-bed/up
 import { UserService } from './user.service';
 import { SpaceBedTypeService } from './space-bed-type.service';
 import { PropertySpaceService } from './property-space.service';
+import { count } from 'console';
 
 @Injectable()
 export class PropertySpaceBedService {
@@ -98,11 +99,12 @@ export class PropertySpaceBedService {
       );
 
       const createdPropertySpaceBedResponse = {
-        PropertySpaceBedId: savedPropertySpaceBed.id,
+        id: savedPropertySpaceBed.id,
         propertySpaceId: savedPropertySpaceBed.propertySpace.id,
         spaceBedTypeId: savedPropertySpaceBed.spaceBedType.id,
         createdBy: savedPropertySpaceBed.createdBy.id,
         createdAt: savedPropertySpaceBed.createdAt,
+        count: savedPropertySpaceBed.count,
       } as unknown as PropertySpaceBed;
       return PROPERTY_SPACE_BED_RESPONSES.PROPERTY_SPACE_BED_CREATED(
         createdPropertySpaceBedResponse,
@@ -230,6 +232,7 @@ export class PropertySpaceBedService {
         spaceBedTypeId: updatedPropertySpaceBed.spaceBedType.id,
         updatedBy: updatedPropertySpaceBed.updatedBy.id,
         updatedAt: updatedPropertySpaceBed.updatedAt,
+        count: updatedPropertySpaceBed.count,
       } as unknown as PropertySpaceBed;
       return PROPERTY_SPACE_BED_RESPONSES.PROPERTY_SPACE_BED_UPDATED(
         updatedPropertySpaceBedResponse,
