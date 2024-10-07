@@ -4,12 +4,13 @@ import { In, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { LoggerService } from './logger.service';
 import { Property } from '../entities/property.entity';
-import { PropertyAmenities } from '../entities/property_amenities.entity';
+import { PropertyAmenities } from '../entities/property_amenity.entity';
 import { Amenities } from '../entities/amenities.entity';
 import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
 import { PROPERTY_AMENITY_RESPONSES } from '../commons/constants/response-constants/property-amenities.constant';
 import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 import { CreateOrDeletePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-or-delete-property-amenities.dto';
+import { PropertySpaceService } from './property-space.service';
 
 @Injectable()
 export class PropertyAmenitiesService {
@@ -23,6 +24,7 @@ export class PropertyAmenitiesService {
     @InjectRepository(Property)
     private readonly propertiesRepository: Repository<Property>,
     private readonly logger: LoggerService,
+    private readonly propertySpaceService: PropertySpaceService,
   ) {}
 
   async createPropertyAmenity(
@@ -80,25 +82,39 @@ export class PropertyAmenitiesService {
         );
       }
 
+      const existingPropertySpace =
+        await this.propertySpaceService.findPropertySpaceById(
+          createPropertyAmenityDto.propertySpace.id,
+        );
+      if (!existingPropertySpace) {
+        return this.propertySpaceService.handlePropertySpaceNotFound(
+          createPropertyAmenityDto.propertySpace.id,
+        );
+      }
+
       const existingPropertyAmenity =
         await this.propertyAmenitiesRepository.findOne({
           where: {
-            property: {
-              id: createPropertyAmenityDto.property.id,
-            },
-            amenity: {
-              id: createPropertyAmenityDto.amenity.id,
-            },
+            property: { id: createPropertyAmenityDto.property.id },
+            amenity: { id: createPropertyAmenityDto.amenity.id },
+            propertySpace: createPropertyAmenityDto.propertySpace
+              ? { id: createPropertyAmenityDto.propertySpace.id }
+              : null,
           },
         });
 
       if (existingPropertyAmenity) {
+        const spaceInfo = createPropertyAmenityDto.propertySpace?.id
+          ? ` and Property Space ID ${createPropertyAmenityDto.propertySpace.id}`
+          : ' without a specific Property Space';
+
         this.logger.error(
-          `Error creating property amenity: Property ID ${createPropertyAmenityDto.property.id} with Amenity ID ${createPropertyAmenityDto.amenity.id} already exists`,
+          `Error creating property amenity: Property ID ${createPropertyAmenityDto.property.id} with Amenity ID ${createPropertyAmenityDto.amenity.id}${spaceInfo} already exists`,
         );
         return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITY_ALREADY_EXISTS(
           createPropertyAmenityDto.property.id,
           createPropertyAmenityDto.amenity.id,
+          createPropertyAmenityDto.propertySpace?.id,
         );
       }
 
