@@ -85,28 +85,4 @@ export const PROPERTY_SPACE_RESPONSES = {
     message: `Property space with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
-  //   AMENITY_GROUP_UPDATED: (
-  //     updatedAmenityGroup: AmenityGroup,
-  //   ): {
-  //     success: boolean;
-  //     message: string;
-  //     data?: AmenityGroup;
-  //     statusCode: number;
-  //   } => ({
-  //     success: true,
-  //     message: `Amenity group with ID ${updatedAmenityGroup.id} updated successfully`,
-  //     data: updatedAmenityGroup,
-  //     statusCode: HttpStatus.OK,
-  //   }),
-  //   AMENITY_GROUP_FOREIGN_KEY_CONFLICT: (
-  //     id: number,
-  //   ): {
-  //     success: boolean;
-  //     message: string;
-  //     statusCode: number;
-  //   } => ({
-  //     success: false,
-  //     message: `Amenity group ID ${id} exists and is mapped to amenity, hence cannot be deleted.`,
-  //     statusCode: HttpStatus.CONFLICT,
-  //   }),
 };

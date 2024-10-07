@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from './logger.module';
 import { AuthenticationModule } from './authentication.module';
@@ -15,8 +15,8 @@ import { SpaceModule } from './space.module';
     LoggerModule,
     AuthenticationModule,
     UserModule,
-    SpaceModule,
     PropertiesModule,
+    forwardRef(() => SpaceModule),
   ],
   controllers: [PropertySpaceController],
   providers: [PropertySpaceService],
