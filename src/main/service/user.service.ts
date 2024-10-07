@@ -178,6 +178,12 @@ export class UserService {
       const user = await this.userRepository.findOne({
         where: { id },
         relations: ['contactDetails', 'role'],
+        select: {
+          role: {
+            id: true,
+            roleName: true,
+          },
+        },
       });
 
       if (!user) {
@@ -232,14 +238,7 @@ export class UserService {
         );
       }
 
-      await this.userRepository.save(user);
-
-      const updatedUser = await this.userRepository.findOne({
-        where: {
-          id: user.id,
-        },
-        relations: ['contactDetails'],
-      });
+      const updatedUser = await this.userRepository.save(user);
 
       this.logger.log(`User with ID ${id} updated successfully`);
       return USER_RESPONSES.USER_UPDATED(updatedUser);
