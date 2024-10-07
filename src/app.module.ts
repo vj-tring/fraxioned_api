@@ -10,7 +10,7 @@ import { UserSessionModule } from './main/modules/user-session.module';
 import { UserPropertyModule } from './main/modules/user-property.module';
 import { UserModule } from './main/modules/user.module';
 import { AmenitiesModule } from './main/modules/amenities.module';
-import { UserDocumentModule } from './main/modules/user-document.module';
+import { UserDocumentModule } from './main/modules/user-property-document.module';
 import { PropertyAmenitiesModule } from './main/modules/property-amenities.module';
 import { PropertyCodesModule } from './main/modules/property-codes.module';
 import { ConfigModule } from '@nestjs/config';
@@ -31,6 +31,7 @@ import { FaqCategoryModule } from './main/modules/faqcategory.module';
 import { FaqQuestionsModule } from './main/modules/faqquestions.module';
 import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
 import { PropertySpaceBedModule } from './main/modules/property-space-bed.module';
+import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
 
 @Module({
   imports: [
@@ -55,7 +56,6 @@ import { PropertySpaceBedModule } from './main/modules/property-space-bed.module
     S3UtilsModule,
     SpaceModule,
     SpaceTypesModule,
-
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/static',
@@ -70,6 +70,7 @@ import { PropertySpaceBedModule } from './main/modules/property-space-bed.module
     FaqQuestionsModule,
     SpaceBedTypeModule,
     PropertySpaceBedModule,
+    SpaceBathroomTypesModule,
   ],
 })
 export class AppModule {}
