@@ -128,6 +128,12 @@ export class PropertySpaceService {
     });
   }
 
+  async findPropertySpaceBySpaceId(id: number): Promise<PropertySpace | null> {
+    return await this.propertySpaceRepository.findOne({
+      where: { space: { id: id } },
+    });
+  }
+
   async findCountOfSpaceForProperty(
     propertyId: number,
     spaceId: number,
