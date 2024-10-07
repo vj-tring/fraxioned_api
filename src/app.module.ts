@@ -31,6 +31,7 @@ import { FaqCategoryModule } from './main/modules/faqcategory.module';
 import { FaqQuestionsModule } from './main/modules/faqquestions.module';
 import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
 import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
+import { PropertySpaceBathroomModule } from './main/modules/property-space-bathroom.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.mo
     FaqQuestionsModule,
     SpaceBedTypeModule,
     SpaceBathroomTypesModule,
+    PropertySpaceBathroomModule,
   ],
 })
 export class AppModule {}
