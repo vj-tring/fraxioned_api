@@ -258,8 +258,34 @@ export class PropertySpaceBedService {
   ): Promise<DeleteResult> {
     return this.propertySpaceBedRepository.delete(id);
   }
-  async deletePropertySpaceBedByProperty(id: number): Promise<DeleteResult> {
-    return this.propertySpaceBedRepository.delete(id);
+  async deletePropertySpaceBedByProperty(
+    propertyId: number,
+  ): Promise<DeleteResult> {
+    try {
+      const result = await this.propertySpaceBedRepository.delete({
+        propertySpace: { id: propertyId },
+      });
+
+      if (result.affected === 0) {
+        this.logger.error(
+          `No property space beds found for property ID ${propertyId}`,
+        );
+      } else {
+        this.logger.log(
+          `Deleted property space beds for property ID ${propertyId}`,
+        );
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error deleting property space beds for property ID ${propertyId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting property space beds by property ID',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async deletePropertySpaceBedById(
