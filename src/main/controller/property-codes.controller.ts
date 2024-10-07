@@ -16,7 +16,7 @@ import { PropertyCodesService } from '../service/property-codes.service';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { AuthGuard } from '../commons/guards/auth.guard';
-import { PropertyCodes } from '../entities/property_codes.entity';
+import { PropertyCodes } from '../entities/property-codes.entity';
 
 @ApiTags('Property Codes')
 @Controller('v1/property-codes')

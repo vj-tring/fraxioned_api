@@ -16,7 +16,7 @@ import { FaqCategoryService } from '../service/faq-category.service';
 import { CreateFaqCategoryDto } from '../dto/requests/faq-category/create-faq-category.dto';
 import { UpdateFaqCategoryDto } from '../dto/requests/faq-category/update-faq-category.dto';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
-import { FaqCategory } from '../entities/faq_category.entity';
+import { FaqCategory } from '../entities/faq-category.entity';
 
 @ApiTags('FAQ Categories')
 @Controller('v1/faq-categories')

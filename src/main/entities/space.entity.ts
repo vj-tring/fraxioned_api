@@ -2,13 +2,11 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { SpaceTypes } from './space-types.entity';
 import { User } from './user.entity';
 
 @Entity('fxn_space')
@@ -48,7 +46,4 @@ export class Space {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
-
-  @OneToMany(() => SpaceTypes, (spaceType) => spaceType.space)
-  spaceTypes: SpaceTypes[];
 }

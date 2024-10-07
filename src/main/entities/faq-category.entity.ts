@@ -2,30 +2,27 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
-import { Space } from './space.entity';
+import { FaqQuestions } from './faq-questions.entity';
 import { User } from './user.entity';
 
-@Entity('fxn_space_types')
-export class SpaceTypes {
+@Entity('fxn_faq_category')
+export class FaqCategory {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'varchar', length: 255 })
-  name: string;
+  categoryName: string;
 
-  @ManyToOne(() => Space, (space) => space.spaceTypes)
-  @JoinColumn({ name: 'space_id' })
-  space: Space;
-
-  @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', nullable: true, default: null })
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.id)
@@ -35,4 +32,7 @@ export class SpaceTypes {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
+
+  @OneToMany(() => FaqQuestions, (faqQuestions) => faqQuestions.category, {})
+  questions: FaqQuestions[];
 }

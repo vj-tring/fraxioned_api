@@ -13,11 +13,11 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { PropertyAmenitiesService } from '../service/property-amenities.service';
 import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
-import { PropertyAmenities } from '../entities/property_amenity.entity';
 import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { CreateOrDeletePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-or-delete-property-amenities.dto';
+import { PropertyAmenities } from '../entities/property-amenity.entity';
 
 @ApiTags('PropertyAmenities')
 @Controller('v1/property-amenities')

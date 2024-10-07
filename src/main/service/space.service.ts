@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
@@ -8,6 +14,7 @@ import { CreateSpaceDto } from '../dto/requests/space/create-space.dto';
 import { UpdateSpaceDto } from '../dto/requests/space/update-space.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { UserService } from './user.service';
+import { PropertySpaceService } from './property-space.service';
 
 @Injectable()
 export class SpaceService {
@@ -15,6 +22,8 @@ export class SpaceService {
     @InjectRepository(Space)
     private readonly spaceRepository: Repository<Space>,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => PropertySpaceService))
+    private readonly propertySpaceService: PropertySpaceService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -201,6 +210,14 @@ export class SpaceService {
 
   async deleteSpaceById(id: number): Promise<ApiResponse<Space>> {
     try {
+      const existingPropertySpace =
+        await this.propertySpaceService.findPropertySpaceBySpaceId(id);
+      if (existingPropertySpace) {
+        this.logger.log(
+          `Space ID ${id} exists and is mapped to property, hence cannot be deleted.`,
+        );
+        return SPACE_RESPONSES.SPACE_FOREIGN_KEY_CONFLICT(id);
+      }
       const result = await this.spaceRepository.delete(id);
       if (result.affected === 0) {
         return await this.handleSpaceNotFound(id);
