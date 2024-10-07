@@ -5,7 +5,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { LoggerService } from 'src/main/service/logger.service';
 import { User } from 'src/main/entities/user.entity';
 import { PropertyCodesService } from 'src/main/service/property-codes.service';
-import { PropertyCodes } from 'src/main/entities/property_codes.entity';
+import { PropertyCodes } from 'src/main/entities/property-codes.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { PropertyCodeCategory } from 'src/main/entities/property-code-category.entity';
 import { CreatePropertyCodeDto } from 'src/main/dto/requests/property-code/create-property-code.dto';

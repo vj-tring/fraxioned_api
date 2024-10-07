@@ -92,7 +92,7 @@ export const SPACE_RESPONSES = {
     statusCode: number;
   } => ({
     success: false,
-    message: `Space ID ${id} exists and is mapped to space type, hence cannot be deleted.`,
+    message: `Space ID ${id} exists and is mapped to property, hence cannot be deleted.`,
     statusCode: HttpStatus.CONFLICT,
   }),
   SPACE_DELETED: (

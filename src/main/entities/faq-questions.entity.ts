@@ -2,22 +2,29 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToMany,
+  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { FaqQuestions } from './faq_questions.entity';
+import { FaqCategory } from './faq-category.entity';
 import { User } from './user.entity';
 
-@Entity('fxn_faq_category')
-export class FaqCategory {
+@Entity('fxn_faq_questions')
+export class FaqQuestions {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
-  categoryName: string;
+  @Column({ type: 'varchar', length: 500 })
+  question: string;
+
+  @Column({ type: 'text' })
+  answer: string;
+
+  @ManyToOne(() => FaqCategory, (faqCategory) => faqCategory.questions, {
+    onDelete: 'CASCADE',
+  })
+  category: FaqCategory;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -32,7 +39,4 @@ export class FaqCategory {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
-
-  @OneToMany(() => FaqQuestions, (faqQuestions) => faqQuestions.category, {})
-  questions: FaqQuestions[];
 }

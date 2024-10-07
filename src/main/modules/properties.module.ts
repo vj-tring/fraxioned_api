@@ -8,14 +8,17 @@ import { PropertyDetailsModule } from './property-details.module';
 import { PropertyDetails } from '../entities/property-details.entity';
 import { UserProperties } from '../entities/user-properties.entity';
 import { User } from '../entities/user.entity';
+import { LoggerModule } from './logger.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Property, PropertyDetails, UserProperties, User]),
     AuthenticationModule,
+    LoggerModule,
     PropertyDetailsModule,
   ],
   controllers: [PropertiesController],
   providers: [PropertiesService],
+  exports: [PropertiesService],
 })
 export class PropertiesModule {}

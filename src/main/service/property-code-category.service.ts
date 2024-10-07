@@ -6,7 +6,7 @@ import { User } from '../entities/user.entity';
 import { PropertyCodeCategory } from '../entities/property-code-category.entity';
 import { CreatePropertyCodeCategoryDto } from '../dto/requests/property-code-category/create-property-code-category.dto';
 import { PROPERTY_CODE_CATEGORY_RESPONSES } from '../commons/constants/response-constants/property-code-category.constant';
-import { PropertyCodes } from '../entities/property_codes.entity';
+import { PropertyCodes } from '../entities/property-codes.entity';
 
 @Injectable()
 export class PropertyCodeCategoryService {
