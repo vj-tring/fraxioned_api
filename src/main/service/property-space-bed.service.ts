@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { PropertySpaceBed } from '../entities/property-space-bed.entity';
 import { CreatePropertySpaceBedDto } from '../dto/requests/property-space-bed/create-property-space-bed.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
@@ -245,11 +245,17 @@ export class PropertySpaceBedService {
     }
   }
 
+  async deletePropertySpaceBedFromRepository(
+    id: number,
+  ): Promise<DeleteResult> {
+    return this.propertySpaceBedRepository.delete(id);
+  }
+
   async deletePropertySpaceBedById(
     id: number,
   ): Promise<ApiResponse<PropertySpaceBed>> {
     try {
-      const result = await this.propertySpaceBedRepository.delete(id);
+      const result = await this.deletePropertySpaceBedFromRepository(id);
       if (result.affected === 0) {
         this.logger.error(`Property space bed with ID ${id} not found`);
         return PROPERTY_SPACE_BED_RESPONSES.PROPERTY_SPACE_BED_NOT_FOUND(id);
