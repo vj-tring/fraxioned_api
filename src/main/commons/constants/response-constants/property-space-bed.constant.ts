@@ -26,6 +26,17 @@ export const PROPERTY_SPACE_BED_RESPONSES = {
     data: [],
     statusCode: HttpStatus.OK,
   }),
+  PROPERTY_SPACE_BEDS_UPDATED: (): {
+    success: boolean;
+    message: string;
+    data?: PropertySpaceBed[];
+    statusCode: number;
+  } => ({
+    success: true,
+    message: 'Property space beds updated successfully',
+    data: [],
+    statusCode: HttpStatus.OK,
+  }),
   PROPERTY_SPACE_BEDS_FETCHED: (
     propertySpaceBeds: PropertySpaceBed[],
   ): {
@@ -86,5 +97,16 @@ export const PROPERTY_SPACE_BED_RESPONSES = {
     success: true,
     message: `Property space bed with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
+  }),
+  SPACE_BED_TYPES_NOT_FOUND: (
+    nonExistingIds: number[],
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Space Bed Types with ID(s) ${nonExistingIds.join(', ')} does not exist`,
+    statusCode: HttpStatus.NOT_FOUND,
   }),
 };

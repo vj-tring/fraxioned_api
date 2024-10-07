@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, In, Repository } from 'typeorm';
 import { PropertySpaceBed } from '../entities/property-space-bed.entity';
 import { CreatePropertySpaceBedDto } from '../dto/requests/property-space-bed/create-property-space-bed.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
@@ -10,6 +10,9 @@ import { UpdatePropertySpaceBedDto } from '../dto/requests/property-space-bed/up
 import { UserService } from './user.service';
 import { SpaceBedTypeService } from './space-bed-type.service';
 import { PropertySpaceService } from './property-space.service';
+import { PROPERTY_SPACE_RESPONSES } from '../commons/constants/response-constants/property-space.constant';
+import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
+import { CreateOrDeletePropertySpaceBedsDto } from '../dto/requests/property-space-bed/create-or-delete.dto';
 
 @Injectable()
 export class PropertySpaceBedService {
@@ -252,6 +255,11 @@ export class PropertySpaceBedService {
   ): Promise<DeleteResult> {
     return this.propertySpaceBedRepository.delete(id);
   }
+  async deletePropertySpaceBedByProperty(
+    id: number,
+  ): Promise<DeleteResult> {
+    return this.propertySpaceBedRepository.delete(id);
+  }
 
   async deletePropertySpaceBedById(
     id: number,
@@ -274,4 +282,109 @@ export class PropertySpaceBedService {
       );
     }
   }
+  async createOrDeletePropertySpaceBeds(
+    createOrDeletePropertySpaceBedsDto: CreateOrDeletePropertySpaceBedsDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceBed[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const user = await this.userService.findUserById(
+        createOrDeletePropertySpaceBedsDto.updatedBy.id,
+      );
+      if (!user) {
+        this.logger.error(
+          `User with ID ${createOrDeletePropertySpaceBedsDto.updatedBy.id} does not exist`,
+        );
+        return USER_RESPONSES.USER_NOT_FOUND(
+          createOrDeletePropertySpaceBedsDto.updatedBy.id,
+        );
+      }
+
+      const existingPropertySpace = await this.propertySpaceService.findPropertySpaceById(
+        createOrDeletePropertySpaceBedsDto.propertySpace.id,
+      );
+      if (!existingPropertySpace) {
+        this.logger.error(
+          `Property space with ID ${createOrDeletePropertySpaceBedsDto.propertySpace.id} does not exist`,
+        );
+        return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACE_NOT_FOUND(
+          createOrDeletePropertySpaceBedsDto.propertySpace.id,
+        );
+      }
+
+      const spaceBedTypeIds = createOrDeletePropertySpaceBedsDto.spaceBedTypes.map(
+        (spaceBedType) => spaceBedType.id,
+      );
+
+      const existingSpaceBedTypes = await this.propertySpaceBedRepository.findBy({
+        id: In(spaceBedTypeIds),
+      });
+
+      const nonExistingIds = spaceBedTypeIds.filter(
+        (id) => !existingSpaceBedTypes.some((spaceBedType) => spaceBedType.id === id),
+      );
+
+      if (nonExistingIds.length > 0) {
+        this.logger.error(
+          `Space bed types with ID(s) ${nonExistingIds.join(', ')} do not exist`,
+        );
+        return PROPERTY_SPACE_BED_RESPONSES.SPACE_BED_TYPES_NOT_FOUND(nonExistingIds);
+      }
+
+      const existingMappings = await this.propertySpaceBedRepository.find({
+        where: {
+          propertySpace: { id: createOrDeletePropertySpaceBedsDto.propertySpace.id },
+        },
+        relations: ['spaceBedType'],
+      });
+
+      const existingSpaceBedTypeIds = existingMappings.map((m) => m.spaceBedType.id);
+
+      const toDelete = existingMappings.filter(
+        (mapping) => !spaceBedTypeIds.includes(mapping.spaceBedType.id),
+      );
+
+      const toCreate = spaceBedTypeIds.filter(
+        (id) => !existingSpaceBedTypeIds.includes(id),
+      );
+
+      if (toDelete.length > 0) {
+        await this.propertySpaceBedRepository.remove(toDelete);
+      }
+
+      if (toCreate.length > 0) {
+        const newMappings = toCreate.map((spaceBedTypeId) => {
+          const spaceBedType = existingSpaceBedTypes.find(
+            (type) => type.id === spaceBedTypeId,
+          );
+
+          const propertySpaceBed = new PropertySpaceBed();
+          propertySpaceBed.propertySpace = existingPropertySpace;
+          propertySpaceBed.spaceBedType = spaceBedType.spaceBedType;
+          propertySpaceBed.createdBy = user;
+          propertySpaceBed.updatedBy = user;
+
+          return propertySpaceBed;
+        });
+        await this.propertySpaceBedRepository.save(newMappings);
+      }
+
+      this.logger.log(
+        `Property space beds for the selected property space updated successfully`,
+      );
+      return PROPERTY_SPACE_BED_RESPONSES.PROPERTY_SPACE_BEDS_UPDATED();
+    } catch (error) {
+      this.logger.error(
+        `Error creating property space beds: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while creation or deletion of property space beds for the selected property space',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  
 }

@@ -590,4 +590,5 @@ export class PropertyAmenitiesService {
       );
     }
   }
+  
 }
