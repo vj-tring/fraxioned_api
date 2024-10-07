@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
-import { UserPropertyDocument } from 'src/main/entities/user-property-document.entity';
+import { PropertyDocuments } from 'src/main/entities/property-document.entity';
 
-export const USER_PROPERTY_DOCUMENT_RESPONSES = {
+export const PROPERTY_DOCUMENTS_RESPONSES = {
   MISMATCHED_DTO_AND_DOCUMENTS: (): {
     success: boolean;
     message: string;
@@ -21,74 +21,74 @@ export const USER_PROPERTY_DOCUMENT_RESPONSES = {
   }),
 
   USER_NOT_FOUND: (
-    userId: number,
+    createdByUserId: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: false,
-    message: `User with ID ${userId} does not exist`,
+    message: `User with ID ${createdByUserId} does not exist`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
 
-  USER_PROPERTY_DOCUMENTS_CREATED: (
-    userPropertyDocuments: UserPropertyDocument[],
+  PROPERTY_DOCUMENTS_CREATED: (
+    propertyDocuments: PropertyDocuments[],
   ): {
     success: boolean;
     message: string;
-    data?: UserPropertyDocument[];
+    data?: PropertyDocuments[];
     statusCode: HttpStatus;
   } => ({
     success: true,
-    message: `${userPropertyDocuments.length} user property documents created successfully`,
-    data: userPropertyDocuments,
+    message: `${propertyDocuments.length} property documents created successfully`,
+    data: propertyDocuments,
     statusCode: HttpStatus.CREATED,
   }),
 
-  USER_PROPERTY_DOCUMENT_NOT_FOUND: (
+  PROPERTY_DOCUMENT_NOT_FOUND: (
     documentId: number,
   ): {
     success: boolean;
     message: string;
-    data?: UserPropertyDocument;
+    data?: PropertyDocuments;
     statusCode: HttpStatus;
   } => ({
     success: false,
-    message: `User property document with ID ${documentId} not found`,
+    message: `Property document with ID ${documentId} not found`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
 
-  USER_PROPERTY_DOCUMENT_FETCHED: (
-    userPropertyDocument: UserPropertyDocument,
+  PROPERTY_DOCUMENT_FETCHED: (
+    propertyDocument: PropertyDocuments,
   ): {
     success: boolean;
     message: string;
-    data?: UserPropertyDocument;
+    data?: PropertyDocuments;
     statusCode: HttpStatus;
   } => ({
     success: true,
-    message: `User property document with ID ${userPropertyDocument.id} retrieved successfully`,
-    data: userPropertyDocument,
+    message: `Property document with ID ${propertyDocument.id} retrieved successfully`,
+    data: propertyDocument,
     statusCode: HttpStatus.OK,
   }),
 
-  USER_PROPERTY_DOCUMENT_DELETED: (
+  PROPERTY_DOCUMENT_DELETED: (
     documentId: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: true,
-    message: `User property document with ID ${documentId} deleted successfully`,
+    message: `Property document with ID ${documentId} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
 
-  USER_PROPERTY_DOCUMENT_UPDATED: (
-    updatedUserPropertyDocument: UserPropertyDocument,
+  PROPERTY_DOCUMENT_UPDATED: (
+    updatedPropertyDocument: PropertyDocuments,
     documentId: number,
   ): {
     success: boolean;
     message: string;
-    data?: UserPropertyDocument;
+    data?: PropertyDocuments;
     statusCode: HttpStatus;
   } => ({
     success: true,
-    message: `User property document with ID ${documentId} updated successfully`,
-    data: updatedUserPropertyDocument,
+    message: `Property document with ID ${documentId} updated successfully`,
+    data: updatedPropertyDocument,
     statusCode: HttpStatus.OK,
   }),
 
@@ -108,12 +108,12 @@ export const USER_PROPERTY_DOCUMENT_RESPONSES = {
     statusCode: HttpStatus.BAD_REQUEST,
   }),
 
-  USER_PROPERTY_DOCUMENT_NOT_FOUND_IN_AWS_S3: (
+  PROPERTY_DOCUMENT_NOT_FOUND_IN_AWS_S3: (
     s3Key: string,
   ): {
     success: boolean;
     message: string;
-    data?: UserPropertyDocument;
+    data?: PropertyDocuments;
     statusCode: HttpStatus;
   } => ({
     success: false,
@@ -131,27 +131,27 @@ export const USER_PROPERTY_DOCUMENT_RESPONSES = {
     statusCode: HttpStatus.BAD_REQUEST,
   }),
 
-  USER_PROPERTY_DOCUMENTS_FETCHED: (
-    userPropertyDocuments: UserPropertyDocument[],
+  PROPERTY_DOCUMENTS_FETCHED: (
+    propertyDocuments: PropertyDocuments[],
   ): {
     success: boolean;
     message: string;
-    data?: UserPropertyDocument[];
+    data?: PropertyDocuments[];
     statusCode: HttpStatus;
   } => ({
     success: true,
-    message: `Retrieved ${userPropertyDocuments.length} user property documents successfully`,
-    data: userPropertyDocuments,
+    message: `Retrieved ${propertyDocuments.length} property documents successfully`,
+    data: propertyDocuments,
     statusCode: HttpStatus.OK,
   }),
 
-  USER_PROPERTY_DOCUMENTS_NOT_FOUND: (): {
+  PROPERTY_DOCUMENTS_NOT_FOUND: (): {
     success: boolean;
     message: string;
     statusCode: HttpStatus;
   } => ({
     success: false,
-    message: 'No user property documents found',
+    message: 'No property documents found',
     statusCode: HttpStatus.NOT_FOUND,
   }),
 };
