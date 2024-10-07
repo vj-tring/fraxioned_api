@@ -10,7 +10,6 @@ import { UpdatePropertySpaceBedDto } from '../dto/requests/property-space-bed/up
 import { UserService } from './user.service';
 import { SpaceBedTypeService } from './space-bed-type.service';
 import { PropertySpaceService } from './property-space.service';
-import { count } from 'console';
 
 @Injectable()
 export class PropertySpaceBedService {
