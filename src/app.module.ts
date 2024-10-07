@@ -52,7 +52,6 @@ import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.mo
     MailModule,
     S3UtilsModule,
     SpaceModule,
-    SpaceTypesModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/static',
