@@ -11,6 +11,7 @@ import { PROPERTY_AMENITY_RESPONSES } from '../commons/constants/response-consta
 import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 import { CreateOrDeletePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-or-delete-property-amenities.dto';
 import { PropertySpaceService } from './property-space.service';
+import { PropertySpace } from '../entities/property-space.entity';
 
 @Injectable()
 export class PropertyAmenitiesService {
@@ -23,6 +24,8 @@ export class PropertyAmenitiesService {
     private readonly amenityRepository: Repository<Amenities>,
     @InjectRepository(Property)
     private readonly propertiesRepository: Repository<Property>,
+    @InjectRepository(PropertySpace)
+    private readonly propertySpaceRepository: Repository<PropertySpace>,
     private readonly logger: LoggerService,
     private readonly propertySpaceService: PropertySpaceService,
   ) {}
@@ -301,6 +304,7 @@ export class PropertyAmenitiesService {
       const propertyAmenities = await this.propertyAmenitiesRepository.find({
         relations: [
           'property',
+          'propertySpace',
           'amenity',
           'amenity.createdBy',
           'amenity.updatedBy',
@@ -310,6 +314,9 @@ export class PropertyAmenitiesService {
         ],
         select: {
           property: {
+            id: true,
+          },
+          propertySpace: {
             id: true,
           },
           amenity: {
@@ -343,11 +350,21 @@ export class PropertyAmenitiesService {
         this.logger.error(`No amenities are available for this property`);
         return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_NOT_FOUND();
       }
+
+      const uniqueAmenitiesMap = new Map<number, PropertyAmenities>();
+      propertyAmenities.forEach((propertyAmenity) => {
+        const amenityId = propertyAmenity.amenity.id;
+        if (!uniqueAmenitiesMap.has(amenityId)) {
+          uniqueAmenitiesMap.set(amenityId, propertyAmenity);
+        }
+      });
+      const uniqueAmenities = Array.from(uniqueAmenitiesMap.values());
+
       this.logger.log(
         `Retrieved ${propertyAmenities.length} amenities successfully.`,
       );
       return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_FETCHED(
-        propertyAmenities,
+        uniqueAmenities,
       );
     } catch (error) {
       this.logger.error(
@@ -522,6 +539,23 @@ export class PropertyAmenitiesService {
         );
       }
 
+      let existingPropertySpace: PropertySpace = null;
+      if (createOrDeletePropertyAmenitiesDto.propertySpace.id > 0) {
+        existingPropertySpace = await this.propertySpaceRepository.findOne({
+          where: {
+            id: createOrDeletePropertyAmenitiesDto.propertySpace.id,
+          },
+        });
+        if (!existingPropertySpace) {
+          this.logger.error(
+            `Property Space with ID ${createOrDeletePropertyAmenitiesDto.propertySpace.id} does not exist`,
+          );
+          return PROPERTY_AMENITY_RESPONSES.PROPERTY_SPACE_NOT_FOUND(
+            createOrDeletePropertyAmenitiesDto.property.id,
+          );
+        }
+      }
+
       const amenityIds = createOrDeletePropertyAmenitiesDto.amenities.map(
         (amenity) => amenity.id,
       );
@@ -544,8 +578,11 @@ export class PropertyAmenitiesService {
       const existingMappings = await this.propertyAmenitiesRepository.find({
         where: {
           property: { id: createOrDeletePropertyAmenitiesDto.property.id },
+          propertySpace: {
+            id: createOrDeletePropertyAmenitiesDto.propertySpace.id,
+          },
         },
-        relations: ['amenity'],
+        relations: ['amenity', 'propertySpace', 'property'],
       });
 
       const existingAmenityIds = existingMappings.map((m) => m.amenity.id);
@@ -569,6 +606,7 @@ export class PropertyAmenitiesService {
 
           const propertyAmenity = new PropertyAmenities();
           propertyAmenity.property = existingProperty;
+          propertyAmenity.propertySpace = existingPropertySpace;
           propertyAmenity.amenity = amenity;
           propertyAmenity.createdBy = user;
           propertyAmenity.updatedBy = user;
