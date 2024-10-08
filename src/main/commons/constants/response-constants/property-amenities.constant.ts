@@ -9,6 +9,13 @@ export const PROPERTY_AMENITY_RESPONSES = {
     message: `Property with ID ${propertyId} does not exist`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
+  PROPERTY_SPACE_NOT_FOUND: (
+    propertySpaceId: number,
+  ): { success: boolean; message: string; statusCode: HttpStatus } => ({
+    success: false,
+    message: `Property Space with ID ${propertySpaceId} does not exist`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
   AMENITY_NOT_FOUND: (
     amenityId: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({

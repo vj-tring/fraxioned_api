@@ -8,10 +8,17 @@ import { PropertyAmenities } from '../entities/property-amenities.entity';
 import { Amenities } from '../entities/amenities.entity';
 import { PropertyAmenitiesService } from '../service/property-amenities.service';
 import { PropertyAmenitiesController } from '../controller/property-amenities.controller';
+import { PropertySpace } from '../entities/property-space.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PropertyAmenities, User, Amenities, Property]),
+    TypeOrmModule.forFeature([
+      PropertyAmenities,
+      User,
+      Amenities,
+      Property,
+      PropertySpace,
+    ]),
     LoggerModule,
     AuthenticationModule,
   ],
