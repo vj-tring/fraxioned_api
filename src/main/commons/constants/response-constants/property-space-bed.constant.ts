@@ -106,7 +106,16 @@ export const PROPERTY_SPACE_BED_RESPONSES = {
     statusCode: number;
   } => ({
     success: false,
-    message: `Space Bed Types with ID(s) ${nonExistingIds.join(', ')} does not exist`,
+    message: `Space Bed Types with ID(s) ${nonExistingIds.join(', ')} do not exist`,
     statusCode: HttpStatus.NOT_FOUND,
+  }),
+  DUPLICATE_SPACE_BED_TYPE: (): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: 'Duplicate SpaceBedType IDs found in the request',
+    statusCode: HttpStatus.BAD_REQUEST,
   }),
 };

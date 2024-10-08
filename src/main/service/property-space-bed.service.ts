@@ -324,6 +324,14 @@ export class PropertySpaceBedService {
           (spaceBedType) => spaceBedType.spaceBedTypeId.id,
         );
 
+      const uniqueSpaceBedTypeIds = new Set(spaceBedTypeIds);
+      if (uniqueSpaceBedTypeIds.size !== spaceBedTypeIds.length) {
+        this.logger.error(
+          `Duplicate spaceBedTypeId(s) found in the request for propertySpace with ID ${createOrDeletePropertySpaceBedsDto.propertySpace.id}`,
+        );
+        return PROPERTY_SPACE_BED_RESPONSES.DUPLICATE_SPACE_BED_TYPE();
+      }
+
       const existingSpaceBedTypes = await this.spaceBedTypeRepository.findBy({
         id: In(spaceBedTypeIds),
       });
@@ -348,15 +356,15 @@ export class PropertySpaceBedService {
             id: createOrDeletePropertySpaceBedsDto.propertySpace.id,
           },
         },
-        relations: ['spaceBedType'],
+        relations: ['spaceBedType', 'propertySpace'],
       });
 
       const existingSpaceBedTypeIds = existingMappings.map(
         (m) => m.spaceBedType.id,
       );
 
-      const toDelete = existingMappings.filter(
-        (mapping) => !spaceBedTypeIds.includes(mapping.spaceBedType.id),
+      const toUpdate = existingMappings.filter((mapping) =>
+        spaceBedTypeIds.includes(mapping.spaceBedType.id),
       );
 
       const toCreate = createOrDeletePropertySpaceBedsDto.spaceBedTypes.filter(
@@ -364,10 +372,23 @@ export class PropertySpaceBedService {
           !existingSpaceBedTypeIds.includes(spaceBedType.spaceBedTypeId.id),
       );
 
-      if (toDelete.length > 0) {
-        await this.propertySpaceBedRepository.remove(toDelete);
+      // Update existing mappings
+      for (const mapping of toUpdate) {
+        const newCount = createOrDeletePropertySpaceBedsDto.spaceBedTypes.find(
+          (spaceBedType) =>
+            spaceBedType.spaceBedTypeId.id === mapping.spaceBedType.id,
+        )?.count;
+
+        if (newCount !== undefined) {
+          mapping.count = newCount;
+          mapping.updatedBy = user;
+        }
       }
 
+      // Save updated mappings
+      await this.propertySpaceBedRepository.save(toUpdate);
+
+      // Create new mappings
       if (toCreate.length > 0) {
         const newMappings = toCreate.map((spaceBedTypeCount) => {
           const spaceBedType = existingSpaceBedTypes.find(
