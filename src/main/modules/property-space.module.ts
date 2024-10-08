@@ -8,10 +8,11 @@ import { PropertySpaceService } from '../service/property-space.service';
 import { PropertiesModule } from './properties.module';
 import { UserModule } from './user.module';
 import { SpaceModule } from './space.module';
+import { User } from '../entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PropertySpace]),
+    TypeOrmModule.forFeature([PropertySpace, User]),
     LoggerModule,
     AuthenticationModule,
     UserModule,
