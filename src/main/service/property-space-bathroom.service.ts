@@ -366,14 +366,22 @@ export class PropertySpaceBathroomService {
           (spaceBathroomType) => spaceBathroomType.spaceBathroomType.id,
         );
 
-      const existingSpaceBedTypes =
+      const uniqueSpaceBathroomTypeIds = new Set(spaceBathroomTypeIds);
+      if (uniqueSpaceBathroomTypeIds.size !== spaceBathroomTypeIds.length) {
+        this.logger.error(
+          `Duplicate spaceBathroomTypeId(s) found in the request for propertySpace with ID ${createOrDeletePropertySpaceBathroomsDto.propertySpace.id}`,
+        );
+        return PROPERTY_SPACE_BATHROOM_RESPONSES.DUPLICATE_SPACE_BATHROOM_TYPE();
+      }
+
+      const existingSpaceBathroomTypes =
         await this.spaceBathroomTypesRepository.findBy({
           id: In(spaceBathroomTypeIds),
         });
 
       const nonExistingIds = spaceBathroomTypeIds.filter(
         (id) =>
-          !existingSpaceBedTypes.some(
+          !existingSpaceBathroomTypes.some(
             (spaceBathroomType) => spaceBathroomType.id === id,
           ),
       );
@@ -393,33 +401,56 @@ export class PropertySpaceBathroomService {
             id: createOrDeletePropertySpaceBathroomsDto.propertySpace.id,
           },
         },
-        relations: ['spaceBathroomType'],
+        relations: ['spaceBathroomType', 'propertySpace'],
       });
 
       const existingspaceBathroomTypeIds = existingMappings.map(
         (m) => m.spaceBathroomType.id,
       );
 
+      const toUpdate = existingMappings.filter((mapping) =>
+        spaceBathroomTypeIds.includes(mapping.spaceBathroomType.id),
+      );
+
+      const toCreate =
+        createOrDeletePropertySpaceBathroomsDto.spaceBathroomTypes.filter(
+          (spaceBathroomType) =>
+            !existingspaceBathroomTypeIds.includes(
+              spaceBathroomType.spaceBathroomType.id,
+            ),
+        );
+
       const toDelete = existingMappings.filter(
         (mapping) =>
           !spaceBathroomTypeIds.includes(mapping.spaceBathroomType.id),
       );
 
-      const toCreate =
-        createOrDeletePropertySpaceBathroomsDto.spaceBathroomTypes.filter(
-          (spaceBedType) =>
-            !existingspaceBathroomTypeIds.includes(
-              spaceBedType.spaceBathroomType.id,
-            ),
-        );
-
       if (toDelete.length > 0) {
         await this.propertySpaceBathroomRepository.remove(toDelete);
       }
 
+      for (const mapping of toUpdate) {
+        const newCount =
+          createOrDeletePropertySpaceBathroomsDto.spaceBathroomTypes.find(
+            (spaceBathroomType) =>
+              spaceBathroomType.spaceBathroomType.id ===
+              mapping.spaceBathroomType.id,
+          )?.count;
+
+        if (newCount !== undefined) {
+          mapping.count = newCount;
+          mapping.updatedBy = user;
+        }
+      }
+
+      // Save updated mappings
+      await this.propertySpaceBathroomRepository.save(toUpdate);
+
+      // Create new mappings
+
       if (toCreate.length > 0) {
         const newMappings = toCreate.map((spaceBathroomTypeCount) => {
-          const spaceBathroomType = existingSpaceBedTypes.find(
+          const spaceBathroomType = existingSpaceBathroomTypes.find(
             (type) => type.id === spaceBathroomTypeCount.spaceBathroomType.id,
           );
 

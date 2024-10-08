@@ -117,8 +117,17 @@ export const PROPERTY_SPACE_BATHROOM_RESPONSES = {
     statusCode: number;
   } => ({
     success: false,
-    message: `Space Bathroom Types with ID(s) ${nonExistingIds.join(', ')} does not exist`,
+    message: `Space Bathroom Types with ID(s) ${nonExistingIds.join(', ')} do not exist`,
     statusCode: HttpStatus.NOT_FOUND,
+  }),
+  DUPLICATE_SPACE_BATHROOM_TYPE: (): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: 'Duplicate SpaceBathroomType IDs found in the request',
+    statusCode: HttpStatus.BAD_REQUEST,
   }),
   PROPERTY_SPACE_BATHROOMS_UPDATED: (): {
     success: boolean;
