@@ -15,7 +15,7 @@ export class PropertySpaceBathroom extends BaseEntity {
   })
   spaceBathroomType: SpaceBathroomTypes;
 
-  @ManyToOne(() => PropertySpace, (PropertySpace) => PropertySpace.id, {
+  @ManyToOne(() => PropertySpace, (propertySpace) => propertySpace.id, {
     onDelete: 'SET NULL',
   })
   @JoinColumn({

@@ -18,6 +18,7 @@ import { PropertySpaceBathroomService } from '../service/property-space-bathroom
 import { PropertySpaceBathroom } from '../entities/property-space-bathroom.entity';
 import { CreatePropertySpaceBathroomDto } from '../dto/requests/property-space-bathroom/create-property-space-bathroom.dto';
 import { UpdatePropertySpaceBathroomDto } from '../dto/requests/property-space-bathroom/update-property-space-bathroom.dto';
+import { CreateOrDeletePropertySpaceBathroomsDto } from '../dto/requests/property-space-bathroom/create-or-delete.dto';
 
 @ApiTags('Property Space Bathroom')
 @Controller('v1/property-space-bathrooms')
@@ -112,6 +113,30 @@ export class PropertySpaceBathroomController {
     } catch (error) {
       throw new HttpException(
         'An error occurred while deleting the property space bathroom',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Patch()
+  async createOrDeletePropertySpaceBeds(
+    @Body()
+    createOrDeletePropertySpaceBathroomsDto: CreateOrDeletePropertySpaceBathroomsDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceBathroom[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertySpaceBathroomService.createOrDeletePropertySpaceBathrooms(
+          createOrDeletePropertySpaceBathroomsDto,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while creation or deletion of property space bathrooms for the selected property space',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

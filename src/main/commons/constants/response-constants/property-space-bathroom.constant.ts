@@ -109,4 +109,26 @@ export const PROPERTY_SPACE_BATHROOM_RESPONSES = {
     message: `Space bathroom type with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
+  SPACE_BATHROOM_TYPES_NOT_FOUND: (
+    nonExistingIds: number[],
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Space Bathroom Types with ID(s) ${nonExistingIds.join(', ')} does not exist`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
+  PROPERTY_SPACE_BATHROOMS_UPDATED: (): {
+    success: boolean;
+    message: string;
+    data?: PropertySpaceBathroom[];
+    statusCode: number;
+  } => ({
+    success: true,
+    message: 'Property space bathrooms updated successfully',
+    data: [],
+    statusCode: HttpStatus.OK,
+  }),
 };

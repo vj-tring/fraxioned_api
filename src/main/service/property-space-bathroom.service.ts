@@ -1,20 +1,28 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { UserService } from './user.service';
 import { PropertySpaceBathroom } from '../entities/property-space-bathroom.entity';
 import { CreatePropertySpaceBathroomDto } from '../dto/requests/property-space-bathroom/create-property-space-bathroom.dto';
 import { UpdatePropertySpaceBathroomDto } from '../dto/requests/property-space-bathroom/update-property-space-bathroom.dto';
 import { PROPERTY_SPACE_BATHROOM_RESPONSES } from '../commons/constants/response-constants/property-space-bathroom.constant';
+import { CreateOrDeletePropertySpaceBathroomsDto } from '../dto/requests/property-space-bathroom/create-or-delete.dto';
+import { PROPERTY_SPACE_RESPONSES } from '../commons/constants/response-constants/property-space.constant';
+import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
+import { PropertySpaceService } from './property-space.service';
+import { SpaceBathroomTypes } from '../entities/space-bathroom-types.entity';
 
 @Injectable()
 export class PropertySpaceBathroomService {
   constructor(
     @InjectRepository(PropertySpaceBathroom)
     private readonly propertySpaceBathroomRepository: Repository<PropertySpaceBathroom>,
+    @InjectRepository(SpaceBathroomTypes)
+    private readonly spaceBathroomTypesRepository: Repository<SpaceBathroomTypes>,
     private readonly userService: UserService,
+    private readonly propertySpaceService: PropertySpaceService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -314,6 +322,129 @@ export class PropertySpaceBathroomService {
       );
       throw new HttpException(
         'An error occurred while deleting the property space bathroom',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async createOrDeletePropertySpaceBathrooms(
+    createOrDeletePropertySpaceBathroomsDto: CreateOrDeletePropertySpaceBathroomsDto,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceBathroom[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const user = await this.userService.findUserById(
+        createOrDeletePropertySpaceBathroomsDto.updatedBy.id,
+      );
+      if (!user) {
+        this.logger.error(
+          `User with ID ${createOrDeletePropertySpaceBathroomsDto.updatedBy.id} does not exist`,
+        );
+        return USER_RESPONSES.USER_NOT_FOUND(
+          createOrDeletePropertySpaceBathroomsDto.updatedBy.id,
+        );
+      }
+
+      const existingPropertySpace =
+        await this.propertySpaceService.findPropertySpaceById(
+          createOrDeletePropertySpaceBathroomsDto.propertySpace.id,
+        );
+      if (!existingPropertySpace) {
+        this.logger.error(
+          `Property space with ID ${createOrDeletePropertySpaceBathroomsDto.propertySpace.id} does not exist`,
+        );
+        return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACE_NOT_FOUND(
+          createOrDeletePropertySpaceBathroomsDto.propertySpace.id,
+        );
+      }
+
+      const spaceBathroomTypeIds =
+        createOrDeletePropertySpaceBathroomsDto.spaceBathroomTypes.map(
+          (spaceBathroomType) => spaceBathroomType.spaceBathroomType.id,
+        );
+
+      const existingSpaceBedTypes =
+        await this.spaceBathroomTypesRepository.findBy({
+          id: In(spaceBathroomTypeIds),
+        });
+
+      const nonExistingIds = spaceBathroomTypeIds.filter(
+        (id) =>
+          !existingSpaceBedTypes.some(
+            (spaceBathroomType) => spaceBathroomType.id === id,
+          ),
+      );
+
+      if (nonExistingIds.length > 0) {
+        this.logger.error(
+          `Space bathroom types with ID(s) ${nonExistingIds.join(', ')} do not exist`,
+        );
+        return PROPERTY_SPACE_BATHROOM_RESPONSES.SPACE_BATHROOM_TYPES_NOT_FOUND(
+          nonExistingIds,
+        );
+      }
+
+      const existingMappings = await this.propertySpaceBathroomRepository.find({
+        where: {
+          propertySpace: {
+            id: createOrDeletePropertySpaceBathroomsDto.propertySpace.id,
+          },
+        },
+        relations: ['spaceBathroomType'],
+      });
+
+      const existingspaceBathroomTypeIds = existingMappings.map(
+        (m) => m.spaceBathroomType.id,
+      );
+
+      const toDelete = existingMappings.filter(
+        (mapping) =>
+          !spaceBathroomTypeIds.includes(mapping.spaceBathroomType.id),
+      );
+
+      const toCreate =
+        createOrDeletePropertySpaceBathroomsDto.spaceBathroomTypes.filter(
+          (spaceBedType) =>
+            !existingspaceBathroomTypeIds.includes(
+              spaceBedType.spaceBathroomType.id,
+            ),
+        );
+
+      if (toDelete.length > 0) {
+        await this.propertySpaceBathroomRepository.remove(toDelete);
+      }
+
+      if (toCreate.length > 0) {
+        const newMappings = toCreate.map((spaceBathroomTypeCount) => {
+          const spaceBathroomType = existingSpaceBedTypes.find(
+            (type) => type.id === spaceBathroomTypeCount.spaceBathroomType.id,
+          );
+
+          const propertySpaceBathroom = new PropertySpaceBathroom();
+          propertySpaceBathroom.propertySpace = existingPropertySpace;
+          propertySpaceBathroom.spaceBathroomType = spaceBathroomType;
+          propertySpaceBathroom.count = spaceBathroomTypeCount.count;
+          propertySpaceBathroom.createdBy = user;
+          propertySpaceBathroom.updatedBy = user;
+
+          return propertySpaceBathroom;
+        });
+        await this.propertySpaceBathroomRepository.save(newMappings);
+      }
+
+      this.logger.log(
+        `Property space bathrooms for the selected property space updated successfully`,
+      );
+      return PROPERTY_SPACE_BATHROOM_RESPONSES.PROPERTY_SPACE_BATHROOMS_UPDATED();
+    } catch (error) {
+      this.logger.error(
+        `Error creating property space bathrooms: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while creation or deletion of property space bathrooms for the selected property space',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
