@@ -372,7 +372,14 @@ export class PropertySpaceBedService {
           !existingSpaceBedTypeIds.includes(spaceBedType.spaceBedTypeId.id),
       );
 
-      // Update existing mappings
+      const toDelete = existingMappings.filter(
+        (mapping) => !spaceBedTypeIds.includes(mapping.spaceBedType.id),
+      );
+
+      if (toDelete.length > 0) {
+        await this.propertySpaceBedRepository.remove(toDelete);
+      }
+
       for (const mapping of toUpdate) {
         const newCount = createOrDeletePropertySpaceBedsDto.spaceBedTypes.find(
           (spaceBedType) =>
@@ -385,10 +392,8 @@ export class PropertySpaceBedService {
         }
       }
 
-      // Save updated mappings
       await this.propertySpaceBedRepository.save(toUpdate);
 
-      // Create new mappings
       if (toCreate.length > 0) {
         const newMappings = toCreate.map((spaceBedTypeCount) => {
           const spaceBedType = existingSpaceBedTypes.find(
