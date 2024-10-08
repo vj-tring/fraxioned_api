@@ -6,7 +6,6 @@ import { SpaceBedType } from '../entities/space-bed-type.entity';
 import { CreateSpaceBedTypeDto } from '../dto/requests/space-bed-type/create-space-bed-type.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { SPACE_BED_TYPE_RESPONSES } from '../commons/constants/response-constants/space-bed-type.constant';
-import { User } from '../entities/user.entity';
 import { UpdateSpaceBedTypeDto } from '../dto/requests/space-bed-type/update-space-bed-type.dto';
 import { UserService } from './user.service';
 
@@ -15,8 +14,6 @@ export class SpaceBedTypeService {
   constructor(
     @InjectRepository(SpaceBedType)
     private readonly spaceBedTypeRepository: Repository<SpaceBedType>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly logger: LoggerService,
     private readonly userService: UserService,
   ) {}
