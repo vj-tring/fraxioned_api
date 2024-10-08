@@ -321,7 +321,7 @@ export class PropertySpaceBedService {
 
       const spaceBedTypeIds =
         createOrDeletePropertySpaceBedsDto.spaceBedTypes.map(
-          (spaceBedType) => spaceBedType.spaceBedTypeId.id,
+          (spaceBedType) => spaceBedType.spaceBedType.id,
         );
 
       const uniqueSpaceBedTypeIds = new Set(spaceBedTypeIds);
@@ -369,7 +369,7 @@ export class PropertySpaceBedService {
 
       const toCreate = createOrDeletePropertySpaceBedsDto.spaceBedTypes.filter(
         (spaceBedType) =>
-          !existingSpaceBedTypeIds.includes(spaceBedType.spaceBedTypeId.id),
+          !existingSpaceBedTypeIds.includes(spaceBedType.spaceBedType.id),
       );
 
       const toDelete = existingMappings.filter(
@@ -383,7 +383,7 @@ export class PropertySpaceBedService {
       for (const mapping of toUpdate) {
         const newCount = createOrDeletePropertySpaceBedsDto.spaceBedTypes.find(
           (spaceBedType) =>
-            spaceBedType.spaceBedTypeId.id === mapping.spaceBedType.id,
+            spaceBedType.spaceBedType.id === mapping.spaceBedType.id,
         )?.count;
 
         if (newCount !== undefined) {
@@ -397,7 +397,7 @@ export class PropertySpaceBedService {
       if (toCreate.length > 0) {
         const newMappings = toCreate.map((spaceBedTypeCount) => {
           const spaceBedType = existingSpaceBedTypes.find(
-            (type) => type.id === spaceBedTypeCount.spaceBedTypeId.id,
+            (type) => type.id === spaceBedTypeCount.spaceBedType.id,
           );
 
           const propertySpaceBed = new PropertySpaceBed();
