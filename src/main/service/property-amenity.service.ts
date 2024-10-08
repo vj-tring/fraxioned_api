@@ -1,16 +1,17 @@
+
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { LoggerService } from './logger.service';
 import { Property } from '../entities/property.entity';
-import { PropertyAmenities } from '../entities/property-amenities.entity';
+import { PropertyAmenities } from '../entities/property-amenity.entity';
 import { Amenities } from '../entities/amenities.entity';
 import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
-import { PROPERTY_AMENITY_RESPONSES } from '../commons/constants/response-constants/property-amenities.constant';
+import { PROPERTY_AMENITY_RESPONSES } from '../commons/constants/response-constants/property-amenity.constant';
 import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 import { CreateOrDeletePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-or-delete-property-amenities.dto';
-import { PropertySpace } from '../entities/property-space.entity';
+import { PropertySpaceService } from './property-space.service';
 
 @Injectable()
 export class PropertyAmenitiesService {
@@ -23,9 +24,8 @@ export class PropertyAmenitiesService {
     private readonly amenityRepository: Repository<Amenities>,
     @InjectRepository(Property)
     private readonly propertiesRepository: Repository<Property>,
-    @InjectRepository(PropertySpace)
-    private readonly propertySpaceRepository: Repository<PropertySpace>,
     private readonly logger: LoggerService,
+    private readonly propertySpaceService: PropertySpaceService,
   ) {}
 
   async createPropertyAmenity(
@@ -83,25 +83,50 @@ export class PropertyAmenitiesService {
         );
       }
 
-      const existingPropertyAmenity =
-        await this.propertyAmenitiesRepository.findOne({
+      const existingPropertySpace =
+        await this.propertySpaceService.findPropertySpaceById(
+          createPropertyAmenityDto.propertySpace?.id,
+        );
+      if (!existingPropertySpace) {
+        return this.propertySpaceService.handlePropertySpaceNotFound(
+          createPropertyAmenityDto.propertySpace.id,
+        );
+      }
+      const existingPropertyAmenities =
+        await this.propertyAmenitiesRepository.find({
+          relations: ['property', 'amenity', 'propertySpace'],
           where: {
-            property: {
-              id: createPropertyAmenityDto.property.id,
-            },
-            amenity: {
-              id: createPropertyAmenityDto.amenity.id,
-            },
+            property: { id: createPropertyAmenityDto.property.id },
+            amenity: { id: createPropertyAmenityDto.amenity.id },
+            propertySpace: createPropertyAmenityDto.propertySpace
+              ? { id: createPropertyAmenityDto.propertySpace.id }
+              : null,
           },
         });
+      const hasExistingWithSpace = existingPropertyAmenities.some(
+        (pa) =>
+          pa.propertySpace?.id === createPropertyAmenityDto.propertySpace?.id,
+      );
 
-      if (existingPropertyAmenity) {
+      const hasExistingWithoutSpace = existingPropertyAmenities.some(
+        (pa) => pa.propertySpace === null,
+      );
+
+      if (
+        (createPropertyAmenityDto.propertySpace && hasExistingWithSpace) ||
+        (!createPropertyAmenityDto.propertySpace && hasExistingWithoutSpace)
+      ) {
+        const spaceInfo = createPropertyAmenityDto.propertySpace?.id
+          ? ` and Property Space ID ${createPropertyAmenityDto.propertySpace.id}`
+          : ' without a specific Property Space';
+
         this.logger.error(
-          `Error creating property amenity: Property ID ${createPropertyAmenityDto.property.id} with Amenity ID ${createPropertyAmenityDto.amenity.id} already exists`,
+          `Error creating property amenity: Property ID ${createPropertyAmenityDto.property.id} with Amenity ID ${createPropertyAmenityDto.amenity.id}${spaceInfo} already exists`,
         );
         return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITY_ALREADY_EXISTS(
           createPropertyAmenityDto.property.id,
           createPropertyAmenityDto.amenity.id,
+          createPropertyAmenityDto.propertySpace?.id,
         );
       }
 
@@ -277,7 +302,6 @@ export class PropertyAmenitiesService {
       const propertyAmenities = await this.propertyAmenitiesRepository.find({
         relations: [
           'property',
-          'propertySpace',
           'amenity',
           'amenity.createdBy',
           'amenity.updatedBy',
@@ -287,9 +311,6 @@ export class PropertyAmenitiesService {
         ],
         select: {
           property: {
-            id: true,
-          },
-          propertySpace: {
             id: true,
           },
           amenity: {
@@ -323,23 +344,11 @@ export class PropertyAmenitiesService {
         this.logger.error(`No amenities are available for this property`);
         return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_NOT_FOUND();
       }
-
-      const uniqueAmenitiesMap = new Map<number, PropertyAmenities>();
-
-      propertyAmenities.forEach((propertyAmenity) => {
-        const amenityId = propertyAmenity.amenity.id;
-        if (!uniqueAmenitiesMap.has(amenityId)) {
-          uniqueAmenitiesMap.set(amenityId, propertyAmenity);
-        }
-      });
-
-      const uniqueAmenities = Array.from(uniqueAmenitiesMap.values());
-
       this.logger.log(
         `Retrieved ${propertyAmenities.length} amenities successfully.`,
       );
       return PROPERTY_AMENITY_RESPONSES.PROPERTY_AMENITIES_FETCHED(
-        uniqueAmenities,
+        propertyAmenities,
       );
     } catch (error) {
       this.logger.error(
@@ -514,24 +523,6 @@ export class PropertyAmenitiesService {
         );
       }
 
-      let existingPropertySpace: PropertySpace = null;
-      if (createOrDeletePropertyAmenitiesDto.propertySpace.id > 0) {
-        existingPropertySpace = await this.propertySpaceRepository.findOne({
-          where: {
-            id: createOrDeletePropertyAmenitiesDto.propertySpace.id,
-          },
-        });
-
-        if (!existingPropertySpace) {
-          this.logger.error(
-            `Property Space with ID ${createOrDeletePropertyAmenitiesDto.propertySpace.id} does not exist`,
-          );
-          return PROPERTY_AMENITY_RESPONSES.PROPERTY_SPACE_NOT_FOUND(
-            createOrDeletePropertyAmenitiesDto.property.id,
-          );
-        }
-      }
-
       const amenityIds = createOrDeletePropertyAmenitiesDto.amenities.map(
         (amenity) => amenity.id,
       );
@@ -554,11 +545,8 @@ export class PropertyAmenitiesService {
       const existingMappings = await this.propertyAmenitiesRepository.find({
         where: {
           property: { id: createOrDeletePropertyAmenitiesDto.property.id },
-          propertySpace: {
-            id: createOrDeletePropertyAmenitiesDto.propertySpace.id,
-          },
         },
-        relations: ['amenity', 'propertySpace', 'property'],
+        relations: ['amenity'],
       });
 
       const existingAmenityIds = existingMappings.map((m) => m.amenity.id);
@@ -582,7 +570,6 @@ export class PropertyAmenitiesService {
 
           const propertyAmenity = new PropertyAmenities();
           propertyAmenity.property = existingProperty;
-          propertyAmenity.propertySpace = existingPropertySpace;
           propertyAmenity.amenity = amenity;
           propertyAmenity.createdBy = user;
           propertyAmenity.updatedBy = user;

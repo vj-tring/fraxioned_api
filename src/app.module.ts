@@ -11,7 +11,7 @@ import { UserPropertyModule } from './main/modules/user-property.module';
 import { UserModule } from './main/modules/user.module';
 import { AmenitiesModule } from './main/modules/amenities.module';
 import { UserDocumentModule } from './main/modules/user-property-document.module';
-import { PropertyAmenitiesModule } from './main/modules/property-amenities.module';
+import { PropertyAmenitiesModule } from './main/modules/property-amenity.module';
 import { PropertyCodesModule } from './main/modules/property-codes.module';
 import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './main/email/mail.module';
@@ -28,7 +28,6 @@ import { AmenityGroupModule } from './main/modules/amenity-group.module';
 import { FaqCategoryModule } from './main/modules/faq-category.module';
 import { FaqQuestionsModule } from './main/modules/faq-questions.module';
 import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
-import { PropertySpaceBedModule } from './main/modules/property-space-bed.module';
 import { PropertySpaceModule } from './main/modules/property-space.module';
 import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
 
@@ -66,7 +65,6 @@ import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.mo
     FaqCategoryModule,
     FaqQuestionsModule,
     SpaceBedTypeModule,
-    PropertySpaceBedModule,
     PropertySpaceModule,
     SpaceBathroomTypesModule,
   ],
