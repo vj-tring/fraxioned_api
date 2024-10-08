@@ -3,6 +3,7 @@ import { IsNotEmpty } from 'class-validator';
 import { IsValidIdArray } from 'src/main/commons/guards/is-valid-id-list.decorator';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { Amenities } from 'src/main/entities/amenities.entity';
+import { PropertySpace } from 'src/main/entities/property-space.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 
@@ -15,6 +16,12 @@ export class CreateOrDeletePropertyAmenitiesDto {
     message: 'property must be an object with a valid id where (id >= 1)',
   })
   property: Property;
+
+  @ApiProperty({
+    example: { id: null },
+  })
+  @IsNotEmpty({ message: 'property space is required' })
+  propertySpace?: PropertySpace;
 
   @ApiProperty({
     example: [{ id: 1 }, { id: 2 }],
