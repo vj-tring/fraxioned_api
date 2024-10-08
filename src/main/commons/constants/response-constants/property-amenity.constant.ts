@@ -30,8 +30,8 @@ export const PROPERTY_AMENITY_RESPONSES = {
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: false,
     message: propertySpaceId
-    ? `Property ID ${propertyId} with Amenity ID ${amenityId} and Property Space ID ${propertySpaceId} already exists`
-    : `Property ID ${propertyId} with Amenity ID ${amenityId} already exists`,
+      ? `Property ID ${propertyId} with Amenity ID ${amenityId} and Property Space ID ${propertySpaceId} already exists`
+      : `Property ID ${propertyId} with Amenity ID ${amenityId} already exists`,
     statusCode: HttpStatus.CONFLICT,
   }),
   PROPERTY_AMENITY_CREATED: (

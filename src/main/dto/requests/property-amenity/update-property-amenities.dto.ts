@@ -24,7 +24,7 @@ export class UpdatePropertyAmenitiesDto {
     message: 'PropertySpace must be an object with a valid id where (id >= 1)',
   })
   propertySpace: PropertySpace;
-  
+
   @ApiProperty({
     example: { id: 1 },
   })
