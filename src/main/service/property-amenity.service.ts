@@ -30,6 +30,17 @@ export class PropertyAmenitiesService {
     private readonly propertySpaceService: PropertySpaceService,
   ) {}
 
+  async removePropertyAmenitiesByPropertySpaceId(id: number): Promise<void> {
+    const existingPropertyAmenities =
+      await this.propertyAmenitiesRepository.findBy({
+        propertySpace: { id },
+      });
+    if (!existingPropertyAmenities) {
+      return null;
+    }
+    await this.propertyAmenitiesRepository.remove(existingPropertyAmenities);
+  }
+
   async createPropertyAmenity(
     createPropertyAmenityDto: CreatePropertyAmenitiesDto,
   ): Promise<{
