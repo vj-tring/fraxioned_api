@@ -11,9 +11,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { PropertyAmenitiesService } from '../service/property-amenities.service';
+import { PropertyAmenitiesService } from '../service/property-amenity.service';
 import { CreatePropertyAmenitiesDto } from '../dto/requests/property-amenity/create-property-amenities.dto';
-import { PropertyAmenities } from '../entities/property-amenities.entity';
+import { PropertyAmenities } from '../entities/property-amenity.entity';
 import { UpdatePropertyAmenitiesDto } from '../dto/requests/property-amenity/update-property-amenities.dto';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';

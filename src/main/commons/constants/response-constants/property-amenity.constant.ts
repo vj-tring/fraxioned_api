@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { PropertyAmenities } from 'src/main/entities/property-amenities.entity';
+import { PropertyAmenities } from 'src/main/entities/property-amenity.entity';
 
 export const PROPERTY_AMENITY_RESPONSES = {
   PROPERTY_NOT_FOUND: (
@@ -26,9 +26,12 @@ export const PROPERTY_AMENITY_RESPONSES = {
   PROPERTY_AMENITY_ALREADY_EXISTS: (
     propertyId: number,
     amenityId: number,
+    propertySpaceId?: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: false,
-    message: `Property ID ${propertyId} with Amenity ID ${amenityId} already exists`,
+    message: propertySpaceId
+    ? `Property ID ${propertyId} with Amenity ID ${amenityId} and Property Space ID ${propertySpaceId} already exists`
+    : `Property ID ${propertyId} with Amenity ID ${amenityId} already exists`,
     statusCode: HttpStatus.CONFLICT,
   }),
   PROPERTY_AMENITY_CREATED: (

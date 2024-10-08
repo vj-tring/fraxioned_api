@@ -9,6 +9,7 @@ import {
 import { Property } from './property.entity';
 import { Amenities } from './amenities.entity';
 import { User } from './user.entity';
+import { PropertySpace } from './property-space.entity';
 
 @Entity('fxn_property_amenities')
 export class PropertyAmenities {
@@ -23,6 +24,12 @@ export class PropertyAmenities {
     name: 'property_id',
   })
   property: Property;
+
+  @ManyToOne(() => PropertySpace, (propertySpace) => propertySpace.id)
+  @JoinColumn({
+    name: 'property_space_id',
+  })
+  propertySpace: PropertySpace;
 
   @ManyToOne(() => Amenities, (amenities) => amenities.id)
   @JoinColumn({
