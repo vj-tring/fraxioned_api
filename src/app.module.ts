@@ -31,6 +31,7 @@ import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
 import { PropertySpaceModule } from './main/modules/property-space.module';
 import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
 import { PropertySpaceBathroomModule } from './main/modules/property-space-bathroom.module';
+import { PropertySpaceBedModule } from './main/modules/property-space-bed.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { PropertySpaceBathroomModule } from './main/modules/property-space-bathr
     FaqQuestionsModule,
     SpaceBedTypeModule,
     PropertySpaceModule,
+    PropertySpaceBedModule,
     SpaceBathroomTypesModule,
     PropertySpaceBathroomModule,
   ],
