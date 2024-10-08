@@ -17,6 +17,5 @@ import { SpaceBedType } from '../entities/space-bed-type.entity';
   ],
   controllers: [SpaceBedTypeController],
   providers: [SpaceBedTypeService],
-  exports: [SpaceBedTypeService],
 })
 export class SpaceBedTypeModule {}
