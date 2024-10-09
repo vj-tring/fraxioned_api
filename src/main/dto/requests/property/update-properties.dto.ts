@@ -25,42 +25,42 @@ export class UpdatePropertiesDto {
   @IsOptional()
   @IsString()
   @Transform(({ value }) => value?.trim())
-  address?: string;
+  address: string;
 
   @IsOptional()
   @IsString()
   @Transform(({ value }) => value?.trim())
-  city?: string;
+  city: string;
 
   @IsOptional()
   @IsString()
   @Transform(({ value }) => value?.trim())
-  state?: string;
+  state: string;
 
   @IsOptional()
   @IsString()
   @Transform(({ value }) => value?.trim())
-  country?: string;
+  country: string;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  zipcode?: number;
+  zipcode: number;
 
   @IsOptional()
   @IsString()
   @Transform(({ value }) => value?.trim())
-  houseDescription?: string;
+  houseDescription: string;
 
   @IsOptional()
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
-  isExclusive?: boolean;
+  isExclusive: boolean;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  propertyShare?: number;
+  propertyShare: number;
 
   @IsOptional()
   @IsNumber()
@@ -85,12 +85,12 @@ export class UpdatePropertiesDto {
   @IsOptional()
   @IsString()
   @Transform(({ value }) => value?.trim())
-  mailBannerUrl?: string;
+  mailBannerUrl: string;
 
   @IsOptional()
   @IsString()
   @Transform(({ value }) => value?.trim())
-  coverImageUrl?: string;
+  coverImageUrl: string;
 
   @ApiProperty({ type: 'string', format: 'binary' })
   @IsOptional()

@@ -81,18 +81,21 @@ export class PropertiesService {
     coverImageFile?: Express.Multer.File,
   ): Promise<UpdatePropertiesResponseDto | object> {
     try {
-      const existingProperties = await this.propertiesRepository.findOne({
+      const existingProperty = await this.propertiesRepository.findOne({
         where: { id },
       });
 
-      if (!existingProperties) {
+      if (!existingProperty) {
         return PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
       }
 
       if (mailBannerFile) {
+        const folderName = `properties/${id}/mailBanners`;
+        const fileExtension = mailBannerFile.originalname.split('.').pop();
+        const fileName = `${existingProperty.propertyName} || ${id}-mailBanner.${fileExtension}`;
         const mailBannerUrl = await this.s3UtilsService.uploadFileToS3(
-          'properties',
-          `${id}-mailBanner-${Date.now()}`,
+          folderName,
+          fileName,
           mailBannerFile.buffer,
           mailBannerFile.mimetype,
         );
@@ -100,9 +103,12 @@ export class PropertiesService {
       }
 
       if (coverImageFile) {
+        const folderName = `properties/${id}/coverImages`;
+        const fileExtension = coverImageFile.originalname.split('.').pop();
+        const fileName = `${existingProperty.propertyName || id}-coverImage.${fileExtension}`;
         const coverImageUrl = await this.s3UtilsService.uploadFileToS3(
-          'properties',
-          `${id}-coverImage-${Date.now()}`,
+          folderName,
+          fileName,
           coverImageFile.buffer,
           coverImageFile.mimetype,
         );
@@ -110,7 +116,7 @@ export class PropertiesService {
       }
 
       const updatedProperties = this.propertiesRepository.merge(
-        existingProperties,
+        existingProperty,
         updatePropertiesDto,
       );
 
