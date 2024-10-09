@@ -89,18 +89,17 @@ export const MEDIA_IMAGE_RESPONSES = {
   //     message: `Media Image with ID ${id} not found`,
   //     statusCode: HttpStatus.NOT_FOUND,
   //   }),
-  //   MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3: (
-  //     s3Key: string,
-  //   ): {
-  //     success: boolean;
-  //     message: string;
-  //     data?: MediaImage;
-  //     statusCode: number;
-  //   } => ({
-  //     success: false,
-  //     message: `Image with key ${s3Key} not found in S3 bucket`,
-  //     statusCode: HttpStatus.NOT_FOUND,
-  //   }),
+  MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3: (
+    s3Key: string,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Image with key ${s3Key} not found in S3 bucket`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
   //   MEDIA_IMAGE_FETCHED: (
   //     mediaImage: MediaImage,
   //   ): {

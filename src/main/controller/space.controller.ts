@@ -48,7 +48,6 @@ export class SpaceController {
     @UploadedFile() imageFile: Express.Multer.File,
   ): Promise<ApiResponse<Space>> {
     try {
-      // createSpaceDto.imageFile = imageFile;
       const max_file_size = getMaxFileSize();
       const allowedExtensions = getAllowedExtensions();
       const hasOversizedFile = !isFileSizeValid(imageFile, max_file_size);

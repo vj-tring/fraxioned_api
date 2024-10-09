@@ -16,6 +16,7 @@ import { ApiResponse } from '../commons/response-body/common.responses';
 import { UserService } from './user.service';
 import { PropertySpaceService } from './property-space.service';
 import { S3UtilsService } from './s3-utils.service';
+import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 
 @Injectable()
 export class SpaceService {
@@ -236,10 +237,25 @@ export class SpaceService {
         );
         return SPACE_RESPONSES.SPACE_FOREIGN_KEY_CONFLICT(id);
       }
-      const result = await this.spaceRepository.delete(id);
-      if (result.affected === 0) {
+      const existingSpace = await this.findSpaceById(id);
+
+      if (!existingSpace) {
         return await this.handleSpaceNotFound(id);
       }
+
+      const s3Key = await this.s3UtilsService.extractS3Key(
+        existingSpace.s3_url,
+      );
+
+      const headObject =
+        await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+      if (!headObject) {
+        return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(s3Key);
+      }
+
+      await this.s3UtilsService.deleteObjectFromS3(s3Key);
+      await this.spaceRepository.delete(id);
+
       this.logger.log(`Space with ID ${id} deleted successfully`);
       return SPACE_RESPONSES.SPACE_DELETED(id);
     } catch (error) {
