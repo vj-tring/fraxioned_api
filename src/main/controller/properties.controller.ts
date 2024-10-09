@@ -11,8 +11,10 @@ import {
   HttpException,
   HttpStatus,
   Req,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
 import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
 import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
@@ -22,6 +24,13 @@ import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { PropertyWithDetailsResponseDto } from '../dto/responses/PropertyWithDetailsResponseDto.dto';
 import { CreatePropertiesDto } from '../dto/requests/property/create-property.dto';
 import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  getAllowedExtensions,
+  getMaxFileSize,
+  isFileExtensionValid,
+  isFileSizeValid,
+} from '../utils/image-file.utils';
 
 @ApiTags('Properties')
 @Controller('v1/properties')
@@ -47,14 +56,68 @@ export class PropertiesController {
   }
 
   @Patch('property/:id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'mailBannerFile', maxCount: 1 },
+      { name: 'coverImageFile', maxCount: 1 },
+    ]),
+  )
+  @ApiConsumes('multipart/form-data')
   async updatePropertiesById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePropertiesDto: UpdatePropertiesDto,
-  ): Promise<UpdatePropertiesResponseDto> {
+    @UploadedFiles()
+    files: {
+      mailBannerFile?: Express.Multer.File[];
+      coverImageFile?: Express.Multer.File[];
+    },
+  ): Promise<UpdatePropertiesResponseDto | object> {
     try {
+      const maxFileSize = getMaxFileSize();
+      const allowedExtensions = getAllowedExtensions();
+
+      const mailBannerFile = files.mailBannerFile
+        ? files.mailBannerFile[0]
+        : undefined;
+      const coverImageFile = files.coverImageFile
+        ? files.coverImageFile[0]
+        : undefined;
+
+      if (mailBannerFile) {
+        if (!isFileSizeValid(mailBannerFile, maxFileSize)) {
+          throw new HttpException(
+            `Mail banner file size exceeds the maximum allowed size of ${maxFileSize} bytes.`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        if (!isFileExtensionValid(mailBannerFile, allowedExtensions)) {
+          throw new HttpException(
+            `Mail banner file has an unsupported extension. Allowed extensions are: ${allowedExtensions.join(', ')}.`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+
+      if (coverImageFile) {
+        if (!isFileSizeValid(coverImageFile, maxFileSize)) {
+          throw new HttpException(
+            `Cover image file size exceeds the maximum allowed size of ${maxFileSize} bytes.`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        if (!isFileExtensionValid(coverImageFile, allowedExtensions)) {
+          throw new HttpException(
+            `Cover image file has an unsupported extension. Allowed extensions are: ${allowedExtensions.join(', ')}.`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+
       return await this.propertiesService.updatePropertiesById(
         id,
         updatePropertiesDto,
+        mailBannerFile,
+        coverImageFile,
       );
     } catch (error) {
       throw error;
