@@ -19,7 +19,7 @@ export class PropertySpaceBathroom extends BaseEntity {
     onDelete: 'SET NULL',
   })
   @JoinColumn({
-    name: 'space_instance_id',
+    name: 'property_space_id',
   })
   propertySpace: PropertySpace;
 
