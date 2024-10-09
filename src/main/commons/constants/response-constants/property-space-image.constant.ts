@@ -1,14 +1,14 @@
 import { HttpStatus } from '@nestjs/common';
-import { MediaImage } from 'src/main/entities/media-image.entity';
+import { PropertySapceImage } from 'src/main/entities/property-space-image.entity';
 
-export const MEDIA_IMAGE_RESPONSES = {
+export const PROPERTY_SPACE_IMAGE_RESPONSES = {
   MISMATCHED_DTO_AND_IMAGES: (): {
     success: boolean;
     message: string;
     statusCode: HttpStatus;
   } => ({
     success: false,
-    message: `The number of files does not match the number of images in the request`,
+    message: `The number of files does not match the number of property space images in the request`,
     statusCode: HttpStatus.BAD_REQUEST,
   }),
   FILE_SIZE_TOO_LARGE: (
@@ -41,81 +41,81 @@ export const MEDIA_IMAGE_RESPONSES = {
     message: `${entityName} with ID ${entityId} does not exist`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
-  MEDIA_IMAGES_CREATED: (
-    mediaImages: MediaImage[],
+  PROPERTY_SPACE_IMAGES_CREATED: (
+    propertySpaceImages: PropertySapceImage[],
   ): {
     success: boolean;
     message: string;
-    data?: MediaImage[];
+    data?: PropertySapceImage[];
     statusCode: HttpStatus;
   } => ({
     success: true,
-    message: `${mediaImages.length} media images created successfully`,
-    data: mediaImages,
+    message: `${propertySpaceImages.length} property space images created successfully`,
+    data: propertySpaceImages,
     statusCode: HttpStatus.CREATED,
   }),
-  MEDIA_IMAGES_NOT_FOUND: (): {
+  PROPERTY_SPACE_IMAGES_NOT_FOUND: (): {
     success: boolean;
     message: string;
-    data?: MediaImage[];
+    data?: PropertySapceImage[];
     statusCode: number;
   } => ({
     success: true,
-    message: `No media images are found`,
+    message: `No property space images are found`,
     data: [],
     statusCode: HttpStatus.OK,
   }),
-  MEDIA_IMAGES_FETCHED: (
-    mediaImages: MediaImage[],
+  PROPERTY_SPACE_IMAGES_FETCHED: (
+    propertySpaceImages: PropertySapceImage[],
   ): {
     success: boolean;
     message: string;
-    data?: MediaImage[];
+    data?: PropertySapceImage[];
     statusCode: number;
   } => ({
     success: true,
-    message: `Retrieved ${mediaImages.length} media images`,
-    data: mediaImages,
+    message: `Retrieved ${propertySpaceImages.length} property space images`,
+    data: propertySpaceImages,
     statusCode: HttpStatus.OK,
   }),
-  MEDIA_IMAGE_NOT_FOUND: (
+  PROPERTY_SPACE_IMAGE_NOT_FOUND: (
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: MediaImage;
+    data?: PropertySapceImage;
     statusCode: number;
   } => ({
     success: false,
-    message: `Media Image with ID ${id} not found`,
+    message: `Property Space Image with ID ${id} not found`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
-  MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3: (
+  PROPERTY_SPACE_IMAGE_NOT_FOUND_IN_AWS_S3: (
     s3Key: string,
   ): {
     success: boolean;
     message: string;
-    data?: MediaImage;
+    data?: PropertySapceImage;
     statusCode: number;
   } => ({
     success: false,
-    message: `Image with key ${s3Key} not found in S3 bucket`,
+    message: `Property Space Image with key ${s3Key} not found in S3 bucket`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
-  MEDIA_IMAGE_FETCHED: (
-    mediaImage: MediaImage,
+  PROPERTY_SPACE_IMAGE_FETCHED: (
+    propertySpaceImage: PropertySapceImage,
   ): {
     success: boolean;
     message: string;
-    data?: MediaImage;
+    data?: PropertySapceImage;
     statusCode: number;
   } => ({
     success: true,
-    message: `Media Image with ID ${mediaImage.id} retrieved successfully`,
-    data: mediaImage,
+    message: `Property Space Image with ID ${propertySpaceImage.id} retrieved successfully`,
+    data: propertySpaceImage,
     statusCode: HttpStatus.OK,
   }),
-  MEDIA_IMAGE_DELETED: (
+  PROPERTY_SPACE_IMAGE_DELETED: (
     id: number,
   ): {
     success: boolean;
@@ -123,21 +123,21 @@ export const MEDIA_IMAGE_RESPONSES = {
     statusCode: number;
   } => ({
     success: true,
-    message: `Media Image with ID ${id} deleted successfully`,
+    message: `Property Space Image with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
-  MEDIA_IMAGE_UPDATED: (
-    updatedMediaImage: MediaImage,
+  PROPERTY_SPACE_IMAGE_UPDATED: (
+    updatedPropertySpaceImage: PropertySapceImage,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: MediaImage;
+    data?: PropertySapceImage;
     statusCode: number;
   } => ({
     success: true,
-    message: `Media Image with ID ${id} updated successfully`,
-    data: updatedMediaImage,
+    message: `Property Space Image with ID ${id} updated successfully`,
+    data: updatedPropertySpaceImage,
     statusCode: HttpStatus.OK,
   }),
 };

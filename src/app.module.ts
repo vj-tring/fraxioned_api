@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from './main/modules/database.module';
-import { MediaImageModule } from './main/modules/media-image.module';
+import { PropertySpaceImageModule } from './main/modules/property-space-image.module';
 import { BookingModule } from './main/modules/booking.module';
 import { UserModule } from './main/modules/user.module';
 import { PropertiesModule } from './main/modules/properties.module';
@@ -37,7 +37,7 @@ import { PropertySpaceBathroomModule } from './main/modules/property-space-bathr
 @Module({
   imports: [
     DatabaseModule,
-    MediaImageModule,
+    PropertySpaceImageModule,
     BookingModule,
     UserModule,
     PropertiesModule,

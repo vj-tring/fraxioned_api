@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateMediaImageRequestDto {
+export class UpdatePropertySpaceImageRequestDto {
   @IsNotEmpty()
   @IsString()
-  mediaImages: string;
+  propertySpaceImage: string;
 }
