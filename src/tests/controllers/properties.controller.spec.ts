@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
 import { PropertiesController } from 'src/main/controller/properties.controller';
 import { CreatePropertiesDto } from 'src/main/dto/requests/property/create-property.dto';
-import { UpdatePropertiesDto } from 'src/main/dto/requests/property/update-properties.dto';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { User } from 'src/main/entities/user.entity';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
