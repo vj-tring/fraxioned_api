@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
-import { PropertySapceImage } from '../entities/property-space-image.entity';
+import { PropertySpaceImage } from '../entities/property-space-image.entity';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import {
@@ -53,7 +53,7 @@ export class PropertySpaceImageController {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySapceImage[];
+    data?: PropertySpaceImage[];
     statusCode: HttpStatus;
   }> {
     try {
@@ -119,7 +119,7 @@ export class PropertySpaceImageController {
   async getAllPropertySpaceImages(): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySapceImage[];
+    data?: PropertySpaceImage[];
     statusCode: HttpStatus;
   }> {
     try {
@@ -138,7 +138,7 @@ export class PropertySpaceImageController {
   async getPropertySpaceImageById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySapceImage;
+    data?: PropertySpaceImage;
     statusCode: HttpStatus;
   }> {
     try {
@@ -163,7 +163,7 @@ export class PropertySpaceImageController {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySapceImage;
+    data?: PropertySpaceImage;
     statusCode: HttpStatus;
   }> {
     try {

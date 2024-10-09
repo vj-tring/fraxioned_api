@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PropertySapceImage } from '../entities/property-space-image.entity';
+import { PropertySpaceImage } from '../entities/property-space-image.entity';
 import { PropertySpaceImageController } from '../controller/property-space-image.controller';
 import { Amenities } from '../entities/amenities.entity';
 import { PropertySpace } from '../entities/property-space.entity';
@@ -17,7 +17,7 @@ import { LoggerModule } from './logger.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      PropertySapceImage,
+      PropertySpaceImage,
       Property,
       Amenities,
       PropertySpace,

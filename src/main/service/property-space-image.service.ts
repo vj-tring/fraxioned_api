@@ -8,13 +8,13 @@ import { PropertySpace } from '../entities/property-space.entity';
 import { User } from '../entities/user.entity';
 import { CreatePropertySpaceImageDto } from '../dto/requests/property-space-image/create.dto';
 import { UpdatePropertySpaceImageDto } from '../dto/requests/property-space-image/update.dto';
-import { PropertySapceImage } from '../entities/property-space-image.entity';
+import { PropertySpaceImage } from '../entities/property-space-image.entity';
 
 @Injectable()
 export class PropertySpaceImageService {
   constructor(
-    @InjectRepository(PropertySapceImage)
-    private readonly propertySapceImageRepository: Repository<PropertySapceImage>,
+    @InjectRepository(PropertySpaceImage)
+    private readonly propertySapceImageRepository: Repository<PropertySpaceImage>,
     @InjectRepository(PropertySpace)
     private readonly propertySpaceRepository: Repository<PropertySpace>,
     @InjectRepository(User)
@@ -28,7 +28,7 @@ export class PropertySpaceImageService {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySapceImage[];
+    data?: PropertySpaceImage[];
     statusCode: number;
   }> {
     try {
@@ -107,7 +107,7 @@ export class PropertySpaceImageService {
   async findAllPropertySpaceImages(): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySapceImage[];
+    data?: PropertySpaceImage[];
     statusCode: number;
   }> {
     try {
@@ -144,7 +144,7 @@ export class PropertySpaceImageService {
   async findPropertySpaceImageById(id: number): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySapceImage;
+    data?: PropertySpaceImage;
     statusCode: number;
   }> {
     try {
@@ -187,7 +187,7 @@ export class PropertySpaceImageService {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySapceImage;
+    data?: PropertySpaceImage;
     statusCode: number;
   }> {
     try {

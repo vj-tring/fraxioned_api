@@ -11,7 +11,7 @@ import { User } from './user.entity';
 import { PropertySpace } from './property-space.entity';
 
 @Entity('fxn_property_sapce_image')
-export class PropertySapceImage {
+export class PropertySpaceImage {
   @PrimaryGeneratedColumn()
   id: number;
 

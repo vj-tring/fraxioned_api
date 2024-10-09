@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { PropertySapceImage } from 'src/main/entities/property-space-image.entity';
+import { PropertySpaceImage } from 'src/main/entities/property-space-image.entity';
 
 export const PROPERTY_SPACE_IMAGE_RESPONSES = {
   MISMATCHED_DTO_AND_IMAGES: (): {
@@ -42,11 +42,11 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     statusCode: HttpStatus.NOT_FOUND,
   }),
   PROPERTY_SPACE_IMAGES_CREATED: (
-    propertySpaceImages: PropertySapceImage[],
+    propertySpaceImages: PropertySpaceImage[],
   ): {
     success: boolean;
     message: string;
-    data?: PropertySapceImage[];
+    data?: PropertySpaceImage[];
     statusCode: HttpStatus;
   } => ({
     success: true,
@@ -57,7 +57,7 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
   PROPERTY_SPACE_IMAGES_NOT_FOUND: (): {
     success: boolean;
     message: string;
-    data?: PropertySapceImage[];
+    data?: PropertySpaceImage[];
     statusCode: number;
   } => ({
     success: true,
@@ -66,11 +66,11 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     statusCode: HttpStatus.OK,
   }),
   PROPERTY_SPACE_IMAGES_FETCHED: (
-    propertySpaceImages: PropertySapceImage[],
+    propertySpaceImages: PropertySpaceImage[],
   ): {
     success: boolean;
     message: string;
-    data?: PropertySapceImage[];
+    data?: PropertySpaceImage[];
     statusCode: number;
   } => ({
     success: true,
@@ -83,7 +83,7 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
   ): {
     success: boolean;
     message: string;
-    data?: PropertySapceImage;
+    data?: PropertySpaceImage;
     statusCode: number;
   } => ({
     success: false,
@@ -95,7 +95,7 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
   ): {
     success: boolean;
     message: string;
-    data?: PropertySapceImage;
+    data?: PropertySpaceImage;
     statusCode: number;
   } => ({
     success: false,
@@ -103,11 +103,11 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     statusCode: HttpStatus.NOT_FOUND,
   }),
   PROPERTY_SPACE_IMAGE_FETCHED: (
-    propertySpaceImage: PropertySapceImage,
+    propertySpaceImage: PropertySpaceImage,
   ): {
     success: boolean;
     message: string;
-    data?: PropertySapceImage;
+    data?: PropertySpaceImage;
     statusCode: number;
   } => ({
     success: true,
@@ -127,12 +127,12 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     statusCode: HttpStatus.NO_CONTENT,
   }),
   PROPERTY_SPACE_IMAGE_UPDATED: (
-    updatedPropertySpaceImage: PropertySapceImage,
+    updatedPropertySpaceImage: PropertySpaceImage,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: PropertySapceImage;
+    data?: PropertySpaceImage;
     statusCode: number;
   } => ({
     success: true,
