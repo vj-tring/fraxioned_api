@@ -24,7 +24,6 @@ export class UserPropertyService {
   async createUserProperty(
     createUserPropertyDto: CreateUserPropertyDTO,
   ): Promise<object> {
-    // Validate user existence
     const user = await this.userRepository.findOne({
       where: { id: createUserPropertyDto.user.id },
     });
@@ -34,7 +33,6 @@ export class UserPropertyService {
       );
     }
 
-    // Validate property existence
     const property = await this.propertyRepository.findOne({
       where: { id: createUserPropertyDto.property.id },
     });
@@ -44,7 +42,6 @@ export class UserPropertyService {
       );
     }
 
-    // Validate createdBy existence
     const createdBy = await this.userRepository.findOne({
       where: { id: createUserPropertyDto.createdBy.id },
     });
@@ -130,7 +127,6 @@ export class UserPropertyService {
       return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(id);
     }
 
-    // Validate user existence
     if (updateUserPropertyDto.user) {
       const user = await this.userRepository.findOne({
         where: { id: updateUserPropertyDto.user.id },
@@ -142,7 +138,6 @@ export class UserPropertyService {
       }
     }
 
-    // Validate property existence
     if (updateUserPropertyDto.property) {
       const property = await this.propertyRepository.findOne({
         where: { id: updateUserPropertyDto.property.id },
@@ -154,7 +149,6 @@ export class UserPropertyService {
       }
     }
 
-    // Validate updatedBy existence
     if (updateUserPropertyDto.updatedBy) {
       const updatedBy = await this.userRepository.findOne({
         where: { id: updateUserPropertyDto.updatedBy.id },

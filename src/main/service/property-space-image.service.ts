@@ -51,6 +51,7 @@ export class PropertySpaceImageService {
 
       const existingUser = await this.userRepository.findOne({
         where: { id: createdByUserId },
+        select: { id: true },
       });
       if (!existingUser) {
         this.logger.error(`User with ID ${createdByUserId} does not exist`);
@@ -112,6 +113,10 @@ export class PropertySpaceImageService {
     try {
       const propertySpaceImages = await this.propertySapceImageRepository.find({
         relations: ['propertySpace', 'createdBy', 'updatedBy'],
+        select: {
+          createdBy: { id: true },
+          updatedBy: { id: true },
+        },
       });
 
       if (propertySpaceImages.length === 0) {
@@ -147,6 +152,10 @@ export class PropertySpaceImageService {
         await this.propertySapceImageRepository.findOne({
           where: { id },
           relations: ['propertySpace', 'createdBy', 'updatedBy'],
+          select: {
+            createdBy: { id: true },
+            updatedBy: { id: true },
+          },
         });
 
       if (!propertySpaceImage) {
@@ -186,6 +195,10 @@ export class PropertySpaceImageService {
         await this.propertySapceImageRepository.findOne({
           where: { id },
           relations: ['propertySpace', 'createdBy', 'updatedBy'],
+          select: {
+            createdBy: { id: true },
+            updatedBy: { id: true },
+          },
         });
 
       if (!propertySpaceImage) {
@@ -253,14 +266,17 @@ export class PropertySpaceImageService {
         );
       }
 
+      const { imageFile, ...dtoWithoutImageFile } = updatePropertySpaceImageDto;
+
       Object.assign(propertySpaceImage, {
-        ...updatePropertySpaceImageDto,
+        ...dtoWithoutImageFile,
         url: imageUrlLocation,
       });
 
       const updatedImage =
         await this.propertySapceImageRepository.save(propertySpaceImage);
 
+      this.logger.log(`Image Details: ${imageFile}`);
       this.logger.log(
         `Property Space Image with ID ${id} updated successfully`,
       );
