@@ -7,6 +7,7 @@ import { SpaceController } from '../controller/space.controller';
 import { SpaceService } from '../service/space.service';
 import { UserModule } from './user.module';
 import { PropertySpaceModule } from './property-space.module';
+import { S3UtilsModule } from './s3-utils.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Space]),
@@ -14,6 +15,7 @@ import { PropertySpaceModule } from './property-space.module';
     AuthenticationModule,
     UserModule,
     forwardRef(() => PropertySpaceModule),
+    S3UtilsModule,
   ],
   controllers: [SpaceController],
   providers: [SpaceService],

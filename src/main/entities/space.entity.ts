@@ -17,6 +17,9 @@ export class Space {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
+  @Column({ type: 'varchar', length: 500, nullable: true, default: null })
+  s3_url: string;
+
   @Column({
     name: 'is_bed_type_allowed',
     type: 'boolean',

@@ -15,6 +15,7 @@ import { UpdateSpaceDto } from '../dto/requests/space/update-space.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { UserService } from './user.service';
 import { PropertySpaceService } from './property-space.service';
+import { S3UtilsService } from './s3-utils.service';
 
 @Injectable()
 export class SpaceService {
@@ -24,6 +25,7 @@ export class SpaceService {
     private readonly userService: UserService,
     @Inject(forwardRef(() => PropertySpaceService))
     private readonly propertySpaceService: PropertySpaceService,
+    private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -87,6 +89,7 @@ export class SpaceService {
 
   async createSpace(
     createSpaceDto: CreateSpaceDto,
+    imageFile: Express.Multer.File,
   ): Promise<ApiResponse<Space>> {
     try {
       const existingSpace = await this.findSpaceByName(createSpaceDto.name);
@@ -107,6 +110,21 @@ export class SpaceService {
         ...createSpaceDto,
       });
       const savedSpace = await this.saveSpace(space);
+
+      const folderName = `general_media/images/space`;
+      const fileName = `${savedSpace.id}.${imageFile.originalname.split('.').pop()}`;
+
+      const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+        folderName,
+        fileName,
+        imageFile.buffer,
+        imageFile.mimetype,
+      );
+
+      savedSpace.s3_url = imageUrlLocation;
+
+      await this.spaceRepository.save(savedSpace);
+
       this.logger.log(
         `Space ${createSpaceDto.name} created with ID ${savedSpace.id}`,
       );

@@ -9,8 +9,10 @@ import {
   Param,
   Patch,
   Delete,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { SpaceService } from '../service/space.service';
@@ -18,6 +20,14 @@ import { Space } from '../entities/space.entity';
 import { CreateSpaceDto } from '../dto/requests/space/create-space.dto';
 import { UpdateSpaceDto } from '../dto/requests/space/update-space.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  getAllowedExtensions,
+  getMaxFileSize,
+  isFileExtensionValid,
+  isFileSizeValid,
+} from '../utils/image-file.utils';
+import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 
 @ApiTags('Space')
 @Controller('v1/spaces')
@@ -27,11 +37,40 @@ export class SpaceController {
   constructor(private readonly spaceService: SpaceService) {}
 
   @Post('space')
+  @UseInterceptors(FileInterceptor('imageFile'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Create a new space',
+    type: CreateSpaceDto,
+  })
   async createSpace(
     @Body() createSpaceDto: CreateSpaceDto,
+    @UploadedFile() imageFile: Express.Multer.File,
   ): Promise<ApiResponse<Space>> {
     try {
-      const result = await this.spaceService.createSpace(createSpaceDto);
+      // createSpaceDto.imageFile = imageFile;
+      const max_file_size = getMaxFileSize();
+      const allowedExtensions = getAllowedExtensions();
+      const hasOversizedFile = !isFileSizeValid(imageFile, max_file_size);
+
+      if (hasOversizedFile) {
+        return MEDIA_IMAGE_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
+      }
+
+      const hasUnsupportedExtension = !isFileExtensionValid(
+        imageFile,
+        allowedExtensions,
+      );
+
+      if (hasUnsupportedExtension) {
+        return MEDIA_IMAGE_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
+          allowedExtensions,
+        );
+      }
+      const result = await this.spaceService.createSpace(
+        createSpaceDto,
+        imageFile,
+      );
       return result;
     } catch (error) {
       throw new HttpException(
