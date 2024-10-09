@@ -17,9 +17,13 @@ import { UserService } from './user.service';
 import { PropertySpaceService } from './property-space.service';
 import { S3UtilsService } from './s3-utils.service';
 import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
+import { S3 } from 'aws-sdk';
 
 @Injectable()
 export class SpaceService {
+  private readonly s3 = new S3();
+  private readonly bucketName = process.env.AWS_S3_BUCKET_NAME;
+
   constructor(
     @InjectRepository(Space)
     private readonly spaceRepository: Repository<Space>,
@@ -112,8 +116,9 @@ export class SpaceService {
       });
       const savedSpace = await this.saveSpace(space);
 
-      const folderName = `general_media/images/space`;
-      const fileName = `${savedSpace.id}.${imageFile.originalname.split('.').pop()}`;
+      const folderName = 'general_media/images/space';
+      const fileExtension = imageFile.originalname.split('.').pop();
+      const fileName = `${savedSpace.id}.${fileExtension}`;
 
       const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
         folderName,
@@ -189,6 +194,7 @@ export class SpaceService {
   async updateSpaceDetailById(
     id: number,
     updateSpaceDto: UpdateSpaceDto,
+    imageFile?: Express.Multer.File,
   ): Promise<ApiResponse<Space>> {
     try {
       const existingSpace = await this.findSpaceById(id);
@@ -213,6 +219,41 @@ export class SpaceService {
         );
       }
       Object.assign(existingSpace, updateSpaceDto);
+
+      if (imageFile) {
+        const folderName = 'general_media/images/space';
+        const fileExtension = imageFile.originalname.split('.').pop();
+        const fileName = `${existingSpace.id}.${fileExtension}`;
+        let s3Key = '';
+        let imageUrlLocation = existingSpace.s3_url;
+
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+        }
+
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
+
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          imageFile.buffer,
+          imageFile.mimetype,
+        );
+
+        existingSpace.s3_url = imageUrlLocation;
+      }
+
       const updatedSpace = await this.saveSpace(existingSpace);
       this.logger.log(`Space with ID ${id} updated successfully`);
       return SPACE_RESPONSES.SPACE_UPDATED(updatedSpace);
