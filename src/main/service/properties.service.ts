@@ -25,6 +25,7 @@ import { User } from '../entities/user.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { PROPERTY_RESPONSES } from '../commons/constants/response-constants/property.constant';
+import { S3UtilsService } from './s3-utils.service';
 
 @Injectable()
 export class PropertiesService {
@@ -38,6 +39,7 @@ export class PropertiesService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private readonly logger: LoggerService,
+    private readonly s3UtilsService: S3UtilsService,
   ) {}
   private async shouldApplyPropertyNameFilter(
     userId: number,
@@ -75,18 +77,49 @@ export class PropertiesService {
   async updatePropertiesById(
     id: number,
     updatePropertiesDto: UpdatePropertiesDto,
-  ): Promise<UpdatePropertiesResponseDto> {
+    mailBannerFile?: Express.Multer.File,
+    coverImageFile?: Express.Multer.File,
+  ): Promise<UpdatePropertiesResponseDto | object> {
     try {
-      const existingProperties = await this.propertiesRepository.findOne({
+      const existingProperty = await this.propertiesRepository.findOne({
         where: { id },
       });
-      if (!existingProperties) {
-        throw new NotFoundException(`Properties with ID ${id} not found`);
+
+      if (!existingProperty) {
+        return PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
       }
+
+      if (mailBannerFile) {
+        const folderName = `properties/${id}/mailBanners`;
+        const fileExtension = mailBannerFile.originalname.split('.').pop();
+        const fileName = `${existingProperty.propertyName} || ${id}-mailBanner.${fileExtension}`;
+        const mailBannerUrl = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          mailBannerFile.buffer,
+          mailBannerFile.mimetype,
+        );
+        updatePropertiesDto.mailBannerUrl = mailBannerUrl;
+      }
+
+      if (coverImageFile) {
+        const folderName = `properties/${id}/coverImages`;
+        const fileExtension = coverImageFile.originalname.split('.').pop();
+        const fileName = `${existingProperty.propertyName || id}-coverImage.${fileExtension}`;
+        const coverImageUrl = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          coverImageFile.buffer,
+          coverImageFile.mimetype,
+        );
+        updatePropertiesDto.coverImageUrl = coverImageUrl;
+      }
+
       const updatedProperties = this.propertiesRepository.merge(
-        existingProperties,
+        existingProperty,
         updatePropertiesDto,
       );
+
       await this.propertiesRepository.save(updatedProperties);
       return updatedProperties;
     } catch (error) {
@@ -99,12 +132,41 @@ export class PropertiesService {
       const existingProperties = await this.propertiesRepository.findOne({
         where: { id },
       });
+
       if (!existingProperties) {
-        throw new NotFoundException(`Properties with ID ${id} not found`);
+        return PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
       }
-      return await this.propertiesRepository.remove(existingProperties);
+
+      const imageUrls = [
+        existingProperties.mailBannerUrl,
+        existingProperties.coverImageUrl,
+      ];
+
+      for (const imageUrl of imageUrls) {
+        if (imageUrl) {
+          const s3Key = await this.s3UtilsService.extractS3Key(imageUrl);
+
+          const headObject =
+            await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+          if (headObject) {
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          } else {
+            this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
+          }
+        }
+      }
+
+      await this.propertiesRepository.remove(existingProperties);
+      this.logger.log(`Properties with ID ${id} deleted successfully`);
+      return PROPERTY_RESPONSES.PROPERTY_DELETED(id);
     } catch (error) {
-      throw error;
+      this.logger.error(
+        `Error deleting properties with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting the property',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
