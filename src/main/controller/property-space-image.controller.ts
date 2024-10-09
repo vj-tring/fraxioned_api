@@ -134,7 +134,7 @@ export class PropertySpaceImageController {
     }
   }
 
-  @Get(':id')
+  @Get('property-space-image/:id')
   async getPropertySpaceImageById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -153,7 +153,7 @@ export class PropertySpaceImageController {
     }
   }
 
-  @Patch(':id')
+  @Patch('property-space-image/:id')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'imageFile', maxCount: 1 }]))
   async updatePropertySpaceImage(
     @Param('id') id: number,
@@ -217,7 +217,7 @@ export class PropertySpaceImageController {
     }
   }
 
-  @Delete(':id')
+  @Delete('property-space-image/:id')
   async deletePropertySpaceImage(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
