@@ -5,7 +5,7 @@ import { PropertySpace } from './property-space.entity';
 import { BaseEntity } from '../commons/abstracts/base-entity';
 
 @Entity('fxn_property_amenities')
-export class PropertyAmenities extends BaseEntity {
+export class PropertySpaceAmenities extends BaseEntity {
   @ManyToOne(() => Property, (properties) => properties.id)
   @JoinColumn({
     name: 'property_id',

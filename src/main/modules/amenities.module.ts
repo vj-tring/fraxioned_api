@@ -6,7 +6,7 @@ import { AuthenticationModule } from './authentication.module';
 import { Amenities } from '../entities/amenities.entity';
 import { AmenitiesController } from '../controller/amenities.controller';
 import { AmenitiesService } from '../service/amenities.service';
-import { PropertyAmenities } from '../entities/property-amenity.entity';
+import { PropertySpaceAmenities } from '../entities/property-space-amenity.entity';
 import { PropertyDocumentsModule } from './property-document.module';
 import { AmenityGroup } from '../entities/amenity-group.entity';
 
@@ -15,7 +15,7 @@ import { AmenityGroup } from '../entities/amenity-group.entity';
     TypeOrmModule.forFeature([
       Amenities,
       User,
-      PropertyAmenities,
+      PropertySpaceAmenities,
       AmenityGroup,
     ]),
     LoggerModule,

@@ -7,7 +7,7 @@ import { PropertySpace } from 'src/main/entities/property-space.entity';
 import { Property } from 'src/main/entities/property.entity';
 import { User } from 'src/main/entities/user.entity';
 
-export class CreateOrDeletePropertyAmenitiesDto {
+export class CreateOrDeletePropertySpaceAmenitiesDto {
   @ApiProperty({
     example: { id: 1 },
   })

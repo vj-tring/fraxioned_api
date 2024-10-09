@@ -11,7 +11,7 @@ import { UserPropertyModule } from './main/modules/user-property.module';
 import { UserModule } from './main/modules/user.module';
 import { AmenitiesModule } from './main/modules/amenities.module';
 import { UserDocumentModule } from './main/modules/user-property-document.module';
-import { PropertyAmenitiesModule } from './main/modules/property-amenity.module';
+import { PropertySpaceAmenitiesModule } from './main/modules/property-space-amenity.module';
 import { PropertyCodesModule } from './main/modules/property-codes.module';
 import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './main/email/mail.module';
@@ -48,7 +48,7 @@ import { PropertySpaceBedModule } from './main/modules/property-space-bed.module
     UserSessionModule,
     AmenitiesModule,
     UserDocumentModule,
-    PropertyAmenitiesModule,
+    PropertySpaceAmenitiesModule,
     PropertyCodesModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,

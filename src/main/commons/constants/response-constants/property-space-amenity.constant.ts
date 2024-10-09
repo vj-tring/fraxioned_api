@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
-import { PropertyAmenities } from 'src/main/entities/property-amenity.entity';
+import { PropertySpaceAmenities } from 'src/main/entities/property-space-amenity.entity';
 
-export const PROPERTY_AMENITY_RESPONSES = {
+export const PROPERTY_SPACE_AMENITY_RESPONSES = {
   PROPERTY_NOT_FOUND: (
     propertyId: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
@@ -42,12 +42,12 @@ export const PROPERTY_AMENITY_RESPONSES = {
     statusCode: HttpStatus.CONFLICT,
   }),
   PROPERTY_AMENITY_CREATED: (
-    savedPropertyAmenity: PropertyAmenities,
+    savedPropertyAmenity: PropertySpaceAmenities,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data: PropertyAmenities;
+    data: PropertySpaceAmenities;
     statusCode: HttpStatus;
   } => ({
     success: true,
@@ -58,7 +58,7 @@ export const PROPERTY_AMENITY_RESPONSES = {
   PROPERTY_AMENITIES_NOT_FOUND: (): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities[];
+    data?: PropertySpaceAmenities[];
     statusCode: number;
   } => ({
     success: true,
@@ -67,16 +67,16 @@ export const PROPERTY_AMENITY_RESPONSES = {
     statusCode: HttpStatus.OK,
   }),
   PROPERTY_AMENITIES_FETCHED: (
-    propertyAmenities: PropertyAmenities[],
+    PropertySpaceAmenities: PropertySpaceAmenities[],
   ): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities[];
+    data?: PropertySpaceAmenities[];
     statusCode: number;
   } => ({
     success: true,
     message: 'Property amenities retrieved successfully',
-    data: propertyAmenities,
+    data: PropertySpaceAmenities,
     statusCode: HttpStatus.OK,
   }),
   PROPERTY_AMENITY_NOT_FOUND: (
@@ -84,7 +84,7 @@ export const PROPERTY_AMENITY_RESPONSES = {
   ): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities;
+    data?: PropertySpaceAmenities;
     statusCode: number;
   } => ({
     success: false,
@@ -92,12 +92,12 @@ export const PROPERTY_AMENITY_RESPONSES = {
     statusCode: HttpStatus.NOT_FOUND,
   }),
   PROPERTY_AMENITY_FETCHED: (
-    propertyAmenity: PropertyAmenities,
+    propertyAmenity: PropertySpaceAmenities,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities;
+    data?: PropertySpaceAmenities;
     statusCode: number;
   } => ({
     success: true,
@@ -106,12 +106,12 @@ export const PROPERTY_AMENITY_RESPONSES = {
     statusCode: HttpStatus.OK,
   }),
   PROPERTY_AMENITY_UPDATED: (
-    updatedPropertyAmenity: PropertyAmenities,
+    updatedPropertyAmenity: PropertySpaceAmenities,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities;
+    data?: PropertySpaceAmenities;
     statusCode: number;
   } => ({
     success: true,
@@ -122,7 +122,7 @@ export const PROPERTY_AMENITY_RESPONSES = {
   PROPERTY_AMENITIES_UPDATED: (): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities[];
+    data?: PropertySpaceAmenities[];
     statusCode: number;
   } => ({
     success: true,
