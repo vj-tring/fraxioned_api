@@ -19,8 +19,8 @@ import { CreatePropertySpaceAmenitiesDto } from '../dto/requests/property-space-
 import { UpdatePropertySpaceAmenitiesDto } from '../dto/requests/property-space-amenity/update-property-space-amenities.dto';
 import { PropertySpaceAmenities } from '../entities/property-space-amenity.entity';
 
-@ApiTags('PropertySpaceAmenities')
-@Controller('v1/property-amenities')
+@ApiTags('Property Space Amenities')
+@Controller('v1/property-space-amenities')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class PropertySpaceAmenitiesController {
@@ -28,7 +28,7 @@ export class PropertySpaceAmenitiesController {
     private readonly propertyAmenitiesService: PropertySpaceAmenitiesService,
   ) {}
 
-  @Post('property-amenity')
+  @Post('property-space-amenity')
   async createPropertyAmenity(
     @Body() createPropertyAmenityDto: CreatePropertySpaceAmenitiesDto,
   ): Promise<{
@@ -44,7 +44,7 @@ export class PropertySpaceAmenitiesController {
       return result;
     } catch (error) {
       throw new HttpException(
-        'An error occurred while creating the property amenity',
+        'An error occurred while creating the property space amenity',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -63,13 +63,13 @@ export class PropertySpaceAmenitiesController {
       return result;
     } catch (error) {
       throw new HttpException(
-        'An error occurred while retrieving all property amenities',
+        'An error occurred while retrieving all property space amenities',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  @Get('property-amenity/:id')
+  @Get('property-space-amenity/:id')
   async getPropertyAmenityById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
@@ -82,7 +82,7 @@ export class PropertySpaceAmenitiesController {
       return result;
     } catch (error) {
       throw new HttpException(
-        'An error occurred while retrieving the property amenity',
+        'An error occurred while retrieving the property space amenity',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -107,7 +107,7 @@ export class PropertySpaceAmenitiesController {
     }
   }
 
-  @Patch('property-amenity/:id')
+  @Patch('property-space-amenity/:id')
   async updatePropertyAmenityDetail(
     @Param('id') id: string,
     @Body() updatePropertyAmenitiesDto: UpdatePropertySpaceAmenitiesDto,
@@ -125,7 +125,7 @@ export class PropertySpaceAmenitiesController {
       return result;
     } catch (error) {
       throw new HttpException(
-        'An error occurred while updating the property amenity',
+        'An error occurred while updating the property space amenity',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -149,13 +149,13 @@ export class PropertySpaceAmenitiesController {
       return result;
     } catch (error) {
       throw new HttpException(
-        'An error occurred while creation or deletion of property amenities for the selected property',
+        'An error occurred while creation or deletion of property space amenities for the selected property',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  @Delete('property-amenity/:id')
+  @Delete('property-space-amenity/:id')
   async deletePropertyAmenity(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
@@ -165,7 +165,7 @@ export class PropertySpaceAmenitiesController {
       return result;
     } catch (error) {
       throw new HttpException(
-        'An error occurred while deleting the property amenity',
+        'An error occurred while deleting the property space amenity',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

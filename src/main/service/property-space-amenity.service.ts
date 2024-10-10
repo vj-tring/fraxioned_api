@@ -99,7 +99,7 @@ export class PropertySpaceAmenitiesService {
   }> {
     try {
       this.logger.log(
-        `Creating mapping for property ${createPropertyAmenityDto.property.id} to the amenity ${createPropertyAmenityDto.amenity.id}`,
+        `Creating mapping for property ${createPropertyAmenityDto.property.id} to the space and amenity ${createPropertyAmenityDto.amenity.id}`,
       );
 
       const existingProperty = await this.propertiesRepository.findOne({
@@ -182,9 +182,9 @@ export class PropertySpaceAmenitiesService {
           : ' without a specific Property Space';
 
         this.logger.error(
-          `Error creating property amenity: Property ID ${createPropertyAmenityDto.property.id} with Amenity ID ${createPropertyAmenityDto.amenity.id}${spaceInfo} already exists`,
+          `Error creating property space amenity: Property ID ${createPropertyAmenityDto.property.id} with Amenity ID ${createPropertyAmenityDto.amenity.id}${spaceInfo} already exists`,
         );
-        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITY_ALREADY_EXISTS(
+        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITY_ALREADY_EXISTS(
           createPropertyAmenityDto.property.id,
           createPropertyAmenityDto.amenity.id,
           createPropertyAmenityDto.propertySpace?.id,
@@ -197,18 +197,18 @@ export class PropertySpaceAmenitiesService {
       const savedPropertyAmenity =
         await this.PropertySpaceAmenitiesRepository.save(propertyAmenity);
       this.logger.log(
-        `Property Amenity with property ID ${createPropertyAmenityDto.property.id} and amenity ID ${createPropertyAmenityDto.amenity.id} created successfully`,
+        `Property Space Amenity with property ID ${createPropertyAmenityDto.property.id} and amenity ID ${createPropertyAmenityDto.amenity.id} created successfully`,
       );
-      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITY_CREATED(
+      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITY_CREATED(
         savedPropertyAmenity,
         savedPropertyAmenity.id,
       );
     } catch (error) {
       this.logger.error(
-        `Error creating property amenity: ${error.message} - ${error.stack}`,
+        `Error creating property space amenity: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
-        'An error occurred while creating the property amenity',
+        'An error occurred while creating the property space amenity',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -263,24 +263,24 @@ export class PropertySpaceAmenitiesService {
         });
 
       if (PropertySpaceAmenities.length === 0) {
-        this.logger.log(`No property amenities are available`);
+        this.logger.log(`No property space amenities are available`);
 
-        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITIES_NOT_FOUND();
+        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
       }
 
       this.logger.log(
         `Retrieved ${PropertySpaceAmenities.length} amenities successfully.`,
       );
 
-      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITIES_FETCHED(
+      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_FETCHED(
         PropertySpaceAmenities,
       );
     } catch (error) {
       this.logger.error(
-        `Error retrieving property amenities: ${error.message} - ${error.stack}`,
+        `Error retrieving property space amenities: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
-        'An error occurred while retrieving the property amenities',
+        'An error occurred while retrieving the property space amenities',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -336,11 +336,15 @@ export class PropertySpaceAmenitiesService {
         });
 
       if (!propertyAmenity) {
-        this.logger.error(`Property Amenity with ID ${id} not found`);
-        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITY_NOT_FOUND(id);
+        this.logger.error(`Property Space Amenity with ID ${id} not found`);
+        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITY_NOT_FOUND(
+          id,
+        );
       }
-      this.logger.log(`Property Amenity with ID ${id} retrieved successfully`);
-      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITY_FETCHED(
+      this.logger.log(
+        `Property Space Amenity with ID ${id} retrieved successfully`,
+      );
+      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITY_FETCHED(
         propertyAmenity,
         id,
       );
@@ -410,7 +414,7 @@ export class PropertySpaceAmenitiesService {
 
       if (PropertySpaceAmenities.length === 0) {
         this.logger.error(`No amenities are available for this property`);
-        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITIES_NOT_FOUND();
+        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
       }
 
       const uniqueAmenitiesMap = new Map<number, PropertySpaceAmenities>();
@@ -425,12 +429,12 @@ export class PropertySpaceAmenitiesService {
       this.logger.log(
         `Retrieved ${PropertySpaceAmenities.length} amenities successfully.`,
       );
-      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITIES_FETCHED(
+      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_FETCHED(
         uniqueAmenities,
       );
     } catch (error) {
       this.logger.error(
-        `Error retrieving property amenities: ${error.message} - ${error.stack}`,
+        `Error retrieving property space amenities: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
         'An error occurred while retrieving the amenities list for the selected property',
@@ -492,8 +496,12 @@ export class PropertySpaceAmenitiesService {
         });
 
       if (!propertyAmenity) {
-        this.logger.error(`Property Amenity with ID ${id} does not exist`);
-        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITY_NOT_FOUND(id);
+        this.logger.error(
+          `Property Space Amenity with ID ${id} does not exist`,
+        );
+        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITY_NOT_FOUND(
+          id,
+        );
       }
 
       const user = await this.usersRepository.findOne({
@@ -548,18 +556,20 @@ export class PropertySpaceAmenitiesService {
       const updatedPropertyAmenity =
         await this.PropertySpaceAmenitiesRepository.save(propertyAmenity);
 
-      this.logger.log(`Property Amenity with ID ${id} updated successfully`);
+      this.logger.log(
+        `Property Space Amenity with ID ${id} updated successfully`,
+      );
 
-      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITY_UPDATED(
+      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITY_UPDATED(
         updatedPropertyAmenity,
         id,
       );
     } catch (error) {
       this.logger.error(
-        `Error updating property amenity with ID ${id}: ${error.message} - ${error.stack}`,
+        `Error updating property space amenity with ID ${id}: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
-        'An error occurred while updating the property amenity',
+        'An error occurred while updating the property space amenity',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -710,15 +720,15 @@ export class PropertySpaceAmenitiesService {
       }
 
       this.logger.log(
-        `Property Amenities for the selected property updated successfully`,
+        `Property Space Amenities for the selected property updated successfully`,
       );
-      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITIES_UPDATED();
+      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_UPDATED();
     } catch (error) {
       this.logger.error(
-        `Error creating property amenities: ${error.message} - ${error.stack}`,
+        `Error creating property space amenities: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
-        'An error occurred while creation or deletion of property amenities for the selected property',
+        'An error occurred while creation or deletion of property space amenities for the selected property',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -811,11 +821,17 @@ export class PropertySpaceAmenitiesService {
       const result = await this.PropertySpaceAmenitiesRepository.delete(id);
 
       if (result.affected === 0) {
-        this.logger.error(`Property Amenity with ID ${id} not found`);
-        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITY_NOT_FOUND(id);
+        this.logger.error(`Property Space Amenity with ID ${id} not found`);
+        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITY_NOT_FOUND(
+          id,
+        );
       }
-      this.logger.log(`Property Amenity with ID ${id} deleted successfully`);
-      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_AMENITY_DELETED(id);
+      this.logger.log(
+        `Property Space Amenity with ID ${id} deleted successfully`,
+      );
+      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITY_DELETED(
+        id,
+      );
     } catch (error) {
       this.logger.error(
         `Error deleting property amenity with ID ${id}: ${error.message} - ${error.stack}`,
