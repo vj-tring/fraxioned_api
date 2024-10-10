@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
-import { PropertyAmenities } from 'src/main/entities/property-amenity.entity';
+import { PropertySpaceAmenities } from 'src/main/entities/property-space-amenity.entity';
 
-export const PROPERTY_AMENITY_RESPONSES = {
+export const PROPERTY_SPACE_AMENITY_RESPONSES = {
   PROPERTY_NOT_FOUND: (
     propertyId: number,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
@@ -30,7 +30,7 @@ export const PROPERTY_AMENITY_RESPONSES = {
     message: `User with ID ${userId} does not exist`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
-  PROPERTY_AMENITY_ALREADY_EXISTS: (
+  PROPERTY_SPACE_AMENITY_ALREADY_EXISTS: (
     propertyId: number,
     amenityId: number,
     propertySpaceId?: number,
@@ -41,95 +41,95 @@ export const PROPERTY_AMENITY_RESPONSES = {
       : `Property ID ${propertyId} with Amenity ID ${amenityId} already exists`,
     statusCode: HttpStatus.CONFLICT,
   }),
-  PROPERTY_AMENITY_CREATED: (
-    savedPropertyAmenity: PropertyAmenities,
+  PROPERTY_SPACE_AMENITY_CREATED: (
+    savedPropertyAmenity: PropertySpaceAmenities,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data: PropertyAmenities;
+    data: PropertySpaceAmenities;
     statusCode: HttpStatus;
   } => ({
     success: true,
-    message: `Property Amenity with ID ${id} created successfully`,
+    message: `Property Space Amenity with ID ${id} created successfully`,
     data: savedPropertyAmenity,
     statusCode: HttpStatus.CREATED,
   }),
-  PROPERTY_AMENITIES_NOT_FOUND: (): {
+  PROPERTY_SPACE_AMENITIES_NOT_FOUND: (): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities[];
+    data?: PropertySpaceAmenities[];
     statusCode: number;
   } => ({
     success: true,
-    message: 'No property amenities are available',
+    message: 'No property space amenities are available',
     data: [],
     statusCode: HttpStatus.OK,
   }),
-  PROPERTY_AMENITIES_FETCHED: (
-    propertyAmenities: PropertyAmenities[],
+  PROPERTY_SPACE_AMENITIES_FETCHED: (
+    PropertySpaceAmenities: PropertySpaceAmenities[],
   ): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities[];
+    data?: PropertySpaceAmenities[];
     statusCode: number;
   } => ({
     success: true,
-    message: 'Property amenities retrieved successfully',
-    data: propertyAmenities,
+    message: 'Property Space Amenities retrieved successfully',
+    data: PropertySpaceAmenities,
     statusCode: HttpStatus.OK,
   }),
-  PROPERTY_AMENITY_NOT_FOUND: (
+  PROPERTY_SPACE_AMENITY_NOT_FOUND: (
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities;
+    data?: PropertySpaceAmenities;
     statusCode: number;
   } => ({
     success: false,
-    message: `Property Amenity with ID ${id} not found`,
+    message: `Property Space Amenity with ID ${id} not found`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
-  PROPERTY_AMENITY_FETCHED: (
-    propertyAmenity: PropertyAmenities,
+  PROPERTY_SPACE_AMENITY_FETCHED: (
+    propertyAmenity: PropertySpaceAmenities,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities;
+    data?: PropertySpaceAmenities;
     statusCode: number;
   } => ({
     success: true,
-    message: `Property Amenity with ID ${id} retrieved successfully`,
+    message: `Property Space Amenity with ID ${id} retrieved successfully`,
     data: propertyAmenity,
     statusCode: HttpStatus.OK,
   }),
-  PROPERTY_AMENITY_UPDATED: (
-    updatedPropertyAmenity: PropertyAmenities,
+  PROPERTY_SPACE_AMENITY_UPDATED: (
+    updatedPropertyAmenity: PropertySpaceAmenities,
     id: number,
   ): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities;
+    data?: PropertySpaceAmenities;
     statusCode: number;
   } => ({
     success: true,
-    message: `Property Amenity with ID ${id} updated successfully`,
+    message: `Property Space Amenity with ID ${id} updated successfully`,
     data: updatedPropertyAmenity,
     statusCode: HttpStatus.OK,
   }),
-  PROPERTY_AMENITIES_UPDATED: (): {
+  PROPERTY_SPACE_AMENITIES_UPDATED: (): {
     success: boolean;
     message: string;
-    data?: PropertyAmenities[];
+    data?: PropertySpaceAmenities[];
     statusCode: number;
   } => ({
     success: true,
-    message: `Property Amenities for the selected property updated successfully`,
+    message: `Property Space Amenities for the selected property updated successfully`,
     statusCode: HttpStatus.OK,
   }),
-  PROPERTY_AMENITY_DELETED: (
+  PROPERTY_SPACE_AMENITY_DELETED: (
     id: number,
   ): {
     success: boolean;
@@ -137,7 +137,7 @@ export const PROPERTY_AMENITY_RESPONSES = {
     statusCode: number;
   } => ({
     success: true,
-    message: `Property Amenity with ID ${id} deleted successfully`,
+    message: `Property Space Amenity with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
   AMENITIES_NOT_FOUND: (

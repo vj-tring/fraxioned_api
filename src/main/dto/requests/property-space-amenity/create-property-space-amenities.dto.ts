@@ -1,12 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
+import { Property } from 'entities/property.entity';
+import { IsValidId } from 'commons/guards/is-valid-id.decorator';
+import { User } from 'entities/user.entity';
+import { ApiProperty } from '@nestjs/swagger';
 import { Amenities } from 'src/main/entities/amenities.entity';
 import { PropertySpace } from 'src/main/entities/property-space.entity';
-import { Property } from 'src/main/entities/property.entity';
-import { User } from 'src/main/entities/user.entity';
 
-export class UpdatePropertyAmenitiesDto {
+export class CreatePropertySpaceAmenitiesDto {
   @ApiProperty({
     example: { id: 1 },
   })
@@ -37,9 +37,9 @@ export class UpdatePropertyAmenitiesDto {
   @ApiProperty({
     example: { id: 1 },
   })
-  @IsNotEmpty({ message: 'updatedBy is required' })
+  @IsNotEmpty({ message: 'created by is required' })
   @IsValidId({
-    message: 'updatedBy must be an object with a valid id where (id >= 1)',
+    message: 'createdBy must be an object with a valid id where (id >= 1)',
   })
-  updatedBy: User;
+  createdBy: User;
 }

@@ -6,7 +6,7 @@ import { User } from '../entities/user.entity';
 import { Amenities } from '../entities/amenities.entity';
 import { CreateAmenitiesDto } from '../dto/requests/amenity/create-amenities.dto';
 import { AMENITIES_RESPONSES } from '../commons/constants/response-constants/amenities.constant';
-import { PropertyAmenities } from '../entities/property-amenity.entity';
+import { PropertySpaceAmenities } from '../entities/property-space-amenity.entity';
 import { UpdateAmenitiesDto } from '../dto/requests/amenity/update-amenities.dto';
 import { AMENITY_GROUP_RESPONSES } from '../commons/constants/response-constants/amenity-group.constant';
 import { AmenityGroup } from '../entities/amenity-group.entity';
@@ -18,8 +18,8 @@ export class AmenitiesService {
     private readonly amenityRepository: Repository<Amenities>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    @InjectRepository(PropertyAmenities)
-    private readonly propertyAmenityRepository: Repository<PropertyAmenities>,
+    @InjectRepository(PropertySpaceAmenities)
+    private readonly propertyAmenityRepository: Repository<PropertySpaceAmenities>,
     @InjectRepository(AmenityGroup)
     private readonly amenityGroupRepository: Repository<AmenityGroup>,
     private readonly logger: LoggerService,
