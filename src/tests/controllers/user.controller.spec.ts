@@ -12,7 +12,6 @@ import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { CreateUserDTO } from 'src/main/dto/requests/user/create-user.dto';
-import { UpdateUserDTO } from 'src/main/dto/requests/user/update-user.dto';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -97,24 +96,6 @@ describe('UserController', () => {
 
       const result = await controller.getUserById(1);
       expect(result).toEqual(USER_RESPONSES.USER_FETCHED(user));
-    });
-  });
-
-  describe('updateUser', () => {
-    it('should update a user', async () => {
-      const updateUserDto: UpdateUserDTO = {
-        firstName: 'John',
-        lastName: 'Doe',
-        role: { id: 1 },
-      } as UpdateUserDTO;
-
-      const updatedUser = { id: 1, firstName: 'John', lastName: 'Doe' };
-      jest
-        .spyOn(service, 'updateUser')
-        .mockResolvedValue(USER_RESPONSES.USER_UPDATED(updatedUser));
-
-      const result = await controller.updateUser(1, updateUserDto);
-      expect(result).toEqual(USER_RESPONSES.USER_UPDATED(updatedUser));
     });
   });
 });

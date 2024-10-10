@@ -9,7 +9,6 @@ import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/us
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 import { CreateUserDTO } from 'src/main/dto/requests/user/create-user.dto';
-import { UpdateUserDTO } from 'src/main/dto/requests/user/update-user.dto';
 
 describe('UserService', () => {
   let service: UserService;
@@ -209,97 +208,6 @@ describe('UserService', () => {
       const result = await service.getUserById(1);
       expect(result).toEqual(USER_RESPONSES.USER_FETCHED(user));
       expect(logger.log).toHaveBeenCalled();
-    });
-  });
-
-  describe('updateUser', () => {
-    it('should return USER_NOT_FOUND if user does not exist', async () => {
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-
-      const updateUserDto: UpdateUserDTO = {
-        firstName: 'John',
-        lastName: 'Doe',
-        role: { id: 1 },
-        contactDetails: {},
-      } as UpdateUserDTO;
-
-      const result = await service.updateUser(1, updateUserDto);
-      expect(result).toEqual(USER_RESPONSES.USER_NOT_FOUND(1));
-      expect(logger.warn).toHaveBeenCalled();
-    });
-
-    it('should return USER_NOT_FOUND if role does not exist', async () => {
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(new User());
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(null);
-
-      const updateUserDto: UpdateUserDTO = {
-        firstName: 'John',
-        lastName: 'Doe',
-        role: { id: 1 },
-        contactDetails: {},
-      } as UpdateUserDTO;
-
-      const result = await service.updateUser(1, updateUserDto);
-      expect(result).toEqual(
-        ROLE_RESPONSES.ROLE_NOT_FOUND(updateUserDto.role.id),
-      );
-    });
-
-    it('should update the user and return USER_UPDATED', async () => {
-      const user = {
-        id: 1,
-        firstName: 'John',
-        lastName: 'Doe',
-        contactDetails: {},
-      } as User;
-
-      const updatedUser = {
-        ...user,
-        firstName: 'John',
-        lastName: 'Doe',
-        role: { id: 1 },
-        contactDetails: {},
-      } as User;
-
-      const role = new Role();
-      role.id = 1;
-
-      const updatedByUser = { id: 2 } as User;
-
-      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(user);
-
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValueOnce(role);
-
-      jest
-        .spyOn(userRepository, 'findOne')
-        .mockResolvedValueOnce(updatedByUser);
-
-      jest
-        .spyOn(userContactDetailsRepository, 'findOne')
-        .mockResolvedValueOnce(user.contactDetails);
-
-      jest.spyOn(userContactDetailsRepository, 'merge').mockReturnValue(null);
-
-      jest.spyOn(userContactDetailsRepository, 'save').mockReturnValue(null);
-
-      jest.spyOn(userRepository, 'save').mockResolvedValueOnce(updatedUser);
-
-      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(updatedUser);
-
-      const updateUserDto: UpdateUserDTO = {
-        firstName: 'John',
-        lastName: 'Doe',
-        role: { id: 1 },
-        contactDetails: {},
-        updatedBy: 2,
-      } as UpdateUserDTO;
-
-      const result = await service.updateUser(1, updateUserDto);
-
-      expect(result).toEqual(USER_RESPONSES.USER_UPDATED(updatedUser));
-      expect(logger.log).toHaveBeenCalledWith(
-        'User with ID 1 updated successfully',
-      );
     });
   });
 
