@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { LoggerModule } from './logger.module';
@@ -22,9 +22,10 @@ import { PropertySpaceAmenities } from '../entities/property-space-amenity.entit
     ]),
     LoggerModule,
     AuthenticationModule,
-    PropertySpaceModule,
+    forwardRef(() => PropertySpaceModule),
   ],
   controllers: [PropertySpaceAmenitiesController],
   providers: [PropertySpaceAmenitiesService],
+  exports: [PropertySpaceAmenitiesService],
 })
 export class PropertySpaceAmenitiesModule {}

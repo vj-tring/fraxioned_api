@@ -15,6 +15,9 @@ import { UserService } from './user.service';
 import { PropertiesService } from './properties.service';
 import { PROPERTY_SPACE_RESPONSES } from '../commons/constants/response-constants/property-space.constant';
 import { SpaceService } from './space.service';
+import { PropertySpaceBathroomService } from './property-space-bathroom.service';
+import { PropertySpaceBedService } from './property-space-bed.service';
+import { PropertySpaceAmenitiesService } from './property-space-amenity.service';
 
 @Injectable()
 export class PropertySpaceService {
@@ -25,6 +28,12 @@ export class PropertySpaceService {
     private readonly propertyService: PropertiesService,
     @Inject(forwardRef(() => SpaceService))
     private readonly spaceService: SpaceService,
+    @Inject(forwardRef(() => PropertySpaceBedService))
+    private readonly propertySpaceBedService: PropertySpaceBedService,
+    @Inject(forwardRef(() => PropertySpaceBathroomService))
+    private readonly propertySpaceBathroomService: PropertySpaceBathroomService,
+    @Inject(forwardRef(() => PropertySpaceAmenitiesService))
+    private readonly propertySpaceAmenitiesService: PropertySpaceAmenitiesService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -189,6 +198,18 @@ export class PropertySpaceService {
     );
   }
 
+  async adjustInstanceNumbersAfterDeletion(
+    deletedInstanceNumber: number,
+  ): Promise<void> {
+    await this.propertySpaceRepository
+      .createQueryBuilder()
+      .update('PropertySpace')
+      .set({ instanceNumber: () => 'instanceNumber - 1' })
+      .where('instanceNumber > :instanceNumber', {
+        instanceNumber: deletedInstanceNumber,
+      })
+      .execute();
+  }
   async createPropertySpace(
     createPropertySpaceDto: CreatePropertySpaceDto,
   ): Promise<ApiResponse<PropertySpace>> {
@@ -331,10 +352,29 @@ export class PropertySpaceService {
 
   async removePropertySpace(id: number): Promise<ApiResponse<PropertySpace>> {
     try {
-      const result = await this.propertySpaceRepository.delete(id);
-      if (result.affected === 0) {
+      const existingPropertySpace = await this.findPropertySpaceById(id);
+
+      if (!existingPropertySpace) {
         return await this.handlePropertySpaceNotFound(id);
       }
+
+      await this.propertySpaceBedService.deletePropertySpaceBedByProperty(
+        existingPropertySpace.id,
+      );
+      await this.propertySpaceBathroomService.removeBathroomByPropertySpaceId(
+        existingPropertySpace.id,
+      );
+      await this.propertySpaceAmenitiesService.removePropertySpaceAmenitiesByPropertySpaceId(
+        existingPropertySpace.property.id,
+        existingPropertySpace.id,
+      );
+
+      await this.propertySpaceRepository.delete(id);
+
+      await this.adjustInstanceNumbersAfterDeletion(
+        existingPropertySpace.instanceNumber,
+      );
+
       this.logger.log(`Property space with ID ${id} deleted successfully`);
       return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACE_DELETED(id);
     } catch (error) {

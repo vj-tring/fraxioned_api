@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from './logger.module';
 import { AuthenticationModule } from './authentication.module';
@@ -14,11 +14,12 @@ import { PropertySpaceModule } from './property-space.module';
   imports: [
     TypeOrmModule.forFeature([User, PropertySpaceBathroom, SpaceBathroomTypes]),
     UserModule,
-    PropertySpaceModule,
     LoggerModule,
     AuthenticationModule,
+    forwardRef(() => PropertySpaceModule),
   ],
   controllers: [PropertySpaceBathroomController],
   providers: [PropertySpaceBathroomService],
+  exports: [PropertySpaceBathroomService],
 })
 export class PropertySpaceBathroomModule {}

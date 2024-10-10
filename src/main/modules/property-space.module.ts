@@ -8,6 +8,9 @@ import { PropertySpaceService } from '../service/property-space.service';
 import { PropertiesModule } from './properties.module';
 import { UserModule } from './user.module';
 import { SpaceModule } from './space.module';
+import { PropertySpaceBathroomModule } from './property-space-bathroom.module';
+import { PropertySpaceBedModule } from './property-space-bed.module';
+import { PropertySpaceAmenitiesModule } from './property-space-amenity.module';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { SpaceModule } from './space.module';
     AuthenticationModule,
     UserModule,
     PropertiesModule,
+    forwardRef(() => PropertySpaceBathroomModule),
+    forwardRef(() => PropertySpaceBedModule),
+    forwardRef(() => PropertySpaceAmenitiesModule),
     forwardRef(() => SpaceModule),
   ],
   controllers: [PropertySpaceController],
