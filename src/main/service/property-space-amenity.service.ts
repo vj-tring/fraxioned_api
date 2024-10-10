@@ -786,15 +786,18 @@ export class PropertySpaceAmenitiesService {
     propertyId: number,
     amenityIds: number[],
   ): Promise<PropertySpaceAmenities[]> {
-    return await this.PropertySpaceAmenitiesRepository.findBy({
-      property: {
-        id: propertyId,
-      },
-      amenity: {
-        id: In(amenityIds),
-      },
-      propertySpace: {
-        id: Not(IsNull()),
+    return await this.PropertySpaceAmenitiesRepository.find({
+      relations: ['amenity'],
+      where: {
+        property: {
+          id: propertyId,
+        },
+        amenity: {
+          id: In(amenityIds),
+        },
+        propertySpace: {
+          id: Not(IsNull()),
+        },
       },
     });
   }
