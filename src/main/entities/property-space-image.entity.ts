@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { PropertySpace } from './property-space.entity';
-import { toUSVString } from 'util';
 
 @Entity('fxn_property_space_image')
 export class PropertySpaceImage {
