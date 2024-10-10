@@ -10,7 +10,7 @@ import {
 import { User } from './user.entity';
 import { PropertySpace } from './property-space.entity';
 
-@Entity('fxn_property_sapce_image')
+@Entity('fxn_property_space_image')
 export class PropertySpaceImage {
   @PrimaryGeneratedColumn()
   id: number;
