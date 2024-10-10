@@ -9,6 +9,7 @@ import { USER_RESPONSES } from 'src/main/commons/constants/response-constants/us
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ROLE_RESPONSES } from 'src/main/commons/constants/response-constants/role.constant';
 import { CreateUserDTO } from 'src/main/dto/requests/user/create-user.dto';
+import { S3UtilsService } from 'src/main/service/s3-utils.service';
 
 describe('UserService', () => {
   let service: UserService;
@@ -38,6 +39,12 @@ describe('UserService', () => {
           useValue: {
             log: jest.fn(),
             warn: jest.fn(),
+          },
+        },
+        {
+          provide: S3UtilsService,
+          useValue: {
+            uploadFileToS3: jest.fn,
           },
         },
       ],

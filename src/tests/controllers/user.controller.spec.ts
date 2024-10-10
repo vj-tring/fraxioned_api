@@ -12,6 +12,7 @@ import { AuthGuard } from 'src/main/commons/guards/auth.guard';
 import { AuthenticationService } from 'src/main/service/auth/authentication.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { CreateUserDTO } from 'src/main/dto/requests/user/create-user.dto';
+import { S3UtilsService } from 'src/main/service/s3-utils.service';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -39,6 +40,12 @@ describe('UserController', () => {
           useValue: {
             log: jest.fn(),
             warn: jest.fn(),
+          },
+        },
+        {
+          provide: S3UtilsService,
+          useValue: {
+            uploadFileToS3: jest.fn,
           },
         },
         {
