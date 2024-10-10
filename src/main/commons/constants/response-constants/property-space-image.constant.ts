@@ -126,6 +126,17 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     message: `Property Space Image with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
+  PROPERTY_SPACE_IMAGES_DELETED: (
+    propertySpaceId: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `All images for Property Space ID ${propertySpaceId} deleted successfully`,
+    statusCode: HttpStatus.NO_CONTENT,
+  }),
   PROPERTY_SPACE_IMAGE_UPDATED: (
     updatedPropertySpaceImage: PropertySpaceImage,
     id: number,
