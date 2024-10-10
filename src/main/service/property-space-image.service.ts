@@ -186,6 +186,46 @@ export class PropertySpaceImageService {
     }
   }
 
+  async findPropertySpaceImagesByPropertyId(propertyId: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceImage[];
+    statusCode: number;
+  }> {
+    try {
+      const propertySpaceImages = await this.propertySapceImageRepository.find({
+        relations: ['propertySpace', 'createdBy', 'updatedBy'],
+        where: { propertySpace: { property: { id: propertyId } } },
+        select: {
+          createdBy: { id: true },
+          updatedBy: { id: true },
+        },
+      });
+
+      if (propertySpaceImages.length === 0) {
+        this.logger.log(
+          `No property space images found for property ID ${propertyId}`,
+        );
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND();
+      }
+
+      this.logger.log(
+        `Retrieved ${propertySpaceImages.length} property space images for property ID ${propertyId}`,
+      );
+      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_FETCHED(
+        propertySpaceImages,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property space images for property ID ${propertyId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving property space images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async updatePropertySpaceImage(
     id: number,
     updatePropertySpaceImageDto: UpdatePropertySpaceImageDto,
