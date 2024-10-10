@@ -12,7 +12,7 @@ import { PropertySeasonHolidaysModule } from './main/modules/property-season-hol
 import { UserSessionModule } from './main/modules/user-session.module';
 import { AmenitiesModule } from './main/modules/amenities.module';
 import { UserDocumentModule } from './main/modules/user-property-document.module';
-import { PropertyAmenitiesModule } from './main/modules/property-amenity.module';
+import { PropertySpaceAmenitiesModule } from './main/modules/property-space-amenity.module';
 import { PropertyCodesModule } from './main/modules/property-codes.module';
 import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './main/email/mail.module';
@@ -49,7 +49,7 @@ import { PropertySpaceBathroomModule } from './main/modules/property-space-bathr
     UserSessionModule,
     AmenitiesModule,
     UserDocumentModule,
-    PropertyAmenitiesModule,
+    PropertySpaceAmenitiesModule,
     PropertyCodesModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,

@@ -4,17 +4,17 @@ import { User } from '../entities/user.entity';
 import { LoggerModule } from './logger.module';
 import { Property } from '../entities/property.entity';
 import { AuthenticationModule } from './authentication.module';
-import { PropertyAmenities } from '../entities/property-amenity.entity';
 import { Amenities } from '../entities/amenities.entity';
 import { PropertySpace } from '../entities/property-space.entity';
-import { PropertyAmenitiesService } from '../service/property-amenity.service';
-import { PropertyAmenitiesController } from '../controller/property-amenity.controller';
+import { PropertySpaceAmenitiesService } from '../service/property-space-amenity.service';
+import { PropertySpaceAmenitiesController } from '../controller/property-space-amenity.controller';
 import { PropertySpaceModule } from './property-space.module';
+import { PropertySpaceAmenities } from '../entities/property-space-amenity.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      PropertyAmenities,
+      PropertySpaceAmenities,
       User,
       Amenities,
       Property,
@@ -24,7 +24,7 @@ import { PropertySpaceModule } from './property-space.module';
     AuthenticationModule,
     PropertySpaceModule,
   ],
-  controllers: [PropertyAmenitiesController],
-  providers: [PropertyAmenitiesService],
+  controllers: [PropertySpaceAmenitiesController],
+  providers: [PropertySpaceAmenitiesService],
 })
-export class PropertyAmenitiesModule {}
+export class PropertySpaceAmenitiesModule {}
