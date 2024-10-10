@@ -87,9 +87,10 @@ export class UpdateUserDTO {
   @IsInt()
   @IsOptional()
   updatedBy?: number;
-  
+
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => UserContactDetailsDTO)
   contactDetails?: UserContactDetailsDTO;
-}``
+}
+``;
