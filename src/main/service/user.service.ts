@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'entities/user.entity';
@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDTO } from '../dto/requests/user/create-user.dto';
 import { UpdateUserDTO } from '../dto/requests/user/update-user.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
+import { S3UtilsService } from './s3-utils.service';
 
 @Injectable()
 export class UserService {
@@ -22,6 +23,7 @@ export class UserService {
     @InjectRepository(UserContactDetails)
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     private readonly logger: LoggerService,
+    private readonly s3UtilsService: S3UtilsService,
   ) {}
 
   async findUserById(id: number): Promise<User | null> {
@@ -173,7 +175,11 @@ export class UserService {
     return USER_RESPONSES.USER_FETCHED(user);
   }
 
-  async updateUser(id: number, updateUserDto: UpdateUserDTO): Promise<object> {
+  async updateUser(
+    id: number,
+    updateUserDto: UpdateUserDTO,
+    profileImage?: Express.Multer.File,
+  ): Promise<object> {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
@@ -185,65 +191,43 @@ export class UserService {
           },
         },
       });
-
       if (!user) {
         this.logger.warn(`User with ID ${id} not found`);
         return USER_RESPONSES.USER_NOT_FOUND(id);
       }
 
-      if (updateUserDto.role) {
-        const role = await this.roleRepository.findOne({
-          where: { id: updateUserDto.role.id },
-        });
-        if (!role) {
-          return ROLE_RESPONSES.ROLE_NOT_FOUND(updateUserDto.role.id);
-        }
-      }
-
-      const updatedByUser = await this.userRepository.findOne({
-        where: { id: updateUserDto.updatedBy },
-      });
-      if (!updatedByUser) {
-        return USER_RESPONSES.USER_NOT_FOUND(updateUserDto.updatedBy);
-      }
-
-      const { contactDetails, ...userDetails } = updateUserDto;
-      Object.assign(user, userDetails);
+      Object.assign(user, updateUserDto);
 
       if (updateUserDto.password) {
         user.password = await bcrypt.hash(updateUserDto.password, 10);
       }
 
-      if (contactDetails) {
-        const existingContact = await this.userContactDetailsRepository.findOne(
-          {
-            where: { user: { id: user.id } },
-          },
+      if (profileImage) {
+        const folderName = 'user_profiles';
+        const fileExtension = profileImage.originalname.split('.').pop();
+        const fileName = `${user.id}.${fileExtension}`;
+
+        const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          profileImage.buffer,
+          profileImage.mimetype,
         );
 
-        if (!existingContact) {
-          return USER_RESPONSES.USER_NOT_FOUND(user.id);
-        }
-
-        delete contactDetails.id;
-
-        const updatedContact = this.userContactDetailsRepository.merge(
-          existingContact,
-          contactDetails,
-        );
-
-        await this.userContactDetailsRepository.save(updatedContact);
-        this.logger.log(
-          `Contact with ID ${existingContact.id} updated successfully`,
-        );
+        user.imageURL = imageUrlLocation;
       }
 
       const updatedUser = await this.userRepository.save(user);
-
       this.logger.log(`User with ID ${id} updated successfully`);
       return USER_RESPONSES.USER_UPDATED(updatedUser);
     } catch (error) {
-      throw error;
+      this.logger.error(
+        `Error updating user with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while updating the user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
