@@ -15,15 +15,22 @@ import { UpdateSpaceDto } from '../dto/requests/space/update-space.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { UserService } from './user.service';
 import { PropertySpaceService } from './property-space.service';
+import { S3UtilsService } from './s3-utils.service';
+import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
+import { S3 } from 'aws-sdk';
 
 @Injectable()
 export class SpaceService {
+  private readonly s3 = new S3();
+  private readonly bucketName = process.env.AWS_S3_BUCKET_NAME;
+
   constructor(
     @InjectRepository(Space)
     private readonly spaceRepository: Repository<Space>,
     private readonly userService: UserService,
     @Inject(forwardRef(() => PropertySpaceService))
     private readonly propertySpaceService: PropertySpaceService,
+    private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -87,6 +94,7 @@ export class SpaceService {
 
   async createSpace(
     createSpaceDto: CreateSpaceDto,
+    imageFile: Express.Multer.File,
   ): Promise<ApiResponse<Space>> {
     try {
       const existingSpace = await this.findSpaceByName(createSpaceDto.name);
@@ -107,6 +115,22 @@ export class SpaceService {
         ...createSpaceDto,
       });
       const savedSpace = await this.saveSpace(space);
+
+      const folderName = 'general_media/images/space';
+      const fileExtension = imageFile.originalname.split('.').pop();
+      const fileName = `${savedSpace.id}.${fileExtension}`;
+
+      const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+        folderName,
+        fileName,
+        imageFile.buffer,
+        imageFile.mimetype,
+      );
+
+      savedSpace.s3_url = imageUrlLocation;
+
+      await this.spaceRepository.save(savedSpace);
+
       this.logger.log(
         `Space ${createSpaceDto.name} created with ID ${savedSpace.id}`,
       );
@@ -170,6 +194,7 @@ export class SpaceService {
   async updateSpaceDetailById(
     id: number,
     updateSpaceDto: UpdateSpaceDto,
+    imageFile?: Express.Multer.File,
   ): Promise<ApiResponse<Space>> {
     try {
       const existingSpace = await this.findSpaceById(id);
@@ -194,6 +219,41 @@ export class SpaceService {
         );
       }
       Object.assign(existingSpace, updateSpaceDto);
+
+      if (imageFile) {
+        const folderName = 'general_media/images/space';
+        const fileExtension = imageFile.originalname.split('.').pop();
+        const fileName = `${existingSpace.id}.${fileExtension}`;
+        let s3Key = '';
+        let imageUrlLocation = existingSpace.s3_url;
+
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+        }
+
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
+
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          imageFile.buffer,
+          imageFile.mimetype,
+        );
+
+        existingSpace.s3_url = imageUrlLocation;
+      }
+
       const updatedSpace = await this.saveSpace(existingSpace);
       this.logger.log(`Space with ID ${id} updated successfully`);
       return SPACE_RESPONSES.SPACE_UPDATED(updatedSpace);
@@ -218,10 +278,25 @@ export class SpaceService {
         );
         return SPACE_RESPONSES.SPACE_FOREIGN_KEY_CONFLICT(id);
       }
-      const result = await this.spaceRepository.delete(id);
-      if (result.affected === 0) {
+      const existingSpace = await this.findSpaceById(id);
+
+      if (!existingSpace) {
         return await this.handleSpaceNotFound(id);
       }
+
+      const s3Key = await this.s3UtilsService.extractS3Key(
+        existingSpace.s3_url,
+      );
+
+      const headObject =
+        await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+      if (!headObject) {
+        return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(s3Key);
+      }
+
+      await this.s3UtilsService.deleteObjectFromS3(s3Key);
+      await this.spaceRepository.delete(id);
+
       this.logger.log(`Space with ID ${id} deleted successfully`);
       return SPACE_RESPONSES.SPACE_DELETED(id);
     } catch (error) {
