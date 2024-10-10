@@ -8,7 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'entities/role.entity';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { UserContactDetailsDTO } from '../user-contact/user-contact-details.dto';
 
 export class UpdateUserDTO {
@@ -21,18 +21,22 @@ export class UpdateUserDTO {
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   firstName?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   lastName?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   password?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   imageURL?: string;
 
   @IsOptional()
@@ -41,30 +45,37 @@ export class UpdateUserDTO {
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   addressLine1?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   addressLine2?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   state?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   country?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   city?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   zipcode?: string;
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   resetToken?: string;
 
   @IsOptional()
@@ -76,9 +87,9 @@ export class UpdateUserDTO {
   @IsInt()
   @IsOptional()
   updatedBy?: number;
-
+  
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => UserContactDetailsDTO)
   contactDetails?: UserContactDetailsDTO;
-}
+}``

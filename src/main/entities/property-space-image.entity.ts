@@ -15,7 +15,7 @@ export class PropertySpaceImage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'name', type: 'varchar' })
+  @Column({ name: 'description', type: 'varchar', length: '1000' })
   description: string;
 
   @Column({ name: 'url', type: 'varchar' })
