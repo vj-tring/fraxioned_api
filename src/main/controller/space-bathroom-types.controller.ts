@@ -20,14 +20,8 @@ import { SpaceBathroomTypes } from '../entities/space-bathroom-types.entity';
 import { CreateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-types/create-space-bathroom-types.dto';
 import { UpdateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-types/update-space-bathroom-types.dto';
 import { SpaceBathroomTypesService } from '../service/space-bathroom-types.service';
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
-import {
-  getMaxFileSize,
-  getAllowedExtensions,
-  isFileSizeValid,
-  isFileExtensionValid,
-} from '../utils/image-file.utils';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { validateFile } from '../utils/image-file.utils';
 
 @ApiTags('Space Bathroom Types')
 @Controller('v1/space-bathroom-types')
@@ -37,29 +31,6 @@ export class SpaceBathroomTypesController {
   constructor(
     private readonly spaceBathroomTypesService: SpaceBathroomTypesService,
   ) {}
-
-  async validateFile(
-    imageFile: Express.Multer.File,
-  ): Promise<ApiResponse<null>> {
-    const max_file_size = getMaxFileSize();
-    const allowedExtensions = getAllowedExtensions();
-
-    const hasOversizedFile = !isFileSizeValid(imageFile, max_file_size);
-    if (hasOversizedFile) {
-      return MEDIA_IMAGE_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
-    }
-
-    const hasUnsupportedExtension = !isFileExtensionValid(
-      imageFile,
-      allowedExtensions,
-    );
-    if (hasUnsupportedExtension) {
-      return MEDIA_IMAGE_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
-        allowedExtensions,
-      );
-    }
-    return null;
-  }
 
   @Post('space-bathroom-type')
   @UseInterceptors(FileInterceptor('imageFile'))
@@ -74,7 +45,7 @@ export class SpaceBathroomTypesController {
   ): Promise<ApiResponse<SpaceBathroomTypes>> {
     try {
       if (imageFile) {
-        const validationResponse = await this.validateFile(imageFile);
+        const validationResponse = validateFile(imageFile);
         if (validationResponse) {
           return validationResponse;
         }
@@ -137,7 +108,7 @@ export class SpaceBathroomTypesController {
   ): Promise<ApiResponse<SpaceBathroomTypes>> {
     try {
       if (imageFile) {
-        const validationResponse = await this.validateFile(imageFile);
+        const validationResponse = validateFile(imageFile);
         if (validationResponse) {
           return validationResponse;
         }
