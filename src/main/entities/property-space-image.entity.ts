@@ -9,16 +9,22 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { PropertySpace } from './property-space.entity';
+import { toUSVString } from 'util';
 
 @Entity('fxn_property_space_image')
 export class PropertySpaceImage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'description', type: 'varchar', length: '1000' })
+  @Column({
+    name: 'description',
+    type: 'varchar',
+    length: '1000',
+    nullable: true,
+  })
   description: string;
 
-  @Column({ name: 'url', type: 'varchar' })
+  @Column({ name: 'url', type: 'varchar', nullable: true })
   url: string;
 
   @Column({

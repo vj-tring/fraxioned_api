@@ -12,8 +12,7 @@ import { Transform } from 'class-transformer';
 import { PropertySpace } from 'src/main/entities/property-space.entity';
 
 export class CreatePropertySpaceImageDto {
-  @ApiProperty({ example: 'Living Room Image' })
-  @IsNotEmpty({ message: 'Image name is required' })
+  @IsOptional()
   @IsString()
   description: string;
 

@@ -36,6 +36,7 @@ export class PropertySpaceImageService {
       const createdByUserId = createPropertySpaceImageDtos[0].createdBy.id;
 
       const existingPropertySpace = await this.propertySpaceRepository.findOne({
+        relations: ['property', 'space'],
         where: { id: propertySpaceId },
       });
 
