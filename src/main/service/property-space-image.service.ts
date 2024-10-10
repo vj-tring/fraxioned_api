@@ -61,32 +61,32 @@ export class PropertySpaceImageService {
         );
       }
 
-      const uploadPromises = createPropertySpaceImageDtos.map(
-        async (dto, index) => {
-          const folderName = `property_space_images/${propertySpaceId}`;
-          const fileExtension = dto.imageFile.originalname.split('.').pop();
-          const fileName = `property_space_${propertySpaceId}_${index}.${fileExtension}`;
+      const uploadPromises = createPropertySpaceImageDtos.map(async (dto) => {
+        const newImage = this.propertySapceImageRepository.create({
+          ...dto,
+          propertySpace: existingPropertySpace,
+          createdBy: existingUser,
+        });
 
-          const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
-            folderName,
-            fileName,
-            dto.imageFile.buffer,
-            dto.imageFile.mimetype,
-          );
+        const savedImage =
+          await this.propertySapceImageRepository.save(newImage);
 
-          const newImage = this.propertySapceImageRepository.create({
-            ...dto,
-            url: imageUrlLocation,
-            propertySpace: existingPropertySpace,
-            createdBy: existingUser,
-          });
+        const folderName = `properties_media/${existingPropertySpace.property.id}/property_space_images/${propertySpaceId}`;
+        const fileExtension = dto.imageFile.originalname.split('.').pop();
+        const fileName = `property_space_${savedImage.id}.${fileExtension}`;
 
-          return await this.propertySapceImageRepository.save(newImage);
-        },
-      );
+        const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          dto.imageFile.buffer,
+          dto.imageFile.mimetype,
+        );
+
+        savedImage.url = imageUrlLocation;
+        return await this.propertySapceImageRepository.save(savedImage);
+      });
 
       const savedImages = await Promise.all(uploadPromises);
-
       this.logger.log(
         `${savedImages.length} property space images created successfully`,
       );
@@ -235,24 +235,29 @@ export class PropertySpaceImageService {
       let imageUrlLocation = propertySpaceImage.url;
 
       if (updatePropertySpaceImageDto.imageFile) {
-        const previousS3Key = await this.s3UtilsService.extractS3Key(
-          propertySpaceImage.url,
-        );
+        const fileExtension = updatePropertySpaceImageDto.imageFile.originalname
+          .split('.')
+          .pop();
+        const folderName = `properties_media/${propertySpaceImage.propertySpace.id}/property_space_images/${propertySpaceImage.id}`;
+        const fileName = `property_space_${propertySpaceImage.id}.${fileExtension}`;
 
-        try {
-          await this.s3UtilsService.deleteObjectFromS3(previousS3Key);
-          this.logger.log(
-            `Previous image with key ${previousS3Key} deleted successfully from S3`,
-          );
-        } catch (error) {
-          this.logger.warn(
-            `Failed to delete previous image with key ${previousS3Key} from S3: ${error.message}`,
-          );
+        let s3Key = '';
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
         }
 
-        const lastSlashIndex = previousS3Key.lastIndexOf('/');
-        const folderName = previousS3Key.substring(0, lastSlashIndex);
-        const fileName = previousS3Key.substring(lastSlashIndex + 1);
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) !== `${folderName}/${fileName}`) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
 
         imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
           folderName,
