@@ -9,13 +9,20 @@ import { CreateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-type
 import { UpdateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-types/update-space-bathroom-types.dto';
 import { BathroomType } from '../commons/constants/enumerations/space-bathroom-types.enum';
 import { SPACE_BATHROOM_TYPES_RESPONSES } from '../commons/constants/response-constants/space-bathroom-types.constant';
+import { S3UtilsService } from './s3-utils.service';
+import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
+import { S3 } from 'aws-sdk';
 
 @Injectable()
 export class SpaceBathroomTypesService {
+  private readonly s3 = new S3();
+  private readonly bucketName = process.env.AWS_S3_BUCKET_NAME;
+
   constructor(
     @InjectRepository(SpaceBathroomTypes)
     private readonly spaceBathroomTypesRepository: Repository<SpaceBathroomTypes>,
     private readonly userService: UserService,
+    private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -78,6 +85,7 @@ export class SpaceBathroomTypesService {
 
   async createSpaceBathroomType(
     createSpaceBathroomTypesDto: CreateSpaceBathroomTypesDto,
+    imageFile: Express.Multer.File,
   ): Promise<ApiResponse<SpaceBathroomTypes>> {
     try {
       const existingSpaceBathroomType = await this.findSpaceBathroomTypeByName(
@@ -101,8 +109,25 @@ export class SpaceBathroomTypesService {
       const spaceBathroomType = this.spaceBathroomTypesRepository.create({
         ...createSpaceBathroomTypesDto,
       });
+
       const savedSpaceBathroomType =
         await this.spaceBathroomTypesRepository.save(spaceBathroomType);
+
+      const folderName = 'general_media/images/space_bathroom_types';
+      const fileExtension = imageFile.originalname.split('.').pop();
+      const fileName = `${savedSpaceBathroomType.id}.${fileExtension}`;
+
+      const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+        folderName,
+        fileName,
+        imageFile.buffer,
+        imageFile.mimetype,
+      );
+
+      savedSpaceBathroomType.s3_url = imageUrlLocation;
+
+      await this.spaceBathroomTypesRepository.save(savedSpaceBathroomType);
+
       this.logger.log(
         `Space bathroom type ${createSpaceBathroomTypesDto.name} created with ID ${savedSpaceBathroomType.id}`,
       );
@@ -178,6 +203,7 @@ export class SpaceBathroomTypesService {
   async updateSpaceBathroomTypeById(
     id: number,
     updateSpaceBathroomTypesDto: UpdateSpaceBathroomTypesDto,
+    imageFile?: Express.Multer.File,
   ): Promise<ApiResponse<SpaceBathroomTypes>> {
     try {
       const existingSpaceBathroomType =
@@ -198,6 +224,41 @@ export class SpaceBathroomTypesService {
         existingSpaceBathroomType,
         updateSpaceBathroomTypesDto,
       );
+
+      if (imageFile) {
+        const folderName = 'general_media/images/space_bathroom_types';
+        const fileExtension = imageFile.originalname.split('.').pop();
+        const fileName = `${existingSpaceBathroomType.id}.${fileExtension}`;
+        let s3Key = '';
+        let imageUrlLocation = existingSpaceBathroomType.s3_url;
+
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+        }
+
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
+
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          imageFile.buffer,
+          imageFile.mimetype,
+        );
+
+        existingSpaceBathroomType.s3_url = imageUrlLocation;
+      }
+
       await this.spaceBathroomTypesRepository.save(updatedSpaceBathroomType);
       this.logger.log(`Space bathroom type with ID ${id} updated successfully`);
       return SPACE_BATHROOM_TYPES_RESPONSES.SPACE_BATHROOM_TYPE_UPDATED(
@@ -221,10 +282,24 @@ export class SpaceBathroomTypesService {
     try {
       const existingSpaceBathroomType =
         await this.findSpaceBathroomTypeById(id);
+
       if (!existingSpaceBathroomType) {
         return await this.handleSpaceBathroomTypeNotFound(id);
       }
+
+      const s3Key = await this.s3UtilsService.extractS3Key(
+        existingSpaceBathroomType.s3_url,
+      );
+
+      const headObject =
+        await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+      if (!headObject) {
+        return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(s3Key);
+      }
+
+      await this.s3UtilsService.deleteObjectFromS3(s3Key);
       await this.spaceBathroomTypesRepository.remove(existingSpaceBathroomType);
+
       this.logger.log(`Space bathroom type with ID ${id} deleted successfully`);
       return SPACE_BATHROOM_TYPES_RESPONSES.SPACE_BATHROOM_TYPE_DELETED(id);
     } catch (error) {

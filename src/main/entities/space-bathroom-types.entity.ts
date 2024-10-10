@@ -24,4 +24,13 @@ export class SpaceBathroomTypes extends BaseEntity {
     nullable: false,
   })
   countValue: CountValue;
+
+  @Column({
+    name: 's3_image_url',
+    type: 'varchar',
+    length: 500,
+    default: null,
+    nullable: true,
+  })
+  s3_url: string;
 }
