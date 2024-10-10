@@ -18,6 +18,7 @@ import { SpaceService } from './space.service';
 import { PropertySpaceBathroomService } from './property-space-bathroom.service';
 import { PropertySpaceBedService } from './property-space-bed.service';
 import { PropertySpaceAmenitiesService } from './property-space-amenity.service';
+import { PropertySpaceImageService } from './property-space-image.service';
 
 @Injectable()
 export class PropertySpaceService {
@@ -26,6 +27,7 @@ export class PropertySpaceService {
     private readonly propertySpaceRepository: Repository<PropertySpace>,
     private readonly userService: UserService,
     private readonly propertyService: PropertiesService,
+    private readonly propertySpaceImageService: PropertySpaceImageService,
     @Inject(forwardRef(() => SpaceService))
     private readonly spaceService: SpaceService,
     @Inject(forwardRef(() => PropertySpaceBedService))
@@ -366,6 +368,9 @@ export class PropertySpaceService {
       );
       await this.propertySpaceAmenitiesService.removePropertySpaceAmenitiesByPropertySpaceId(
         existingPropertySpace.property.id,
+        existingPropertySpace.id,
+      );
+      await this.propertySpaceImageService.deletePropertySpaceImagesByPropertySpaceId(
         existingPropertySpace.id,
       );
 

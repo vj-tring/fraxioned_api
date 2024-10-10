@@ -11,6 +11,7 @@ import { SpaceModule } from './space.module';
 import { PropertySpaceBathroomModule } from './property-space-bathroom.module';
 import { PropertySpaceBedModule } from './property-space-bed.module';
 import { PropertySpaceAmenitiesModule } from './property-space-amenity.module';
+import { PropertySpaceImageModule } from './property-space-image.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PropertySpaceAmenitiesModule } from './property-space-amenity.module';
     AuthenticationModule,
     UserModule,
     PropertiesModule,
+    PropertySpaceImageModule,
     forwardRef(() => PropertySpaceBathroomModule),
     forwardRef(() => PropertySpaceBedModule),
     forwardRef(() => PropertySpaceAmenitiesModule),

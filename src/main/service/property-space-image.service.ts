@@ -353,44 +353,36 @@ export class PropertySpaceImageService {
       );
     }
   }
+
   async deletePropertySpaceImagesByPropertySpaceId(
     propertySpaceId: number,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    statusCode: number;
-  }> {
+  ): Promise<void> {
     try {
       const propertySpaceImages = await this.propertySapceImageRepository.find({
         where: { propertySpace: { id: propertySpaceId } },
       });
 
-      if (propertySpaceImages.length === 0) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND();
-      }
+      if (propertySpaceImages.length !== 0) {
+        for (const propertySpaceImage of propertySpaceImages) {
+          let s3Key = '';
+          const imageUrlLocation = propertySpaceImage.url;
 
-      for (const propertySpaceImage of propertySpaceImages) {
-        const s3Key = await this.s3UtilsService.extractS3Key(
-          propertySpaceImage.url,
-        );
+          if (imageUrlLocation) {
+            s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+          }
+          if (s3Key) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
+              continue;
+            }
 
-        const headObject =
-          await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-        if (!headObject) {
-          this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
-          continue;
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+          await this.propertySapceImageRepository.delete(propertySpaceImage.id);
         }
-
-        await this.s3UtilsService.deleteObjectFromS3(s3Key);
-        await this.propertySapceImageRepository.delete(propertySpaceImage.id);
       }
-
-      this.logger.log(
-        `Deleted all images for Property Space ID ${propertySpaceId}`,
-      );
-      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_DELETED(
-        propertySpaceId,
-      );
     } catch (error) {
       this.logger.error(
         `Error deleting property space images for Property Space ID ${propertySpaceId}: ${error.message} - ${error.stack}`,
