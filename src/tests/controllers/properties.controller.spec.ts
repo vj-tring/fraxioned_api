@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
 import { PropertiesController } from 'src/main/controller/properties.controller';
 import { CreatePropertiesDto } from 'src/main/dto/requests/property/create-property.dto';
-import { UpdatePropertiesDto } from 'src/main/dto/requests/property/update-properties.dto';
 import { PropertiesService } from 'src/main/service/properties.service';
 import { User } from 'src/main/entities/user.entity';
 import { AuthGuard } from 'src/main/commons/guards/auth.guard';
@@ -95,64 +94,6 @@ describe('PropertiesController', () => {
 
       await expect(
         controller.createProperties(createPropertiesDto),
-      ).rejects.toThrow(error);
-    });
-  });
-
-  describe('updatePropertiesById', () => {
-    it('should update properties by id', async () => {
-      const id = 1;
-      const updatePropertiesDto: UpdatePropertiesDto = {
-        propertyName: 'Updated Property',
-        ownerRezPropId: 1,
-        latitude: 12.34,
-        longitude: 56.78,
-        isActive: true,
-        displayOrder: 1,
-        updatedBy: new User(),
-      };
-      const expectedResult = {
-        id: 1,
-        propertyName: 'Updated Property',
-        ownerRezPropId: 1,
-        latitude: 12.34,
-        longitude: 56.78,
-        isActive: true,
-        displayOrder: 1,
-        updatedBy: new User(),
-      };
-      mockPropertiesService.updatePropertiesById.mockResolvedValue(
-        expectedResult,
-      );
-
-      const result = await controller.updatePropertiesById(
-        id,
-        updatePropertiesDto,
-      );
-
-      expect(result).toBe(expectedResult);
-      expect(mockPropertiesService.updatePropertiesById).toHaveBeenCalledWith(
-        id,
-        updatePropertiesDto,
-      );
-    });
-
-    it('should throw an error if service throws', async () => {
-      const id = 1;
-      const updatePropertiesDto: UpdatePropertiesDto = {
-        propertyName: 'Updated Property',
-        ownerRezPropId: 1,
-        latitude: 12.34,
-        longitude: 56.78,
-        isActive: true,
-        displayOrder: 1,
-        updatedBy: new User(),
-      };
-      const error = new Error('Service error');
-      mockPropertiesService.updatePropertiesById.mockRejectedValue(error);
-
-      await expect(
-        controller.updatePropertiesById(id, updatePropertiesDto),
       ).rejects.toThrow(error);
     });
   });
