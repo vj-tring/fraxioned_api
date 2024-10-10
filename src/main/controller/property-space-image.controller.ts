@@ -171,14 +171,6 @@ export class PropertySpaceImageController {
         JSON.parse(updatePropertySpaceImageRequestDto.propertySpaceImage);
 
       const file = files.imageFile ? files.imageFile[0] : undefined;
-
-      if (
-        (file && !updatePropertySpaceImageDto) ||
-        (!file && updatePropertySpaceImageDto)
-      ) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.MISMATCHED_DTO_AND_IMAGES();
-      }
-
       const max_file_size = getMaxFileSize();
       const allowedExtensions = getAllowedExtensions();
 

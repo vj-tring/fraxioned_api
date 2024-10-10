@@ -16,7 +16,7 @@ export class PropertySpaceImage {
   id: number;
 
   @Column({ name: 'name', type: 'varchar' })
-  name: string;
+  description: string;
 
   @Column({ name: 'url', type: 'varchar' })
   url: string;

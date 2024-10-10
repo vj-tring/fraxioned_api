@@ -15,7 +15,7 @@ export class UpdatePropertySpaceImageDto {
   @ApiProperty({ example: 'Living Room Image' })
   @IsNotEmpty({ message: 'Image name is required' })
   @IsString()
-  name: string;
+  description: string;
 
   @ApiProperty({ example: 1 })
   @IsNotEmpty({ message: 'Display order is required' })
