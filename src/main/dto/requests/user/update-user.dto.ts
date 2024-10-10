@@ -14,6 +14,9 @@ import { UserContactDetailsDTO } from '../user-contact/user-contact-details.dto'
 export class UpdateUserDTO {
   @ApiProperty({ example: { id: 1 } })
   @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? JSON.parse(value) : value,
+  )
   @IsValidId({
     message: 'role must be an object with a valid id where (id >= 1)',
   })

@@ -37,6 +37,10 @@ export class PropertySpaceImageService {
 
       const existingPropertySpace = await this.propertySpaceRepository.findOne({
         relations: ['property', 'space'],
+        select: {
+          property: { id: true },
+          space: { id: true },
+        },
         where: { id: propertySpaceId },
       });
 
