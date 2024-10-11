@@ -9,14 +9,18 @@ import {
   Patch,
   Delete,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { AmenitiesService } from '../service/amenities.service';
 import { CreateAmenitiesDto } from '../dto/requests/amenity/create-amenities.dto';
 import { Amenities } from '../entities/amenities.entity';
 import { UpdateAmenitiesDto } from '../dto/requests/amenity/update-amenities.dto';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { validateFile } from '../utils/fileUploadValidation.Util';
 
 @ApiTags('Amenities')
 @Controller('v1/amenities')
@@ -26,15 +30,32 @@ export class AmenitiesController {
   constructor(private readonly amenitiesService: AmenitiesService) {}
 
   @Post('amenity')
-  async createAmenity(@Body() createAmenitiesDto: CreateAmenitiesDto): Promise<{
+  @UseInterceptors(FileInterceptor('imageFile'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Create a new amenity',
+    type: CreateAmenitiesDto,
+  })
+  async createAmenity(
+    @Body() createAmenitiesDto: CreateAmenitiesDto,
+    @UploadedFile() imageFile: Express.Multer.File,
+  ): Promise<{
     success: boolean;
     message: string;
     data?: Amenities;
     statusCode: HttpStatus;
   }> {
     try {
-      const result =
-        await this.amenitiesService.createAmenity(createAmenitiesDto);
+      if (imageFile) {
+        const validationResponse = await validateFile(imageFile);
+        if (validationResponse) {
+          return validationResponse;
+        }
+      }
+      const result = await this.amenitiesService.createAmenity(
+        createAmenitiesDto,
+        imageFile,
+      );
       return result;
     } catch (error) {
       throw new HttpException(
@@ -81,9 +102,16 @@ export class AmenitiesController {
   }
 
   @Patch('amenity/:id')
+  @UseInterceptors(FileInterceptor('imageFile'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Update already existing space',
+    type: UpdateAmenitiesDto,
+  })
   async updateAmenityDetail(
     @Param('id') id: string,
     @Body() updateAmenitiesDto: UpdateAmenitiesDto,
+    @UploadedFile() imageFile?: Express.Multer.File,
   ): Promise<{
     success: boolean;
     message: string;
@@ -91,9 +119,16 @@ export class AmenitiesController {
     statusCode: HttpStatus;
   }> {
     try {
+      if (imageFile) {
+        const validationResponse = await validateFile(imageFile);
+        if (validationResponse) {
+          return validationResponse;
+        }
+      }
       const result = await this.amenitiesService.updateAmenityDetailById(
         +id,
         updateAmenitiesDto,
+        imageFile,
       );
       return result;
     } catch (error) {

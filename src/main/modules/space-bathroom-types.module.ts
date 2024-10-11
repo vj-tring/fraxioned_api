@@ -7,6 +7,7 @@ import { SpaceBathroomTypesController } from '../controller/space-bathroom-types
 import { SpaceBathroomTypes } from '../entities/space-bathroom-types.entity';
 import { SpaceBathroomTypesService } from '../service/space-bathroom-types.service';
 import { UserModule } from './user.module';
+import { S3UtilsModule } from './s3-utils.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserModule } from './user.module';
     UserModule,
     LoggerModule,
     AuthenticationModule,
+    S3UtilsModule,
   ],
   controllers: [SpaceBathroomTypesController],
   providers: [SpaceBathroomTypesService],
