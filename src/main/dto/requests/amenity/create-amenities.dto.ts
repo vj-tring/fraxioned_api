@@ -15,7 +15,7 @@ export class CreateAmenitiesDto {
 
   @IsOptional()
   @IsString()
-  amenityDescription: string;
+  amenityDescription?: string;
 
   @ApiProperty({
     example: { id: 1 },
