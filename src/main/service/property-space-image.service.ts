@@ -14,7 +14,7 @@ import { PropertySpaceImage } from '../entities/property-space-image.entity';
 export class PropertySpaceImageService {
   constructor(
     @InjectRepository(PropertySpaceImage)
-    private readonly propertySapceImageRepository: Repository<PropertySpaceImage>,
+    private readonly propertySpaceImageRepository: Repository<PropertySpaceImage>,
     @InjectRepository(PropertySpace)
     private readonly propertySpaceRepository: Repository<PropertySpace>,
     @InjectRepository(User)
@@ -67,14 +67,14 @@ export class PropertySpaceImageService {
       }
 
       const uploadPromises = createPropertySpaceImageDtos.map(async (dto) => {
-        const newImage = this.propertySapceImageRepository.create({
+        const newImage = this.propertySpaceImageRepository.create({
           ...dto,
           propertySpace: existingPropertySpace,
           createdBy: existingUser,
         });
 
         const savedImage =
-          await this.propertySapceImageRepository.save(newImage);
+          await this.propertySpaceImageRepository.save(newImage);
 
         const folderName = `properties_media/${existingPropertySpace.property.id}/property_space_images/${propertySpaceId}`;
         const fileExtension = dto.imageFile.originalname.split('.').pop();
@@ -88,7 +88,7 @@ export class PropertySpaceImageService {
         );
 
         savedImage.url = imageUrlLocation;
-        return await this.propertySapceImageRepository.save(savedImage);
+        return await this.propertySpaceImageRepository.save(savedImage);
       });
 
       const savedImages = await Promise.all(uploadPromises);
@@ -116,11 +116,29 @@ export class PropertySpaceImageService {
     statusCode: number;
   }> {
     try {
-      const propertySpaceImages = await this.propertySapceImageRepository.find({
-        relations: ['propertySpace', 'createdBy', 'updatedBy'],
+      const propertySpaceImages = await this.propertySpaceImageRepository.find({
+        relations: [
+          'propertySpace',
+          'createdBy',
+          'updatedBy',
+          'propertySpace.space',
+          'propertySpace.property',
+        ],
         select: {
           createdBy: { id: true },
           updatedBy: { id: true },
+          propertySpace: {
+            id: true,
+            instanceNumber: true,
+            space: {
+              id: true,
+              name: true,
+            },
+            property: {
+              id: true,
+              propertyName: true,
+            },
+          },
         },
       });
 
@@ -154,12 +172,30 @@ export class PropertySpaceImageService {
   }> {
     try {
       const propertySpaceImage =
-        await this.propertySapceImageRepository.findOne({
+        await this.propertySpaceImageRepository.findOne({
           where: { id },
-          relations: ['propertySpace', 'createdBy', 'updatedBy'],
+          relations: [
+            'propertySpace',
+            'createdBy',
+            'updatedBy',
+            'propertySpace.space',
+            'propertySpace.property',
+          ],
           select: {
             createdBy: { id: true },
             updatedBy: { id: true },
+            propertySpace: {
+              id: true,
+              instanceNumber: true,
+              space: {
+                id: true,
+                name: true,
+              },
+              property: {
+                id: true,
+                propertyName: true,
+              },
+            },
           },
         });
 
@@ -186,6 +222,64 @@ export class PropertySpaceImageService {
     }
   }
 
+  async findPropertySpaceImagesByPropertyId(propertyId: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceImage[];
+    statusCode: number;
+  }> {
+    try {
+      const propertySpaceImages = await this.propertySpaceImageRepository.find({
+        relations: [
+          'propertySpace',
+          'createdBy',
+          'updatedBy',
+          'propertySpace.space',
+          'propertySpace.property',
+        ],
+        where: { propertySpace: { property: { id: propertyId } } },
+        select: {
+          createdBy: { id: true },
+          updatedBy: { id: true },
+          propertySpace: {
+            id: true,
+            instanceNumber: true,
+            space: {
+              id: true,
+              name: true,
+            },
+            property: {
+              id: true,
+              propertyName: true,
+            },
+          },
+        },
+      });
+
+      if (propertySpaceImages.length === 0) {
+        this.logger.log(
+          `No property space images found for property ID ${propertyId}`,
+        );
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND();
+      }
+
+      this.logger.log(
+        `Retrieved ${propertySpaceImages.length} property space images for property ID ${propertyId}`,
+      );
+      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_FETCHED(
+        propertySpaceImages,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property space images for property ID ${propertyId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving property space images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async updatePropertySpaceImage(
     id: number,
     updatePropertySpaceImageDto: UpdatePropertySpaceImageDto,
@@ -197,7 +291,7 @@ export class PropertySpaceImageService {
   }> {
     try {
       const propertySpaceImage =
-        await this.propertySapceImageRepository.findOne({
+        await this.propertySpaceImageRepository.findOne({
           where: { id },
           relations: ['propertySpace', 'createdBy', 'updatedBy'],
           select: {
@@ -284,7 +378,7 @@ export class PropertySpaceImageService {
       });
 
       const updatedImage =
-        await this.propertySapceImageRepository.save(propertySpaceImage);
+        await this.propertySpaceImageRepository.save(propertySpaceImage);
 
       this.logger.log(`Image Details: ${imageFile}`);
       this.logger.log(
@@ -312,7 +406,7 @@ export class PropertySpaceImageService {
   }> {
     try {
       const propertySpaceImage =
-        await this.propertySapceImageRepository.findOne({
+        await this.propertySpaceImageRepository.findOne({
           where: { id },
         });
 
@@ -336,7 +430,7 @@ export class PropertySpaceImageService {
 
       await this.s3UtilsService.deleteObjectFromS3(s3Key);
 
-      const result = await this.propertySapceImageRepository.delete(id);
+      const result = await this.propertySpaceImageRepository.delete(id);
       if (result.affected === 0) {
         return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGE_NOT_FOUND(
           id,
@@ -353,44 +447,35 @@ export class PropertySpaceImageService {
       );
     }
   }
+
   async deletePropertySpaceImagesByPropertySpaceId(
     propertySpaceId: number,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    statusCode: number;
-  }> {
+  ): Promise<void> {
     try {
-      const propertySpaceImages = await this.propertySapceImageRepository.find({
+      const propertySpaceImages = await this.propertySpaceImageRepository.find({
         where: { propertySpace: { id: propertySpaceId } },
       });
 
-      if (propertySpaceImages.length === 0) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND();
-      }
+      if (propertySpaceImages.length !== 0) {
+        for (const propertySpaceImage of propertySpaceImages) {
+          let s3Key = '';
+          const imageUrlLocation = propertySpaceImage.url;
 
-      for (const propertySpaceImage of propertySpaceImages) {
-        const s3Key = await this.s3UtilsService.extractS3Key(
-          propertySpaceImage.url,
-        );
-
-        const headObject =
-          await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-        if (!headObject) {
-          this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
-          continue;
+          if (imageUrlLocation) {
+            s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+          }
+          if (s3Key) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
+            } else {
+              await this.s3UtilsService.deleteObjectFromS3(s3Key);
+            }
+          }
+          await this.propertySpaceImageRepository.delete(propertySpaceImage.id);
         }
-
-        await this.s3UtilsService.deleteObjectFromS3(s3Key);
-        await this.propertySapceImageRepository.delete(propertySpaceImage.id);
       }
-
-      this.logger.log(
-        `Deleted all images for Property Space ID ${propertySpaceId}`,
-      );
-      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_DELETED(
-        propertySpaceId,
-      );
     } catch (error) {
       this.logger.error(
         `Error deleting property space images for Property Space ID ${propertySpaceId}: ${error.message} - ${error.stack}`,

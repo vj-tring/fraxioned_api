@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Not, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
@@ -27,6 +33,7 @@ export class PropertySpaceAmenitiesService {
     @InjectRepository(PropertySpace)
     private readonly propertySpaceRepository: Repository<PropertySpace>,
     private readonly logger: LoggerService,
+    @Inject(forwardRef(() => PropertySpaceService))
     private readonly propertySpaceService: PropertySpaceService,
   ) {}
 
@@ -44,14 +51,29 @@ export class PropertySpaceAmenitiesService {
       .map((m) => m.amenity.id)
       .filter((id) => withNullIds.has(id));
 
-    if (filteredIds.length === 0) return;
+    if (filteredIds.length > 0) {
+      const propertySpaceWithNull =
+        await this.PropertySpaceAmenitiesRepository.find({
+          where: {
+            property: { id: propertyId },
+            propertySpace: { id: Not(IsNull()) },
+          },
+          select: ['propertySpace'],
+          relations: ['propertySpace'],
+        });
+      const distinctPropertySpaceIds = new Set(
+        propertySpaceWithNull.map((item) => item.propertySpace.id),
+      );
 
-    const existingAmenities = await this.getExistingPropertySpaceAmenities(
-      propertyId,
-      filteredIds,
-    );
-    if (existingAmenities.length > 0) {
-      await this.PropertySpaceAmenitiesRepository.remove(existingAmenities);
+      if (distinctPropertySpaceIds.size < 2) {
+        const existingAmenities = await this.getExistingPropertySpaceAmenities(
+          propertyId,
+          filteredIds,
+        );
+        if (existingAmenities.length > 0) {
+          await this.PropertySpaceAmenitiesRepository.remove(existingAmenities);
+        }
+      }
     }
     await this.PropertySpaceAmenitiesRepository.remove(amenitiesWithoutNull);
     return;

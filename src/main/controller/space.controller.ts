@@ -21,13 +21,7 @@ import { CreateSpaceDto } from '../dto/requests/space/create-space.dto';
 import { UpdateSpaceDto } from '../dto/requests/space/update-space.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  getAllowedExtensions,
-  getMaxFileSize,
-  isFileExtensionValid,
-  isFileSizeValid,
-} from '../utils/image-file.utils';
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
+import { validateFile } from '../utils/fileUploadValidation.Util';
 
 @ApiTags('Space')
 @Controller('v1/spaces')
@@ -35,29 +29,6 @@ import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/m
 @ApiHeadersForAuth()
 export class SpaceController {
   constructor(private readonly spaceService: SpaceService) {}
-
-  async validateFile(
-    imageFile: Express.Multer.File,
-  ): Promise<ApiResponse<null>> {
-    const max_file_size = getMaxFileSize();
-    const allowedExtensions = getAllowedExtensions();
-
-    const hasOversizedFile = !isFileSizeValid(imageFile, max_file_size);
-    if (hasOversizedFile) {
-      return MEDIA_IMAGE_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
-    }
-
-    const hasUnsupportedExtension = !isFileExtensionValid(
-      imageFile,
-      allowedExtensions,
-    );
-    if (hasUnsupportedExtension) {
-      return MEDIA_IMAGE_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
-        allowedExtensions,
-      );
-    }
-    return null;
-  }
 
   @Post('space')
   @UseInterceptors(FileInterceptor('imageFile'))
@@ -72,7 +43,7 @@ export class SpaceController {
   ): Promise<ApiResponse<Space>> {
     try {
       if (imageFile) {
-        const validationResponse = await this.validateFile(imageFile);
+        const validationResponse = await validateFile(imageFile);
         if (validationResponse) {
           return validationResponse;
         }
@@ -130,7 +101,7 @@ export class SpaceController {
   ): Promise<ApiResponse<Space>> {
     try {
       if (imageFile) {
-        const validationResponse = await this.validateFile(imageFile);
+        const validationResponse = await validateFile(imageFile);
         if (validationResponse) {
           return validationResponse;
         }

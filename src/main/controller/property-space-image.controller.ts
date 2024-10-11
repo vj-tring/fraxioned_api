@@ -209,6 +209,28 @@ export class PropertySpaceImageController {
     }
   }
 
+  @Get('property/:propertyId/images')
+  async getPropertySpaceImagesByPropertyId(
+    @Param('propertyId') propertyId: number,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceImage[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertySpaceImageService.findPropertySpaceImagesByPropertyId(
+          propertyId,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving property space images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
   @Delete('property-space-image/:id')
   async deletePropertySpaceImage(
     @Param('id') id: number,
