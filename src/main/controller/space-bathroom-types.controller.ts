@@ -21,7 +21,7 @@ import { CreateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-type
 import { UpdateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-types/update-space-bathroom-types.dto';
 import { SpaceBathroomTypesService } from '../service/space-bathroom-types.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { validateFile } from '../utils/image-file.utils';
+import { validateFile } from '../utils/fileUploadValidation.Util';
 
 @ApiTags('Space Bathroom Types')
 @Controller('v1/space-bathroom-types')
@@ -45,7 +45,7 @@ export class SpaceBathroomTypesController {
   ): Promise<ApiResponse<SpaceBathroomTypes>> {
     try {
       if (imageFile) {
-        const validationResponse = validateFile(imageFile);
+        const validationResponse = await validateFile(imageFile);
         if (validationResponse) {
           return validationResponse;
         }
@@ -108,7 +108,7 @@ export class SpaceBathroomTypesController {
   ): Promise<ApiResponse<SpaceBathroomTypes>> {
     try {
       if (imageFile) {
-        const validationResponse = validateFile(imageFile);
+        const validationResponse = await validateFile(imageFile);
         if (validationResponse) {
           return validationResponse;
         }
@@ -117,6 +117,7 @@ export class SpaceBathroomTypesController {
         await this.spaceBathroomTypesService.updateSpaceBathroomTypeById(
           +id,
           updateSpaceBathroomTypesDto,
+          imageFile,
         );
       return result;
     } catch (error) {

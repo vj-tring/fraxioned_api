@@ -1,6 +1,3 @@
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
-import { ApiResponse } from '../commons/response-body/common.responses';
-
 export function getMaxFileSize(): number {
   return parseInt(process.env.MAX_FILE_SIZE || '31457280', 10);
 }
@@ -36,25 +33,4 @@ export function isFileExtensionValid(
     .toLowerCase();
 
   return allowedExtensions.includes(`.${fileExtension}`);
-}
-
-export function validateFile(
-  imageFile: Express.Multer.File,
-): ApiResponse<null> {
-  const max_file_size = getMaxFileSize();
-  const allowedExtensions = getAllowedExtensions();
-
-  const hasOversizedFile = !isFileSizeValid(imageFile, max_file_size);
-  if (hasOversizedFile) {
-    return MEDIA_IMAGE_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
-  }
-
-  const hasUnsupportedExtension = !isFileExtensionValid(
-    imageFile,
-    allowedExtensions,
-  );
-  if (hasUnsupportedExtension) {
-    return MEDIA_IMAGE_RESPONSES.UNSUPPORTED_FILE_EXTENSION(allowedExtensions);
-  }
-  return null;
 }
