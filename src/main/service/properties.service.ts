@@ -26,6 +26,7 @@ import { USER_RESPONSES } from '../commons/constants/response-constants/user.con
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { PROPERTY_RESPONSES } from '../commons/constants/response-constants/property.constant';
 import { S3UtilsService } from './s3-utils.service';
+import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 
 @Injectable()
 export class PropertiesService {
@@ -93,26 +94,68 @@ export class PropertiesService {
         const folderName = `properties/${id}/mailBanners`;
         const fileExtension = mailBannerFile.originalname.split('.').pop();
         const fileName = `${existingProperty.propertyName} || ${id}-mailBanner.${fileExtension}`;
-        const mailBannerUrl = await this.s3UtilsService.uploadFileToS3(
+        let s3Key = '';
+        let imageUrlLocation = existingProperty.mailBannerUrl;
+
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+        }
+
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
+
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
           folderName,
           fileName,
           mailBannerFile.buffer,
           mailBannerFile.mimetype,
         );
-        updatePropertiesDto.mailBannerUrl = mailBannerUrl;
+
+        existingProperty.mailBannerUrl = imageUrlLocation;
       }
 
       if (coverImageFile) {
         const folderName = `properties/${id}/coverImages`;
         const fileExtension = coverImageFile.originalname.split('.').pop();
-        const fileName = `${existingProperty.propertyName || id}-coverImage.${fileExtension}`;
-        const coverImageUrl = await this.s3UtilsService.uploadFileToS3(
+        const fileName = `${existingProperty.propertyName} || ${id}-coverImage.${fileExtension}`;
+        let s3Key = '';
+        let imageUrlLocation = existingProperty.coverImageUrl;
+
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+        }
+
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
+
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
           folderName,
           fileName,
           coverImageFile.buffer,
           coverImageFile.mimetype,
         );
-        updatePropertiesDto.coverImageUrl = coverImageUrl;
+
+        existingProperty.coverImageUrl = imageUrlLocation;
       }
 
       const updatedProperties = this.propertiesRepository.merge(
