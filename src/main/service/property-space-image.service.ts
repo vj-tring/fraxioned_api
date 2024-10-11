@@ -375,10 +375,9 @@ export class PropertySpaceImageService {
               await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
             if (!headObject) {
               this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
-              continue;
+            } else {
+              await this.s3UtilsService.deleteObjectFromS3(s3Key);
             }
-
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
           }
           await this.propertySapceImageRepository.delete(propertySpaceImage.id);
         }

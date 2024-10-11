@@ -51,14 +51,29 @@ export class PropertySpaceAmenitiesService {
       .map((m) => m.amenity.id)
       .filter((id) => withNullIds.has(id));
 
-    if (filteredIds.length === 0) return;
+    if (filteredIds.length > 0) {
+      const propertySpaceWithNull =
+        await this.PropertySpaceAmenitiesRepository.find({
+          where: {
+            property: { id: propertyId },
+            propertySpace: { id: Not(IsNull()) },
+          },
+          select: ['propertySpace'],
+          relations: ['propertySpace'],
+        });
+      const distinctPropertySpaceIds = new Set(
+        propertySpaceWithNull.map((item) => item.propertySpace.id),
+      );
 
-    const existingAmenities = await this.getExistingPropertySpaceAmenities(
-      propertyId,
-      filteredIds,
-    );
-    if (existingAmenities.length > 0) {
-      await this.PropertySpaceAmenitiesRepository.remove(existingAmenities);
+      if (distinctPropertySpaceIds.size < 2) {
+        const existingAmenities = await this.getExistingPropertySpaceAmenities(
+          propertyId,
+          filteredIds,
+        );
+        if (existingAmenities.length > 0) {
+          await this.PropertySpaceAmenitiesRepository.remove(existingAmenities);
+        }
+      }
     }
     await this.PropertySpaceAmenitiesRepository.remove(amenitiesWithoutNull);
     return;
