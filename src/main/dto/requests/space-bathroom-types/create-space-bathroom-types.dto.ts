@@ -1,11 +1,8 @@
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  BathroomType,
-  CountValue,
-} from 'src/main/commons/constants/enumerations/space-bathroom-types.enum';
+import { CountValue } from 'src/main/commons/constants/enumerations/space-bathroom-types.enum';
 import { Transform } from 'class-transformer';
 
 export class CreateSpaceBathroomTypesDto {
@@ -13,19 +10,8 @@ export class CreateSpaceBathroomTypesDto {
   imageFile: Express.Multer.File;
 
   @IsNotEmpty({ message: 'space bathroom type name is required' })
-  @IsEnum(BathroomType)
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      const normalizedValue = value.toLowerCase().replace(/ /g, '_');
-      return Object.values(BathroomType).includes(
-        normalizedValue as BathroomType,
-      )
-        ? normalizedValue
-        : undefined;
-    }
-    return value;
-  })
-  name: BathroomType;
+  @IsString()
+  name: string;
 
   @IsNotEmpty({ message: 'type count value is required' })
   @IsEnum(CountValue)

@@ -7,7 +7,6 @@ import { UserService } from './user.service';
 import { SpaceBathroomTypes } from '../entities/space-bathroom-types.entity';
 import { CreateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-types/create-space-bathroom-types.dto';
 import { UpdateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-types/update-space-bathroom-types.dto';
-import { BathroomType } from '../commons/constants/enumerations/space-bathroom-types.enum';
 import { SPACE_BATHROOM_TYPES_RESPONSES } from '../commons/constants/response-constants/space-bathroom-types.constant';
 import { S3UtilsService } from './s3-utils.service';
 import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
@@ -27,7 +26,7 @@ export class SpaceBathroomTypesService {
   ) {}
 
   async findSpaceBathroomTypeByName(
-    name: BathroomType,
+    name: string,
   ): Promise<SpaceBathroomTypes | null> {
     return await this.spaceBathroomTypesRepository.findOne({
       where: { name },
