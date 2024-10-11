@@ -21,6 +21,7 @@ import { SpaceBedType } from '../entities/space-bed-type.entity';
 import { CreateSpaceBedTypeDto } from '../dto/requests/space-bed-type/create-space-bed-type.dto';
 import { UpdateSpaceBedTypeDto } from '../dto/requests/space-bed-type/update-space-bed-type.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { validateFile } from '../utils/fileUploadValidation.Util';
 
 @ApiTags('Space Bed Types')
 @Controller('v1/space-bed-types')
