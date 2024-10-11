@@ -8,7 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'entities/role.entity';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
-import { Type, Transform } from 'class-transformer';
+import { plainToClass, Transform, Type } from 'class-transformer';
 import { UserContactDetailsDTO } from '../user-contact/user-contact-details.dto';
 
 export class UpdateUserDTO {
@@ -44,6 +44,7 @@ export class UpdateUserDTO {
 
   @IsOptional()
   @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
   isActive?: boolean;
 
   @IsOptional()
@@ -82,18 +83,34 @@ export class UpdateUserDTO {
   resetToken?: string;
 
   @IsOptional()
+  @Transform(({ value }) => new Date(value))
   resetTokenExpires?: Date;
 
   @IsOptional()
+  @Transform(({ value }) => new Date(value))
   lastLoginTime?: Date;
 
   @IsInt()
   @IsOptional()
+  @Type(() => Number)
   updatedBy?: number;
 
   @IsOptional()
   @ValidateNested({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        const parsedValue = JSON.parse(value);
+        return plainToClass(UserContactDetailsDTO, parsedValue);
+      } catch (error) {
+        throw new Error('Invalid JSON string for contactDetails');
+      }
+    }
+    return plainToClass(UserContactDetailsDTO, value);
+  })
   @Type(() => UserContactDetailsDTO)
   contactDetails?: UserContactDetailsDTO;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @IsOptional()
+  profileImage?: Express.Multer.File;
 }
-``;
