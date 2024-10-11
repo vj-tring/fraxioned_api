@@ -19,15 +19,8 @@ import { CreateAmenitiesDto } from '../dto/requests/amenity/create-amenities.dto
 import { Amenities } from '../entities/amenities.entity';
 import { UpdateAmenitiesDto } from '../dto/requests/amenity/update-amenities.dto';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
-import { ApiResponse } from '../commons/response-body/common.responses';
-import {
-  getMaxFileSize,
-  getAllowedExtensions,
-  isFileSizeValid,
-  isFileExtensionValid,
-} from '../utils/image-file.utils';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { validateFile } from '../utils/fileUploadValidation.Util';
 
 @ApiTags('Amenities')
 @Controller('v1/amenities')
@@ -35,29 +28,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @ApiHeadersForAuth()
 export class AmenitiesController {
   constructor(private readonly amenitiesService: AmenitiesService) {}
-
-  async validateFile(
-    imageFile: Express.Multer.File,
-  ): Promise<ApiResponse<null>> {
-    const max_file_size = getMaxFileSize();
-    const allowedExtensions = getAllowedExtensions();
-
-    const hasOversizedFile = !isFileSizeValid(imageFile, max_file_size);
-    if (hasOversizedFile) {
-      return MEDIA_IMAGE_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
-    }
-
-    const hasUnsupportedExtension = !isFileExtensionValid(
-      imageFile,
-      allowedExtensions,
-    );
-    if (hasUnsupportedExtension) {
-      return MEDIA_IMAGE_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
-        allowedExtensions,
-      );
-    }
-    return null;
-  }
 
   @Post('amenity')
   @UseInterceptors(FileInterceptor('imageFile'))
@@ -77,7 +47,7 @@ export class AmenitiesController {
   }> {
     try {
       if (imageFile) {
-        const validationResponse = await this.validateFile(imageFile);
+        const validationResponse = await validateFile(imageFile);
         if (validationResponse) {
           return validationResponse;
         }
@@ -150,7 +120,7 @@ export class AmenitiesController {
   }> {
     try {
       if (imageFile) {
-        const validationResponse = await this.validateFile(imageFile);
+        const validationResponse = await validateFile(imageFile);
         if (validationResponse) {
           return validationResponse;
         }
@@ -158,6 +128,7 @@ export class AmenitiesController {
       const result = await this.amenitiesService.updateAmenityDetailById(
         +id,
         updateAmenitiesDto,
+        imageFile,
       );
       return result;
     } catch (error) {
