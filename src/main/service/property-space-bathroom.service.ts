@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
@@ -22,6 +28,7 @@ export class PropertySpaceBathroomService {
     @InjectRepository(SpaceBathroomTypes)
     private readonly spaceBathroomTypesRepository: Repository<SpaceBathroomTypes>,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => PropertySpaceService))
     private readonly propertySpaceService: PropertySpaceService,
     private readonly logger: LoggerService,
   ) {}
@@ -115,17 +122,12 @@ export class PropertySpaceBathroomService {
     return true;
   }
 
-  async removeBathroomByPropertySpaceId(id: number): Promise<void> {
-    const existingPropertySpaceBathroom =
-      await this.propertySpaceBathroomRepository.findBy({
-        spaceBathroomType: { id },
-      });
-    if (!existingPropertySpaceBathroom) {
-      return null;
-    }
-    await this.propertySpaceBathroomRepository.remove(
-      existingPropertySpaceBathroom,
-    );
+  async removeBathroomByPropertySpaceId(
+    propertySpaceId: number,
+  ): Promise<void> {
+    await this.propertySpaceBathroomRepository.delete({
+      propertySpace: { id: propertySpaceId },
+    });
   }
 
   async handleExistingPropertySpaceBathroom(
