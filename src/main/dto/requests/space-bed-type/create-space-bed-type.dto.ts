@@ -4,6 +4,9 @@ import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSpaceBedTypeDto {
+  @ApiProperty({ type: 'string', format: 'binary' })
+  imageFile: Express.Multer.File;
+
   @IsNotEmpty({ message: 'Bed type is required' })
   @IsString()
   bedType: string;

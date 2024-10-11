@@ -4,6 +4,10 @@ import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateSpaceBedTypeDto {
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @IsOptional()
+  imageFile?: Express.Multer.File;
+
   @IsOptional()
   bedType: string;
 
