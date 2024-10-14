@@ -22,7 +22,7 @@ import { AdminBookingService } from '../service/booking/admin-booking.service';
 import { BookingUtilService } from '../service/booking/utils/booking.service.util';
 import { BookingMailService } from '../service/booking/utils/mail.util';
 import { BookingValidationService } from '../service/booking/utils/validation.util';
-import { PropertyCodes } from '../entities/property_codes.entity';
+import { PropertyCodes } from '../entities/property-codes.entity';
 
 @Module({
   imports: [
@@ -36,6 +36,7 @@ import { PropertyCodes } from '../entities/property_codes.entity';
       User,
       UserContactDetails,
       Space,
+      PropertyCodes,
     ]),
     AuthenticationModule,
   ],
