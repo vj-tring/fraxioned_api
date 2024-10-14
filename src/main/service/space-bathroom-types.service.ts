@@ -84,7 +84,7 @@ export class SpaceBathroomTypesService {
 
   async createSpaceBathroomType(
     createSpaceBathroomTypesDto: CreateSpaceBathroomTypesDto,
-    imageFile: Express.Multer.File,
+    imageFile?: Express.Multer.File,
   ): Promise<ApiResponse<SpaceBathroomTypes>> {
     try {
       const existingSpaceBathroomType = await this.findSpaceBathroomTypeByName(
@@ -112,20 +112,22 @@ export class SpaceBathroomTypesService {
       const savedSpaceBathroomType =
         await this.spaceBathroomTypesRepository.save(spaceBathroomType);
 
-      const folderName = 'general_media/images/space_bathroom_types';
-      const fileExtension = imageFile.originalname.split('.').pop();
-      const fileName = `${savedSpaceBathroomType.id}.${fileExtension}`;
+      if (imageFile) {
+        const folderName = 'general_media/images/space_bathroom_types';
+        const fileExtension = imageFile.originalname.split('.').pop();
+        const fileName = `${savedSpaceBathroomType.id}.${fileExtension}`;
 
-      const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
-        folderName,
-        fileName,
-        imageFile.buffer,
-        imageFile.mimetype,
-      );
+        const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          imageFile.buffer,
+          imageFile.mimetype,
+        );
 
-      savedSpaceBathroomType.s3_url = imageUrlLocation;
+        savedSpaceBathroomType.s3_url = imageUrlLocation;
 
-      await this.spaceBathroomTypesRepository.save(savedSpaceBathroomType);
+        await this.spaceBathroomTypesRepository.save(savedSpaceBathroomType);
+      }
 
       this.logger.log(
         `Space bathroom type ${createSpaceBathroomTypesDto.name} created with ID ${savedSpaceBathroomType.id}`,
