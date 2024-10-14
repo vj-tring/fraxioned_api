@@ -116,12 +116,14 @@ export class Property {
   @Column({
     name: 'mail_banner_url',
     type: 'varchar',
+    nullable: true,
   })
   mailBannerUrl: string;
 
   @Column({
     name: 'cover_image_url',
     type: 'varchar',
+    nullable: true,
   })
   coverImageUrl: string;
 
