@@ -36,7 +36,7 @@ export class AmenitiesService {
 
   async createAmenity(
     createAmenityDto: CreateAmenitiesDto,
-    imageFile: Express.Multer.File,
+    imageFile?: Express.Multer.File,
   ): Promise<{
     success: boolean;
     message: string;
@@ -97,20 +97,22 @@ export class AmenitiesService {
 
       const savedAmenity = await this.amenityRepository.save(amenity);
 
-      const folderName = 'general_media/images/amenities';
-      const fileExtension = imageFile.originalname.split('.').pop();
-      const fileName = `${savedAmenity.id}.${fileExtension}`;
+      if (imageFile) {
+        const folderName = 'general_media/images/amenities';
+        const fileExtension = imageFile.originalname.split('.').pop();
+        const fileName = `${savedAmenity.id}.${fileExtension}`;
 
-      const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
-        folderName,
-        fileName,
-        imageFile.buffer,
-        imageFile.mimetype,
-      );
+        const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          imageFile.buffer,
+          imageFile.mimetype,
+        );
 
-      savedAmenity.s3_url = imageUrlLocation;
+        savedAmenity.s3_url = imageUrlLocation;
 
-      await this.amenityRepository.save(amenity);
+        await this.amenityRepository.save(amenity);
+      }
 
       this.logger.log(
         `Amenity ${createAmenityDto.amenityName} created with ID ${savedAmenity.id}`,

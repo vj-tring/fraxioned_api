@@ -77,7 +77,7 @@ export class SpaceBedTypeService {
 
   async createSpaceBedType(
     createSpaceBedTypeDto: CreateSpaceBedTypeDto,
-    imageFile: Express.Multer.File,
+    imageFile?: Express.Multer.File,
   ): Promise<ApiResponse<SpaceBedType>> {
     try {
       const existingResponse = await this.checkSpaceBedTypeExists(
@@ -105,20 +105,22 @@ export class SpaceBedTypeService {
       const savedSpaceBedType =
         await this.spaceBedTypeRepository.save(spaceBedType);
 
-      const folderName = 'general_media/images/space_bedroom_types';
-      const fileExtension = imageFile.originalname.split('.').pop();
-      const fileName = `${savedSpaceBedType.id}.${fileExtension}`;
+      if (imageFile) {
+        const folderName = 'general_media/images/space_bedroom_types';
+        const fileExtension = imageFile.originalname.split('.').pop();
+        const fileName = `${savedSpaceBedType.id}.${fileExtension}`;
 
-      const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
-        folderName,
-        fileName,
-        imageFile.buffer,
-        imageFile.mimetype,
-      );
+        const imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          imageFile.buffer,
+          imageFile.mimetype,
+        );
 
-      savedSpaceBedType.s3_url = imageUrlLocation;
+        savedSpaceBedType.s3_url = imageUrlLocation;
 
-      await this.spaceBedTypeRepository.save(savedSpaceBedType);
+        await this.spaceBedTypeRepository.save(savedSpaceBedType);
+      }
 
       this.logger.log(
         `Space bed type '${createSpaceBedTypeDto.bedType}' created with ID ${savedSpaceBedType.id}`,

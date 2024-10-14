@@ -7,7 +7,8 @@ import { Transform } from 'class-transformer';
 
 export class CreateAmenitiesDto {
   @ApiProperty({ type: 'string', format: 'binary' })
-  imageFile: Express.Multer.File;
+  @IsOptional()
+  imageFile?: Express.Multer.File;
 
   @IsNotEmpty({ message: 'amenity name is required' })
   @IsString()
