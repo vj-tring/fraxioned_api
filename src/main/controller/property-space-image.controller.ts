@@ -30,6 +30,7 @@ import { UpdatePropertySpaceImageRequestDto } from '../dto/requests/property-spa
 import { UpdatePropertySpaceImageDto } from '../dto/requests/property-space-image/update.dto';
 import { PROPERTY_SPACE_IMAGE_RESPONSES } from '../commons/constants/response-constants/property-space-image.constant';
 import { PropertySpaceImageService } from '../service/property-space-image.service';
+import { DeletePropertySpaceImagesDto } from '../dto/requests/property-space-image/delete-by-ids-request.dto';
 
 @ApiTags('Property Space Images')
 @Controller('v1/property-space-images')
@@ -249,9 +250,10 @@ export class PropertySpaceImageController {
 
   @Delete('property-space-images')
   async deletePropertySpaceImages(
-    @Body('ids') ids: number[],
+    @Body() deletePropertySpaceImagesDto: DeletePropertySpaceImagesDto,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
     try {
+      const { ids } = deletePropertySpaceImagesDto;
       const result =
         await this.propertySpaceImageService.deletePropertySpaceImagesByIds(
           ids,
