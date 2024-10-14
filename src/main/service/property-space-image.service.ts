@@ -486,4 +486,68 @@ export class PropertySpaceImageService {
       );
     }
   }
+
+  async deletePropertySpaceImagesByIds(ids: number[]): Promise<{
+    success: boolean;
+    message: string;
+    statusCode: number;
+  }> {
+    const notFoundIds: number[] = [];
+    const s3NotFoundKeys: string[] = [];
+
+    try {
+      for (const id of ids) {
+        const propertySpaceImage =
+          await this.propertySpaceImageRepository.findOne({
+            where: { id },
+          });
+        if (!propertySpaceImage) {
+          notFoundIds.push(id);
+          continue;
+        }
+
+        const s3Key = await this.s3UtilsService.extractS3Key(
+          propertySpaceImage.url,
+        );
+        const headObject =
+          await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+        if (!headObject) {
+          s3NotFoundKeys.push(s3Key);
+        }
+      }
+
+      if (notFoundIds.length > 0) {
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND_FOR_IDS(
+          notFoundIds,
+        );
+      }
+
+      if (s3NotFoundKeys.length > 0) {
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND_IN_AWS_S3(
+          s3NotFoundKeys,
+        );
+      }
+
+      for (const id of ids) {
+        const propertySpaceImage =
+          await this.propertySpaceImageRepository.findOne({ where: { id } });
+        const s3Key = await this.s3UtilsService.extractS3Key(
+          propertySpaceImage.url,
+        );
+
+        await this.s3UtilsService.deleteObjectFromS3(s3Key);
+
+        await this.propertySpaceImageRepository.delete(id);
+      }
+      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_BULK_DELETED();
+    } catch (error) {
+      this.logger.error(
+        `Error deleting property space images with IDs [${ids.join(', ')}]: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting the property space images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

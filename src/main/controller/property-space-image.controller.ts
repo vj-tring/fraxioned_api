@@ -246,4 +246,22 @@ export class PropertySpaceImageController {
       );
     }
   }
+
+  @Delete('property-space-images')
+  async deletePropertySpaceImages(
+    @Body('ids') ids: number[],
+  ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
+    try {
+      const result =
+        await this.propertySpaceImageService.deletePropertySpaceImagesByIds(
+          ids,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while deleting the property space images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
