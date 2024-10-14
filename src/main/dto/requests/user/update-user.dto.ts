@@ -38,11 +38,6 @@ export class UpdateUserDTO {
   password?: string;
 
   @IsOptional()
-  @IsString()
-  @Transform(({ value }) => value?.trim())
-  imageURL?: string;
-
-  @IsOptional()
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
   isActive?: boolean;

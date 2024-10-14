@@ -65,6 +65,37 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     data: [],
     statusCode: HttpStatus.OK,
   }),
+  PROPERTY_SPACE_IMAGES_NOT_FOUND_FOR_IDS: (
+    notFoundIds: number[],
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Property space images with IDs [${notFoundIds.join(', ')}] not found in the database.`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
+  PROPERTY_SPACE_IMAGES_NOT_FOUND_IN_AWS_S3: (
+    s3NotFoundKeys: string[],
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `S3 objects with keys [${s3NotFoundKeys.join(', ')}] not found.`,
+    statusCode: HttpStatus.NOT_FOUND,
+  }),
+  PROPERTY_SPACE_IMAGES_BULK_DELETED: (): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `All property space images deleted successfully.`,
+    statusCode: HttpStatus.NO_CONTENT,
+  }),
   PROPERTY_SPACE_IMAGES_FETCHED: (
     propertySpaceImages: PropertySpaceImage[],
   ): {
