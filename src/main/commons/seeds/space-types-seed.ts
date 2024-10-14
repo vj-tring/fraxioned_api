@@ -236,3 +236,4 @@ export const seedSpaceType = async (dataSource: DataSource): Promise<void> => {
     ]);
   }
 };
+

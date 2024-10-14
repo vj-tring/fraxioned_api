@@ -20,7 +20,7 @@ export abstract class BaseEntity {
   @JoinColumn({
     name: 'created_by',
   })
-  createdBy: number;
+  createdBy: User;
 
   @ManyToOne(() => User, (user) => user.id, {
     onDelete: 'SET NULL',
@@ -28,7 +28,7 @@ export abstract class BaseEntity {
   @JoinColumn({
     name: 'updated_by',
   })
-  updatedBy: number;
+  updatedBy: User;
 
   @CreateDateColumn({
     name: 'created_at',

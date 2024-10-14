@@ -1,11 +1,11 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FaqQuestions } from '../entities/faq_questions.entity';
+import { FaqQuestions } from '../entities/faq-questions.entity';
 import { CreateFaqQuestionsDto } from '../dto/requests/faq-questions/create-faq-questions.dto';
 import { UpdateFaqQuestionsDto } from '../dto/requests/faq-questions/update-faq-questions.dto';
 import { FaqCategoryService } from './faq-category.service';
-import { FAQ_QUESTIONS_RESPONSES } from '../commons/constants/response-constants/faq_questions_constant';
+import { FAQ_QUESTIONS_RESPONSES } from '../commons/constants/response-constants/faq-questions-constant';
 
 @Injectable()
 export class FaqQuestionsService {

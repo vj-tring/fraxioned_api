@@ -13,8 +13,6 @@ import { MailService } from 'src/main/email/mail.service';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
 import { format } from 'date-fns';
-import { SpaceTypes } from 'src/main/entities/space-types.entity';
-import { PropertyImages } from 'src/main/entities/property_images.entity';
 import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
 import { BookingUtilService } from './booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
@@ -42,6 +40,11 @@ export class BookingMailService {
     private readonly bookingUtilService: BookingUtilService,
   ) {}
 
+  async getBannerImage(booking: Booking): Promise<string> {
+    // const banner = await this.spaceTypesRepository.findOne({
+    //   where: { name: 'Banner', space: { id: 1 } },
+    // });
+    const banner = null;
   private async getScheduledDate(
     reminderDays: number,
     hour: number = 0,
@@ -75,12 +78,13 @@ export class BookingMailService {
 
     let imageUrl = '';
     if (banner) {
-      const image = await this.propertyImagesRepository.findOne({
-        where: {
-          spaceType: { id: banner.id },
-          property: { id: booking.property.id },
-        },
-      });
+      // const image = await this.propertyImagesRepository.findOne({
+      //   where: {
+      //     spaceType: { id: banner.id },
+      //     property: { id: booking.property.id },
+      //   },
+      // });
+      const image = null;
 
       if (image) {
         imageUrl = image.imageUrl;

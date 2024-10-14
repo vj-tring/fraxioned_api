@@ -16,8 +16,6 @@ import { UserContactDetails } from '../entities/user-contact-details.entity';
 import { MailService } from '../email/mail.service';
 import { Property } from '../entities/property.entity';
 import { Space } from '../entities/space.entity';
-import { SpaceTypes } from '../entities/space-types.entity';
-import { PropertyImages } from '../entities/property_images.entity';
 import { UpdateBookingService } from '../service/booking/booking-update.service';
 import { CancelBookingService } from '../service/booking/booking-cancel.service';
 import { AdminBookingService } from '../service/booking/admin-booking.service';
@@ -38,9 +36,6 @@ import { PropertyCodes } from '../entities/property_codes.entity';
       User,
       UserContactDetails,
       Space,
-      SpaceTypes,
-      PropertyImages,
-      PropertyCodes,
     ]),
     AuthenticationModule,
   ],

@@ -1,28 +1,28 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from './main/modules/database.module';
-import { HolidaysModule } from 'modules/holidays.module';
+import { PropertySpaceImageModule } from './main/modules/property-space-image.module';
+import { BookingModule } from './main/modules/booking.module';
+import { UserModule } from './main/modules/user.module';
 import { PropertiesModule } from './main/modules/properties.module';
-import { AuthenticationModule } from './main/modules/authentication.module';
-import { RoleModule } from './main/modules/role.module';
 import { PropertyDetailsModule } from './main/modules/property-details.module';
+import { UserPropertyModule } from './main/modules/user-property.module';
+import { HolidaysModule } from './main/modules/holidays.module';
+import { RoleModule } from './main/modules/role.module';
 import { PropertySeasonHolidaysModule } from './main/modules/property-season-holidays.module';
 import { UserSessionModule } from './main/modules/user-session.module';
-import { UserPropertyModule } from './main/modules/user-property.module';
-import { UserModule } from './main/modules/user.module';
 import { AmenitiesModule } from './main/modules/amenities.module';
-import { UserDocumentModule } from './main/modules/user-document.module';
-import { PropertyAmenitiesModule } from './main/modules/property-amenities.module';
+import { UserDocumentModule } from './main/modules/user-property-document.module';
+import { PropertySpaceAmenitiesModule } from './main/modules/property-space-amenity.module';
 import { PropertyCodesModule } from './main/modules/property-codes.module';
 import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './main/email/mail.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MaintenanceModule } from './main/modules/maintenance.module';
-import { PropertyImagesModule } from './main/modules/property-images.module';
 import { S3UtilsModule } from './main/modules/s3-utils.module';
 import { SpaceModule } from './main/modules/space.module';
-import { SpaceTypesModule } from './main/modules/space-types.module';
-import { BookingModule } from './main/modules/booking.module';
+import { ReportsModule } from './main/modules/reports.module';
+import { AuthenticationModule } from './main/modules/authentication.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
 import { CronJobsService } from './main/scheduler/cron-jobs.service';
 import { MailSchedulerService } from './main/scheduler/mail-scheduler.service';
@@ -31,13 +31,18 @@ import { LoggerModule } from './main/modules/logger.module';
 import { ReportsModule } from './main/modules/reports.module';
 import { PropertyCodeCategoryModule } from './main/modules/property-code-category.module';
 import { AmenityGroupModule } from './main/modules/amenity-group.module';
-import { FaqCategoryModule } from './main/modules/faqcategory.module';
-import { FaqQuestionsModule } from './main/modules/faqquestions.module';
+import { FaqCategoryModule } from './main/modules/faq-category.module';
+import { FaqQuestionsModule } from './main/modules/faq-questions.module';
+import { SpaceBedTypeModule } from './main/modules/space-bed-type.module';
+import { PropertySpaceModule } from './main/modules/property-space.module';
+import { PropertySpaceBedModule } from './main/modules/property-space-bed.module';
+import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
+import { PropertySpaceBathroomModule } from './main/modules/property-space-bathroom.module';
 
 @Module({
   imports: [
     DatabaseModule,
-    AuthenticationModule,
+    PropertySpaceImageModule,
     BookingModule,
     UserModule,
     PropertiesModule,
@@ -49,21 +54,19 @@ import { FaqQuestionsModule } from './main/modules/faqquestions.module';
     UserSessionModule,
     AmenitiesModule,
     UserDocumentModule,
-    PropertyAmenitiesModule,
+    PropertySpaceAmenitiesModule,
     PropertyCodesModule,
-    PropertyImagesModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     S3UtilsModule,
     SpaceModule,
-    SpaceTypesModule,
-
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/static',
       exclude: ['/api/(.*)'],
     }),
     ReportsModule,
+    AuthenticationModule,
     MaintenanceModule,
     ContactUsModule,
     ScheduleModule.forRoot(),
@@ -72,6 +75,11 @@ import { FaqQuestionsModule } from './main/modules/faqquestions.module';
     AmenityGroupModule,
     FaqCategoryModule,
     FaqQuestionsModule,
+    SpaceBedTypeModule,
+    PropertySpaceModule,
+    PropertySpaceBedModule,
+    SpaceBathroomTypesModule,
+    PropertySpaceBathroomModule,
   ],
   providers: [CronJobsService, MailSchedulerService],
 })

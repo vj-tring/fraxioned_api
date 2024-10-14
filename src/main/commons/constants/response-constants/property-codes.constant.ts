@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { PropertyCodes } from 'src/main/entities/property_codes.entity';
+import { PropertyCodes } from 'src/main/entities/property-codes.entity';
 
 export const PROPERTY_CODES_RESPONSES = {
   PROPERTY_NOT_FOUND: (

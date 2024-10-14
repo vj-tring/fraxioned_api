@@ -9,8 +9,6 @@ import { INestApplication } from '@nestjs/common';
 import { seedProperties } from 'src/main/commons/seeds/propertySeed';
 import { seedPropertyDetails } from 'src/main/commons/seeds/propertDetailSeed';
 import { seedUserPropertyDetails } from 'src/main/commons/seeds/userPropertyDetailsSeed';
-import { seedSpace } from 'src/main/commons/seeds/space-seed';
-import { seedSpaceType } from 'src/main/commons/seeds/space-types-seed';
 
 jest.mock('@nestjs/core', () => ({
   NestFactory: {
@@ -40,14 +38,6 @@ jest.mock('src/main/commons/seeds/propertDetailSeed', () => ({
 
 jest.mock('src/main/commons/seeds/userPropertyDetailsSeed', () => ({
   seedUserPropertyDetails: jest.fn(),
-}));
-
-jest.mock('src/main/commons/seeds/space-seed', () => ({
-  seedSpace: jest.fn(),
-}));
-
-jest.mock('src/main/commons/seeds/space-types-seed', () => ({
-  seedSpaceType: jest.fn(),
 }));
 
 jest.mock('typeorm', () => {
@@ -106,8 +96,6 @@ describe('Bootstrap', () => {
     expect(seedProperties).toHaveBeenCalledWith(mockDataSource);
     expect(seedPropertyDetails).toHaveBeenCalledWith(mockDataSource);
     expect(seedUserPropertyDetails).toHaveBeenCalledWith(mockDataSource);
-    expect(seedSpace).toHaveBeenCalledWith(mockDataSource);
-    expect(seedSpaceType).toHaveBeenCalledWith(mockDataSource);
 
     const url = await app.getUrl();
     expect(url.replace('[::1]', 'localhost')).toBe('http://localhost:3008/api');

@@ -16,7 +16,7 @@ import { FaqQuestionsService } from '../service/faq-questions.service';
 import { CreateFaqQuestionsDto } from '../dto/requests/faq-questions/create-faq-questions.dto';
 import { UpdateFaqQuestionsDto } from '../dto/requests/faq-questions/update-faq-questions.dto';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
-import { FaqQuestions } from '../entities/faq_questions.entity';
+import { FaqQuestions } from '../entities/faq-questions.entity';
 
 @ApiTags('FAQ Questions')
 @Controller('v1/faq-questions')
