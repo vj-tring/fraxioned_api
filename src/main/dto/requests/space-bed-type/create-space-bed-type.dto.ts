@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { User } from 'entities/user.entity';
 import { IsValidId } from 'commons/guards/is-valid-id.decorator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -6,7 +6,8 @@ import { Transform } from 'class-transformer';
 
 export class CreateSpaceBedTypeDto {
   @ApiProperty({ type: 'string', format: 'binary' })
-  imageFile: Express.Multer.File;
+  @IsOptional()
+  imageFile?: Express.Multer.File;
 
   @IsNotEmpty({ message: 'Bed type is required' })
   @IsString()
