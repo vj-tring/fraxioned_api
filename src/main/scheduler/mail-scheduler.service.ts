@@ -79,7 +79,7 @@ export class MailSchedulerService implements OnModuleInit {
     const jobConfigs: CronJobConfig[] = [
       {
         name: 'sendBookingReminderEmails',
-        schedule: '0 12 17 * * *',
+        schedule: '0 0 15 * * *',
         handler: this.sendBookingReminderEmails,
       },
     ];

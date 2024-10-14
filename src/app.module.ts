@@ -28,7 +28,6 @@ import { CronJobsService } from './main/scheduler/cron-jobs.service';
 import { MailSchedulerService } from './main/scheduler/mail-scheduler.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from './main/modules/logger.module';
-import { ReportsModule } from './main/modules/reports.module';
 import { PropertyCodeCategoryModule } from './main/modules/property-code-category.module';
 import { AmenityGroupModule } from './main/modules/amenity-group.module';
 import { FaqCategoryModule } from './main/modules/faq-category.module';
