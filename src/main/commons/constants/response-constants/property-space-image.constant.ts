@@ -41,6 +41,18 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     message: `${entityName} with ID ${entityId} does not exist`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
+  IMAGE_UPLOAD_LIMIT_EXCEEDED: (
+    maxFileCount: number,
+    existingImageCount: number,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: HttpStatus;
+  } => ({
+    success: false,
+    message: `Maximum image upload limit exceeded. Only ${maxFileCount - existingImageCount} image(s) is/are allowed.`,
+    statusCode: HttpStatus.BAD_REQUEST,
+  }),
   PROPERTY_SPACE_IMAGES_CREATED: (
     propertySpaceImages: PropertySpaceImage[],
   ): {
