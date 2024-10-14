@@ -40,9 +40,9 @@ export class PropertySpaceService {
   ) {}
 
   async findPropertySpaceByObjectIds(
-    instanceNumber: number,
-    spaceId: number,
     propertyId: number,
+    spaceId: number,
+    instanceNumber: number,
   ): Promise<PropertySpace | null> {
     return await this.propertySpaceRepository.findOne({
       where: {
