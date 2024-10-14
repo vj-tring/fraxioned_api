@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { authConstants } from 'src/main/commons/constants/authentication/authentication.constants';
 import { BookingUtilService } from './booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
-import { PropertyCodes } from 'src/main/entities/property_codes.entity';
+import { PropertyCodes } from 'src/main/entities/property-codes.entity';
 
 @Injectable()
 export class BookingMailService {
@@ -27,10 +27,6 @@ export class BookingMailService {
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(SpaceTypes)
-    private readonly spaceTypesRepository: Repository<SpaceTypes>,
-    @InjectRepository(PropertyImages)
-    private readonly propertyImagesRepository: Repository<PropertyImages>,
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(PropertyCodes)
@@ -40,11 +36,6 @@ export class BookingMailService {
     private readonly bookingUtilService: BookingUtilService,
   ) {}
 
-  async getBannerImage(booking: Booking): Promise<string> {
-    // const banner = await this.spaceTypesRepository.findOne({
-    //   where: { name: 'Banner', space: { id: 1 } },
-    // });
-    const banner = null;
   private async getScheduledDate(
     reminderDays: number,
     hour: number = 0,
@@ -67,36 +58,23 @@ export class BookingMailService {
   }
 
   private async getBannerImage(booking: Booking): Promise<string> {
-    const banner = await this.spaceTypesRepository.findOne({
-      where: { name: 'Banner' },
+    let imageUrl = '';
+    const property = await this.propertyRepository.findOne({
+      where: {
+        id: booking.property.id,
+      },
     });
 
-    if (!banner) {
-      this.logger.warn('Banner space type not found');
-      return;
+    if (property) {
+      imageUrl = property.mailBannerUrl;
+      this.logger.log(`Banner Image URL: ${imageUrl}`);
+    } else {
+      this.logger.warn(
+        `No banner image found for property ID: ${booking.property.id}`,
+      );
     }
 
-    let imageUrl = '';
-    if (banner) {
-      // const image = await this.propertyImagesRepository.findOne({
-      //   where: {
-      //     spaceType: { id: banner.id },
-      //     property: { id: booking.property.id },
-      //   },
-      // });
-      const image = null;
-
-      if (image) {
-        imageUrl = image.imageUrl;
-        this.logger.log(`Banner Image URL: ${imageUrl}`);
-      } else {
-        this.logger.warn(
-          `No banner image found for property ID: ${booking.property.id}`,
-        );
-      }
-
-      return imageUrl;
-    }
+    return imageUrl;
   }
 
   private async getPrimaryEmail(booking: Booking): Promise<string> {
