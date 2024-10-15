@@ -381,6 +381,77 @@ export class PropertySpaceAmenitiesService {
     }
   }
 
+  async findAmenitiesByPropertySpaceId(propertySpaceId: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceAmenities[];
+    statusCode: number;
+  }> {
+    try {
+      const propertySpaceAmenities =
+        await this.PropertySpaceAmenitiesRepository.find({
+          relations: [
+            'property',
+            'amenity',
+            'amenity.createdBy',
+            'amenity.updatedBy',
+            'amenity.amenityGroup',
+            'createdBy',
+            'updatedBy',
+          ],
+          select: {
+            property: {
+              id: true,
+            },
+            amenity: {
+              id: true,
+              amenityName: true,
+              amenityDescription: true,
+              amenityGroup: {
+                id: true,
+                name: true,
+              },
+              createdAt: true,
+              updatedAt: true,
+              createdBy: {
+                id: true,
+              },
+              updatedBy: {
+                id: true,
+              },
+            },
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
+          },
+          where: { propertySpace: { id: propertySpaceId } },
+        });
+
+      if (propertySpaceAmenities.length === 0) {
+        this.logger.error(`No amenities are available for this property space`);
+        return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
+      }
+
+      this.logger.log(
+        `Retrieved ${propertySpaceAmenities.length} amenities successfully.`,
+      );
+      return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_FETCHED(
+        propertySpaceAmenities,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property space amenities: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the amenities for the specified property space',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async findAmenitiesByPropertyId(id: number): Promise<{
     success: boolean;
     message: string;
