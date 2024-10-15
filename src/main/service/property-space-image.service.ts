@@ -9,6 +9,8 @@ import { User } from '../entities/user.entity';
 import { CreatePropertySpaceImageDto } from '../dto/requests/property-space-image/create.dto';
 import { UpdatePropertySpaceImageDto } from '../dto/requests/property-space-image/update.dto';
 import { PropertySpaceImage } from '../entities/property-space-image.entity';
+import { getMaxFileCount } from '../utils/image-file.utils';
+import { ApiResponse } from '../commons/response-body/common.responses';
 
 @Injectable()
 export class PropertySpaceImageService {
@@ -22,6 +24,29 @@ export class PropertySpaceImageService {
     private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
   ) {}
+
+  async getImageCountForProperty(propertyId: number): Promise<number> {
+    const imageCount = await this.propertySpaceImageRepository
+      .createQueryBuilder('fpsi')
+      .innerJoin('fpsi.propertySpace', 'fps')
+      .where('fps.property_id = :propertyId', { propertyId })
+      .getCount();
+
+    return imageCount;
+  }
+
+  async handleImageUploadLimitExceeded(
+    maxFileCount: number,
+    existingImageCount: number,
+  ): Promise<ApiResponse<null>> {
+    this.logger.error(
+      `Maximum image upload limit exceeded. Only ${maxFileCount - existingImageCount} image(s) is/are allowed.`,
+    );
+    return PROPERTY_SPACE_IMAGE_RESPONSES.IMAGE_UPLOAD_LIMIT_EXCEEDED(
+      maxFileCount,
+      existingImageCount,
+    );
+  }
 
   async createPropertySpaceImages(
     createPropertySpaceImageDtos: CreatePropertySpaceImageDto[],
@@ -63,6 +88,21 @@ export class PropertySpaceImageService {
         return PROPERTY_SPACE_IMAGE_RESPONSES.ENTITY_NOT_FOUND(
           'User',
           createdByUserId,
+        );
+      }
+
+      const propertyId = existingPropertySpace.property.id;
+      const existingImageCount =
+        await this.getImageCountForProperty(propertyId);
+      const maxFileCount = getMaxFileCount();
+
+      if (
+        existingImageCount + createPropertySpaceImageDtos.length >
+        maxFileCount
+      ) {
+        return await this.handleImageUploadLimitExceeded(
+          maxFileCount,
+          existingImageCount,
         );
       }
 
