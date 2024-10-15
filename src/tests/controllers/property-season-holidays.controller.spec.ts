@@ -78,7 +78,7 @@ describe('PropertySeasonHolidaysController', () => {
       isActive: false,
       displayOrder: 0,
       propertyRemainingShare: 0,
-    },
+    } as Property,
     holiday: {
       id: 1,
       name: '',
@@ -306,7 +306,7 @@ describe('PropertySeasonHolidaysController', () => {
           isActive: false,
           displayOrder: 0,
           propertyRemainingShare: 0,
-        },
+        } as Property,
         holiday: {
           id: 1,
           name: '',

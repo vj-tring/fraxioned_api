@@ -16,10 +16,13 @@ import { UserContactDetails } from '../entities/user-contact-details.entity';
 import { MailService } from '../email/mail.service';
 import { Property } from '../entities/property.entity';
 import { Space } from '../entities/space.entity';
-import { SpaceTypes } from '../entities/space-types.entity';
-import { PropertyImages } from '../entities/property_images.entity';
 import { UpdateBookingService } from '../service/booking/booking-update.service';
 import { CancelBookingService } from '../service/booking/booking-cancel.service';
+import { AdminBookingService } from '../service/booking/admin-booking.service';
+import { BookingUtilService } from '../service/booking/utils/booking.service.util';
+import { BookingMailService } from '../service/booking/utils/mail.util';
+import { BookingValidationService } from '../service/booking/utils/validation.util';
+import { PropertyCodes } from '../entities/property-codes.entity';
 
 @Module({
   imports: [
@@ -33,8 +36,7 @@ import { CancelBookingService } from '../service/booking/booking-cancel.service'
       User,
       UserContactDetails,
       Space,
-      SpaceTypes,
-      PropertyImages,
+      PropertyCodes,
     ]),
     AuthenticationModule,
   ],
@@ -47,6 +49,11 @@ import { CancelBookingService } from '../service/booking/booking-cancel.service'
     MailService,
     UpdateBookingService,
     CancelBookingService,
+    AdminBookingService,
+    BookingUtilService,
+    BookingMailService,
+    BookingValidationService,
   ],
+  exports: [BookingMailService],
 })
 export class BookingModule {}

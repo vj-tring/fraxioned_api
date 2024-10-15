@@ -16,8 +16,9 @@ import { CreateBookingService } from 'src/main/service/booking/create-booking.se
 import { BookingHistory } from 'src/main/entities/booking-history.entity';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { MailService } from 'src/main/email/mail.service';
-import { SpaceTypes } from 'src/main/entities/space-types.entity';
-import { PropertyImages } from 'src/main/entities/property_images.entity';
+import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
+import { BookingMailService } from 'src/main/service/booking/utils/mail.util';
+import { BookingValidationService } from 'src/main/service/booking/utils/validation.util';
 
 describe('BookingService', () => {
   let service: BookingService;
@@ -35,6 +36,29 @@ describe('BookingService', () => {
           useValue: {
             log: jest.fn(),
             warn: jest.fn(),
+          },
+        },
+        {
+          provide: BookingUtilService,
+          useValue: {
+            getProperty: jest.fn(),
+          },
+        },
+        {
+          provide: BookingMailService,
+          useValue: {
+            sendBookingConfirmationEmail: jest.fn(),
+          },
+        },
+        {
+          provide: BookingValidationService,
+          useValue: {
+            validateBookingRules: jest.fn(),
+            validateBookedDates: jest.fn(),
+            validateBookingGap: jest.fn(),
+            validateGuestLimits: jest.fn(),
+            validateUserProperty: jest.fn(),
+            validateDates: jest.fn(),
           },
         },
         CreateBookingService,
@@ -68,14 +92,6 @@ describe('BookingService', () => {
         },
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(SpaceTypes),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(PropertyImages),
           useClass: Repository,
         },
       ],

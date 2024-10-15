@@ -19,6 +19,7 @@ import { AuthGuard } from '../commons/guards/auth.guard';
 import { BookingSummaryService } from '../service/booking/booking-summary.service';
 import { UpdateBookingService } from '../service/booking/booking-update.service';
 import { CancelBookingService } from '../service/booking/booking-cancel.service';
+import { AdminBookingService } from '../service/booking/admin-booking.service';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
@@ -28,6 +29,7 @@ export class BookingController {
   constructor(
     private readonly bookingService: BookingService,
     private readonly createBookingService: CreateBookingService,
+    private readonly adminBookingService: AdminBookingService,
     private readonly bookingSummaryService: BookingSummaryService,
     private readonly updateBookingService: UpdateBookingService,
     private readonly cancelBookingService: CancelBookingService,
@@ -106,5 +108,12 @@ export class BookingController {
     @Param('user') user: number,
   ): Promise<object> {
     return this.cancelBookingService.cancelBooking(id, user);
+  }
+
+  @Post('admin-booking')
+  async adminBooking(
+    @Body() createBookingDto: CreateBookingDTO,
+  ): Promise<object> {
+    return this.adminBookingService.createAdminBooking(createBookingDto);
   }
 }

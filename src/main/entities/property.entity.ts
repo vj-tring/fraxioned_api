@@ -113,6 +113,20 @@ export class Property {
   })
   displayOrder: number;
 
+  @Column({
+    name: 'mail_banner_url',
+    type: 'varchar',
+    nullable: true,
+  })
+  mailBannerUrl: string;
+
+  @Column({
+    name: 'cover_image_url',
+    type: 'varchar',
+    nullable: true,
+  })
+  coverImageUrl: string;
+
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({
     name: 'created_by',

@@ -5,29 +5,25 @@ import { Booking } from 'entities/booking.entity';
 import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
 import { CreateBookingDTO } from '../../dto/requests/booking/create-booking.dto';
-import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { PropertyDetails } from '../../entities/property-details.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { CreateBookingService } from './create-booking.service';
-import { generateBookingId } from 'src/main/service/booking/utils/booking.util';
+import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
 import { NightCounts } from './interface/bookingInterface';
+import { normalizeDates } from './utils/date.util';
+import { generateBookingId } from './utils/booking-id.util';
+import { BookingValidationService } from './utils/validation.util';
 
 @Injectable()
 export class BookingSummaryService {
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
-    @InjectRepository(UserProperties)
-    private readonly userPropertiesRepository: Repository<UserProperties>,
-    @InjectRepository(Property)
-    private readonly propertyRepository: Repository<Property>,
-    @InjectRepository(PropertyDetails)
-    private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     @InjectRepository(PropertySeasonHolidays)
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
     private readonly logger: LoggerService,
-    private readonly createBookingService: CreateBookingService,
+    private readonly bookingUtilService: BookingUtilService,
+    private readonly bookingValidationService: BookingValidationService,
   ) {}
 
   async bookingSummary(createBookingDto: CreateBookingDTO): Promise<object> {
@@ -39,20 +35,22 @@ export class BookingSummaryService {
       user,
     } = createBookingDto;
 
-    const property = await this.createBookingService.getProperty(
+    const property = await this.bookingUtilService.getProperty(
       createBookingDto.property.id,
     );
     const propertyDetails =
-      await this.createBookingService.getPropertyDetails(property);
+      await this.bookingUtilService.getPropertyDetails(property);
 
     if (!propertyDetails) {
       return BOOKING_RESPONSES.NO_ACCESS_TO_PROPERTY;
     }
 
-    const { checkinDate, checkoutDate } =
-      this.createBookingService.normalizeDates(checkinDateStr, checkoutDateStr);
+    const { checkinDate, checkoutDate } = normalizeDates(
+      checkinDateStr,
+      checkoutDateStr,
+    );
 
-    const dateValidationResult = this.createBookingService.validateDates(
+    const dateValidationResult = this.bookingValidationService.validateDates(
       checkinDate,
       checkoutDate,
       propertyDetails,
@@ -62,7 +60,7 @@ export class BookingSummaryService {
     }
 
     const userPropertyValidationResult =
-      await this.createBookingService.validateUserProperty(
+      await this.bookingValidationService.validateUserProperty(
         user,
         property,
         checkinDate,
@@ -72,16 +70,17 @@ export class BookingSummaryService {
       return userPropertyValidationResult;
     }
 
-    const guestValidationResult = this.createBookingService.validateGuestLimits(
-      createBookingDto,
-      propertyDetails,
-    );
+    const guestValidationResult =
+      this.bookingValidationService.validateGuestLimits(
+        createBookingDto,
+        propertyDetails,
+      );
     if (guestValidationResult !== true) {
       return guestValidationResult;
     }
 
     const bookingGapValidationResult =
-      await this.createBookingService.validateBookingGap(
+      await this.bookingValidationService.validateBookingGap(
         user,
         property,
         checkinDate,
@@ -92,7 +91,7 @@ export class BookingSummaryService {
     }
 
     const bookedDatesValidationResult =
-      await this.createBookingService.validateBookedDates(
+      await this.bookingValidationService.validateBookedDates(
         property,
         checkinDate,
         checkoutDate,
@@ -102,7 +101,7 @@ export class BookingSummaryService {
     }
 
     const nightCounts: NightCounts =
-      await this.createBookingService.calculateNightCounts(
+      await this.bookingUtilService.calculateNightCounts(
         property,
         checkinDate,
         checkoutDate,
@@ -110,14 +109,14 @@ export class BookingSummaryService {
       );
 
     const isLastMinuteBooking =
-      this.createBookingService.isLastMinuteBooking(checkinDate);
-    const nightsSelected = this.createBookingService.calculateNightsSelected(
+      this.bookingUtilService.isLastMinuteBooking(checkinDate);
+    const nightsSelected = this.bookingUtilService.calculateNightsSelected(
       checkinDate,
       checkoutDate,
     );
 
     const bookingRulesValidationResult =
-      await this.createBookingService.validateBookingRules(
+      await this.bookingValidationService.validateBookingRules(
         isLastMinuteBooking,
         nightsSelected,
         nightCounts,
