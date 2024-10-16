@@ -31,14 +31,20 @@ export class FaqQuestionsController {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: FaqQuestions;
+    data?: FaqQuestions & { categoryId: number };
     statusCode: HttpStatus;
   }> {
     try {
       const result = await this.faqQuestionsService.createFaqQuestion(
         createFaqQuestionsDto,
       );
-      return result;
+      return {
+        ...result,
+        data: {
+          ...result.data,
+          categoryId: createFaqQuestionsDto.categoryId,
+        },
+      };
     } catch (error) {
       throw new HttpException(
         'An error occurred while creating the FAQ question',
@@ -51,12 +57,17 @@ export class FaqQuestionsController {
   async getAllFaqQuestions(): Promise<{
     success: boolean;
     message: string;
-    data?: FaqQuestions[];
-    statusCode: HttpStatus;
+    data?: (FaqQuestions & { categoryId: number })[];
   }> {
     try {
       const result = await this.faqQuestionsService.findAllFaqQuestions();
-      return result;
+      return {
+        ...result,
+        data: result.data?.map((question) => ({
+          ...question,
+          categoryId: question.category.id,
+        })),
+      };
     } catch (error) {
       throw new HttpException(
         'An error occurred while retrieving FAQ questions',
@@ -69,12 +80,18 @@ export class FaqQuestionsController {
   async getFaqQuestionById(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
-    data?: FaqQuestions;
+    data?: FaqQuestions & { categoryId: number };
     statusCode: HttpStatus;
   }> {
     try {
       const result = await this.faqQuestionsService.findFaqQuestionById(id);
-      return result;
+      return {
+        ...result,
+        data: {
+          ...result.data,
+          categoryId: result.data.category.id,
+        },
+      };
     } catch (error) {
       throw new HttpException(
         'An error occurred while retrieving the FAQ question',
@@ -90,7 +107,7 @@ export class FaqQuestionsController {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: FaqQuestions;
+    data?: FaqQuestions & { categoryId: number };
     statusCode: HttpStatus;
   }> {
     try {
@@ -98,7 +115,14 @@ export class FaqQuestionsController {
         id,
         updateFaqQuestionsDto,
       );
-      return result;
+      return {
+        ...result,
+        data: {
+          ...result.data,
+          categoryId:
+            updateFaqQuestionsDto.categoryId || result.data.category.id,
+        },
+      };
     } catch (error) {
       throw new HttpException(
         'An error occurred while updating the FAQ question',
