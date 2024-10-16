@@ -320,6 +320,65 @@ export class PropertySpaceImageService {
     }
   }
 
+  async findPropertySpaceImagesByPropertySpaceId(
+    propertySpaceId: number,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceImage[];
+    statusCode: number;
+  }> {
+    try {
+      const propertySpaceImages = await this.propertySpaceImageRepository.find({
+        relations: [
+          'propertySpace',
+          'createdBy',
+          'updatedBy',
+          'propertySpace.space',
+          'propertySpace.property',
+        ],
+        where: { propertySpace: { id: propertySpaceId } },
+        select: {
+          createdBy: { id: true },
+          updatedBy: { id: true },
+          propertySpace: {
+            id: true,
+            instanceNumber: true,
+            space: {
+              id: true,
+              name: true,
+            },
+            property: {
+              id: true,
+              propertyName: true,
+            },
+          },
+        },
+      });
+
+      if (propertySpaceImages.length === 0) {
+        this.logger.log(
+          `No property space images found for property space ID ${propertySpaceId}`,
+        );
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND();
+      }
+
+      this.logger.log(
+        `Retrieved ${propertySpaceImages.length} property space images for property space ID ${propertySpaceId}`,
+      );
+      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_FETCHED(
+        propertySpaceImages,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property space images for property space ID ${propertySpaceId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving property space images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
   async updatePropertySpaceImage(
     id: number,
     updatePropertySpaceImageDto: UpdatePropertySpaceImageDto,
