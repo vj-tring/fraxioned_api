@@ -174,4 +174,9 @@ export const BOOKING_RESPONSES = {
     status: HttpStatus.BAD_REQUEST,
     message: 'Last-minute bookings cannot be cancelled.',
   },
+  OWNER_REZ_BOOKING_FAILED: {
+    message: 'Owner cannot book reservations.',
+    error: 'Forbidden',
+    statusCode: HttpStatus.FORBIDDEN,
+  },
 };
