@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoggerService } from './logger.service';
@@ -11,6 +17,7 @@ import { UpdatePropertySpaceImageDto } from '../dto/requests/property-space-imag
 import { PropertySpaceImage } from '../entities/property-space-image.entity';
 import { getMaxFileCount } from '../utils/image-file.utils';
 import { ApiResponse } from '../commons/response-body/common.responses';
+import { PropertySpaceService } from './property-space.service';
 
 @Injectable()
 export class PropertySpaceImageService {
@@ -20,9 +27,11 @@ export class PropertySpaceImageService {
     @InjectRepository(PropertySpace)
     private readonly propertySpaceRepository: Repository<PropertySpace>,
     @InjectRepository(User)
+    @Inject(forwardRef(() => PropertySpaceService))
     private readonly userRepository: Repository<User>,
     private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
+    private readonly propertySpaceService: PropertySpaceService,
   ) {}
 
   async getImageCountForProperty(propertyId: number): Promise<number> {
@@ -320,6 +329,72 @@ export class PropertySpaceImageService {
     }
   }
 
+  async findPropertySpaceImagesByPropertySpaceId(
+    propertySpaceId: number,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceImage[];
+    statusCode: number;
+  }> {
+    try {
+      const existingPropertySpace =
+        await this.propertySpaceService.findPropertySpaceById(propertySpaceId);
+      if (!existingPropertySpace) {
+        return this.propertySpaceService.handlePropertySpaceNotFound(
+          propertySpaceId,
+        );
+      }
+      const propertySpaceImages = await this.propertySpaceImageRepository.find({
+        relations: [
+          'propertySpace',
+          'createdBy',
+          'updatedBy',
+          'propertySpace.space',
+          'propertySpace.property',
+        ],
+        where: { propertySpace: { id: propertySpaceId } },
+        select: {
+          createdBy: { id: true },
+          updatedBy: { id: true },
+          propertySpace: {
+            id: true,
+            instanceNumber: true,
+            space: {
+              id: true,
+              name: true,
+            },
+            property: {
+              id: true,
+              propertyName: true,
+            },
+          },
+        },
+      });
+
+      if (propertySpaceImages.length === 0) {
+        this.logger.log(
+          `No property space images found for property space ID ${propertySpaceId}`,
+        );
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND();
+      }
+
+      this.logger.log(
+        `Retrieved ${propertySpaceImages.length} property space images for property space ID ${propertySpaceId}`,
+      );
+      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_FETCHED(
+        propertySpaceImages,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property space images for property space ID ${propertySpaceId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving property space images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
   async updatePropertySpaceImage(
     id: number,
     updatePropertySpaceImageDto: UpdatePropertySpaceImageDto,
