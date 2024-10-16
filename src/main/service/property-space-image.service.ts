@@ -9,6 +9,8 @@ import { User } from '../entities/user.entity';
 import { CreatePropertySpaceImageDto } from '../dto/requests/property-space-image/create.dto';
 import { UpdatePropertySpaceImageDto } from '../dto/requests/property-space-image/update.dto';
 import { PropertySpaceImage } from '../entities/property-space-image.entity';
+import { getMaxFileCount } from '../utils/image-file.utils';
+import { ApiResponse } from '../commons/response-body/common.responses';
 
 @Injectable()
 export class PropertySpaceImageService {
@@ -22,6 +24,29 @@ export class PropertySpaceImageService {
     private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
   ) {}
+
+  async getImageCountForProperty(propertyId: number): Promise<number> {
+    const imageCount = await this.propertySpaceImageRepository
+      .createQueryBuilder('fpsi')
+      .innerJoin('fpsi.propertySpace', 'fps')
+      .where('fps.property_id = :propertyId', { propertyId })
+      .getCount();
+
+    return imageCount;
+  }
+
+  async handleImageUploadLimitExceeded(
+    maxFileCount: number,
+    existingImageCount: number,
+  ): Promise<ApiResponse<null>> {
+    this.logger.error(
+      `Maximum image upload limit exceeded. Only ${maxFileCount - existingImageCount} image(s) is/are allowed.`,
+    );
+    return PROPERTY_SPACE_IMAGE_RESPONSES.IMAGE_UPLOAD_LIMIT_EXCEEDED(
+      maxFileCount,
+      existingImageCount,
+    );
+  }
 
   async createPropertySpaceImages(
     createPropertySpaceImageDtos: CreatePropertySpaceImageDto[],
@@ -63,6 +88,21 @@ export class PropertySpaceImageService {
         return PROPERTY_SPACE_IMAGE_RESPONSES.ENTITY_NOT_FOUND(
           'User',
           createdByUserId,
+        );
+      }
+
+      const propertyId = existingPropertySpace.property.id;
+      const existingImageCount =
+        await this.getImageCountForProperty(propertyId);
+      const maxFileCount = getMaxFileCount();
+
+      if (
+        existingImageCount + createPropertySpaceImageDtos.length >
+        maxFileCount
+      ) {
+        return await this.handleImageUploadLimitExceeded(
+          maxFileCount,
+          existingImageCount,
         );
       }
 
@@ -479,6 +519,70 @@ export class PropertySpaceImageService {
     } catch (error) {
       this.logger.error(
         `Error deleting property space images for Property Space ID ${propertySpaceId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting the property space images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async deletePropertySpaceImagesByIds(ids: number[]): Promise<{
+    success: boolean;
+    message: string;
+    statusCode: number;
+  }> {
+    const notFoundIds: number[] = [];
+    const s3NotFoundKeys: string[] = [];
+
+    try {
+      for (const id of ids) {
+        const propertySpaceImage =
+          await this.propertySpaceImageRepository.findOne({
+            where: { id },
+          });
+        if (!propertySpaceImage) {
+          notFoundIds.push(id);
+          continue;
+        }
+
+        const s3Key = await this.s3UtilsService.extractS3Key(
+          propertySpaceImage.url,
+        );
+        const headObject =
+          await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+        if (!headObject) {
+          s3NotFoundKeys.push(s3Key);
+        }
+      }
+
+      if (notFoundIds.length > 0) {
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND_FOR_IDS(
+          notFoundIds,
+        );
+      }
+
+      if (s3NotFoundKeys.length > 0) {
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND_IN_AWS_S3(
+          s3NotFoundKeys,
+        );
+      }
+
+      for (const id of ids) {
+        const propertySpaceImage =
+          await this.propertySpaceImageRepository.findOne({ where: { id } });
+        const s3Key = await this.s3UtilsService.extractS3Key(
+          propertySpaceImage.url,
+        );
+
+        await this.s3UtilsService.deleteObjectFromS3(s3Key);
+
+        await this.propertySpaceImageRepository.delete(id);
+      }
+      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_BULK_DELETED();
+    } catch (error) {
+      this.logger.error(
+        `Error deleting property space images with IDs [${ids.join(', ')}]: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
         'An error occurred while deleting the property space images',

@@ -24,6 +24,10 @@ import { SpaceModule } from './main/modules/space.module';
 import { ReportsModule } from './main/modules/reports.module';
 import { AuthenticationModule } from './main/modules/authentication.module';
 import { ContactUsModule } from './main/modules/contact-us.module';
+import { CronJobsService } from './main/scheduler/cron-jobs.service';
+import { MailSchedulerService } from './main/scheduler/mail-scheduler.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { LoggerModule } from './main/modules/logger.module';
 import { PropertyCodeCategoryModule } from './main/modules/property-code-category.module';
 import { AmenityGroupModule } from './main/modules/amenity-group.module';
 import { FaqCategoryModule } from './main/modules/faq-category.module';
@@ -33,6 +37,7 @@ import { PropertySpaceModule } from './main/modules/property-space.module';
 import { PropertySpaceBedModule } from './main/modules/property-space-bed.module';
 import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
 import { PropertySpaceBathroomModule } from './main/modules/property-space-bathroom.module';
+import { RuleConstantModule } from './main/modules/rule-constant.module';
 
 @Module({
   imports: [
@@ -64,6 +69,8 @@ import { PropertySpaceBathroomModule } from './main/modules/property-space-bathr
     AuthenticationModule,
     MaintenanceModule,
     ContactUsModule,
+    ScheduleModule.forRoot(),
+    LoggerModule,
     PropertyCodeCategoryModule,
     AmenityGroupModule,
     FaqCategoryModule,
@@ -73,6 +80,8 @@ import { PropertySpaceBathroomModule } from './main/modules/property-space-bathr
     PropertySpaceBedModule,
     SpaceBathroomTypesModule,
     PropertySpaceBathroomModule,
+    RuleConstantModule,
   ],
+  providers: [CronJobsService, MailSchedulerService],
 })
 export class AppModule {}

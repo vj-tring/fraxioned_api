@@ -25,12 +25,7 @@ import { PropertyWithDetailsResponseDto } from '../dto/responses/PropertyWithDet
 import { CreatePropertiesDto } from '../dto/requests/property/create-property.dto';
 import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import {
-  getAllowedExtensions,
-  getMaxFileSize,
-  isFileExtensionValid,
-  isFileSizeValid,
-} from '../utils/image-file.utils';
+import { validateFile } from '../utils/fileUploadValidation.Util';
 
 @ApiTags('Properties')
 @Controller('v1/properties')
@@ -73,9 +68,6 @@ export class PropertiesController {
     },
   ): Promise<UpdatePropertiesResponseDto | object> {
     try {
-      const maxFileSize = getMaxFileSize();
-      const allowedExtensions = getAllowedExtensions();
-
       const mailBannerFile = files.mailBannerFile
         ? files.mailBannerFile[0]
         : undefined;
@@ -84,32 +76,15 @@ export class PropertiesController {
         : undefined;
 
       if (mailBannerFile) {
-        if (!isFileSizeValid(mailBannerFile, maxFileSize)) {
-          throw new HttpException(
-            `Mail banner file size exceeds the maximum allowed size of ${maxFileSize} bytes.`,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        if (!isFileExtensionValid(mailBannerFile, allowedExtensions)) {
-          throw new HttpException(
-            `Mail banner file has an unsupported extension. Allowed extensions are: ${allowedExtensions.join(', ')}.`,
-            HttpStatus.BAD_REQUEST,
-          );
+        const validationResponse = await validateFile(mailBannerFile);
+        if (validationResponse) {
+          return validationResponse;
         }
       }
-
       if (coverImageFile) {
-        if (!isFileSizeValid(coverImageFile, maxFileSize)) {
-          throw new HttpException(
-            `Cover image file size exceeds the maximum allowed size of ${maxFileSize} bytes.`,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        if (!isFileExtensionValid(coverImageFile, allowedExtensions)) {
-          throw new HttpException(
-            `Cover image file has an unsupported extension. Allowed extensions are: ${allowedExtensions.join(', ')}.`,
-            HttpStatus.BAD_REQUEST,
-          );
+        const validationResponse = await validateFile(coverImageFile);
+        if (validationResponse) {
+          return validationResponse;
         }
       }
 

@@ -82,16 +82,6 @@ export class UpdatePropertiesDto {
   @Type(() => Number)
   displayOrder: number;
 
-  @IsOptional()
-  @IsString()
-  @Transform(({ value }) => value?.trim())
-  mailBannerUrl: string;
-
-  @IsOptional()
-  @IsString()
-  @Transform(({ value }) => value?.trim())
-  coverImageUrl: string;
-
   @ApiProperty({ type: 'string', format: 'binary' })
   @IsOptional()
   mailBannerFile?: Express.Multer.File;
