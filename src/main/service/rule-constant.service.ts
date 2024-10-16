@@ -299,7 +299,7 @@ export class RuleConstantService implements OnModuleInit {
       }
 
       await this.ruleConstantRepository.delete(id);
-
+      await this.refreshRuleConstantsCache();
       this.logger.log(`Rule constant with ID ${id} deleted successfully`);
       return RULE_CONSTANT_RESPONSES.RULE_CONSTANT_DELETED(id);
     } catch (error) {
