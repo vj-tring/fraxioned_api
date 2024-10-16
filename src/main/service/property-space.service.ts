@@ -239,9 +239,7 @@ export class PropertySpaceService {
       );
 
       if (!existingSpace) {
-        return await this.spaceService.handleSpaceNotFound(
-          createPropertySpaceDto.space.id,
-        );
+        return await this.spaceService.handleSpaceNotFound();
       }
 
       const instanceNumber =
