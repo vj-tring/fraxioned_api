@@ -388,6 +388,13 @@ export class PropertySpaceAmenitiesService {
     statusCode: number;
   }> {
     try {
+      const existingPropertySpace =
+        await this.propertySpaceService.findPropertySpaceById(propertySpaceId);
+      if (!existingPropertySpace) {
+        return this.propertySpaceService.handlePropertySpaceNotFound(
+          propertySpaceId,
+        );
+      }
       const propertySpaceAmenities =
         await this.PropertySpaceAmenitiesRepository.find({
           relations: [

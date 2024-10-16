@@ -11,6 +11,7 @@ import { UpdatePropertySpaceImageDto } from '../dto/requests/property-space-imag
 import { PropertySpaceImage } from '../entities/property-space-image.entity';
 import { getMaxFileCount } from '../utils/image-file.utils';
 import { ApiResponse } from '../commons/response-body/common.responses';
+import { PropertySpaceService } from './property-space.service';
 
 @Injectable()
 export class PropertySpaceImageService {
@@ -23,6 +24,7 @@ export class PropertySpaceImageService {
     private readonly userRepository: Repository<User>,
     private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
+    private readonly propertySpaceService: PropertySpaceService,
   ) {}
 
   async getImageCountForProperty(propertyId: number): Promise<number> {
@@ -329,6 +331,13 @@ export class PropertySpaceImageService {
     statusCode: number;
   }> {
     try {
+      const existingPropertySpace =
+        await this.propertySpaceService.findPropertySpaceById(propertySpaceId);
+      if (!existingPropertySpace) {
+        return this.propertySpaceService.handlePropertySpaceNotFound(
+          propertySpaceId,
+        );
+      }
       const propertySpaceImages = await this.propertySpaceImageRepository.find({
         relations: [
           'propertySpace',
