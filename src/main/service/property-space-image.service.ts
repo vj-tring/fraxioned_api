@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoggerService } from './logger.service';
@@ -21,6 +27,7 @@ export class PropertySpaceImageService {
     @InjectRepository(PropertySpace)
     private readonly propertySpaceRepository: Repository<PropertySpace>,
     @InjectRepository(User)
+    @Inject(forwardRef(() => PropertySpaceService))
     private readonly userRepository: Repository<User>,
     private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
