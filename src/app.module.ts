@@ -37,6 +37,7 @@ import { PropertySpaceModule } from './main/modules/property-space.module';
 import { PropertySpaceBedModule } from './main/modules/property-space-bed.module';
 import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.module';
 import { PropertySpaceBathroomModule } from './main/modules/property-space-bathroom.module';
+import { RuleConstantModule } from './main/modules/rule-constant.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { PropertySpaceBathroomModule } from './main/modules/property-space-bathr
     PropertySpaceBedModule,
     SpaceBathroomTypesModule,
     PropertySpaceBathroomModule,
+    RuleConstantModule,
   ],
   providers: [CronJobsService, MailSchedulerService],
 })
