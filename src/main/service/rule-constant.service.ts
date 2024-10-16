@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,13 +15,47 @@ import { RULE_CONSTANT_RESPONSES } from '../commons/constants/response-constants
 import { UpdateRuleConstantDto } from '../dto/requests/rule-constant/update-rule-constant.dto';
 
 @Injectable()
-export class RuleConstantService {
+export class RuleConstantService implements OnModuleInit {
+  private ruleConstantsCache: Map<string, number> = new Map();
+
   constructor(
     @InjectRepository(RuleConstant)
     private readonly ruleConstantRepository: Repository<RuleConstant>,
     private readonly userService: UserService,
     private readonly logger: LoggerService,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.loadRuleConstantsIntoCache();
+  }
+
+  async loadRuleConstantsIntoCache(): Promise<void> {
+    try {
+      const constants = await this.findAllRuleConstants();
+      constants.forEach((constant) => {
+        this.ruleConstantsCache.set(constant.name, constant.value);
+      });
+      this.logger.log('Rule constants loaded into cache successfully.');
+      console.log(this.ruleConstantsCache);
+    } catch (error) {
+      this.logger.error(
+        `Error loading rule constants into cache: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while loading rule constants into cache',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getRuleConstant(name: string): Promise<number> {
+    return this.ruleConstantsCache.get(name);
+  }
+
+  async refreshRuleConstantsCache(): Promise<void> {
+    this.ruleConstantsCache.clear();
+    await this.loadRuleConstantsIntoCache();
+  }
 
   async findRuleConstantByName(name: string): Promise<RuleConstant | null> {
     return await this.ruleConstantRepository.findOne({
@@ -133,6 +172,7 @@ export class RuleConstantService {
       });
       const savedRuleConstant = await this.saveRuleConstant(ruleConstant);
 
+      await this.refreshRuleConstantsCache();
       this.logger.log(
         `Rule constant ${savedRuleConstant.name} created with ID ${savedRuleConstant.id}`,
       );
@@ -235,6 +275,8 @@ export class RuleConstantService {
       Object.assign(existingRuleConstant, updateRuleConstantDto);
       const updatedRuleConstant =
         await this.saveRuleConstant(existingRuleConstant);
+
+      await this.refreshRuleConstantsCache();
 
       this.logger.log(`Rule constant with ID ${id} updated successfully`);
       return RULE_CONSTANT_RESPONSES.RULE_CONSTANT_UPDATED(updatedRuleConstant);
