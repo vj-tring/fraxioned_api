@@ -408,10 +408,16 @@ export class PropertySpaceImageService {
       const propertySpaceImage =
         await this.propertySpaceImageRepository.findOne({
           where: { id },
-          relations: ['propertySpace', 'createdBy', 'updatedBy'],
+          relations: [
+            'propertySpace',
+            'propertySpace.property',
+            'createdBy',
+            'updatedBy',
+          ],
           select: {
             createdBy: { id: true },
             updatedBy: { id: true },
+            propertySpace: { id: true },
           },
         });
 
@@ -447,13 +453,13 @@ export class PropertySpaceImageService {
       }
 
       let imageUrlLocation = propertySpaceImage.url;
-
+      const propertyId = propertySpaceImage.propertySpace.property.id;
       if (updatePropertySpaceImageDto.imageFile) {
+        const folderName = `properties_media/${propertyId}/property_space_images/${propertySpaceImage.propertySpace.id}`;
         const fileExtension = updatePropertySpaceImageDto.imageFile.originalname
           .split('.')
           .pop();
-        const folderName = `properties_media/${propertySpaceImage.propertySpace.id}/property_space_images/${propertySpaceImage.id}`;
-        const fileName = `property_space_${propertySpaceImage.id}.${fileExtension}`;
+        const fileName = `property_space_${id}.${fileExtension}`;
 
         let s3Key = '';
         if (imageUrlLocation) {
