@@ -262,7 +262,7 @@ export class PropertySpaceImageController {
     }
   }
 
-  @Delete('property-space-images')
+  @Delete('')
   async deletePropertySpaceImages(
     @Body() deletePropertySpaceImagesDto: DeletePropertySpaceImagesDto,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
