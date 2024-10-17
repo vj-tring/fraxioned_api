@@ -2,7 +2,6 @@ import {
   IsNotEmpty,
   IsArray,
   IsNumber,
-  Min,
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -24,7 +23,6 @@ export class SpaceBedTypeCount {
   @ApiProperty({ example: 2 })
   @IsNotEmpty({ message: 'count is required' })
   @IsNumber({}, { message: 'count must be a number' })
-  @Min(1, { message: 'count must be greater than or equal to 1' })
   count: number;
 }
 
