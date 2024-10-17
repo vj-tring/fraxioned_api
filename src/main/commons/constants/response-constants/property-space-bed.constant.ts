@@ -15,6 +15,7 @@ export const PROPERTY_SPACE_BED_RESPONSES = {
     data: savedPropertySpaceBed,
     statusCode: HttpStatus.CREATED,
   }),
+
   PROPERTY_SPACE_BEDS_NOT_FOUND: (): {
     success: boolean;
     message: string;

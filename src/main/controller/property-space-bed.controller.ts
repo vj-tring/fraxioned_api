@@ -76,6 +76,24 @@ export class PropertySpaceBedController {
     }
   }
 
+  @Get('property-space/:propertySpaceId/property-space-beds')
+  async getAllSpaceBedTypesByPropertySpaceId(
+    @Param('propertySpaceId') propertySpaceId: number,
+  ): Promise<ApiResponse<PropertySpaceBed[]>> {
+    try {
+      const result =
+        await this.propertySpaceBedService.getAllSpaceBedTypesByPropertySpaceId(
+          propertySpaceId,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving space bed types',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Patch('property-space-bed/:id')
   async updatePropertySpaceBedDetail(
     @Param('id') id: string,

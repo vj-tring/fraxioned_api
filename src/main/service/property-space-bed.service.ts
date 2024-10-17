@@ -45,7 +45,7 @@ export class PropertySpaceBedService {
       relations: ['propertySpace', 'spaceBedType', 'createdBy', 'updatedBy'],
       select: {
         propertySpace: { id: true },
-        spaceBedType: { id: true },
+        spaceBedType: { id: true, bedType: true },
         createdBy: { id: true },
         updatedBy: { id: true },
       },
@@ -58,7 +58,7 @@ export class PropertySpaceBedService {
       where: { id },
       select: {
         propertySpace: { id: true },
-        spaceBedType: { id: true },
+        spaceBedType: { id: true, bedType: true },
         createdBy: { id: true },
         updatedBy: { id: true },
       },
@@ -180,6 +180,41 @@ export class PropertySpaceBedService {
       );
       throw new HttpException(
         'An error occurred while retrieving the property space bed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getAllSpaceBedTypesByPropertySpaceId(
+    propertySpaceId: number,
+  ): Promise<ApiResponse<PropertySpaceBed[]>> {
+    try {
+      const propertySpaceBeds = await this.propertySpaceBedRepository.find({
+        where: { propertySpace: { id: propertySpaceId } },
+        relations: ['propertySpace', 'spaceBedType', 'createdBy', 'updatedBy'],
+        select: {
+          propertySpace: { id: true },
+          spaceBedType: { id: true, bedType: true },
+          createdBy: { id: true },
+          updatedBy: { id: true },
+        },
+      });
+
+      if (propertySpaceBeds.length === 0) {
+        this.logger.log(
+          `No space bed types found for property space ID ${propertySpaceId}`,
+        );
+        return PROPERTY_SPACE_BED_RESPONSES.SPACE_BED_TYPES_NOT_FOUND([]);
+      }
+      return PROPERTY_SPACE_BED_RESPONSES.PROPERTY_SPACE_BEDS_FETCHED(
+        propertySpaceBeds,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving space bed types for property space ID ${propertySpaceId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving space bed types',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

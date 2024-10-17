@@ -87,9 +87,9 @@ export class SpaceService {
     return SPACE_RESPONSES.SPACE_ALREADY_EXISTS(name);
   }
 
-  async handleSpaceNotFound(id: number): Promise<ApiResponse<null>> {
-    this.logger.error(`Space with ID ${id} not found`);
-    return SPACE_RESPONSES.SPACE_NOT_FOUND(id);
+  async handleSpaceNotFound(): Promise<ApiResponse<null>> {
+    this.logger.error(`Space not found`);
+    return SPACE_RESPONSES.SPACE_NOT_FOUND();
   }
 
   async createSpace(
@@ -131,9 +131,7 @@ export class SpaceService {
 
       await this.spaceRepository.save(savedSpace);
 
-      this.logger.log(
-        `Space ${createSpaceDto.name} created with ID ${savedSpace.id}`,
-      );
+      this.logger.log(`Space ${savedSpace.name} created successfully`);
       return SPACE_RESPONSES.SPACE_CREATED(savedSpace);
     } catch (error) {
       this.logger.error(
@@ -175,11 +173,11 @@ export class SpaceService {
       const existingSpace = await this.findSpaceById(id);
 
       if (!existingSpace) {
-        return await this.handleSpaceNotFound(id);
+        return await this.handleSpaceNotFound();
       }
 
-      this.logger.log(`Space with ID ${id} retrieved successfully`);
-      return SPACE_RESPONSES.SPACE_FETCHED(existingSpace, id);
+      this.logger.log(`Space ${existingSpace.name} retrieved successfully`);
+      return SPACE_RESPONSES.SPACE_FETCHED(existingSpace);
     } catch (error) {
       this.logger.error(
         `Error retrieving space with ID ${id}: ${error.message} - ${error.stack}`,
@@ -199,7 +197,7 @@ export class SpaceService {
     try {
       const existingSpace = await this.findSpaceById(id);
       if (!existingSpace) {
-        return await this.handleSpaceNotFound(id);
+        return await this.handleSpaceNotFound();
       }
 
       const existingSpaceName = await this.findSpaceByNameExcludingId(
@@ -255,7 +253,7 @@ export class SpaceService {
       }
 
       const updatedSpace = await this.saveSpace(existingSpace);
-      this.logger.log(`Space with ID ${id} updated successfully`);
+      this.logger.log(`Space ${updatedSpace.name} updated successfully`);
       return SPACE_RESPONSES.SPACE_UPDATED(updatedSpace);
     } catch (error) {
       this.logger.error(
@@ -270,18 +268,18 @@ export class SpaceService {
 
   async deleteSpaceById(id: number): Promise<ApiResponse<Space>> {
     try {
+      const existingSpace = await this.findSpaceById(id);
+      if (!existingSpace) {
+        return await this.handleSpaceNotFound();
+      }
+
       const existingPropertySpace =
         await this.propertySpaceService.findPropertySpaceBySpaceId(id);
       if (existingPropertySpace) {
         this.logger.log(
-          `Space ID ${id} exists and is mapped to property, hence cannot be deleted.`,
+          `Space ${existingSpace.name} exists and is mapped to property, hence cannot be deleted.`,
         );
-        return SPACE_RESPONSES.SPACE_FOREIGN_KEY_CONFLICT(id);
-      }
-      const existingSpace = await this.findSpaceById(id);
-
-      if (!existingSpace) {
-        return await this.handleSpaceNotFound(id);
+        return SPACE_RESPONSES.SPACE_FOREIGN_KEY_CONFLICT(existingSpace.name);
       }
 
       const s3Key = await this.s3UtilsService.extractS3Key(
@@ -297,8 +295,8 @@ export class SpaceService {
       await this.s3UtilsService.deleteObjectFromS3(s3Key);
       await this.spaceRepository.delete(id);
 
-      this.logger.log(`Space with ID ${id} deleted successfully`);
-      return SPACE_RESPONSES.SPACE_DELETED(id);
+      this.logger.log(`Space ${existingSpace.name} deleted successfully`);
+      return SPACE_RESPONSES.SPACE_DELETED(existingSpace.name);
     } catch (error) {
       this.logger.error(
         `Error deleting space with ID ${id}: ${error.message} - ${error.stack}`,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PropertySpaceImage } from '../entities/property-space-image.entity';
 import { PropertySpaceImageController } from '../controller/property-space-image.controller';
@@ -13,6 +13,7 @@ import { PropertySpaceImageService } from '../service/property-space-image.servi
 import { S3UtilsModule } from './s3-utils.module';
 import { AuthenticationModule } from './authentication.module';
 import { LoggerModule } from './logger.module';
+import { PropertySpaceModule } from './property-space.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { LoggerModule } from './logger.module';
     LoggerModule,
     AuthenticationModule,
     S3UtilsModule,
+    forwardRef(() => PropertySpaceModule),
   ],
   controllers: [PropertySpaceImageController],
   providers: [PropertySpaceImageService],
