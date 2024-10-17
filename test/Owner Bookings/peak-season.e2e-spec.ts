@@ -51,7 +51,7 @@ describe('Booking API Test', () => {
       .set('id', `${bookid3}`)
       .set('user', `${userid}`);
   });
-  describe('Successful Flows', () => {
+  describe('Peak Season Booking', () => {
     it('Booking nights consecutively in peak season', async () => {
       const payload = {
         user: {
@@ -193,8 +193,6 @@ describe('Booking API Test', () => {
       expect(response1.body.message).toBe('Booking created successfully');
       bookid3 = response1.body.data.id;
     }, 10000);
-  });
-  describe('Unsuccessful Flows', () => {
     it('Booking does not adhere to the maximum stay length', async () => {
       const payload2 = {
         user: {

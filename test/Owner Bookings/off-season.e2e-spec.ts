@@ -10,6 +10,7 @@ describe('Booking API Test', () => {
   let bookid1: number;
   let bookid2: number;
   let bookid3: number;
+  let bookid4: number;
 
   beforeAll(async () => {
     const login_payload = {
@@ -50,8 +51,17 @@ describe('Booking API Test', () => {
       .set('user-id', `${userid}`)
       .set('id', `${bookid}`)
       .set('user', `${userid}`);
+  }, 6000);
+  afterAll(async () => {
+    await request(url1)
+      .post(`/${bookid4}/${userid}/cancel`)
+      .set('Accept', 'application/json')
+      .set('access-token', `${token}`)
+      .set('user-id', `${userid}`)
+      .set('id', `${bookid4}`)
+      .set('user', `${userid}`);
   });
-  describe('Successful Flows', () => {
+  describe('Off Season Booking', () => {
     it('Booking nights consecutively in off season', async () => {
       const payload = {
         user: {
@@ -112,6 +122,36 @@ describe('Booking API Test', () => {
       expect(response.body.message).toBe('Booking created successfully');
       bookid1 = response.body.data.id;
     }, 10000);
+    it('Booking is made at the end of one year and the start of another year', async () => {
+      const credentials = {
+        user: {
+          id: 2,
+        },
+        property: {
+          id: 1,
+        },
+        createdBy: {
+          id: 1,
+        },
+        checkinDate: '2024-12-29T05:40:48.669Z',
+        checkoutDate: '2025-01-02T05:40:48.669Z',
+        noOfGuests: 10,
+        noOfPets: 2,
+        isLastMinuteBooking: true,
+        noOfAdults: 5,
+        noOfChildren: 5,
+        notes: 'None',
+      };
+      const response = await request(url1)
+        .post('/booking')
+        .set('Accept', 'application/json')
+        .send(credentials)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe('Booking created successfully');
+      bookid4 = response.body.data.id;
+    });
     it('Multiple short bookings are made with respect to remaining nights', async () => {
       const payload = {
         user: {
@@ -193,8 +233,6 @@ describe('Booking API Test', () => {
         'Booking is already cancelled or completed',
       );
     });
-  });
-  describe('Unsuccessful Flows', () => {
     it('Booking does not adhere to the maximum stay length', async () => {
       const payload2 = {
         user: {
