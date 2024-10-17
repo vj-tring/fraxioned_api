@@ -139,6 +139,21 @@ export class CreateBookingService {
       return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
     }
 
+    if (ownerRezData.data) {
+      if (ownerRezData.data.status_code === 500) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_500;
+      }
+      if (ownerRezData.data.status_code === 400) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_400;
+      }
+      if (ownerRezData.data.status_code === 404) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_404;
+      }
+      if (ownerRezData.data.status_code !== 200) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+      }
+    }
+
     const savedBooking = await this.saveBooking(preparedBooking);
 
     await this.bookingUtilService.updateUserProperties(

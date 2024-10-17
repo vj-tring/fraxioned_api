@@ -14,6 +14,7 @@ import { isDateInRange, normalizeDate } from './date.util';
 import { createBooking } from 'src/main/integrations/ownerrez/apis/owner-rez-endpoints';
 import { format } from 'date-fns';
 import { LoggerService } from '../../logger.service';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class BookingUtilService {
@@ -335,7 +336,7 @@ export class BookingUtilService {
     await this.bookingHistoryRepository.save(bookingHistory);
   }
 
-  async createBookingOnOwnerRez(booking: Booking): Promise<object> {
+  async createBookingOnOwnerRez(booking: Booking): Promise<AxiosResponse> {
     try {
       const formatBooking = {
         arrival: booking.checkinDate
@@ -351,7 +352,7 @@ export class BookingUtilService {
           ? format(booking.checkoutDate, 'KK:mm')
           : 'N/A',
         is_block: false,
-        guest_id: 614805507,
+        guest_id: 602100604,
         property_id: booking.property.ownerRezPropId | 0,
       };
       const ownerRezData = await createBooking(formatBooking);
@@ -361,8 +362,10 @@ export class BookingUtilService {
       }
       return ownerRezData;
     } catch (error) {
-      this.logger.error(`Error creating booking on OwnerRez: ${error.message}`);
-      return;
+      this.logger.error(
+        `Error creating booking on OwnerRez: ${error.response.data.messages}`,
+      );
+      return error.response;
     }
   }
 }

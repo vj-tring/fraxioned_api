@@ -1,10 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
 
-const username = 'invoice@fraxioned.com';
-const password = 'pt_5pj8kpdq03cnd2p95z0ctrd0hvrjdlbc';
+const username = 'jaiganesh.j@tringapps.com';
+const password = 'pt_oxy7rb429ic9bpvuva47vuuoqb5kjndp';
 
 const client = axios.create({
-  baseURL: 'https://api.ownerrez.com/',
+  // PROD - https://api.ownerrez.com/
+  baseURL: 'https://apistage.ownerrez.com/',
   auth: {
     username,
     password,
