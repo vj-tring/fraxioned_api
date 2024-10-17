@@ -1,9 +1,4 @@
-import {
-  IsNotEmpty,
-  IsArray,
-  IsNumber,
-  ValidateNested,
-} from 'class-validator';
+import { IsNotEmpty, IsArray, IsNumber, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { PropertySpace } from 'src/main/entities/property-space.entity';
