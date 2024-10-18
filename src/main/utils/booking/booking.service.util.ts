@@ -84,11 +84,7 @@ export class BookingUtilService {
     const countedHolidays = new Set<number>();
 
     const getCalendarYear = (date: Date): number => {
-      if (
-        date.getMonth() === 11 &&
-        date.getDate() === 31 &&
-        date.getHours() >= 12
-      ) {
+      if (date.getMonth() === 11 && date.getDate() === 31) {
         return date.getFullYear() + 1;
       }
       return date.getFullYear();
