@@ -8,6 +8,8 @@ import { CreateUserPropertyDTO } from '../dto/requests/user-property/create-user
 import { UpdateUserPropertyDTO } from '../dto/requests/user-property/update-user-property.dto';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
+import { PropertyDetails } from 'src/main/entities/property-details.entity';
+import { UserPropertyDto } from '../dto/requests/user-property/userProperty.dto';
 
 @Injectable()
 export class UserPropertyService {
@@ -18,6 +20,8 @@ export class UserPropertyService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Property)
     private readonly propertyRepository: Repository<Property>,
+    @InjectRepository(PropertyDetails)
+    private readonly propertyDetailsRepository: Repository<PropertyDetails>,
     private readonly logger: LoggerService,
   ) {}
 
@@ -33,15 +37,6 @@ export class UserPropertyService {
       );
     }
 
-    const property = await this.propertyRepository.findOne({
-      where: { id: createUserPropertyDto.property.id },
-    });
-    if (!property) {
-      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
-        createUserPropertyDto.property.id,
-      );
-    }
-
     const createdBy = await this.userRepository.findOne({
       where: { id: createUserPropertyDto.createdBy.id },
     });
@@ -51,31 +46,34 @@ export class UserPropertyService {
       );
     }
 
-    const existingUserProperty = await this.userPropertyRepository.findOne({
-      where: {
-        user: createUserPropertyDto.user,
-        property: createUserPropertyDto.property,
-        year: createUserPropertyDto.year,
+    const userPropertyDetails: UserPropertyDto[] = [
+      {
+        propertyID: createUserPropertyDto.property.id,
+        noOfShares: createUserPropertyDto.noOfShare,
+        acquisitionDate: createUserPropertyDto.acquisitionDate,
       },
-    });
-    if (existingUserProperty) {
-      this.logger.warn(
-        `User property with user ID ${createUserPropertyDto.user.id}, property ID ${createUserPropertyDto.property.id}, and year ${createUserPropertyDto.year} already exists`,
-      );
-      return USER_PROPERTY_RESPONSES.USER_PROPERTY_ALREADY_EXISTS(
-        createUserPropertyDto.user.id,
-        createUserPropertyDto.property.id,
-        createUserPropertyDto.year,
-      );
+    ];
+
+    const calculatedUserProperties = await this.calculateUserProperties(
+      userPropertyDetails,
+      user,
+      createdBy,
+      createdBy,
+    );
+
+    if (!Array.isArray(calculatedUserProperties)) {
+      return calculatedUserProperties;
     }
 
-    const userProperty = new UserProperties();
-    Object.assign(userProperty, createUserPropertyDto);
+    const savedUserProperties: UserProperties[] = [];
+    for (const userProperty of calculatedUserProperties) {
+      const savedUserProperty =
+        await this.userPropertyRepository.save(userProperty);
+      savedUserProperties.push(savedUserProperty);
+    }
 
-    const savedUserProperty =
-      await this.userPropertyRepository.save(userProperty);
-    this.logger.log(`User property created with ID ${savedUserProperty.id}`);
-    return USER_PROPERTY_RESPONSES.USER_PROPERTY_CREATED(savedUserProperty);
+    this.logger.log(`User properties created`);
+    return USER_PROPERTY_RESPONSES.USER_PROPERTY_CREATED(savedUserProperties);
   }
 
   async getUserProperties(): Promise<object> {
@@ -116,55 +114,71 @@ export class UserPropertyService {
   }
 
   async updateUserProperty(
-    id: number,
     updateUserPropertyDto: UpdateUserPropertyDTO,
   ): Promise<object> {
-    const userProperty = await this.userPropertyRepository.findOne({
-      where: { id },
+    const userProperties = await this.userPropertyRepository.find({
+      where: {
+        user: { id: updateUserPropertyDto.user.id },
+        property: { id: updateUserPropertyDto.property.id },
+      },
+      relations: ['user', 'property', 'createdBy'],
     });
-    if (!userProperty) {
-      this.logger.warn(`User property with ID ${id} not found`);
-      return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(id);
+
+    if (userProperties.length === 0) {
+      this.logger.warn(`No user properties found for the given criteria`);
+      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
 
-    if (updateUserPropertyDto.user) {
-      const user = await this.userRepository.findOne({
-        where: { id: updateUserPropertyDto.user.id },
-      });
-      if (!user) {
-        return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
-          updateUserPropertyDto.user.id,
+    const updatedBy = await this.userRepository.findOne({
+      where: { id: updateUserPropertyDto.updatedBy.id },
+    });
+    if (!updatedBy) {
+      return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
+        updateUserPropertyDto.updatedBy.id,
+      );
+    }
+
+    const updatedUserProperties: UserProperties[] = [];
+
+    for (const userProperty of userProperties) {
+      const userPropertyDetails: UserPropertyDto[] = [
+        {
+          propertyID: userProperty.property.id,
+          noOfShares: updateUserPropertyDto.noOfShare ?? userProperty.noOfShare,
+          acquisitionDate:
+            updateUserPropertyDto.acquisitionDate ??
+            userProperty.acquisitionDate,
+        },
+      ];
+
+      const calculatedUserProperties = await this.calculateUserProperties(
+        userPropertyDetails,
+        userProperty.user,
+        userProperty.createdBy,
+        updatedBy,
+      );
+
+      if ('status' in calculatedUserProperties) {
+        this.logger.error(
+          `Error updating property ${userProperty.property.id}: ${calculatedUserProperties.status}`,
         );
+        continue;
       }
+
+      Object.assign(userProperty, calculatedUserProperties[0]);
+      const updatedUserProperty =
+        await this.userPropertyRepository.save(userProperty);
+      updatedUserProperties.push(updatedUserProperty);
     }
 
-    if (updateUserPropertyDto.property) {
-      const property = await this.propertyRepository.findOne({
-        where: { id: updateUserPropertyDto.property.id },
-      });
-      if (!property) {
-        return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
-          updateUserPropertyDto.property.id,
-        );
-      }
+    if (updatedUserProperties.length === 0) {
+      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATE_FAILED();
     }
 
-    if (updateUserPropertyDto.updatedBy) {
-      const updatedBy = await this.userRepository.findOne({
-        where: { id: updateUserPropertyDto.updatedBy.id },
-      });
-      if (!updatedBy) {
-        return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
-          updateUserPropertyDto.updatedBy.id,
-        );
-      }
-    }
-
-    Object.assign(userProperty, updateUserPropertyDto);
-    const updatedUserProperty =
-      await this.userPropertyRepository.save(userProperty);
-    this.logger.log(`User property with ID ${id} updated`);
-    return USER_PROPERTY_RESPONSES.USER_PROPERTY_UPDATED(updatedUserProperty);
+    this.logger.log(`${updatedUserProperties.length} user properties updated`);
+    return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
+      updatedUserProperties,
+    );
   }
 
   async deleteUserProperty(id: number): Promise<object> {
@@ -175,5 +189,176 @@ export class UserPropertyService {
     }
     this.logger.log(`User property with ID ${id} deleted`);
     return USER_PROPERTY_RESPONSES.USER_PROPERTY_DELETED;
+  }
+
+  private async calculateUserProperties(
+    userPropertyDetails: UserPropertyDto[],
+    user: User,
+    createdByUser: User,
+    updatedByUser: User,
+  ): Promise<UserProperties[] | object> {
+    const currentYear = new Date().getFullYear();
+    const userPropertyEntities: UserProperties[] = [];
+
+    for (const propertyDetail of userPropertyDetails) {
+      const propertyId = propertyDetail.propertyID;
+      const userProperty = await this.propertyRepository.findOne({
+        where: { id: propertyId },
+      });
+      const userPropertyDetails = await this.propertyDetailsRepository.findOne({
+        where: { id: propertyId },
+      });
+
+      if (!userProperty) {
+        this.logger.error(`Property not found with ID: ${propertyId}`);
+        return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
+      }
+
+      if (!userPropertyDetails) {
+        this.logger.error(`Property detail not found with ID: ${propertyId}`);
+        return USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(propertyId);
+      }
+
+      if (propertyDetail.noOfShares > userProperty.propertyRemainingShare) {
+        this.logger.error(
+          `Not enough remaining shares for property ID: ${propertyId}`,
+        );
+        return USER_PROPERTY_RESPONSES.INSUFFICIENT_SHARES(
+          propertyId,
+          userProperty.propertyRemainingShare,
+        );
+      }
+
+      userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
+      await this.propertyRepository.save(userProperty);
+
+      const peakAllottedNights = this.calculateAllottedNights(
+        propertyDetail.noOfShares,
+        userPropertyDetails.peakSeasonAllottedNights,
+      );
+      const offAllottedNights = this.calculateAllottedNights(
+        propertyDetail.noOfShares,
+        userPropertyDetails.offSeasonAllottedNights,
+      );
+      const peakAllottedHolidayNights = this.calculateAllottedNights(
+        propertyDetail.noOfShares,
+        userPropertyDetails.peakSeasonAllottedHolidayNights,
+      );
+      const offAllottedHolidayNights = this.calculateAllottedNights(
+        propertyDetail.noOfShares,
+        userPropertyDetails.offSeasonAllottedHolidayNights,
+      );
+
+      const ratedPeakAllottedNights = this.rateNights(
+        peakAllottedNights,
+        new Date(propertyDetail.acquisitionDate),
+      );
+      const ratedOffAllottedNights = this.rateNights(
+        offAllottedNights,
+        new Date(propertyDetail.acquisitionDate),
+      );
+
+      const maximumStayLength = Math.min(
+        14 + (propertyDetail.noOfShares - 1) * 7,
+        28,
+      );
+
+      for (let yearOffset = 0; yearOffset <= 2; yearOffset++) {
+        const year = currentYear + yearOffset;
+        const isCurrentYear = year === currentYear;
+
+        const peakSeasonEndDate = new Date(
+          userPropertyDetails.peakSeasonEndDate,
+        );
+        const acquisitionDate = new Date(propertyDetail.acquisitionDate);
+        const isAfterPeakSeasonEndDate = acquisitionDate > peakSeasonEndDate;
+
+        userPropertyEntities.push(
+          this.userPropertyRepository.create({
+            property: userProperty,
+            noOfShare: propertyDetail.noOfShares,
+            acquisitionDate: acquisitionDate,
+            user,
+            year,
+            createdBy: createdByUser,
+            updatedBy: updatedByUser,
+            peakAllottedNights: isCurrentYear
+              ? isAfterPeakSeasonEndDate
+                ? 0
+                : ratedPeakAllottedNights
+              : peakAllottedNights,
+            peakRemainingNights: isCurrentYear
+              ? isAfterPeakSeasonEndDate
+                ? 0
+                : ratedPeakAllottedNights
+              : peakAllottedNights,
+            peakAllottedHolidayNights: isCurrentYear
+              ? isAfterPeakSeasonEndDate
+                ? 0
+                : peakAllottedHolidayNights
+              : peakAllottedHolidayNights,
+            peakRemainingHolidayNights: isCurrentYear
+              ? isAfterPeakSeasonEndDate
+                ? 0
+                : peakAllottedHolidayNights
+              : peakAllottedHolidayNights,
+            offAllottedNights: isCurrentYear
+              ? ratedOffAllottedNights
+              : offAllottedNights,
+            offRemainingNights: isCurrentYear
+              ? ratedOffAllottedNights
+              : offAllottedNights,
+            offAllottedHolidayNights: isCurrentYear
+              ? offAllottedHolidayNights
+              : offAllottedHolidayNights,
+            offRemainingHolidayNights: isCurrentYear
+              ? offAllottedHolidayNights
+              : offAllottedHolidayNights,
+            lastMinuteAllottedNights: 8 * propertyDetail.noOfShares,
+            lastMinuteRemainingNights: 8 * propertyDetail.noOfShares,
+            maximumStayLength: maximumStayLength,
+          } as UserProperties),
+        );
+      }
+    }
+
+    return userPropertyEntities;
+  }
+
+  private calculateAllottedNights(
+    noOfShares: number,
+    baseAllottedNights: number,
+  ): number {
+    return noOfShares * baseAllottedNights;
+  }
+
+  private rateNights(allottedNights: number, acquisitionDate: Date): number {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const endOfYear = new Date(currentYear, 11, 30);
+
+    const isLeapYear = (year: number): boolean => {
+      return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    };
+
+    const daysInYear = isLeapYear(currentYear) ? 366 : 365;
+    const adjustedDaysInYear = daysInYear - 1;
+
+    const isAcquisitionInCurrentYear =
+      acquisitionDate.getFullYear() === currentYear &&
+      acquisitionDate <= endOfYear;
+
+    let daysRemaining: number;
+    if (isAcquisitionInCurrentYear) {
+      daysRemaining =
+        Math.ceil(
+          (endOfYear.getTime() - acquisitionDate.getTime()) /
+            (1000 * 60 * 60 * 24),
+        ) + 1;
+    } else {
+      daysRemaining = adjustedDaysInYear;
+    }
+
+    return Math.floor((daysRemaining / adjustedDaysInYear) * allottedNights);
   }
 }

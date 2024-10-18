@@ -5,7 +5,7 @@ interface UserPropertySuccessResponse {
   status: number;
   message: string;
   userProperty?: Partial<UserProperties>;
-  userProperties?: Partial<UserProperties[]>;
+  userProperties?: Partial<UserProperties>[];
 }
 
 export const USER_PROPERTY_RESPONSES = {
@@ -16,7 +16,23 @@ export const USER_PROPERTY_RESPONSES = {
     status: HttpStatus.BAD_REQUEST,
     message: `Insufficient shares available for property ID ${propertyId}. Remaining shares: ${remainingShares}`,
   }),
-
+  USER_PROPERTIES_UPDATE_FAILED: (): { status: number; message: string } => ({
+    status: HttpStatus.BAD_REQUEST,
+    message: 'Failed to update user properties',
+  }),
+  USER_PROPERTY_FOR_USER_NOT_FOUND: (
+    userPropertyId: number,
+  ): { status: number; message: string } => ({
+    status: HttpStatus.NOT_FOUND,
+    message: `User property for user ID ${userPropertyId} not found`,
+  }),
+  USER_PROPERTIES_UPDATED: (
+    userProperties: Partial<UserProperties>[],
+  ): UserPropertySuccessResponse => ({
+    status: HttpStatus.OK,
+    message: 'User properties updated successfully',
+    userProperties,
+  }),
   USER_PROPERTY_ALREADY_EXISTS: (
     userId: number,
     propertyId: number,
@@ -56,12 +72,13 @@ export const USER_PROPERTY_RESPONSES = {
     message: `User properties not found`,
   }),
   USER_PROPERTY_CREATED: (
-    userProperty: Partial<UserProperties>,
+    userProperties: Partial<UserProperties>[],
   ): UserPropertySuccessResponse => ({
     status: HttpStatus.CREATED,
-    message: 'User property created successfully',
-    userProperty,
+    message: 'User properties created successfully',
+    userProperties,
   }),
+
   USER_PROPERTY_UPDATED: (
     userProperty: Partial<UserProperties>,
   ): UserPropertySuccessResponse => ({

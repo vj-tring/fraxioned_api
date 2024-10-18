@@ -41,13 +41,9 @@ export class UserPropertyController {
 
   @Patch('user-property/:id')
   async updateUserProperty(
-    @Param('id') id: number,
     @Body() updateUserPropertyDto: UpdateUserPropertyDTO,
   ): Promise<object> {
-    return this.userPropertyService.updateUserProperty(
-      id,
-      updateUserPropertyDto,
-    );
+    return this.userPropertyService.updateUserProperty(updateUserPropertyDto);
   }
 
   @Delete('user-property/:id')

@@ -7,10 +7,11 @@ import { LoggerModule } from './logger.module';
 import { AuthenticationModule } from './authentication.module';
 import { User } from '../entities/user.entity';
 import { Property } from '../entities/property.entity';
+import { PropertyDetails } from '../entities/property-details.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserProperties, User, Property]),
+    TypeOrmModule.forFeature([UserProperties, User, Property, PropertyDetails]),
     LoggerModule,
     AuthenticationModule,
   ],
