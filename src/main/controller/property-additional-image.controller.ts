@@ -206,7 +206,7 @@ export class PropertyAdditionalImageController {
     }
   }
 
-  @Delete('property-additional-images')
+  @Delete()
   async deletePropertyAdditionalImages(
     @Body()
     deletePropertyAdditionalImagesDto: DeletePropertyAdditionalImagesDto,
