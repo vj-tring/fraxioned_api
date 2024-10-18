@@ -21,9 +21,11 @@ export class FaqQuestions {
   @Column({ type: 'text' })
   answer: string;
 
-  @ManyToOne(() => FaqCategory, (faqCategory) => faqCategory.questions, {
-    onDelete: 'CASCADE',
-  })
+  @Column({ type: 'int' })
+  categoryId: number;
+
+  @ManyToOne(() => FaqCategory, (faqCategory) => faqCategory.questions)
+  @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
   category: FaqCategory;
 
   @CreateDateColumn()
