@@ -83,14 +83,25 @@ export class BookingUtilService {
 
     const countedHolidays = new Set<number>();
 
-    const firstYear = checkinDate.getFullYear();
+    const getCalendarYear = (date: Date): number => {
+      if (
+        date.getMonth() === 11 &&
+        date.getDate() === 31 &&
+        date.getHours() >= 12
+      ) {
+        return date.getFullYear() + 1;
+      }
+      return date.getFullYear();
+    };
+
+    const firstYear = getCalendarYear(checkinDate);
 
     for (
       let date = new Date(checkinDate);
       date < checkoutDate;
       date.setDate(date.getDate() + 1)
     ) {
-      const currentYear = date.getFullYear();
+      const currentYear = getCalendarYear(date);
 
       PropertyHolidays.forEach((PropertyHoliday) => {
         if (
@@ -144,7 +155,6 @@ export class BookingUtilService {
       offHolidayNightsInSecondYear,
     };
   }
-
   calculateNightsSelected(checkinDate: Date, checkoutDate: Date): number {
     return (
       (checkoutDate.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24)

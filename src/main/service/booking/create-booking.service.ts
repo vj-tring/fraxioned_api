@@ -121,6 +121,7 @@ export class CreateBookingService {
         user,
         property,
         checkinDate,
+        checkoutDate,
       );
     if (bookingValidationResult !== true) {
       return bookingValidationResult;

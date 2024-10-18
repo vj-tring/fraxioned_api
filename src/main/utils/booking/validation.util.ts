@@ -213,10 +213,11 @@ export class BookingValidationService {
     user: User,
     property: Property,
     checkinDate: Date,
+    checkoutDate: Date,
   ): Promise<true | object> {
     const [userPropertyFirstYear, userPropertySecondYear] = await Promise.all([
       this.getUserProperty(user.id, property.id, checkinDate.getFullYear()),
-      this.getUserProperty(user.id, property.id, checkinDate.getFullYear() + 1),
+      this.getUserProperty(user.id, property.id, checkoutDate.getFullYear()),
     ]);
 
     if (!userPropertyFirstYear || !userPropertySecondYear) {

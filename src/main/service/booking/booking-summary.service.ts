@@ -122,6 +122,7 @@ export class BookingSummaryService {
         user,
         property,
         checkinDate,
+        checkoutDate,
       );
     if (bookingRulesValidationResult !== true) {
       return bookingRulesValidationResult;

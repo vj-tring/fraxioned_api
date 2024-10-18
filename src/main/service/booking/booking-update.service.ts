@@ -147,6 +147,7 @@ export class UpdateBookingService {
         user || existingBooking.user,
         property,
         newCheckinDate,
+        newCheckoutDate,
       );
     if (bookingValidationResult !== true) {
       return bookingValidationResult;
