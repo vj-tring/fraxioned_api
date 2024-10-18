@@ -1,10 +1,4 @@
-import {
-  IsNotEmpty,
-  IsArray,
-  IsNumber,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { IsNotEmpty, IsArray, IsNumber, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsValidId } from 'src/main/commons/guards/is-valid-id.decorator';
 import { PropertySpace } from 'src/main/entities/property-space.entity';
@@ -25,7 +19,6 @@ export class SpaceBathroomTypesCount {
   @ApiProperty({ example: 2 })
   @IsNotEmpty({ message: 'count is required' })
   @IsNumber({}, { message: 'count must be a number' })
-  @Min(1, { message: 'count must be greater than or equal to 1' })
   count: number;
 }
 

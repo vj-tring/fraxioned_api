@@ -68,6 +68,39 @@ export class PropertySpaceBathroomService {
       select: {
         spaceBathroomType: {
           id: true,
+          name: true,
+        },
+        propertySpace: {
+          id: true,
+        },
+        createdBy: {
+          id: true,
+        },
+        updatedBy: {
+          id: true,
+        },
+      },
+    });
+  }
+  async findPropertySpaceBathroomsByPropertySpaceId(
+    propertySpaceId: number,
+  ): Promise<PropertySpaceBathroom[] | null> {
+    return await this.propertySpaceBathroomRepository.find({
+      relations: [
+        'spaceBathroomType',
+        'propertySpace',
+        'createdBy',
+        'updatedBy',
+      ],
+      where: {
+        propertySpace: {
+          id: propertySpaceId,
+        },
+      },
+      select: {
+        spaceBathroomType: {
+          id: true,
+          name: true,
         },
         propertySpace: {
           id: true,
@@ -95,7 +128,9 @@ export class PropertySpaceBathroomService {
       select: {
         spaceBathroomType: {
           id: true,
+          name: true,
         },
+
         propertySpace: {
           id: true,
         },
@@ -229,7 +264,36 @@ export class PropertySpaceBathroomService {
       );
     }
   }
+  async getPropertySpaceBathroomsByPropertySpaceId(
+    propertySpaceId: number,
+  ): Promise<ApiResponse<PropertySpaceBathroom[]>> {
+    try {
+      const propertySpaceBathrooms =
+        await this.findPropertySpaceBathroomsByPropertySpaceId(propertySpaceId);
 
+      if (!propertySpaceBathrooms || propertySpaceBathrooms.length === 0) {
+        this.logger.log(
+          `No property space bathrooms found for propertySpaceId ${propertySpaceId}`,
+        );
+        return PROPERTY_SPACE_BATHROOM_RESPONSES.PROPERTY_SPACE_BATHROOMS_NOT_FOUND();
+      }
+
+      this.logger.log(
+        `Retrieved ${propertySpaceBathrooms.length} property space bathrooms for propertySpaceId ${propertySpaceId} successfully.`,
+      );
+      return PROPERTY_SPACE_BATHROOM_RESPONSES.PROPERTY_SPACE_BATHROOMS_FETCHED(
+        propertySpaceBathrooms,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property space bathrooms for propertySpaceId ${propertySpaceId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the property space bathrooms',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
   async getPropertySpaceBathroomById(
     id: number,
   ): Promise<ApiResponse<PropertySpaceBathroom>> {

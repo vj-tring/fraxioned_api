@@ -25,9 +25,6 @@ export class PropertySpaceService {
   constructor(
     @InjectRepository(PropertySpace)
     private readonly propertySpaceRepository: Repository<PropertySpace>,
-    private readonly userService: UserService,
-    private readonly propertyService: PropertiesService,
-    private readonly propertySpaceImageService: PropertySpaceImageService,
     @Inject(forwardRef(() => SpaceService))
     private readonly spaceService: SpaceService,
     @Inject(forwardRef(() => PropertySpaceBedService))
@@ -36,6 +33,11 @@ export class PropertySpaceService {
     private readonly propertySpaceBathroomService: PropertySpaceBathroomService,
     @Inject(forwardRef(() => PropertySpaceAmenitiesService))
     private readonly propertySpaceAmenitiesService: PropertySpaceAmenitiesService,
+    @Inject(forwardRef(() => PropertySpaceImageService))
+    private readonly propertySpaceImageService: PropertySpaceImageService,
+    private readonly userService: UserService,
+    private readonly propertyService: PropertiesService,
+
     private readonly logger: LoggerService,
   ) {}
 
@@ -239,9 +241,7 @@ export class PropertySpaceService {
       );
 
       if (!existingSpace) {
-        return await this.spaceService.handleSpaceNotFound(
-          createPropertySpaceDto.space.id,
-        );
+        return await this.spaceService.handleSpaceNotFound();
       }
 
       const instanceNumber =

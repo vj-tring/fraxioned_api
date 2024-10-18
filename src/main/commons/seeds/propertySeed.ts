@@ -17,7 +17,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
     const properties = [
       {
         propertyName: 'Paradise Shores (eighths)',
-        ownerRezPropId: 431184,
         address: '5367 S. Cyan Lane',
         city: 'St. George',
         state: 'Utah',
@@ -38,7 +37,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Paradise Shores (tenths)',
-        ownerRezPropId: 0,
         address: '5367 S. Cyan Lane',
         city: 'St. George',
         state: 'Utah',
@@ -59,7 +57,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Crown Jewel',
-        ownerRezPropId: 0,
         address: '5409 S. Aquamarine Lane',
         city: 'St. George',
         state: 'Utah',
@@ -80,7 +77,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Modern Lagoon',
-        ownerRezPropId: 0,
         address: '833 W. Cyan Lane',
         city: 'St. George',
         state: 'Utah',
@@ -101,7 +97,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Blue Bear Lake',
-        ownerRezPropId: 0,
         address: '537 Blue Lake Street',
         city: 'Garden City',
         state: 'Utah',
@@ -122,7 +117,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Bear Lake Bluffs',
-        ownerRezPropId: 0,
         address: '732 Spruce Drive',
         city: 'Garden City',
         state: 'Utah',
@@ -143,7 +137,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Swan Creek',
-        ownerRezPropId: 0,
         address: '1343 N. Trapper Lane',
         city: 'Garden City',
         state: 'Utah',
@@ -164,7 +157,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Huckleberry House',
-        ownerRezPropId: 0,
         address: '565 Richland Valley Street',
         city: 'Garden City',
         state: 'Utah',
@@ -185,7 +177,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Raspberry Retreat',
-        ownerRezPropId: 0,
         address: '330 W Morningstar Circle',
         city: 'Utah',
         state: 'Arizona',
@@ -206,7 +197,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Lake Escape',
-        ownerRezPropId: 0,
         address: '13 Rosemary Lane',
         city: 'Page',
         state: 'Arizona',

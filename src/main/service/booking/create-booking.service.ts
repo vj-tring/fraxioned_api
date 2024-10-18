@@ -125,13 +125,36 @@ export class CreateBookingService {
       return bookingValidationResult;
     }
 
-    const savedBooking = await this.saveBooking(
+    const preparedBooking = await this.prepareBooking(
       createBookingDto,
       property,
       propertyDetails,
       isLastMinuteBooking,
       nightsSelected,
     );
+
+    const ownerRezData =
+      await this.bookingUtilService.createBookingOnOwnerRez(preparedBooking);
+    if (!ownerRezData) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+    }
+
+    if (ownerRezData.data) {
+      if (ownerRezData.data.status_code === 500) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_500;
+      }
+      if (ownerRezData.data.status_code === 400) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_400;
+      }
+      if (ownerRezData.data.status_code === 404) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_404;
+      }
+      if (ownerRezData.data.status_code !== 200) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+      }
+    }
+
+    const savedBooking = await this.saveBooking(preparedBooking);
 
     await this.bookingUtilService.updateUserProperties(
       user,
@@ -154,7 +177,11 @@ export class CreateBookingService {
     return BOOKING_RESPONSES.BOOKING_CREATED(savedBooking);
   }
 
-  async saveBooking(
+  async saveBooking(booking: Booking): Promise<Booking> {
+    return this.bookingRepository.save(booking);
+  }
+
+  async prepareBooking(
     createBookingDto: CreateBookingDTO,
     property: Property,
     propertyDetails: PropertyDetails,
@@ -175,7 +202,9 @@ export class CreateBookingService {
     booking.checkinDate.setHours(propertyDetails.checkInTime, 0, 0, 0);
     booking.checkoutDate = new Date(createBookingDto.checkoutDate);
     booking.checkoutDate.setHours(propertyDetails.checkOutTime, 0, 0, 0);
+    booking.property.id = property.id;
+    booking.property.ownerRezPropId = property.ownerRezPropId;
 
-    return this.bookingRepository.save(booking);
+    return booking;
   }
 }

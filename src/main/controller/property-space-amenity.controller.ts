@@ -107,6 +107,29 @@ export class PropertySpaceAmenitiesController {
     }
   }
 
+  @Get('property-space/:propertySpaceId')
+  async getAmenitiesByPropertySpaceId(
+    @Param('propertySpaceId') propertySpaceId: number,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: PropertySpaceAmenities[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.propertyAmenitiesService.findAmenitiesByPropertySpaceId(
+          propertySpaceId,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the amenities for the specified property space',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Patch('property-space-amenity/:id')
   async updatePropertyAmenityDetail(
     @Param('id') id: string,

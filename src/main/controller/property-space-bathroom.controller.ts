@@ -62,6 +62,24 @@ export class PropertySpaceBathroomController {
     }
   }
 
+  @Get('property-space/:propertySpaceId/bathrooms')
+  async getPropertySpaceBathroomsByPropertySpaceId(
+    @Param('propertySpaceId') propertySpaceId: number,
+  ): Promise<ApiResponse<PropertySpaceBathroom[]>> {
+    try {
+      const result =
+        await this.propertySpaceBathroomService.getPropertySpaceBathroomsByPropertySpaceId(
+          propertySpaceId,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the property space bathrooms',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Get('property-space-bathroom/:id')
   async getPropertySpaceBathroomById(
     @Param('id') id: number,
