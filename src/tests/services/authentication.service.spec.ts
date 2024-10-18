@@ -117,10 +117,12 @@ describe('AuthenticationService', () => {
         } as Role,
         lastLoginTime: new Date(Date.now()),
       } as User;
-      const userDetails = {
+      const userDetails: Partial<User> = {
         id: user.id,
-        roleId: user.role.id,
-        roleName: user.role.roleName,
+        role: {
+          id: user.role.id,
+          roleName: user.role.roleName,
+        } as Role,
         firstName: user.firstName,
         lastName: user.lastName,
         addressLine1: user.addressLine1,
@@ -135,6 +137,7 @@ describe('AuthenticationService', () => {
         createdBy: user.createdBy,
         updatedAt: user.updatedAt,
         updatedBy: user.updatedBy,
+        contactDetails: user.contactDetails,
       };
       const userEmail = { user, contactValue: 'test@example.com' };
       const session = {
