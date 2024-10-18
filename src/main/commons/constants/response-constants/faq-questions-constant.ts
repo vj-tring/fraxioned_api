@@ -41,12 +41,15 @@ export const FAQ_QUESTIONS_RESPONSES = {
   ): {
     success: boolean;
     message: string;
-    data: FaqQuestions;
+    data: FaqQuestions & { categoryId: number };
     statusCode: number;
   } => ({
     success: true,
     message: 'Question fetched successfully.',
-    data: question,
+    data: {
+      ...question,
+      categoryId: question.category?.id,
+    },
     statusCode: HttpStatus.OK,
   }),
 
@@ -55,12 +58,15 @@ export const FAQ_QUESTIONS_RESPONSES = {
   ): {
     success: boolean;
     message: string;
-    data: FaqQuestions[];
+    data: (FaqQuestions & { categoryId: number })[];
     statusCode: number;
   } => ({
     success: true,
     message: 'Questions fetched successfully.',
-    data: questions,
+    data: questions.map((question) => ({
+      ...question,
+      categoryId: question.category?.id,
+    })),
     statusCode: HttpStatus.OK,
   }),
 
@@ -70,12 +76,15 @@ export const FAQ_QUESTIONS_RESPONSES = {
   ): {
     success: boolean;
     message: string;
-    data: FaqQuestions;
+    data: FaqQuestions & { categoryId: number };
     statusCode: number;
   } => ({
     success: true,
     message: `Question "${question}" created successfully.`,
-    data: savedQuestion,
+    data: {
+      ...savedQuestion,
+      categoryId: savedQuestion.category?.id,
+    },
     statusCode: HttpStatus.CREATED,
   }),
 
@@ -84,12 +93,15 @@ export const FAQ_QUESTIONS_RESPONSES = {
   ): {
     success: boolean;
     message: string;
-    data: FaqQuestions;
+    data: FaqQuestions & { categoryId: number };
     statusCode: number;
   } => ({
     success: true,
     message: 'Question updated successfully.',
-    data: updatedQuestion,
+    data: {
+      ...updatedQuestion,
+      categoryId: updatedQuestion.category?.id,
+    },
     statusCode: HttpStatus.OK,
   }),
 

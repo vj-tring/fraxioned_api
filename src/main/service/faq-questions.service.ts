@@ -31,6 +31,7 @@ export class FaqQuestionsService {
       createFaqQuestionsDto,
     );
     const savedQuestion = await this.faqQuestionsRepository.save(newQuestion);
+
     return FAQ_QUESTIONS_RESPONSES.QUESTION_CREATED(savedQuestion, question);
   }
 
@@ -40,7 +41,9 @@ export class FaqQuestionsService {
     data?: FaqQuestions[];
     statusCode: HttpStatus;
   }> {
-    const questions = await this.faqQuestionsRepository.find();
+    const questions = await this.faqQuestionsRepository.find({
+      relations: ['category'],
+    }); // Include category relations
     if (!questions || questions.length === 0) {
       return FAQ_QUESTIONS_RESPONSES.QUESTIONS_NOT_FOUND();
     }
@@ -55,7 +58,8 @@ export class FaqQuestionsService {
   }> {
     const question = await this.faqQuestionsRepository.findOne({
       where: { id },
-    }); // Updated here
+      relations: ['category'],
+    });
     if (!question) {
       throw new HttpException(
         FAQ_QUESTIONS_RESPONSES.QUESTION_NOT_FOUND(id),

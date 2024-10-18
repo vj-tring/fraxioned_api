@@ -12,9 +12,9 @@ import { BookingSummaryService } from 'src/main/service/booking/booking-summary.
 import { UpdateBookingService } from 'src/main/service/booking/booking-update.service';
 import { BookingService } from 'src/main/service/booking/booking.service';
 import { CreateBookingService } from 'src/main/service/booking/create-booking.service';
-import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
-import { BookingMailService } from 'src/main/service/booking/utils/mail.util';
-import { BookingValidationService } from 'src/main/service/booking/utils/validation.util';
+import { BookingUtilService } from 'src/main/utils/booking/booking.service.util';
+import { BookingMailService } from 'src/main/utils/booking/mail.util';
+import { BookingValidationService } from 'src/main/utils/booking/validation.util';
 
 describe('BookingController', () => {
   let controller: BookingController;

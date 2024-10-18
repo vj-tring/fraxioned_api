@@ -10,16 +10,16 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { BookingService } from 'src/main/service/booking/booking.service';
 import { CreateBookingDTO } from 'src/main/dto/requests/booking/create-booking.dto';
 import { UpdateBookingDTO } from '../dto/requests/booking/update-booking.dto';
 import { CreateBookingService } from '../service/booking/create-booking.service';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
 import { AuthGuard } from '../commons/guards/auth.guard';
+import { AdminBookingService } from '../service/booking/admin-booking.service';
+import { CancelBookingService } from '../service/booking/booking-cancel.service';
 import { BookingSummaryService } from '../service/booking/booking-summary.service';
 import { UpdateBookingService } from '../service/booking/booking-update.service';
-import { CancelBookingService } from '../service/booking/booking-cancel.service';
-import { AdminBookingService } from '../service/booking/admin-booking.service';
+import { BookingService } from '../service/booking/booking.service';
 
 @ApiTags('Booking')
 @Controller('v1/bookings')
@@ -35,6 +35,11 @@ export class BookingController {
     private readonly cancelBookingService: CancelBookingService,
   ) {}
 
+  private getUserIdFromRequest(req: Request): number {
+    const userId = req.headers['user-id'];
+    return userId ? parseInt(userId as string, 10) : 0;
+  }
+
   @Post('booking')
   async createBooking(
     @Body() createBookingDto: CreateBookingDTO,
@@ -47,11 +52,6 @@ export class BookingController {
     @Body() createBookingDto: CreateBookingDTO,
   ): Promise<object> {
     return this.bookingSummaryService.bookingSummary(createBookingDto);
-  }
-
-  private getUserIdFromRequest(req: Request): number {
-    const userId = req.headers['user-id'];
-    return userId ? parseInt(userId as string, 10) : 0;
   }
 
   @Get()

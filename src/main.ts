@@ -37,7 +37,7 @@ export async function bootstrap(): Promise<void> {
 
   app.enableCors();
 
-  await app.listen(3008);
+  await app.listen(process.env.PORT || 3008);
   console.log(
     `Application is running on: ${(await app.getUrl()).replace('[::1]', 'localhost')}/api`,
   );
