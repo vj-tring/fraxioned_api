@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'entities/user.entity';
@@ -10,6 +10,9 @@ import { ROLE_RESPONSES } from '../commons/constants/response-constants/role.con
 import * as bcrypt from 'bcrypt';
 import { CreateUserDTO } from '../dto/requests/user/create-user.dto';
 import { UpdateUserDTO } from '../dto/requests/user/update-user.dto';
+import { ApiResponse } from '../commons/response-body/common.responses';
+import { S3UtilsService } from './s3-utils.service';
+import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 
 @Injectable()
 export class UserService {
@@ -21,8 +24,50 @@ export class UserService {
     @InjectRepository(UserContactDetails)
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     private readonly logger: LoggerService,
+    private readonly s3UtilsService: S3UtilsService,
   ) {}
 
+  async findUserById(id: number): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { id },
+      relations: ['contactDetails', 'role'],
+      select: {
+        id: true,
+        role: { id: true, roleName: true },
+        firstName: true,
+        lastName: true,
+        addressLine1: true,
+        addressLine2: true,
+        city: true,
+        state: true,
+        zipcode: true,
+        country: true,
+        imageURL: true,
+        isActive: true,
+        lastLoginTime: true,
+        createdAt: true,
+        createdBy: true,
+        updatedAt: true,
+        updatedBy: true,
+        contactDetails: {
+          id: true,
+          optionalEmailOne: true,
+          optionalEmailTwo: true,
+          optionalPhoneOne: true,
+          optionalPhoneTwo: true,
+          primaryEmail: true,
+          primaryPhone: true,
+          secondaryEmail: true,
+          secondaryPhone: true,
+        },
+      },
+    });
+  }
+
+  async handleUserNotFound(id: number): Promise<ApiResponse<null>> {
+    this.logger.error(`User with ID ${id} not found`);
+    return USER_RESPONSES.USER_NOT_FOUND(id);
+  }
   async createUser(createUserDto: CreateUserDTO): Promise<object> {
     const role = await this.roleRepository.findOne({
       where: { id: createUserDto.role.id },
@@ -87,6 +132,17 @@ export class UserService {
       select: {
         id: true,
         role: { id: true, roleName: true },
+        contactDetails: {
+          id: true,
+          optionalEmailOne: true,
+          optionalEmailTwo: true,
+          optionalPhoneOne: true,
+          optionalPhoneTwo: true,
+          primaryEmail: true,
+          primaryPhone: true,
+          secondaryEmail: true,
+          secondaryPhone: true,
+        },
         firstName: true,
         lastName: true,
         addressLine1: true,
@@ -113,111 +169,84 @@ export class UserService {
 
   async getUserById(id: number): Promise<object> {
     this.logger.log(`Fetching user with ID ${id}`);
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['contactDetails', 'role'],
-      select: {
-        id: true,
-        role: { id: true, roleName: true },
-        firstName: true,
-        lastName: true,
-        addressLine1: true,
-        addressLine2: true,
-        city: true,
-        state: true,
-        zipcode: true,
-        country: true,
-        imageURL: true,
-        isActive: true,
-        lastLoginTime: true,
-        createdAt: true,
-        createdBy: true,
-        updatedAt: true,
-        updatedBy: true,
-      },
-    });
+    const user = await this.findUserById(id);
     if (!user) {
-      this.logger.warn(`User with ID ${id} not found`);
-      return USER_RESPONSES.USER_NOT_FOUND(id);
+      return await this.handleUserNotFound(id);
     }
     return USER_RESPONSES.USER_FETCHED(user);
   }
 
-  async updateUser(id: number, updateUserDto: UpdateUserDTO): Promise<object> {
+  async updateUser(
+    id: number,
+    updateUserDto: UpdateUserDTO,
+    profileImage?: Express.Multer.File,
+  ): Promise<object> {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
-        relations: {
-          contactDetails: true,
-          role: true,
+        relations: ['contactDetails', 'role'],
+        select: {
+          role: {
+            id: true,
+            roleName: true,
+          },
         },
       });
-
       if (!user) {
         this.logger.warn(`User with ID ${id} not found`);
         return USER_RESPONSES.USER_NOT_FOUND(id);
       }
 
-      if (updateUserDto.role) {
-        const role = await this.roleRepository.findOne({
-          where: { id: updateUserDto.role.id },
-        });
-        if (!role) {
-          return ROLE_RESPONSES.ROLE_NOT_FOUND(updateUserDto.role.id);
-        }
-      }
-
-      const updatedByUser = await this.userRepository.findOne({
-        where: { id: updateUserDto.updatedBy },
-      });
-      if (!updatedByUser) {
-        return USER_RESPONSES.USER_NOT_FOUND(updateUserDto.updatedBy);
-      }
-
-      const { contactDetails, ...userDetails } = updateUserDto;
-      Object.assign(user, userDetails);
+      Object.assign(user, updateUserDto);
 
       if (updateUserDto.password) {
         user.password = await bcrypt.hash(updateUserDto.password, 10);
       }
 
-      if (contactDetails) {
-        const existingContact = await this.userContactDetailsRepository.findOne(
-          {
-            where: { user: { id: user.id } },
-          },
-        );
+      if (profileImage) {
+        const folderName = 'user_profiles';
+        const fileExtension = profileImage.originalname.split('.').pop();
+        const fileName = `${user.id}.${fileExtension}`;
+        let s3Key = '';
+        let imageUrlLocation = user.imageURL;
 
-        if (!existingContact) {
-          return USER_RESPONSES.USER_NOT_FOUND(user.id);
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
         }
 
-        delete contactDetails.id;
-
-        const updatedContact = this.userContactDetailsRepository.merge(
-          existingContact,
-          contactDetails,
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          profileImage.buffer,
+          profileImage.mimetype,
         );
 
-        await this.userContactDetailsRepository.save(updatedContact);
-        this.logger.log(
-          `Contact with ID ${existingContact.id} updated successfully`,
-        );
+        user.imageURL = imageUrlLocation;
       }
 
-      await this.userRepository.save(user);
-
-      const updatedUser = await this.userRepository.findOne({
-        where: {
-          id: user.id,
-        },
-        relations: ['contactDetails'],
-      });
-
+      const updatedUser = await this.userRepository.save(user);
       this.logger.log(`User with ID ${id} updated successfully`);
       return USER_RESPONSES.USER_UPDATED(updatedUser);
     } catch (error) {
-      throw error;
+      this.logger.error(
+        `Error updating user with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while updating the user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

@@ -6,16 +6,26 @@ import { AuthenticationModule } from './authentication.module';
 import { Amenities } from '../entities/amenities.entity';
 import { AmenitiesController } from '../controller/amenities.controller';
 import { AmenitiesService } from '../service/amenities.service';
-import { PropertyAmenities } from '../entities/property_amenities.entity';
+import { PropertySpaceAmenities } from '../entities/property-space-amenity.entity';
+import { PropertyDocumentsModule } from './property-document.module';
+import { AmenityGroup } from '../entities/amenity-group.entity';
+import { S3UtilsModule } from './s3-utils.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Amenities, User, PropertyAmenities]),
-    PropertyAmenities,
+    TypeOrmModule.forFeature([
+      Amenities,
+      User,
+      PropertySpaceAmenities,
+      AmenityGroup,
+    ]),
     LoggerModule,
     AuthenticationModule,
+    PropertyDocumentsModule,
+    S3UtilsModule,
   ],
   controllers: [AmenitiesController],
   providers: [AmenitiesService],
+  exports: [AmenitiesService],
 })
 export class AmenitiesModule {}

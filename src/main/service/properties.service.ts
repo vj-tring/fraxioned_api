@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { LoggerService } from './logger.service';
 import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-properties.dto';
 import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
 import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
@@ -22,6 +23,10 @@ import { CreatePropertiesDto } from '../dto/requests/property/create-property.dt
 import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.dto';
 import { User } from '../entities/user.entity';
 import { USER_RESPONSES } from '../commons/constants/response-constants/user.constant';
+import { ApiResponse } from '../commons/response-body/common.responses';
+import { PROPERTY_RESPONSES } from '../commons/constants/response-constants/property.constant';
+import { S3UtilsService } from './s3-utils.service';
+import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 
 @Injectable()
 export class PropertiesService {
@@ -34,6 +39,8 @@ export class PropertiesService {
     private userPropertiesRepository: Repository<UserProperties>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private readonly logger: LoggerService,
+    private readonly s3UtilsService: S3UtilsService,
   ) {}
   private async shouldApplyPropertyNameFilter(
     userId: number,
@@ -71,18 +78,91 @@ export class PropertiesService {
   async updatePropertiesById(
     id: number,
     updatePropertiesDto: UpdatePropertiesDto,
-  ): Promise<UpdatePropertiesResponseDto> {
+    mailBannerFile?: Express.Multer.File,
+    coverImageFile?: Express.Multer.File,
+  ): Promise<UpdatePropertiesResponseDto | object> {
     try {
-      const existingProperties = await this.propertiesRepository.findOne({
+      const existingProperty = await this.propertiesRepository.findOne({
         where: { id },
       });
-      if (!existingProperties) {
-        throw new NotFoundException(`Properties with ID ${id} not found`);
+
+      if (!existingProperty) {
+        return PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
       }
+
+      if (mailBannerFile) {
+        const folderName = `properties/${id}/mailBanners`;
+        const fileExtension = mailBannerFile.originalname.split('.').pop();
+        const fileName = `${existingProperty.propertyName} || ${id}-mailBanner.${fileExtension}`;
+        let s3Key = '';
+        let imageUrlLocation = existingProperty.mailBannerUrl;
+
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+        }
+
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
+
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          mailBannerFile.buffer,
+          mailBannerFile.mimetype,
+        );
+
+        existingProperty.mailBannerUrl = imageUrlLocation;
+      }
+
+      if (coverImageFile) {
+        const folderName = `properties/${id}/coverImages`;
+        const fileExtension = coverImageFile.originalname.split('.').pop();
+        const fileName = `${existingProperty.propertyName} || ${id}-coverImage.${fileExtension}`;
+        let s3Key = '';
+        let imageUrlLocation = existingProperty.coverImageUrl;
+
+        if (imageUrlLocation) {
+          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+        }
+
+        if (s3Key) {
+          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
+            const headObject =
+              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+            if (!headObject) {
+              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
+                s3Key,
+              );
+            }
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          }
+        }
+
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          coverImageFile.buffer,
+          coverImageFile.mimetype,
+        );
+
+        existingProperty.coverImageUrl = imageUrlLocation;
+      }
+
       const updatedProperties = this.propertiesRepository.merge(
-        existingProperties,
+        existingProperty,
         updatePropertiesDto,
       );
+
       await this.propertiesRepository.save(updatedProperties);
       return updatedProperties;
     } catch (error) {
@@ -95,12 +175,41 @@ export class PropertiesService {
       const existingProperties = await this.propertiesRepository.findOne({
         where: { id },
       });
+
       if (!existingProperties) {
-        throw new NotFoundException(`Properties with ID ${id} not found`);
+        return PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
       }
-      return await this.propertiesRepository.remove(existingProperties);
+
+      const imageUrls = [
+        existingProperties.mailBannerUrl,
+        existingProperties.coverImageUrl,
+      ];
+
+      for (const imageUrl of imageUrls) {
+        if (imageUrl) {
+          const s3Key = await this.s3UtilsService.extractS3Key(imageUrl);
+
+          const headObject =
+            await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
+          if (headObject) {
+            await this.s3UtilsService.deleteObjectFromS3(s3Key);
+          } else {
+            this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
+          }
+        }
+      }
+
+      await this.propertiesRepository.remove(existingProperties);
+      this.logger.log(`Properties with ID ${id} deleted successfully`);
+      return PROPERTY_RESPONSES.PROPERTY_DELETED(id);
     } catch (error) {
-      throw error;
+      this.logger.error(
+        `Error deleting properties with ID ${id}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while deleting the property',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -218,23 +327,32 @@ export class PropertiesService {
     }
   }
 
+  async findPropertyById(id: number): Promise<Property | null> {
+    return await this.propertiesRepository.findOne({
+      where: { id },
+      relations: ['createdBy', 'updatedBy'],
+      select: {
+        createdBy: {
+          id: true,
+        },
+        updatedBy: {
+          id: true,
+        },
+      },
+    });
+  }
+
+  async handlePropertyNotFound(id: number): Promise<ApiResponse<null>> {
+    this.logger.error(`Property with ID ${id} not found`);
+    return PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
+  }
+
   async getPropertiesById(
     id: number,
     userId: number,
   ): Promise<CommonPropertiesResponseDto> {
     try {
-      const existingProperties = await this.propertiesRepository.findOne({
-        where: { id },
-        relations: ['createdBy', 'updatedBy'],
-        select: {
-          createdBy: {
-            id: true,
-          },
-          updatedBy: {
-            id: true,
-          },
-        },
-      });
+      const existingProperties = await this.findPropertyById(id);
       if (!existingProperties) {
         throw new NotFoundException(`Properties with ID ${id} not found`);
       }

@@ -9,7 +9,7 @@ import { CreatePropertyCodeDto } from 'src/main/dto/requests/property-code/creat
 import { UpdatePropertyCodeDto } from 'src/main/dto/requests/property-code/update-property-code.dto';
 import { PropertyCodeCategory } from 'src/main/entities/property-code-category.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { PropertyCodes } from 'src/main/entities/property_codes.entity';
+import { PropertyCodes } from 'src/main/entities/property-codes.entity';
 import { PROPERTY_CODES_RESPONSES } from 'src/main/commons/constants/response-constants/property-codes.constant';
 
 describe('PropertyCodesController', () => {

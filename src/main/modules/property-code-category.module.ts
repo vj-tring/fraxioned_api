@@ -6,7 +6,7 @@ import { User } from '../entities/user.entity';
 import { PropertyCodeCategory } from '../entities/property-code-category.entity';
 import { PropertyCodeCategoryController } from '../controller/property-code-category.controller';
 import { PropertyCodeCategoryService } from '../service/property-code-category.service';
-import { PropertyCodes } from '../entities/property_codes.entity';
+import { PropertyCodes } from '../entities/property-codes.entity';
 
 @Module({
   imports: [

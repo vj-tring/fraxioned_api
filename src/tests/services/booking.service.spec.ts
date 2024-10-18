@@ -15,8 +15,6 @@ import { CreateBookingService } from 'src/main/service/booking/create-booking.se
 import { BookingHistory } from 'src/main/entities/booking-history.entity';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { MailService } from 'src/main/email/mail.service';
-import { SpaceTypes } from 'src/main/entities/space-types.entity';
-import { PropertyImages } from 'src/main/entities/property_images.entity';
 import { BookingUtilService } from 'src/main/utils/booking/booking.service.util';
 import { BookingMailService } from 'src/main/utils/booking/mail.util';
 import { BookingValidationService } from 'src/main/utils/booking/validation.util';
@@ -93,14 +91,6 @@ describe('BookingService', () => {
         },
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(SpaceTypes),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(PropertyImages),
           useClass: Repository,
         },
       ],

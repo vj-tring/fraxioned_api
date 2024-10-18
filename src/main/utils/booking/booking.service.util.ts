@@ -10,6 +10,10 @@ import { Property } from 'src/main/entities/property.entity';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { isDateInRange, normalizeDate } from './date.util';
 import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
+import { createBooking } from 'src/main/integrations/ownerrez/apis/owner-rez-endpoints';
+import { format } from 'date-fns';
+import { AxiosResponse } from 'axios';
+import { LoggerService } from 'src/main/service/logger.service';
 
 const FirstYear = 'FirstYear';
 const SecondYear = 'SecondYear';
@@ -27,6 +31,7 @@ export class BookingUtilService {
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
     @InjectRepository(BookingHistory)
     private readonly bookingHistoryRepository: Repository<BookingHistory>,
+    private readonly logger: LoggerService,
   ) {}
 
   async getProperty(propertyId: number): Promise<Property> {
@@ -339,5 +344,38 @@ export class BookingUtilService {
     });
 
     await this.bookingHistoryRepository.save(bookingHistory);
+  }
+
+  async createBookingOnOwnerRez(booking: Booking): Promise<AxiosResponse> {
+    try {
+      const formatBooking = {
+        arrival: booking.checkinDate
+          ? format(booking.checkinDate, 'yyyy-MM-dd')
+          : 'N/A',
+        departure: booking.checkoutDate
+          ? format(booking.checkoutDate, 'yyyy-MM-dd')
+          : 'N/A',
+        check_in: booking.checkinDate
+          ? format(booking.checkinDate, 'KK:mm')
+          : 'N/A',
+        check_out: booking.checkoutDate
+          ? format(booking.checkoutDate, 'KK:mm')
+          : 'N/A',
+        is_block: false,
+        guest_id: 602100604,
+        property_id: booking.property.ownerRezPropId | 0,
+      };
+      const ownerRezData = await createBooking(formatBooking);
+      if (!ownerRezData) {
+        this.logger.log(`Empty response data received from the OwnerRez`);
+        return;
+      }
+      return ownerRezData;
+    } catch (error) {
+      this.logger.error(
+        `Error creating booking on OwnerRez: ${error.response.data.messages}`,
+      );
+      return error.response;
+    }
   }
 }

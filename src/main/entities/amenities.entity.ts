@@ -1,16 +1,15 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { AmenityGroup } from './amenity-group.entity';
+import { BaseEntity } from '../commons/abstracts/base-entity';
 
 @Entity('fxn_amenities')
-export class Amenities {
+export class Amenities extends BaseEntity {
   @PrimaryGeneratedColumn({
     name: 'id',
     comment: 'This is a unique identifier',
@@ -26,36 +25,20 @@ export class Amenities {
   @Column({
     name: 'description',
     type: 'varchar',
+    nullable: true,
+    default: null,
   })
   amenityDescription: string;
 
+  @ManyToOne(() => AmenityGroup, (amenityGroup) => amenityGroup.amenities)
+  @JoinColumn({ name: 'amenity_group_id' })
+  amenityGroup: AmenityGroup;
+
   @Column({
-    name: 'type',
     type: 'varchar',
-  })
-  amenityType: string;
-
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({
-    name: 'created_by',
-  })
-  createdBy: User;
-
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({
-    name: 'updated_by',
-  })
-  updatedBy: User;
-
-  @CreateDateColumn({
-    name: 'created_at',
+    length: 500,
     nullable: true,
+    default: null,
   })
-  createdAt: Date = undefined;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-    nullable: true,
-  })
-  updatedAt: Date = undefined;
+  s3_url: string;
 }

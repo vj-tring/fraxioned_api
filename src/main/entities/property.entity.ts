@@ -19,6 +19,7 @@ export class Property {
 
   @Column({
     name: 'ownerRez_prop_id',
+    nullable: true,
   })
   ownerRezPropId: number;
 
@@ -112,6 +113,20 @@ export class Property {
     nullable: true,
   })
   displayOrder: number;
+
+  @Column({
+    name: 'mail_banner_url',
+    type: 'varchar',
+    nullable: true,
+  })
+  mailBannerUrl: string;
+
+  @Column({
+    name: 'cover_image_url',
+    type: 'varchar',
+    nullable: true,
+  })
+  coverImageUrl: string;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({

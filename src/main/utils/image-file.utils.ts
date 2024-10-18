@@ -7,6 +7,11 @@ export function getAllowedExtensions(): string[] {
     .split(',')
     .map((ext) => ext.trim().toLowerCase());
 }
+export function getAllowedDocumentExtensions(): string[] {
+  return (process.env.ALLOWED_DOCUMENT_EXTENSIONS || '.pdf,.docx')
+    .split(',')
+    .map((ext) => ext.trim().toLowerCase());
+}
 
 export function getMaxFileCount(): number {
   return parseInt(process.env.MAX_FILE_COUNT || '50', 10);

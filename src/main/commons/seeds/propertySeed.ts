@@ -17,7 +17,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
     const properties = [
       {
         propertyName: 'Paradise Shores (eighths)',
-        ownerRezPropId: 431184,
         address: '5367 S. Cyan Lane',
         city: 'St. George',
         state: 'Utah',
@@ -38,7 +37,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Paradise Shores (tenths)',
-        ownerRezPropId: 0,
         address: '5367 S. Cyan Lane',
         city: 'St. George',
         state: 'Utah',
@@ -59,7 +57,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Crown Jewel',
-        ownerRezPropId: 0,
         address: '5409 S. Aquamarine Lane',
         city: 'St. George',
         state: 'Utah',
@@ -80,7 +77,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Modern Lagoon',
-        ownerRezPropId: 0,
         address: '833 W. Cyan Lane',
         city: 'St. George',
         state: 'Utah',
@@ -101,7 +97,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Blue Bear Lake',
-        ownerRezPropId: 0,
         address: '537 Blue Lake Street',
         city: 'Garden City',
         state: 'Utah',
@@ -122,7 +117,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Bear Lake Bluffs',
-        ownerRezPropId: 0,
         address: '732 Spruce Drive',
         city: 'Garden City',
         state: 'Utah',
@@ -143,7 +137,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Swan Creek',
-        ownerRezPropId: 0,
         address: '1343 N. Trapper Lane',
         city: 'Garden City',
         state: 'Utah',
@@ -164,7 +157,6 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
       },
       {
         propertyName: 'Huckleberry House',
-        ownerRezPropId: 0,
         address: '565 Richland Valley Street',
         city: 'Garden City',
         state: 'Utah',
@@ -184,8 +176,27 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
         updatedAt: new Date(Date.now()),
       },
       {
+        propertyName: 'Raspberry Retreat',
+        address: '330 W Morningstar Circle',
+        city: 'Utah',
+        state: 'Arizona',
+        country: 'United States',
+        zipcode: 84028,
+        houseDescription:
+          'Ready for an escape to your home away from home? Book a stay at Raspberry Retreat, your cozy mountain escape. Explore the year-round outdoor activities that Bear Lake Valley has to offer. Enjoy the small town charm of Garden City, and try some new local cuisine. After your adventures, return to the comfort of your second home- complete with large common areas, game tables, and cozy bedrooms. There’s room for the whole crew, so bring them all (or don’t). Either way, get ready to make some lifelong memories at your vacation home. Raspberry Retreat- your favorite place with your favorite people.',
+        isExclusive: false,
+        propertyShare: 8,
+        propertyRemainingShare: 8,
+        latitude: 0,
+        longitude: 0,
+        isActive: true,
+        displayOrder: 9,
+        createdBy: adminUser,
+        createdAt: new Date(Date.now()),
+        updatedAt: new Date(Date.now()),
+      },
+      {
         propertyName: 'Lake Escape',
-        ownerRezPropId: 0,
         address: '13 Rosemary Lane',
         city: 'Page',
         state: 'Arizona',
@@ -199,7 +210,7 @@ export const seedProperties = async (dataSource: DataSource): Promise<void> => {
         latitude: 0,
         longitude: 0,
         isActive: true,
-        displayOrder: 9,
+        displayOrder: 10,
         createdBy: adminUser,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),

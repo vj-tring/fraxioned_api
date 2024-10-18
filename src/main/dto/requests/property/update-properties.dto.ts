@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsInt,
@@ -13,62 +14,99 @@ import { User } from 'src/main/entities/user.entity';
 export class UpdatePropertiesDto {
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.trim())
   propertyName: string;
 
   @IsInt()
+  @IsOptional()
+  @Type(() => Number)
   ownerRezPropId: number;
 
   @IsOptional()
   @IsString()
-  address?: string;
+  @Transform(({ value }) => value?.trim())
+  address: string;
 
   @IsOptional()
   @IsString()
-  city?: string;
+  @Transform(({ value }) => value?.trim())
+  city: string;
 
   @IsOptional()
   @IsString()
-  state?: string;
+  @Transform(({ value }) => value?.trim())
+  state: string;
 
   @IsOptional()
   @IsString()
-  country?: string;
+  @Transform(({ value }) => value?.trim())
+  country: string;
 
   @IsOptional()
   @IsNumber()
-  zipcode?: number;
+  @Type(() => Number)
+  zipcode: number;
 
   @IsOptional()
   @IsString()
-  houseDescription?: string;
+  @Transform(({ value }) => value?.trim())
+  houseDescription: string;
 
   @IsOptional()
   @IsBoolean()
-  isExclusive?: boolean;
+  @Transform(({ value }) => value === 'true' || value === true)
+  isExclusive: boolean;
 
   @IsOptional()
   @IsNumber()
-  propertyShare?: number;
+  @Type(() => Number)
+  propertyShare: number;
 
   @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   latitude: number;
 
   @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   longitude: number;
 
   @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
   isActive: boolean;
 
   @IsOptional()
   @IsInt({ message: 'displayOrder should be int' })
+  @Type(() => Number)
   displayOrder: number;
+
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @IsOptional()
+  mailBannerFile?: Express.Multer.File;
+
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @IsOptional()
+  coverImageFile?: Express.Multer.File;
 
   @ApiProperty({
     example: { id: 1 },
   })
-  @IsNotEmpty({ message: 'created by is required' })
+  @IsNotEmpty({ message: 'updatedBy is required' })
   @IsValidId({
-    message: 'createdBy must be an object with a valid id where (id >= 1)',
+    message: 'updatedBy must be an object with a valid id (id >= 1)',
+  })
+  @Type(() => User)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
   })
   updatedBy: User;
 }
