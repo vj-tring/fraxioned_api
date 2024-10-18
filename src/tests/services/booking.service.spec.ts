@@ -7,7 +7,6 @@ import { PropertyDetails } from 'entities/property-details.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
-import { NotFoundException } from '@nestjs/common';
 import { UpdateBookingDTO } from 'src/main/dto/requests/booking/update-booking.dto';
 import { BookingService } from 'src/main/service/booking/booking.service';
 import { User } from 'src/main/entities/user.entity';
@@ -16,9 +15,9 @@ import { CreateBookingService } from 'src/main/service/booking/create-booking.se
 import { BookingHistory } from 'src/main/entities/booking-history.entity';
 import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { MailService } from 'src/main/email/mail.service';
-import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
-import { BookingMailService } from 'src/main/service/booking/utils/mail.util';
-import { BookingValidationService } from 'src/main/service/booking/utils/validation.util';
+import { BookingUtilService } from 'src/main/utils/booking/booking.service.util';
+import { BookingMailService } from 'src/main/utils/booking/mail.util';
+import { BookingValidationService } from 'src/main/utils/booking/validation.util';
 
 describe('BookingService', () => {
   let service: BookingService;
@@ -126,15 +125,13 @@ describe('BookingService', () => {
       expect(result).toEqual(bookings);
     });
 
-    it('should throw NotFoundException if no bookings found', async () => {
+    it('should return BOOKINGS_NOT_FOUND if no bookings found', async () => {
       jest.spyOn(bookingRepository, 'find').mockResolvedValue([]);
       const requestedUser = 1;
-      await expect(service.getAllBookings(requestedUser)).rejects.toThrow(
-        NotFoundException,
-      );
+      const result = await service.getAllBookings(requestedUser);
+      expect(result).toEqual(BOOKING_RESPONSES.BOOKINGS_NOT_FOUND());
     });
   });
-
   describe('getBookingById', () => {
     it('should return a booking by ID', async () => {
       const booking = {

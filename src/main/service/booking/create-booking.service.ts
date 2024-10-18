@@ -6,12 +6,14 @@ import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
 import { CreateBookingDTO } from '../../dto/requests/booking/create-booking.dto';
 import { PropertyDetails } from '../../entities/property-details.entity';
-import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
+import { BookingUtilService } from 'src/main/utils/booking/booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
-import { normalizeDates } from './utils/date.util';
-import { generateBookingId } from './utils/booking-id.util';
-import { BookingMailService } from './utils/mail.util';
-import { BookingValidationService } from './utils/validation.util';
+import { normalizeDates } from '../../utils/booking/date.util';
+import { generateBookingId } from '../../utils/booking/booking-id.util';
+import { BookingMailService } from '../../utils/booking/mail.util';
+import { BookingValidationService } from '../../utils/booking/validation.util';
+
+const userAction = 'Created';
 
 @Injectable()
 export class CreateBookingService {
@@ -105,8 +107,7 @@ export class CreateBookingService {
       propertyDetails,
     );
 
-    const isLastMinuteBooking =
-      this.bookingUtilService.isLastMinuteBooking(checkinDate);
+    const isLastMinuteBooking = createBookingDto.isLastMinuteBooking;
     const nightsSelected = this.bookingUtilService.calculateNightsSelected(
       checkinDate,
       checkoutDate,
@@ -120,18 +121,42 @@ export class CreateBookingService {
         user,
         property,
         checkinDate,
+        checkoutDate,
       );
     if (bookingValidationResult !== true) {
       return bookingValidationResult;
     }
 
-    const savedBooking = await this.saveBooking(
+    const preparedBooking = await this.prepareBooking(
       createBookingDto,
       property,
       propertyDetails,
       isLastMinuteBooking,
       nightsSelected,
     );
+
+    const ownerRezData =
+      await this.bookingUtilService.createBookingOnOwnerRez(preparedBooking);
+    if (!ownerRezData) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+    }
+
+    if (ownerRezData.data) {
+      if (ownerRezData.data.status_code === 500) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_500;
+      }
+      if (ownerRezData.data.status_code === 400) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_400;
+      }
+      if (ownerRezData.data.status_code === 404) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_404;
+      }
+      if (ownerRezData.data.status_code !== 200) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+      }
+    }
+
+    const savedBooking = await this.saveBooking(preparedBooking);
 
     await this.bookingUtilService.updateUserProperties(
       user,
@@ -144,7 +169,6 @@ export class CreateBookingService {
 
     await this.bookingMailService.sendBookingConfirmationEmail(savedBooking);
 
-    const userAction = 'Created';
     await this.bookingUtilService.createBookingHistory(
       savedBooking,
       createBookingDto.createdBy,
@@ -154,7 +178,11 @@ export class CreateBookingService {
     return BOOKING_RESPONSES.BOOKING_CREATED(savedBooking);
   }
 
-  async saveBooking(
+  async saveBooking(booking: Booking): Promise<Booking> {
+    return this.bookingRepository.save(booking);
+  }
+
+  async prepareBooking(
     createBookingDto: CreateBookingDTO,
     property: Property,
     propertyDetails: PropertyDetails,
@@ -175,7 +203,9 @@ export class CreateBookingService {
     booking.checkinDate.setHours(propertyDetails.checkInTime, 0, 0, 0);
     booking.checkoutDate = new Date(createBookingDto.checkoutDate);
     booking.checkoutDate.setHours(propertyDetails.checkOutTime, 0, 0, 0);
+    booking.property.id = property.id;
+    booking.property.ownerRezPropId = property.ownerRezPropId;
 
-    return this.bookingRepository.save(booking);
+    return booking;
   }
 }

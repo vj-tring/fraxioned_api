@@ -19,6 +19,7 @@ export class Property {
 
   @Column({
     name: 'ownerRez_prop_id',
+    nullable: true,
   })
   ownerRezPropId: number;
 
