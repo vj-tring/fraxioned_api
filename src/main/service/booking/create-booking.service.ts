@@ -6,12 +6,14 @@ import { LoggerService } from 'services/logger.service';
 import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants/booking.constant';
 import { CreateBookingDTO } from '../../dto/requests/booking/create-booking.dto';
 import { PropertyDetails } from '../../entities/property-details.entity';
-import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
+import { BookingUtilService } from 'src/main/utils/booking/booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
-import { normalizeDates } from './utils/date.util';
-import { generateBookingId } from './utils/booking-id.util';
-import { BookingMailService } from './utils/mail.util';
-import { BookingValidationService } from './utils/validation.util';
+import { normalizeDates } from '../../utils/booking/date.util';
+import { generateBookingId } from '../../utils/booking/booking-id.util';
+import { BookingMailService } from '../../utils/booking/mail.util';
+import { BookingValidationService } from '../../utils/booking/validation.util';
+
+const userAction = 'Created';
 
 @Injectable()
 export class CreateBookingService {
@@ -105,8 +107,7 @@ export class CreateBookingService {
       propertyDetails,
     );
 
-    const isLastMinuteBooking =
-      this.bookingUtilService.isLastMinuteBooking(checkinDate);
+    const isLastMinuteBooking = createBookingDto.isLastMinuteBooking;
     const nightsSelected = this.bookingUtilService.calculateNightsSelected(
       checkinDate,
       checkoutDate,
@@ -120,6 +121,7 @@ export class CreateBookingService {
         user,
         property,
         checkinDate,
+        checkoutDate,
       );
     if (bookingValidationResult !== true) {
       return bookingValidationResult;
@@ -167,7 +169,6 @@ export class CreateBookingService {
 
     await this.bookingMailService.sendBookingConfirmationEmail(savedBooking);
 
-    const userAction = 'Created';
     await this.bookingUtilService.createBookingHistory(
       savedBooking,
       createBookingDto.createdBy,

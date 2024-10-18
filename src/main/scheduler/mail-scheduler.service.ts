@@ -1,11 +1,11 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CronJobsService } from './cron-jobs.service';
 import { LoggerService } from '../service/logger.service';
-import { BookingMailService } from '../service/booking/utils/mail.util';
 import {
   reminderDays,
   ReminderType,
 } from '../commons/constants/email/mail.constants';
+import { BookingMailService } from '../utils/booking/mail.util';
 
 interface CronJobConfig {
   name: string;
