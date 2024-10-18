@@ -9,11 +9,16 @@ export const BOOKING_RESPONSES = {
     data: booking,
     status_code: 201,
   }),
-  BOOKING_NOT_FOUND: (
-    id: number,
-  ): { message: string; status_code: number } => ({
+  BOOKING_SUMMARY: (
+    booking: object,
+  ): { message: string; data: object; statusCode: number } => ({
+    message: 'Booking summary created successfully',
+    data: booking,
+    statusCode: 201,
+  }),
+  BOOKING_NOT_FOUND: (id: number): { message: string; statusCode: number } => ({
     message: `Booking with ID ${id} not found`,
-    status_code: 404,
+    statusCode: 404,
   }),
   BOOKINGS_NOT_FOUND: (): { message: string; status_code: number } => ({
     message: `Bookings not found`,

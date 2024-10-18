@@ -7,15 +7,18 @@ import { BOOKING_RESPONSES } from 'src/main/commons/constants/response-constants
 import { UpdateBookingDTO } from '../../dto/requests/booking/update-booking.dto';
 import { UserProperties } from 'entities/user-properties.entity';
 import { PropertyDetails } from '../../entities/property-details.entity';
-import { MailService } from 'src/main/email/mail.service';
-import { UserContactDetails } from 'src/main/entities/user-contact-details.entity';
 import { User } from 'src/main/entities/user.entity';
-import { BookingUtilService } from 'src/main/service/booking/utils/booking.service.util';
+import { BookingUtilService } from 'src/main/utils/booking/booking.service.util';
 import { Property } from 'src/main/entities/property.entity';
-import { NightCounts } from './interface/bookingInterface';
-import { normalizeDates, normalizeDate } from './utils/date.util';
-import { BookingValidationService } from './utils/validation.util';
-import { BookingMailService } from './utils/mail.util';
+import { normalizeDates, normalizeDate } from '../../utils/booking/date.util';
+import { BookingValidationService } from '../../utils/booking/validation.util';
+import { BookingMailService } from '../../utils/booking/mail.util';
+import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
+
+const USER_ACTION = 'Updated';
+const FIRST_YEAR = 'FirstYear';
+const SECOND_YEAR = 'SecondYear';
+
 @Injectable()
 export class UpdateBookingService {
   constructor(
@@ -23,12 +26,7 @@ export class UpdateBookingService {
     private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(UserProperties)
     private readonly userPropertiesRepository: Repository<UserProperties>,
-    @InjectRepository(UserContactDetails)
-    private readonly userContactDetailsRepository: Repository<UserContactDetails>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly logger: LoggerService,
-    private readonly mailService: MailService,
     private readonly bookingUtilService: BookingUtilService,
     private readonly bookingValidationService: BookingValidationService,
     private readonly bookingMailService: BookingMailService,
@@ -52,7 +50,7 @@ export class UpdateBookingService {
     this.lastCheckOutDate = existingBooking.checkoutDate;
 
     if (!existingBooking) {
-      return BOOKING_RESPONSES.BOOKING_NOT_FOUND;
+      return BOOKING_RESPONSES.BOOKING_NOT_FOUND(updateBookingDto.property.id);
     }
 
     const {
@@ -134,8 +132,8 @@ export class UpdateBookingService {
       propertyDetails,
     );
 
-    const isLastMinuteBooking =
-      this.bookingUtilService.isLastMinuteBooking(newCheckinDate);
+    const isLastMinuteBooking = updateBookingDto.isLastMinuteBooking;
+
     const nightsSelected = this.bookingUtilService.calculateNightsSelected(
       newCheckinDate,
       newCheckoutDate,
@@ -149,6 +147,7 @@ export class UpdateBookingService {
         user || existingBooking.user,
         property,
         newCheckinDate,
+        newCheckoutDate,
       );
     if (bookingValidationResult !== true) {
       return bookingValidationResult;
@@ -179,11 +178,10 @@ export class UpdateBookingService {
       this.lastCheckOutDate,
     );
 
-    const userAction = 'Updated';
     await this.bookingUtilService.createBookingHistory(
       updatedBooking,
       updateBookingDto.updatedBy,
-      userAction,
+      USER_ACTION,
     );
 
     return BOOKING_RESPONSES.BOOKING_UPDATED(updatedBooking);
@@ -282,7 +280,7 @@ export class UpdateBookingService {
         this.bookingUtilService.updateNightCounts(
           userPropertyFirstYear,
           newNightCounts,
-          'FirstYear',
+          FIRST_YEAR,
         );
       }
       await this.userPropertiesRepository.save(userPropertyFirstYear);
@@ -300,7 +298,7 @@ export class UpdateBookingService {
         this.bookingUtilService.updateNightCounts(
           userPropertySecondYear,
           newNightCounts,
-          'SecondYear',
+          SECOND_YEAR,
         );
       }
       await this.userPropertiesRepository.save(userPropertySecondYear);
@@ -367,7 +365,11 @@ export class UpdateBookingService {
         userPropertyFirstYear.lastMinuteRemainingNights += totalNightsFirstYear;
         userPropertyFirstYear.lastMinuteBookedNights -= totalNightsFirstYear;
       } else {
-        this.revertNightCounts(userPropertyFirstYear, nightCounts, 'FirstYear');
+        this.bookingUtilService.revertNightCounts(
+          userPropertyFirstYear,
+          nightCounts,
+          FIRST_YEAR,
+        );
       }
       await this.userPropertiesRepository.save(userPropertyFirstYear);
     }
@@ -383,10 +385,10 @@ export class UpdateBookingService {
           totalNightsSecondYear;
         userPropertySecondYear.lastMinuteBookedNights -= totalNightsSecondYear;
       } else {
-        this.revertNightCounts(
+        this.bookingUtilService.revertNightCounts(
           userPropertySecondYear,
           nightCounts,
-          'SecondYear',
+          SECOND_YEAR,
         );
       }
       await this.userPropertiesRepository.save(userPropertySecondYear);
@@ -408,27 +410,6 @@ export class UpdateBookingService {
         property,
       );
     }
-  }
-
-  private revertNightCounts(
-    userProperty: UserProperties,
-    nightCounts: NightCounts,
-    yearType: 'FirstYear' | 'SecondYear',
-  ): void {
-    userProperty.peakRemainingNights += nightCounts[`peakNightsIn${yearType}`];
-    userProperty.offRemainingNights += nightCounts[`offNightsIn${yearType}`];
-    userProperty.peakRemainingHolidayNights +=
-      nightCounts[`peakHolidayNightsIn${yearType}`];
-    userProperty.offRemainingHolidayNights +=
-      nightCounts[`offHolidayNightsIn${yearType}`];
-
-    userProperty.peakBookedNights -= userProperty.peakBookedNights -=
-      nightCounts[`peakNightsIn${yearType}`];
-    userProperty.offBookedNights -= nightCounts[`offNightsIn${yearType}`];
-    userProperty.peakBookedHolidayNights -=
-      nightCounts[`peakHolidayNightsIn${yearType}`];
-    userProperty.offBookedHolidayNights -=
-      nightCounts[`offHolidayNightsIn${yearType}`];
   }
 
   private async revertPeakHoliday(
