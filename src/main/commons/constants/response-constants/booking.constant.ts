@@ -181,6 +181,11 @@ export const BOOKING_RESPONSES = {
     error: 'Forbidden',
     status_code: HttpStatus.FORBIDDEN,
   },
+  OWNER_REZ_BOOKING_ID_NOT_FOUND: {
+    message: 'Booking ID was not found.',
+    error: 'Not Found',
+    status_code: HttpStatus.NOT_FOUND,
+  },
   OWNER_REZ_BOOKING_500: {
     message: 'You have conflicts in the provided data with server.',
     error: 'Internal Server Error',
