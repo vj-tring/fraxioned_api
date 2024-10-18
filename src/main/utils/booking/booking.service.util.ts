@@ -7,10 +7,16 @@ import { UserProperties } from 'entities/user-properties.entity';
 import { PropertySeasonHolidays } from 'entities/property-season-holidays.entity';
 import { User } from 'src/main/entities/user.entity';
 import { Property } from 'src/main/entities/property.entity';
-import { BookingRules } from 'src/main/commons/constants/enumerations/booking-rules';
 import { PropertyDetails } from 'src/main/entities/property-details.entity';
-import { NightCounts } from '../interface/bookingInterface';
 import { isDateInRange, normalizeDate } from './date.util';
+import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
+import { createBooking } from 'src/main/integrations/ownerrez/apis/owner-rez-endpoints';
+import { format } from 'date-fns';
+import { AxiosResponse } from 'axios';
+import { LoggerService } from 'src/main/service/logger.service';
+
+const FirstYear = 'FirstYear';
+const SecondYear = 'SecondYear';
 
 @Injectable()
 export class BookingUtilService {
@@ -25,6 +31,7 @@ export class BookingUtilService {
     private readonly propertySeasonHolidaysRepository: Repository<PropertySeasonHolidays>,
     @InjectRepository(BookingHistory)
     private readonly bookingHistoryRepository: Repository<BookingHistory>,
+    private readonly logger: LoggerService,
   ) {}
 
   async getProperty(propertyId: number): Promise<Property> {
@@ -76,16 +83,21 @@ export class BookingUtilService {
 
     const countedHolidays = new Set<number>();
 
+    const getCalendarYear = (date: Date): number => {
+      if (date.getMonth() === 11 && date.getDate() === 31) {
+        return date.getFullYear() + 1;
+      }
+      return date.getFullYear();
+    };
+
+    const firstYear = getCalendarYear(checkinDate);
+
     for (
       let date = new Date(checkinDate);
       date < checkoutDate;
       date.setDate(date.getDate() + 1)
     ) {
-      const currentYear = date.getFullYear();
-      const adjustedYear =
-        date.getMonth() === 11 && date.getDate() === 31
-          ? currentYear + 1
-          : currentYear;
+      const currentYear = getCalendarYear(date);
 
       PropertyHolidays.forEach((PropertyHoliday) => {
         if (
@@ -95,13 +107,13 @@ export class BookingUtilService {
           if (!countedHolidays.has(PropertyHoliday.holiday.id)) {
             countedHolidays.add(PropertyHoliday.holiday.id);
             if (isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
-              if (adjustedYear === checkinDate.getFullYear()) {
+              if (currentYear === firstYear) {
                 peakHolidayNightsInFirstYear++;
               } else {
                 peakHolidayNightsInSecondYear++;
               }
             } else {
-              if (adjustedYear === checkinDate.getFullYear()) {
+              if (currentYear === firstYear) {
                 offHolidayNightsInFirstYear++;
               } else {
                 offHolidayNightsInSecondYear++;
@@ -113,13 +125,13 @@ export class BookingUtilService {
 
       if (!countedHolidays.has(date.getTime())) {
         if (isDateInRange(date, peakSeasonStart, peakSeasonEnd)) {
-          if (adjustedYear === checkinDate.getFullYear()) {
+          if (currentYear === firstYear) {
             peakNightsInFirstYear++;
           } else {
             peakNightsInSecondYear++;
           }
         } else {
-          if (adjustedYear === checkinDate.getFullYear()) {
+          if (currentYear === firstYear) {
             offNightsInFirstYear++;
           } else {
             offNightsInSecondYear++;
@@ -139,19 +151,12 @@ export class BookingUtilService {
       offHolidayNightsInSecondYear,
     };
   }
-
-  isLastMinuteBooking(checkinDate: Date | string): boolean {
-    const date = new Date(checkinDate);
-    const today = new Date();
-    const diffInDays =
-      (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-    return diffInDays <= BookingRules.LAST_MAX_DAYS;
-  }
   calculateNightsSelected(checkinDate: Date, checkoutDate: Date): number {
     return (
       (checkoutDate.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24)
     );
   }
+
   async updateUserProperties(
     user: User,
     property: Property,
@@ -186,7 +191,7 @@ export class BookingUtilService {
         userPropertyFirstYear.lastMinuteRemainingNights -= totalNightsFirstYear;
         userPropertyFirstYear.lastMinuteBookedNights += totalNightsFirstYear;
       } else {
-        this.updateNightCounts(userPropertyFirstYear, nightCounts, 'FirstYear');
+        this.updateNightCounts(userPropertyFirstYear, nightCounts, FirstYear);
       }
       await this.userPropertiesRepository.save(userPropertyFirstYear);
     }
@@ -200,11 +205,7 @@ export class BookingUtilService {
           totalNightsSecondYear;
         userPropertySecondYear.lastMinuteBookedNights += totalNightsSecondYear;
       } else {
-        this.updateNightCounts(
-          userPropertySecondYear,
-          nightCounts,
-          'SecondYear',
-        );
+        this.updateNightCounts(userPropertySecondYear, nightCounts, SecondYear);
       }
       await this.userPropertiesRepository.save(userPropertySecondYear);
     }
@@ -230,7 +231,7 @@ export class BookingUtilService {
   updateNightCounts(
     userProperty: UserProperties,
     nightCounts: NightCounts,
-    yearType: 'FirstYear' | 'SecondYear',
+    yearType: typeof FirstYear | typeof SecondYear,
   ): void {
     userProperty.peakRemainingNights -= nightCounts[`peakNightsIn${yearType}`];
     userProperty.offRemainingNights -= nightCounts[`offNightsIn${yearType}`];
@@ -244,6 +245,26 @@ export class BookingUtilService {
     userProperty.peakBookedHolidayNights +=
       nightCounts[`peakHolidayNightsIn${yearType}`];
     userProperty.offBookedHolidayNights +=
+      nightCounts[`offHolidayNightsIn${yearType}`];
+  }
+
+  revertNightCounts(
+    userProperty: UserProperties,
+    nightCounts: NightCounts,
+    yearType: typeof FirstYear | typeof SecondYear,
+  ): void {
+    userProperty.peakRemainingNights += nightCounts[`peakNightsIn${yearType}`];
+    userProperty.offRemainingNights += nightCounts[`offNightsIn${yearType}`];
+    userProperty.peakRemainingHolidayNights +=
+      nightCounts[`peakHolidayNightsIn${yearType}`];
+    userProperty.offRemainingHolidayNights +=
+      nightCounts[`offHolidayNightsIn${yearType}`];
+
+    userProperty.peakBookedNights -= nightCounts[`peakNightsIn${yearType}`];
+    userProperty.offBookedNights -= nightCounts[`offNightsIn${yearType}`];
+    userProperty.peakBookedHolidayNights -=
+      nightCounts[`peakHolidayNightsIn${yearType}`];
+    userProperty.offBookedHolidayNights -=
       nightCounts[`offHolidayNightsIn${yearType}`];
   }
 
@@ -329,5 +350,38 @@ export class BookingUtilService {
     });
 
     await this.bookingHistoryRepository.save(bookingHistory);
+  }
+
+  async createBookingOnOwnerRez(booking: Booking): Promise<AxiosResponse> {
+    try {
+      const formatBooking = {
+        arrival: booking.checkinDate
+          ? format(booking.checkinDate, 'yyyy-MM-dd')
+          : 'N/A',
+        departure: booking.checkoutDate
+          ? format(booking.checkoutDate, 'yyyy-MM-dd')
+          : 'N/A',
+        check_in: booking.checkinDate
+          ? format(booking.checkinDate, 'KK:mm')
+          : 'N/A',
+        check_out: booking.checkoutDate
+          ? format(booking.checkoutDate, 'KK:mm')
+          : 'N/A',
+        is_block: false,
+        guest_id: 602100604,
+        property_id: booking.property.ownerRezPropId | 0,
+      };
+      const ownerRezData = await createBooking(formatBooking);
+      if (!ownerRezData) {
+        this.logger.log(`Empty response data received from the OwnerRez`);
+        return;
+      }
+      return ownerRezData;
+    } catch (error) {
+      this.logger.error(
+        `Error creating booking on OwnerRez: ${error.response.data.messages}`,
+      );
+      return error.response;
+    }
   }
 }

@@ -21,14 +21,14 @@ import { PropertyCodes } from 'src/main/entities/property-codes.entity';
 @Injectable()
 export class BookingMailService {
   constructor(
-    @InjectRepository(Property)
-    private readonly propertyRepository: Repository<Property>,
     @InjectRepository(UserContactDetails)
     private readonly userContactDetailsRepository: Repository<UserContactDetails>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
+    @InjectRepository(Property)
+    private readonly propertyRepository: Repository<Property>,
     @InjectRepository(PropertyCodes)
     private readonly propertyCodesRepository: Repository<PropertyCodes>,
     private readonly logger: LoggerService,
