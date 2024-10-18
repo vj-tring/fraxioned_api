@@ -24,6 +24,7 @@ import {
   mailTemplates,
 } from 'src/main/commons/constants/email/mail.constants';
 import { MailService } from 'src/main/email/mail.service';
+import { Role } from 'src/main/entities/role.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -54,8 +55,21 @@ export class AuthenticationService {
 
     const user = await this.userRepository.findOne({
       where: { id: userEmail.user.id },
-      relations: ['role'],
-      select: { role: { id: true, roleName: true } },
+      relations: ['contactDetails', 'role'],
+      select: {
+        role: { id: true, roleName: true },
+        contactDetails: {
+          id: true,
+          optionalEmailOne: true,
+          optionalEmailTwo: true,
+          optionalPhoneOne: true,
+          optionalPhoneTwo: true,
+          primaryEmail: true,
+          primaryPhone: true,
+          secondaryEmail: true,
+          secondaryPhone: true,
+        },
+      },
     });
 
     if (!user) {
@@ -85,10 +99,12 @@ export class AuthenticationService {
 
     await this.userSessionRepository.save(session);
 
-    const userDetails = {
+    const userDetails: Partial<User> = {
       id: user.id,
-      roleId: user.role.id,
-      roleName: user.role.roleName,
+      role: {
+        id: user.role.id,
+        roleName: user.role.roleName,
+      } as Role,
       firstName: user.firstName,
       lastName: user.lastName,
       addressLine1: user.addressLine1,
@@ -103,6 +119,7 @@ export class AuthenticationService {
       createdBy: user.createdBy,
       updatedAt: user.updatedAt,
       updatedBy: user.updatedBy,
+      contactDetails: user.contactDetails,
     };
     this.logger.log(`Login successful for email: ${email}`);
     return LOGIN_RESPONSES.LOGIN_SUCCESS(userDetails, session);
