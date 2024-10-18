@@ -1,7 +1,9 @@
 import * as request from 'supertest';
 import { baseurl } from '../test.config';
 import { createConnection, Connection } from 'mysql2/promise';
-//NOTE : This test will drop the database after all test cases are executed.
+import * as fs from 'fs';
+import * as path from 'path';
+
 describe('Booking API Test', () => {
   const url = `${baseurl}/authentication`;
   const url1 = `${baseurl}/bookings`;
@@ -11,6 +13,12 @@ describe('Booking API Test', () => {
   let bookid: number;
 
   beforeAll(async () => {
+    connection = await createConnection({
+      host: 'localhost',
+      user: 'root',
+      password: '1234',
+      database: 'fraxioned_testing',
+    });
     const login_payload = {
       email: 'owner@fraxioned.com',
       password: 'Owner@123',
@@ -23,17 +31,20 @@ describe('Booking API Test', () => {
     token = session.token;
     userid = user.id;
   });
-
-  afterAll(async () => {
-    connection = await createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '1234',
-      database: 'fraxioned_test',
-    });
-    await connection.query(`DROP DATABASE fraxioned_test`);
-    await connection.query(`CREATE DATABASE fraxioned_test`);
-    await connection.end();
+  beforeEach(async () => {
+    const scriptPath = path.resolve(__dirname, 'user properties.sql');
+    const sqlScript = fs.readFileSync(scriptPath, 'utf8');
+    const statements = sqlScript
+      .split(';')
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
+    for (const statement of statements) {
+      try {
+        await connection.query(statement);
+      } catch (error) {
+        throw error;
+      }
+    }
   });
   describe('Last Minute Booking', () => {
     it('Last Minute Booking is made within 24 hours', async () => {
@@ -202,6 +213,7 @@ describe('Booking API Test', () => {
         .set('access-token', `${token}`)
         .set('user-id', `${userid}`)
         .expect('Content-Type', /json/);
+      console.log(response.body);
       expect(response.body.message).toBe('Booking created successfully');
       bookid = response.body.data.id;
     });
@@ -283,6 +295,40 @@ describe('Booking API Test', () => {
         .expect('Content-Type', /json/);
       expect(response.body.message).toBe(
         'You should wait at least 5 nights from the last booking to book again.',
+      );
+    });
+    it('Last Minute Booking(LMB) exceeds maximum stay length', async () => {
+      const todaydate = new Date();
+      const checkin = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
+      const checkout = new Date(todaydate.getTime() + 8 * 24 * 60 * 60 * 1000);
+      const payload = {
+        user: {
+          id: 2,
+        },
+        property: {
+          id: 2,
+        },
+        createdBy: {
+          id: 1,
+        },
+        checkinDate: checkin,
+        checkoutDate: checkout,
+        noOfGuests: 10,
+        noOfPets: 2,
+        isLastMinuteBooking: true,
+        noOfAdults: 5,
+        noOfChildren: 5,
+        notes: 'None',
+      };
+      const response = await request(url1)
+        .post('/booking')
+        .set('Accept', 'application/json')
+        .send(payload)
+        .set('access-token', `${token}`)
+        .set('user-id', `${userid}`)
+        .expect('Content-Type', /json/);
+      expect(response.body.message).toBe(
+        'Maximum 3 nights allowed for last-minute bookings',
       );
     });
   });

@@ -86,10 +86,10 @@ describe('Booking API Test', () => {
       host: 'localhost',
       user: 'root',
       password: '1234',
-      database: 'fraxioned_test',
+      database: 'fraxioned_testing',
     });
-    await connection.query(`DROP DATABASE fraxioned_test`);
-    await connection.query(`CREATE DATABASE fraxioned_test`);
+    await connection.query(`DROP DATABASE fraxioned_testing`);
+    await connection.query(`CREATE DATABASE fraxioned_testing`);
     await connection.end();
   });
   describe('Successful Flows', () => {
