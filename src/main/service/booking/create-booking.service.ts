@@ -181,11 +181,11 @@ export class CreateBookingService {
     return BOOKING_RESPONSES.BOOKING_CREATED(savedBooking);
   }
 
-  async saveBooking(booking: Booking): Promise<Booking> {
+  private async saveBooking(booking: Booking): Promise<Booking> {
     return this.bookingRepository.save(booking);
   }
 
-  async prepareBooking(
+  private async prepareBooking(
     createBookingDto: CreateBookingDTO,
     property: Property,
     propertyDetails: PropertyDetails,
