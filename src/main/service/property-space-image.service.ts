@@ -27,14 +27,16 @@ export class PropertySpaceImageService {
     @InjectRepository(PropertySpace)
     private readonly propertySpaceRepository: Repository<PropertySpace>,
     @InjectRepository(User)
-    @Inject(forwardRef(() => PropertySpaceService))
     private readonly userRepository: Repository<User>,
     private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
+    @Inject(forwardRef(() => PropertySpaceService))
     private readonly propertySpaceService: PropertySpaceService,
   ) {}
 
-  async getImageCountForProperty(propertyId: number): Promise<number> {
+  async getImageCountForPropertyFromPropertySpaceImage(
+    propertyId: number,
+  ): Promise<number> {
     const imageCount = await this.propertySpaceImageRepository
       .createQueryBuilder('fpsi')
       .innerJoin('fpsi.propertySpace', 'fps')
@@ -102,7 +104,7 @@ export class PropertySpaceImageService {
 
       const propertyId = existingPropertySpace.property.id;
       const existingImageCount =
-        await this.getImageCountForProperty(propertyId);
+        await this.getImageCountForPropertyFromPropertySpaceImage(propertyId);
       const maxFileCount = getMaxFileCount();
 
       if (
