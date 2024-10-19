@@ -15,7 +15,7 @@ export const axiosConfigAsync = {
 
     const environment = configService.get<string>('SET_ENV');
 
-    if (environment !== 'DEV') {
+    if (environment === 'PROD') {
       baseURL = configService.get<string>('API_URL');
       username = configService.get<string>('API_USERNAME');
       password = configService.get<string>('API_PASSWORD');
