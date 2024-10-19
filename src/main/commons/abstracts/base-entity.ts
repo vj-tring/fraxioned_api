@@ -19,6 +19,7 @@ export abstract class BaseEntity {
   })
   @JoinColumn({
     name: 'created_by',
+    referencedColumnName: 'id',
   })
   createdBy: User;
 
@@ -27,6 +28,7 @@ export abstract class BaseEntity {
   })
   @JoinColumn({
     name: 'updated_by',
+    referencedColumnName: 'id',
   })
   updatedBy: User;
 

@@ -54,12 +54,18 @@ export class PropertySpaceAmenitiesController {
   async getAllPropertyAmenities(): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySpaceAmenities[];
+    data?: {
+      amenityGroup: {
+        id: number;
+        name: string;
+        amenities: PropertySpaceAmenities[];
+      }[];
+    };
     statusCode: HttpStatus;
   }> {
     try {
       const result =
-        await this.propertyAmenitiesService.findAllPropertySAmenities();
+        await this.propertyAmenitiesService.findAllPropertyAmenities();
       return result;
     } catch (error) {
       throw new HttpException(
@@ -89,10 +95,16 @@ export class PropertySpaceAmenitiesController {
   }
 
   @Get('property/:id')
-  async getHolidaysByPropertyId(@Param('id') id: number): Promise<{
+  async getAmenitiesByPropertyId(@Param('id') id: number): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySpaceAmenities[];
+    data?: {
+      amenityGroup: {
+        id: number;
+        name: string;
+        amenities: PropertySpaceAmenities[];
+      }[];
+    };
     statusCode: HttpStatus;
   }> {
     try {
@@ -113,7 +125,13 @@ export class PropertySpaceAmenitiesController {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySpaceAmenities[];
+    data?: {
+      amenityGroup: {
+        id: number;
+        name: string;
+        amenities: PropertySpaceAmenities[];
+      }[];
+    };
     statusCode: HttpStatus;
   }> {
     try {

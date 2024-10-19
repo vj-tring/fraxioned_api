@@ -89,4 +89,39 @@ export class S3UtilsService {
       );
     }
   }
+
+  public async handleS3KeyAndImageUrl(
+    existingImageUrl: string,
+    shouldDelete: boolean = false,
+  ): Promise<string> {
+    try {
+      const s3Key = existingImageUrl
+        ? await this.extractS3Key(existingImageUrl)
+        : '';
+      let imageUrlLocation = existingImageUrl;
+
+      if (s3Key) {
+        const headObject = await this.checkIfObjectExistsInS3(s3Key);
+
+        if (shouldDelete) {
+          if (headObject) {
+            await this.deleteObjectFromS3(s3Key);
+          }
+          imageUrlLocation = '';
+        } else if (!headObject) {
+          imageUrlLocation = '';
+        }
+      }
+
+      return imageUrlLocation;
+    } catch (err) {
+      this.logger.error(
+        `Error handling S3 image: Code: ${err.code}, Message: ${err.message}`,
+      );
+      throw new HttpException(
+        'Error handling S3 image',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
