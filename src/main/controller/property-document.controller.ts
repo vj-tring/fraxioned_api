@@ -11,9 +11,8 @@ import {
   Param,
   Delete,
   Patch,
-  UploadedFile,
 } from '@nestjs/common';
-import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
@@ -22,22 +21,18 @@ import { PropertyDocumentsService } from '../service/property-document.service';
 import { PROPERTY_DOCUMENTS_RESPONSES } from '../commons/constants/response-constants/property-document.constant';
 import {
   getMaxFileSize,
-  isFileSizeValid,
-  isFileExtensionValid,
   getAllowedDocumentExtensions,
   getMaxFileCount,
+  isFileSizeValid,
+  isFileExtensionValid,
 } from '../utils/image-file.utils';
-import {
-  CreatePropertyDocumentsRequestDto,
-  CreatePropertyDocumentsDto,
-} from '../dto/requests/property-document/create-property-document.dto';
-import {
-  UpdatePropertyDocumentDto,
-  UpdatePropertyDocumentRequestDto,
-} from '../dto/requests/property-document/update-property-document.dto';
+import { validateFile } from '../utils/fileUploadValidation.Util';
+import { DeletePropertyDocumentsDto } from '../dto/requests/property-document/delete-by-ids-request.dto';
+import { CreatePropertyDocumentsRequestDto } from '../dto/requests/property-document/create-request.dto';
+import { UpdatePropertyDocumentRequestDto } from '../dto/requests/property-document/update-request.dto';
 
 @ApiTags('Property Documents')
-@Controller('v1/propertyDocuments')
+@Controller('v1/property-documents')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class PropertyDocumentsController {
@@ -46,9 +41,13 @@ export class PropertyDocumentsController {
   ) {}
 
   @Post()
-  @UseInterceptors(FilesInterceptor('documentFiles', getMaxFileCount()))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'documentFiles', maxCount: getMaxFileCount() },
+    ]),
+  )
   async createPropertyDocuments(
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles() files: { documentFiles?: Express.Multer.File[] },
     @Body()
     createPropertyDocumentsRequestDto: CreatePropertyDocumentsRequestDto,
   ): Promise<{
@@ -61,7 +60,7 @@ export class PropertyDocumentsController {
       const max_file_size = getMaxFileSize();
       const allowedExtensions = getAllowedDocumentExtensions();
 
-      const hasOversizedFile = files.some(
+      const hasOversizedFile = (files.documentFiles || []).some(
         (file) => !isFileSizeValid(file, max_file_size),
       );
 
@@ -69,7 +68,7 @@ export class PropertyDocumentsController {
         return PROPERTY_DOCUMENTS_RESPONSES.FILE_SIZE_TOO_LARGE(max_file_size);
       }
 
-      const hasUnsupportedExtension = files.some(
+      const hasUnsupportedExtension = (files.documentFiles || []).some(
         (file) => !isFileExtensionValid(file, allowedExtensions),
       );
 
@@ -79,18 +78,20 @@ export class PropertyDocumentsController {
         );
       }
 
-      const propertyDocumentDetails: CreatePropertyDocumentsDto[] = JSON.parse(
+      const propertyDocumentDetails = JSON.parse(
         createPropertyDocumentsRequestDto.propertyDocuments,
       );
 
-      if (propertyDocumentDetails.length !== files.length) {
+      if (
+        propertyDocumentDetails.length !== (files.documentFiles?.length || 0)
+      ) {
         return PROPERTY_DOCUMENTS_RESPONSES.MISMATCHED_DTO_AND_DOCUMENTS();
       }
 
       const processedPropertyDocumentsDtos = propertyDocumentDetails.map(
         (dto, index) => ({
           ...dto,
-          documentFile: files[index],
+          documentFile: files.documentFiles[index],
         }),
       );
 
@@ -132,30 +133,34 @@ export class PropertyDocumentsController {
     }
   }
 
-  @Get('propertyDocument/:id')
-  async getByPropertyDocumentId(@Param('id') id: number): Promise<{
+  @Get('property/:id')
+  async getByPropertyId(@Param('id') propertyId: number): Promise<{
     success: boolean;
     message: string;
-    data?: PropertyDocuments;
+    data?: PropertyDocuments[];
     statusCode: HttpStatus;
   }> {
     try {
       const result =
-        await this.propertyDocumentsService.findPropertyDocumentById(id);
+        await this.propertyDocumentsService.findPropertyDocumentsByPropertyId(
+          propertyId,
+        );
       return result;
     } catch (error) {
       throw new HttpException(
-        'An error occurred while retrieving the property document',
+        'An error occurred while retrieving the property documents',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  @Patch('propertyDocument/:id')
-  @UseInterceptors(FileInterceptor('documentFile'))
+  @Patch('property-document/:id')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'documentFile', maxCount: 1 }]),
+  )
   async updatePropertyDocumentId(
     @Param('id') id: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: { documentFile?: Express.Multer.File[] },
     @Body() updatePropertyDocumentRequestDto: UpdatePropertyDocumentRequestDto,
   ): Promise<{
     success: boolean;
@@ -164,40 +169,23 @@ export class PropertyDocumentsController {
     statusCode: HttpStatus;
   }> {
     try {
-      const updatePropertyDocumentDto: UpdatePropertyDocumentDto = JSON.parse(
+      const updatePropertyDocumentDto = JSON.parse(
         updatePropertyDocumentRequestDto.propertyDocument,
       );
 
-      if (
-        (file && !updatePropertyDocumentDto) ||
-        (!file && updatePropertyDocumentDto)
-      ) {
-        return PROPERTY_DOCUMENTS_RESPONSES.MISMATCHED_DTO_AND_DOCUMENTS();
-      }
-
-      const max_file_size = getMaxFileSize();
-      const allowedExtensions = getAllowedDocumentExtensions();
-
+      const file = files.documentFile ? files.documentFile[0] : undefined;
       if (file) {
-        if (!isFileSizeValid(file, max_file_size)) {
-          return PROPERTY_DOCUMENTS_RESPONSES.FILE_SIZE_TOO_LARGE(
-            max_file_size,
-          );
-        }
-
-        if (!isFileExtensionValid(file, allowedExtensions)) {
-          return PROPERTY_DOCUMENTS_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
-            allowedExtensions,
-          );
+        const validationResponse = await validateFile(file);
+        if (validationResponse) {
+          return validationResponse;
         }
       }
 
       updatePropertyDocumentDto.documentFile = file;
-      const result =
-        await this.propertyDocumentsService.updatePropertyDocumentDetail(
-          id,
-          updatePropertyDocumentDto,
-        );
+      const result = await this.propertyDocumentsService.updatePropertyDocument(
+        id,
+        updatePropertyDocumentDto,
+      );
       return result;
     } catch (error) {
       if (error instanceof SyntaxError) {
@@ -213,7 +201,7 @@ export class PropertyDocumentsController {
     }
   }
 
-  @Delete('propertyDocument/:id')
+  @Delete('property-document/:id')
   async deletePropertyDocument(
     @Param('id') id: number,
   ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
@@ -224,6 +212,23 @@ export class PropertyDocumentsController {
     } catch (error) {
       throw new HttpException(
         'An error occurred while deleting the property document',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('property-documents')
+  async deletePropertyDocuments(
+    @Body() deletePropertyDocumentsDto: DeletePropertyDocumentsDto,
+  ): Promise<{ success: boolean; message: string; statusCode: HttpStatus }> {
+    try {
+      const { ids } = deletePropertyDocumentsDto;
+      const result =
+        await this.propertyDocumentsService.deletePropertyDocumentsByIds(ids);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while deleting the property documents',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

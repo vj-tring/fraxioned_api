@@ -33,10 +33,12 @@ export class UpdateBookingDTO {
 
   @IsInt()
   @IsNotEmpty({ message: 'noOfGuests is required' })
+  @IsOptional()
   noOfGuests: number;
 
   @IsInt()
   @IsNotEmpty({ message: 'noOfPets is required' })
+  @IsOptional()
   noOfPets: number;
 
   @IsBoolean()

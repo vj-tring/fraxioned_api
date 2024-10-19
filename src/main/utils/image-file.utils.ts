@@ -8,7 +8,10 @@ export function getAllowedExtensions(): string[] {
     .map((ext) => ext.trim().toLowerCase());
 }
 export function getAllowedDocumentExtensions(): string[] {
-  return (process.env.ALLOWED_DOCUMENT_EXTENSIONS || '.pdf,.docx')
+  return (
+    process.env.ALLOWED_DOCUMENT_EXTENSIONS ||
+    '.pdf,.docx,.jpeg,.jpg,.png,.xlsx'
+  )
     .split(',')
     .map((ext) => ext.trim().toLowerCase());
 }

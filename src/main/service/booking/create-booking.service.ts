@@ -156,6 +156,10 @@ export class CreateBookingService {
       }
     }
 
+    preparedBooking.ownerRezBookingId = ownerRezData['id'];
+    if (!preparedBooking.ownerRezBookingId) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_ID_NOT_FOUND;
+    }
     const savedBooking = await this.saveBooking(preparedBooking);
 
     await this.bookingUtilService.updateUserProperties(
@@ -178,11 +182,11 @@ export class CreateBookingService {
     return BOOKING_RESPONSES.BOOKING_CREATED(savedBooking);
   }
 
-  async saveBooking(booking: Booking): Promise<Booking> {
+  private async saveBooking(booking: Booking): Promise<Booking> {
     return this.bookingRepository.save(booking);
   }
 
-  async prepareBooking(
+  private async prepareBooking(
     createBookingDto: CreateBookingDTO,
     property: Property,
     propertyDetails: PropertyDetails,
