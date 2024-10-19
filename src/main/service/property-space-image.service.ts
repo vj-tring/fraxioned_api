@@ -107,8 +107,12 @@ export class PropertySpaceImageService {
       }
 
       const propertyId = existingPropertySpace.property.id;
+
       const existingImageCount =
-        await this.getImageCountForPropertyFromPropertySpaceImage(propertyId);
+        (await this.propertyAdditionalImageService.getImageCountForPropertyFromPropertyAdditionalImage(
+          propertyId,
+        )) +
+        (await this.getImageCountForPropertyFromPropertySpaceImage(propertyId));
       const maxFileCount = getMaxFileCount();
 
       if (
