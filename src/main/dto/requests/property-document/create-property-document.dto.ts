@@ -34,7 +34,7 @@ export class CreatePropertyDocumentsDto {
   @ApiProperty({ example: 'Property Deed' })
   @IsNotEmpty({ message: 'Document name is required' })
   @IsString()
-  name: string;
+  documentName: string;
 
   @ApiProperty({ example: 'Legal' })
   @IsNotEmpty({ message: 'Document type is required' })
@@ -43,10 +43,4 @@ export class CreatePropertyDocumentsDto {
 
   @ApiProperty({ type: 'string', format: 'binary' })
   documentFile: Express.Multer.File;
-}
-
-export class CreatePropertyDocumentsRequestDto {
-  @IsNotEmpty()
-  @IsString()
-  propertyDocuments: string;
 }
