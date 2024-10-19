@@ -86,12 +86,14 @@ export class PropertyDetails {
   @Column({
     name: 'fee_per_pet',
     type: 'float',
+    default: 0.0,
   })
   feePerPet: number;
 
   @Column({
     name: 'cleaning_fee',
     type: 'float',
+    default: 0.0,
   })
   cleaningFee: number;
 

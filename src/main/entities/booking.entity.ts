@@ -15,8 +15,21 @@ export class Booking {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', nullable: false, unique: true })
+  @Column({
+    name: 'booking_id',
+    type: 'varchar',
+    nullable: false,
+    unique: true,
+  })
   bookingId: string;
+
+  @Column({
+    name: 'ownerrez_booking_id',
+    type: 'integer',
+    nullable: false,
+    unique: true,
+  })
+  ownerRezBookingId: number;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
