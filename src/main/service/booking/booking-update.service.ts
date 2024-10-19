@@ -163,7 +163,7 @@ export class UpdateBookingService {
       existingBooking,
     );
 
-    const updatedBooking = await this.saveUpdatedBooking(
+    const updateBooking = await this.getUpdateBooking(
       existingBooking,
       updateBookingDto,
       property,
@@ -171,6 +171,34 @@ export class UpdateBookingService {
       isLastMinuteBooking,
       nightsSelected,
     );
+
+    const updatedOwnerRezData =
+      await this.bookingUtilService.updateBookingOnOwnerRez(updateBooking);
+    if (!updatedOwnerRezData) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+    }
+
+    if (updatedOwnerRezData.data) {
+      if (updatedOwnerRezData.data.status_code === 500) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_500;
+      }
+      if (updatedOwnerRezData.data.status_code === 400) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_400;
+      }
+      if (updatedOwnerRezData.data.status_code === 404) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_404;
+      }
+      if (updatedOwnerRezData.data.status_code !== 200) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+      }
+    }
+
+    updateBooking.ownerRezBookingId = updatedOwnerRezData['id'];
+    if (!updateBooking.ownerRezBookingId) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_ID_NOT_FOUND;
+    }
+
+    const updatedBooking = await this.saveBooking(updateBooking);
 
     await this.bookingMailService.sendBookingModificationEmail(
       updatedBooking,
@@ -187,7 +215,11 @@ export class UpdateBookingService {
     return BOOKING_RESPONSES.BOOKING_UPDATED(updatedBooking);
   }
 
-  private async saveUpdatedBooking(
+  async saveBooking(booking: Booking): Promise<Booking> {
+    return this.bookingRepository.save(booking);
+  }
+
+  private async getUpdateBooking(
     existingBooking: Booking,
     updateBookingDto: UpdateBookingDTO,
     property: Property,
@@ -200,9 +232,9 @@ export class UpdateBookingService {
       updateBookingDto,
     );
 
+    const totalPetFee = updateBookingDto.noOfPets * propertyDetails.feePerPet;
     updatedBooking.cleaningFee = propertyDetails.cleaningFee;
-    updatedBooking.petFee =
-      updateBookingDto.noOfPets * propertyDetails.feePerPet;
+    updatedBooking.petFee = totalPetFee ? totalPetFee : 0.0;
     updatedBooking.isLastMinuteBooking = isLastMinuteBooking;
     updatedBooking.totalNights = nightsSelected;
 
@@ -221,7 +253,7 @@ export class UpdateBookingService {
       );
     }
 
-    return this.bookingRepository.save(updatedBooking);
+    return updatedBooking;
   }
 
   private async updateUserProperties(
