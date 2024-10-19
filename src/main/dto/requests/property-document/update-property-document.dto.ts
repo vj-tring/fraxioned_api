@@ -43,8 +43,3 @@ export class UpdatePropertyDocumentDto {
   @ApiProperty({ type: 'string', format: 'binary' })
   documentFile: Express.Multer.File;
 }
-export class UpdatePropertyDocumentRequestDto {
-  @IsNotEmpty()
-  @IsString()
-  propertyDocument: string;
-}

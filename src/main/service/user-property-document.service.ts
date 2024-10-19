@@ -146,6 +146,58 @@ export class UserPropertyDocumentsService {
     }
   }
 
+  async findUserPropertyDocumentsByUserId(userId: number): Promise<{
+    success: boolean;
+    message: string;
+    data?: UserPropertyDocument[];
+    statusCode: number;
+  }> {
+    try {
+      const userPropertyDocuments =
+        await this.userPropertyDocumentsRepository.find({
+          where: { user: { id: userId } },
+          relations: ['property', 'user', 'createdBy', 'updatedBy'],
+          select: {
+            property: {
+              id: true,
+              propertyName: true,
+            },
+            user: {
+              id: true,
+            },
+            createdBy: {
+              id: true,
+            },
+            updatedBy: {
+              id: true,
+            },
+          },
+        });
+
+      if (userPropertyDocuments.length === 0) {
+        this.logger.log(
+          `No user property documents found for user with ID ${userId}`,
+        );
+        return USER_PROPERTY_DOCUMENT_RESPONSES.USER_PROPERTY_DOCUMENTS_NOT_FOUND();
+      }
+
+      this.logger.log(
+        `Retrieved ${userPropertyDocuments.length} user property documents for user with ID ${userId}`,
+      );
+      return USER_PROPERTY_DOCUMENT_RESPONSES.USER_PROPERTY_DOCUMENTS_FETCHED(
+        userPropertyDocuments,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving user property documents for user with ID ${userId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving user property documents by user id',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async findUserPropertyDocumentById(id: number): Promise<{
     success: boolean;
     message: string;
