@@ -58,27 +58,45 @@ export const PROPERTY_SPACE_AMENITY_RESPONSES = {
   PROPERTY_SPACE_AMENITIES_NOT_FOUND: (): {
     success: boolean;
     message: string;
-    data?: PropertySpaceAmenities[];
+    data?: {
+      amenityGroup: {
+        id: number;
+        name: string;
+        amenities: PropertySpaceAmenities[];
+      }[];
+    };
     statusCode: number;
   } => ({
     success: true,
     message: 'No property space amenities are available',
-    data: [],
+    data: { amenityGroup: [] },
     statusCode: HttpStatus.OK,
   }),
-  PROPERTY_SPACE_AMENITIES_FETCHED: (
-    PropertySpaceAmenities: PropertySpaceAmenities[],
-  ): {
+
+  PROPERTY_SPACE_AMENITIES_FETCHED: (groupedAmenities: {
+    amenityGroup: {
+      id: number;
+      name: string;
+      amenities: PropertySpaceAmenities[];
+    }[];
+  }): {
     success: boolean;
     message: string;
-    data?: PropertySpaceAmenities[];
+    data?: {
+      amenityGroup: {
+        id: number;
+        name: string;
+        amenities: PropertySpaceAmenities[];
+      }[];
+    };
     statusCode: number;
   } => ({
     success: true,
     message: 'Property Space Amenities retrieved successfully',
-    data: PropertySpaceAmenities,
+    data: groupedAmenities,
     statusCode: HttpStatus.OK,
   }),
+
   PROPERTY_SPACE_AMENITY_NOT_FOUND: (
     id: number,
   ): {
