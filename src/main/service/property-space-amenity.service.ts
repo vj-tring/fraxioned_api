@@ -236,18 +236,21 @@ export class PropertySpaceAmenitiesService {
     }
   }
 
-  async findAllPropertyAmenities(): Promise<{
-    success: boolean;
-    message: string;
-    data?: {
-      amenityGroup: {
-        id: number;
-        name: string;
-        amenities: PropertySpaceAmenities[];
-      }[];
-    };
-    statusCode: number;
-  }> {
+  async findAllPropertyAmenities(): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: number;
+      }
+    | object
+  > {
     try {
       const propertySpaceAmenities =
         await this.PropertySpaceAmenitiesRepository.find({
@@ -376,18 +379,21 @@ export class PropertySpaceAmenitiesService {
     }
   }
 
-  async findAmenitiesByPropertySpaceId(propertySpaceId: number): Promise<{
-    success: boolean;
-    message: string;
-    data?: {
-      amenityGroup: {
-        id: number;
-        name: string;
-        amenities: PropertySpaceAmenities[];
-      }[];
-    };
-    statusCode: number;
-  }> {
+  async findAmenitiesByPropertySpaceId(propertySpaceId: number): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: number;
+      }
+    | object
+  > {
     try {
       const existingPropertySpace =
         await this.propertySpaceService.findPropertySpaceById(propertySpaceId);
@@ -452,42 +458,54 @@ export class PropertySpaceAmenitiesService {
   }
 
   private groupAmenitiesByGroup(amenities: PropertySpaceAmenities[]): {
-    amenityGroup: {
-      id: number;
-      name: string;
-      amenities: PropertySpaceAmenities[];
-    }[];
+    amenityGroup: { id: number; name: string; amenities: object[] }[];
   } {
-    const grouped = amenities.reduce(
-      (acc, amenity) => {
-        const groupId = amenity.amenity.amenityGroup.id;
-        const groupName = amenity.amenity.amenityGroup.name;
-        if (!acc[groupId]) {
-          acc[groupId] = { id: groupId, name: groupName, amenities: [] };
-        }
-        acc[groupId].amenities.push(amenity);
-        return acc;
-      },
-      {} as Record<
-        number,
-        { id: number; name: string; amenities: PropertySpaceAmenities[] }
-      >,
+    const grouped = amenities.reduce((acc, amenity) => {
+      const groupId = amenity.amenity.amenityGroup.id;
+      const groupName = amenity.amenity.amenityGroup.name;
+      if (!acc[groupId]) {
+        acc[groupId] = {
+          id: groupId,
+          name: groupName,
+          amenities: [],
+          amenitySet: new Set(),
+        };
+      }
+
+      if (!acc[groupId].amenitySet.has(amenity.amenity.id)) {
+        acc[groupId].amenities.push({
+          id: amenity.id,
+          amenityId: amenity.amenity.id,
+          amenityName: amenity.amenity.amenityName,
+          amenityDescription: amenity.amenity.amenityDescription,
+        });
+        acc[groupId].amenitySet.add(amenity.amenity.id);
+      }
+
+      return acc;
+    }, {});
+
+    const finalGrouped = Object.values(grouped).map(
+      ({ id, name, amenities }) => ({ id, name, amenities }),
     );
 
-    return { amenityGroup: Object.values(grouped) };
+    return { amenityGroup: finalGrouped };
   }
-  async findAmenitiesByPropertyId(id: number): Promise<{
-    success: boolean;
-    message: string;
-    data?: {
-      amenityGroup: {
-        id: number;
-        name: string;
-        amenities: PropertySpaceAmenities[];
-      }[];
-    };
-    statusCode: HttpStatus;
-  }> {
+  async findAmenitiesByPropertyId(id: number): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: HttpStatus;
+      }
+    | object
+  > {
     try {
       const propertySpaceAmenities =
         await this.PropertySpaceAmenitiesRepository.find({
