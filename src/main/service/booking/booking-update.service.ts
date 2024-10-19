@@ -163,7 +163,7 @@ export class UpdateBookingService {
       existingBooking,
     );
 
-    const preparedUpdateBooking = await this.prepareUpdateBooking(
+    const updateBooking = await this.getUpdateBooking(
       existingBooking,
       updateBookingDto,
       property,
@@ -173,9 +173,7 @@ export class UpdateBookingService {
     );
 
     const updatedOwnerRezData =
-      await this.bookingUtilService.updateBookingOnOwnerRez(
-        preparedUpdateBooking,
-      );
+      await this.bookingUtilService.updateBookingOnOwnerRez(updateBooking);
     if (!updatedOwnerRezData) {
       return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
     }
@@ -195,12 +193,12 @@ export class UpdateBookingService {
       }
     }
 
-    preparedUpdateBooking.ownerRezBookingId = updatedOwnerRezData['id'];
-    if (!preparedUpdateBooking.ownerRezBookingId) {
+    updateBooking.ownerRezBookingId = updatedOwnerRezData['id'];
+    if (!updateBooking.ownerRezBookingId) {
       return BOOKING_RESPONSES.OWNER_REZ_BOOKING_ID_NOT_FOUND;
     }
 
-    const updatedBooking = await this.saveBooking(preparedUpdateBooking);
+    const updatedBooking = await this.saveBooking(updateBooking);
 
     await this.bookingMailService.sendBookingModificationEmail(
       updatedBooking,
@@ -221,7 +219,7 @@ export class UpdateBookingService {
     return this.bookingRepository.save(booking);
   }
 
-  private async prepareUpdateBooking(
+  private async getUpdateBooking(
     existingBooking: Booking,
     updateBookingDto: UpdateBookingDTO,
     property: Property,
