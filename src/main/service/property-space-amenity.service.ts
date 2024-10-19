@@ -474,7 +474,6 @@ export class PropertySpaceAmenitiesService {
 
       if (!acc[groupId].amenitySet.has(amenity.amenity.id)) {
         acc[groupId].amenities.push({
-          id: amenity.id,
           amenityId: amenity.amenity.id,
           amenityName: amenity.amenity.amenityName,
           amenityDescription: amenity.amenity.amenityDescription,
