@@ -96,6 +96,33 @@ export class CancelBookingService {
 
     existingBooking.isCancelled = true;
     existingBooking.cancelledAt = new Date();
+
+    const cancelledOwnerRezData =
+      await this.bookingUtilService.cancelBookingOnOwnerRez(existingBooking);
+    if (!cancelledOwnerRezData) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+    }
+
+    if (cancelledOwnerRezData.data) {
+      if (cancelledOwnerRezData.data.status_code === 500) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_500;
+      }
+      if (cancelledOwnerRezData.data.status_code === 400) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_400;
+      }
+      if (cancelledOwnerRezData.data.status_code === 404) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_404;
+      }
+      if (cancelledOwnerRezData.data.status_code !== 200) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+      }
+    }
+
+    existingBooking.ownerRezBookingId = cancelledOwnerRezData['id'];
+    if (!existingBooking.ownerRezBookingId) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_ID_NOT_FOUND;
+    }
+
     const cancelledBooking = await this.bookingRepository.save(existingBooking);
 
     await this.bookingMailService.sendBookingCancellationEmail(
