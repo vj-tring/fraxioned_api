@@ -32,6 +32,7 @@ import { PROPERTY_SPACE_IMAGE_RESPONSES } from '../commons/constants/response-co
 import { PropertySpaceImageService } from '../service/property-space-image.service';
 import { DeletePropertySpaceImagesDto } from '../dto/requests/property-space-image/delete-by-ids-request.dto';
 import { validateFile } from '../utils/fileUploadValidation.Util';
+import { PropertyAdditionalImage } from '../entities/property-additional-image.entity';
 
 @ApiTags('Property Space Images')
 @Controller('v1/property-space-images')
@@ -207,8 +208,11 @@ export class PropertySpaceImageController {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySpaceImage[];
-    statusCode: HttpStatus;
+    data?: {
+      propertySpaceImages: PropertySpaceImage[];
+      propertyAdditionalImages: PropertyAdditionalImage[];
+    };
+    statusCode: number;
   }> {
     try {
       const result =

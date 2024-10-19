@@ -18,6 +18,8 @@ import { PropertySpaceImage } from '../entities/property-space-image.entity';
 import { getMaxFileCount } from '../utils/image-file.utils';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { PropertySpaceService } from './property-space.service';
+import { PropertyAdditionalImageService } from './property-additional-image.service';
+import { PropertyAdditionalImage } from '../entities/property-additional-image.entity';
 
 @Injectable()
 export class PropertySpaceImageService {
@@ -32,6 +34,8 @@ export class PropertySpaceImageService {
     private readonly logger: LoggerService,
     @Inject(forwardRef(() => PropertySpaceService))
     private readonly propertySpaceService: PropertySpaceService,
+    @Inject(forwardRef(() => PropertyAdditionalImageService))
+    private readonly propertyAdditionalImageService: PropertyAdditionalImageService,
   ) {}
 
   async getImageCountForPropertyFromPropertySpaceImage(
@@ -276,7 +280,10 @@ export class PropertySpaceImageService {
   async findPropertySpaceImagesByPropertyId(propertyId: number): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySpaceImage[];
+    data?: {
+      propertySpaceImages: PropertySpaceImage[];
+      propertyAdditionalImages: PropertyAdditionalImage[];
+    };
     statusCode: number;
   }> {
     try {
@@ -307,25 +314,31 @@ export class PropertySpaceImageService {
         },
       });
 
-      if (propertySpaceImages.length === 0) {
-        this.logger.log(
-          `No property space images found for property ID ${propertyId}`,
+      const propertyAdditionalImages =
+        await this.propertyAdditionalImageService.findAllPropertyAdditionalImagesByPropertyId(
+          propertyId,
         );
-        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND();
+      if (
+        propertySpaceImages.length === 0 &&
+        propertyAdditionalImages.length === 0
+      ) {
+        this.logger.log(`No property images are found`);
+        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_IMAGES_NOT_FOUND();
       }
 
       this.logger.log(
-        `Retrieved ${propertySpaceImages.length} property space images for property ID ${propertyId}`,
+        `Retrieved ${propertySpaceImages.length} property space images and ${propertyAdditionalImages.length} property additional images`,
       );
-      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_FETCHED(
+      return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_IMAGES_FETCHED(
         propertySpaceImages,
+        propertyAdditionalImages,
       );
     } catch (error) {
       this.logger.error(
-        `Error retrieving property space images for property ID ${propertyId}: ${error.message} - ${error.stack}`,
+        `Error retrieving property images for property ID ${propertyId}: ${error.message} - ${error.stack}`,
       );
       throw new HttpException(
-        'An error occurred while retrieving property space images',
+        'An error occurred while retrieving property images',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
