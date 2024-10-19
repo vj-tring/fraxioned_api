@@ -27,14 +27,16 @@ export class PropertySpaceImageService {
     @InjectRepository(PropertySpace)
     private readonly propertySpaceRepository: Repository<PropertySpace>,
     @InjectRepository(User)
-    @Inject(forwardRef(() => PropertySpaceService))
     private readonly userRepository: Repository<User>,
     private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
+    @Inject(forwardRef(() => PropertySpaceService))
     private readonly propertySpaceService: PropertySpaceService,
   ) {}
 
-  async getImageCountForProperty(propertyId: number): Promise<number> {
+  async getImageCountForPropertyFromPropertySpaceImage(
+    propertyId: number,
+  ): Promise<number> {
     const imageCount = await this.propertySpaceImageRepository
       .createQueryBuilder('fpsi')
       .innerJoin('fpsi.propertySpace', 'fps')
@@ -102,7 +104,7 @@ export class PropertySpaceImageService {
 
       const propertyId = existingPropertySpace.property.id;
       const existingImageCount =
-        await this.getImageCountForProperty(propertyId);
+        await this.getImageCountForPropertyFromPropertySpaceImage(propertyId);
       const maxFileCount = getMaxFileCount();
 
       if (
@@ -408,10 +410,16 @@ export class PropertySpaceImageService {
       const propertySpaceImage =
         await this.propertySpaceImageRepository.findOne({
           where: { id },
-          relations: ['propertySpace', 'createdBy', 'updatedBy'],
+          relations: [
+            'propertySpace',
+            'propertySpace.property',
+            'createdBy',
+            'updatedBy',
+          ],
           select: {
             createdBy: { id: true },
             updatedBy: { id: true },
+            propertySpace: { id: true },
           },
         });
 
@@ -447,13 +455,13 @@ export class PropertySpaceImageService {
       }
 
       let imageUrlLocation = propertySpaceImage.url;
-
+      const propertyId = propertySpaceImage.propertySpace.property.id;
       if (updatePropertySpaceImageDto.imageFile) {
+        const folderName = `properties_media/${propertyId}/property_space_images/${propertySpaceImage.propertySpace.id}`;
         const fileExtension = updatePropertySpaceImageDto.imageFile.originalname
           .split('.')
           .pop();
-        const folderName = `properties_media/${propertySpaceImage.propertySpace.id}/property_space_images/${propertySpaceImage.id}`;
-        const fileName = `property_space_${propertySpaceImage.id}.${fileExtension}`;
+        const fileName = `property_space_${id}.${fileExtension}`;
 
         let s3Key = '';
         if (imageUrlLocation) {
