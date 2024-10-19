@@ -51,18 +51,21 @@ export class PropertySpaceAmenitiesController {
   }
 
   @Get()
-  async getAllPropertyAmenities(): Promise<{
-    success: boolean;
-    message: string;
-    data?: {
-      amenityGroup: {
-        id: number;
-        name: string;
-        amenities: PropertySpaceAmenities[];
-      }[];
-    };
-    statusCode: HttpStatus;
-  }> {
+  async getAllPropertyAmenities(): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: HttpStatus;
+      }
+    | object
+  > {
     try {
       const result =
         await this.propertyAmenitiesService.findAllPropertyAmenities();
@@ -95,18 +98,21 @@ export class PropertySpaceAmenitiesController {
   }
 
   @Get('property/:id')
-  async getAmenitiesByPropertyId(@Param('id') id: number): Promise<{
-    success: boolean;
-    message: string;
-    data?: {
-      amenityGroup: {
-        id: number;
-        name: string;
-        amenities: PropertySpaceAmenities[];
-      }[];
-    };
-    statusCode: HttpStatus;
-  }> {
+  async getAmenitiesByPropertyId(@Param('id') id: number): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: HttpStatus;
+      }
+    | object
+  > {
     try {
       const result =
         await this.propertyAmenitiesService.findAmenitiesByPropertyId(id);
@@ -122,18 +128,21 @@ export class PropertySpaceAmenitiesController {
   @Get('property-space/:propertySpaceId')
   async getAmenitiesByPropertySpaceId(
     @Param('propertySpaceId') propertySpaceId: number,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data?: {
-      amenityGroup: {
-        id: number;
-        name: string;
-        amenities: PropertySpaceAmenities[];
-      }[];
-    };
-    statusCode: HttpStatus;
-  }> {
+  ): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: HttpStatus;
+      }
+    | object
+  > {
     try {
       const result =
         await this.propertyAmenitiesService.findAmenitiesByPropertySpaceId(

@@ -59,11 +59,7 @@ export const PROPERTY_SPACE_AMENITY_RESPONSES = {
     success: boolean;
     message: string;
     data?: {
-      amenityGroup: {
-        id: number;
-        name: string;
-        amenities: PropertySpaceAmenities[];
-      }[];
+      amenityGroup: { id: number; name: string; amenities: object[] }[];
     };
     statusCode: number;
   } => ({
@@ -74,20 +70,12 @@ export const PROPERTY_SPACE_AMENITY_RESPONSES = {
   }),
 
   PROPERTY_SPACE_AMENITIES_FETCHED: (groupedAmenities: {
-    amenityGroup: {
-      id: number;
-      name: string;
-      amenities: PropertySpaceAmenities[];
-    }[];
+    amenityGroup: { id: number; name: string; amenities: object[] }[];
   }): {
     success: boolean;
     message: string;
     data?: {
-      amenityGroup: {
-        id: number;
-        name: string;
-        amenities: PropertySpaceAmenities[];
-      }[];
+      amenityGroup: { id: number; name: string; amenities: object[] }[];
     };
     statusCode: number;
   } => ({
