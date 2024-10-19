@@ -133,6 +133,29 @@ export class UserPropertyDocumentsController {
     }
   }
 
+  @Get('user/:userId')
+  async getUserPropertyDocumentsByUserId(
+    @Param('userId') userId: number,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: UserPropertyDocument[];
+    statusCode: HttpStatus;
+  }> {
+    try {
+      const result =
+        await this.userPropertyDocumentsService.findUserPropertyDocumentsByUserId(
+          userId,
+        );
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving user property documents by user id',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Get('userPropertyDocument/:id')
   async getByUserPropertyDocumentId(@Param('id') id: number): Promise<{
     success: boolean;
