@@ -28,7 +28,6 @@ export class UserPropertyService {
   async createUserProperty(
     createUserPropertyDto: CreateUserPropertyDTO,
   ): Promise<object> {
-    // Find the user for whom the property is being created
     const user = await this.userRepository.findOne({
       where: { id: createUserPropertyDto.user.id },
     });
@@ -38,7 +37,6 @@ export class UserPropertyService {
       );
     }
 
-    // Find the user who is creating the property
     const createdBy = await this.userRepository.findOne({
       where: { id: createUserPropertyDto.createdBy.id },
     });
@@ -48,7 +46,6 @@ export class UserPropertyService {
       );
     }
 
-    // Prepare the property details for creation
     const userPropertyDetails: UserPropertyDto[] = [
       {
         propertyID: createUserPropertyDto.property.id,
@@ -57,7 +54,6 @@ export class UserPropertyService {
       },
     ];
 
-    // Calculate the user properties
     const calculatedUserProperties = await this.calculateUserProperties(
       userPropertyDetails,
       user,
@@ -65,12 +61,10 @@ export class UserPropertyService {
       createdBy,
     );
 
-    // If there's an error in calculation, return the error
     if (!Array.isArray(calculatedUserProperties)) {
       return calculatedUserProperties;
     }
 
-    // Save each calculated user property
     const savedUserProperties: UserProperties[] = [];
     for (const userProperty of calculatedUserProperties) {
       const savedUserProperty =
@@ -78,7 +72,6 @@ export class UserPropertyService {
       savedUserProperties.push(savedUserProperty);
     }
 
-    // Log the creation and return a success response
     this.logger.log(`User properties created`);
     return USER_PROPERTY_RESPONSES.USER_PROPERTY_CREATED(savedUserProperties);
   }
@@ -122,7 +115,6 @@ export class UserPropertyService {
   async updateUserProperty(
     updateUserPropertyDto: UpdateUserPropertyDTO,
   ): Promise<object> {
-    // Find all user properties matching the user ID and property ID
     const existingUserProperties = await this.userPropertyRepository.find({
       where: {
         user: { id: updateUserPropertyDto.user.id },
@@ -131,25 +123,21 @@ export class UserPropertyService {
       relations: ['user', 'property', 'createdBy'],
     });
 
-    // If no matching user properties are found, return an error response
     if (existingUserProperties.length === 0) {
       this.logger.warn(`No user properties found for the given criteria`);
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
 
-    // Find the user who is updating the property
     const updatedBy = await this.userRepository.findOne({
       where: { id: updateUserPropertyDto.updatedBy.id },
     });
 
-    // If the updating user is not found, return an error response
     if (!updatedBy) {
       return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
         updateUserPropertyDto.updatedBy.id,
       );
     }
 
-    // Prepare the property details for recalculation
     const userPropertyDetails: UserPropertyDto[] = [
       {
         propertyID: updateUserPropertyDto.property.id,
@@ -162,7 +150,6 @@ export class UserPropertyService {
       },
     ];
 
-    // Recalculate the user property details
     const calculatedUserProperties = await this.calculateUserProperties(
       userPropertyDetails,
       existingUserProperties[0].user,
@@ -170,7 +157,6 @@ export class UserPropertyService {
       updatedBy,
     );
 
-    // If there's an error in calculation, return the error response
     if (!Array.isArray(calculatedUserProperties)) {
       this.logger.error(
         `Error calculating properties: ${JSON.stringify(calculatedUserProperties)}`,
@@ -178,37 +164,30 @@ export class UserPropertyService {
       return calculatedUserProperties;
     }
 
-    // Start a transaction
     const queryRunner =
       this.userPropertyRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // Remove existing user properties
       await queryRunner.manager.remove(existingUserProperties);
 
-      // Insert newly calculated user properties
       const insertedProperties = await queryRunner.manager.save(
         UserProperties,
         calculatedUserProperties,
       );
 
-      // Commit the transaction
       await queryRunner.commitTransaction();
 
-      // Log the number of updated properties and return a success response
       this.logger.log(`${insertedProperties.length} user properties updated`);
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
         insertedProperties,
       );
     } catch (error) {
-      // If there's an error, rollback the transaction
       await queryRunner.rollbackTransaction();
       this.logger.error(`Error updating user properties: ${error.message}`);
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATE_FAILED();
     } finally {
-      // Release the query runner
       await queryRunner.release();
     }
   }
@@ -217,7 +196,6 @@ export class UserPropertyService {
     userId: number,
     propertyId: number,
   ): Promise<object> {
-    // Find all user properties matching the user ID and property ID
     const userProperties = await this.userPropertyRepository.find({
       where: {
         user: { id: userId },
@@ -226,7 +204,6 @@ export class UserPropertyService {
       relations: ['user', 'property'],
     });
 
-    // If no matching user properties are found, return an error response
     if (userProperties.length === 0) {
       this.logger.warn(
         `No user properties found for user ID ${userId} and property ID ${propertyId}`,
@@ -234,13 +211,11 @@ export class UserPropertyService {
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
 
-    // For each found user property, set the user to null and save
     for (const userProperty of userProperties) {
       userProperty.user = null;
       await this.userPropertyRepository.save(userProperty);
     }
 
-    // Log the update and return a success response
     this.logger.log(
       `User properties for user ID ${userId} and property ID ${propertyId} updated to have null user`,
     );
@@ -259,7 +234,6 @@ export class UserPropertyService {
     for (const propertyDetail of userPropertyDetails) {
       const propertyId = propertyDetail.propertyID;
 
-      // Find the property and its details
       const userProperty = await this.propertyRepository.findOne({
         where: { id: propertyId },
       });
@@ -267,7 +241,6 @@ export class UserPropertyService {
         where: { id: propertyId },
       });
 
-      // If property or details not found, return an error
       if (!userProperty || !userPropertyDetails) {
         this.logger.error(
           `Property or detail not found with ID: ${propertyId}`,
@@ -277,7 +250,6 @@ export class UserPropertyService {
           : USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(propertyId);
       }
 
-      // Check if there are enough remaining shares
       if (propertyDetail.noOfShares > userProperty.propertyRemainingShare) {
         this.logger.error(
           `Not enough remaining shares for property ID: ${propertyId}`,
@@ -288,11 +260,9 @@ export class UserPropertyService {
         );
       }
 
-      // Update remaining shares
       userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
       await this.propertyRepository.save(userProperty);
 
-      // Calculate allotted nights for different seasons and types
       const peakAllottedNights = this.calculateAllottedNights(
         propertyDetail.noOfShares,
         userPropertyDetails.peakSeasonAllottedNights,
@@ -310,7 +280,6 @@ export class UserPropertyService {
         userPropertyDetails.offSeasonAllottedHolidayNights,
       );
 
-      // Rate the nights based on acquisition date
       const ratedPeakAllottedNights = this.rateNights(
         peakAllottedNights,
         new Date(propertyDetail.acquisitionDate),
@@ -320,13 +289,11 @@ export class UserPropertyService {
         new Date(propertyDetail.acquisitionDate),
       );
 
-      // Calculate maximum stay length
       const maximumStayLength = Math.min(
         14 + (propertyDetail.noOfShares - 1) * 7,
         28,
       );
 
-      // Create user property entities for the next 4 years
       for (let yearOffset = 0; yearOffset <= 3; yearOffset++) {
         const year = currentYear + yearOffset;
         const isCurrentYear = year === currentYear;
