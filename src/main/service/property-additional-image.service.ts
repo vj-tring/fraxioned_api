@@ -26,6 +26,7 @@ export class PropertyAdditionalImageService {
     private readonly propertyAdditionalImageRepository: Repository<PropertyAdditionalImage>,
     private readonly userService: UserService,
     private readonly s3UtilsService: S3UtilsService,
+    @Inject(forwardRef(() => PropertiesService))
     private readonly propertyService: PropertiesService,
     @Inject(forwardRef(() => PropertySpaceImageService))
     private readonly propertySpaceImageService: PropertySpaceImageService,

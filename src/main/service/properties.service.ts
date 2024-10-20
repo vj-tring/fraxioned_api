@@ -1,8 +1,10 @@
 import {
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoggerService } from './logger.service';
@@ -27,6 +29,12 @@ import { ApiResponse } from '../commons/response-body/common.responses';
 import { PROPERTY_RESPONSES } from '../commons/constants/response-constants/property.constant';
 import { S3UtilsService } from './s3-utils.service';
 import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
+import { PropertySpaceService } from './property-space.service';
+import { PropertyAdditionalImageService } from './property-additional-image.service';
+import { PropertySpace } from '../entities/property-space.entity';
+import { FindPropertyImagesData } from '../dto/responses/find-property-images-response.dto';
+import { SpaceDTO } from '../dto/responses/space-response.dto';
+import { PropertySpaceImageDTO } from '../dto/responses/property-space-image-response.dto';
 
 @Injectable()
 export class PropertiesService {
@@ -41,6 +49,10 @@ export class PropertiesService {
     private userRepository: Repository<User>,
     private readonly logger: LoggerService,
     private readonly s3UtilsService: S3UtilsService,
+    @Inject(forwardRef(() => PropertySpaceService))
+    private readonly propertySpaceService: PropertySpaceService,
+    @Inject(forwardRef(() => PropertyAdditionalImageService))
+    private readonly propertyAdditionalImageService: PropertyAdditionalImageService,
   ) {}
   private async shouldApplyPropertyNameFilter(
     userId: number,
@@ -594,6 +606,89 @@ export class PropertiesService {
       }
       throw new HttpException(
         'An error occurred while fetching properties with details for the user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findPropertyImagesByPropertyId(
+    propertyId: number,
+  ): Promise<ApiResponse<FindPropertyImagesData>> {
+    try {
+      const propertySpaces =
+        await this.propertySpaceService.findAllPropertySpacesByPropertyId(
+          propertyId,
+        );
+
+      if (propertySpaces.length === 0) {
+        return this.propertySpaceService.handlePropertySpacesNotFound();
+      }
+
+      const additionalImages =
+        await this.propertyAdditionalImageService.findAllPropertyAdditionalImagesByPropertyId(
+          propertyId,
+        );
+
+      const groupedSpaces = this.groupPropertySpacesByType(propertySpaces);
+
+      return PROPERTY_RESPONSES.PROPERTY_IMAGES_FETCHED(
+        groupedSpaces,
+        additionalImages,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property images for property ID ${propertyId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the property images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  private groupPropertySpacesByType(
+    propertySpaces: PropertySpace[],
+  ): SpaceDTO[] {
+    try {
+      const spaceMap: Record<number, SpaceDTO> = {};
+
+      propertySpaces.forEach((space) => {
+        const spaceTypeId = space.space.id;
+
+        if (!spaceMap[spaceTypeId]) {
+          spaceMap[spaceTypeId] = {
+            id: space.space.id,
+            name: space.space.name,
+            s3_url: space.space.s3_url,
+            isBedTypeAllowed: space.space.isBedTypeAllowed,
+            isBathroomTypeAllowed: space.space.isBathroomTypeAllowed,
+            propertySpaces: [],
+          };
+        }
+
+        const propertySpaceImages: PropertySpaceImageDTO[] =
+          space.propertySpaceImages.map((image) => ({
+            id: image.id,
+            description: image.description,
+            url: image.url,
+            displayOrder: image.displayOrder,
+          }));
+
+        spaceMap[spaceTypeId].propertySpaces.push({
+          id: space.id,
+          instanceNumber: space.instanceNumber,
+          spaceInstanceName: `${space.space.name} ${space.instanceNumber}`,
+          propertySpaceImages,
+        });
+      });
+
+      return Object.values(spaceMap);
+    } catch (error) {
+      this.logger.error(
+        `Error while grouping property spaces by type: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while grouping property spaces by type',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

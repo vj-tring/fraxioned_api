@@ -15,7 +15,7 @@ import { PropertySpaceImageModule } from './property-space-image.module';
     TypeOrmModule.forFeature([PropertyAdditionalImage]),
     UserModule,
     S3UtilsModule,
-    PropertiesModule,
+    forwardRef(() => PropertiesModule),
     forwardRef(() => PropertySpaceImageModule),
     LoggerModule,
     AuthenticationModule,

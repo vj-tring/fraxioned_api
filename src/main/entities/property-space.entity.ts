@@ -6,10 +6,12 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Space } from './space.entity';
 import { User } from './user.entity';
 import { Property } from './property.entity';
+import { PropertySpaceImage } from './property-space-image.entity';
 
 @Entity('fxn_property_space')
 export class PropertySpace {
@@ -45,4 +47,7 @@ export class PropertySpace {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
+
+  @OneToMany(() => PropertySpaceImage, (image) => image.propertySpace)
+  propertySpaceImages: PropertySpaceImage[];
 }

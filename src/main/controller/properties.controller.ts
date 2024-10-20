@@ -26,6 +26,8 @@ import { CreatePropertiesDto } from '../dto/requests/property/create-property.dt
 import { UpdatePropertiesDto } from '../dto/requests/property/update-properties.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { validateFile } from '../utils/fileUploadValidation.Util';
+import { ApiResponse } from '../commons/response-body/common.responses';
+import { FindPropertyImagesData } from '../dto/responses/find-property-images-response.dto';
 
 @ApiTags('Properties')
 @Controller('v1/properties')
@@ -195,6 +197,22 @@ export class PropertiesController {
     } catch (error) {
       throw new HttpException(
         'An error occurred while fetching properties with details for the user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('property/:id/images')
+  async getPropertyImagesById(
+    @Param('id') propertyId: number,
+  ): Promise<ApiResponse<FindPropertyImagesData>> {
+    try {
+      const result =
+        await this.propertiesService.findPropertyImagesByPropertyId(propertyId);
+      return result;
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while retrieving the property images',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

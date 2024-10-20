@@ -36,6 +36,7 @@ export class PropertySpaceService {
     @Inject(forwardRef(() => PropertySpaceImageService))
     private readonly propertySpaceImageService: PropertySpaceImageService,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => PropertiesService))
     private readonly propertyService: PropertiesService,
 
     private readonly logger: LoggerService,
@@ -61,6 +62,9 @@ export class PropertySpaceService {
         space: {
           id: true,
           name: true,
+          s3_url: true,
+          isBedTypeAllowed: true,
+          isBathroomTypeAllowed: true,
         },
       },
     });
@@ -83,6 +87,7 @@ export class PropertySpaceService {
         space: {
           id: true,
           name: true,
+          s3_url: true,
           isBedTypeAllowed: true,
           isBathroomTypeAllowed: true,
         },
@@ -107,6 +112,7 @@ export class PropertySpaceService {
         space: {
           id: true,
           name: true,
+          s3_url: true,
           isBedTypeAllowed: true,
           isBathroomTypeAllowed: true,
         },
@@ -125,7 +131,13 @@ export class PropertySpaceService {
     id: number,
   ): Promise<PropertySpace[] | null> {
     return await this.propertySpaceRepository.find({
-      relations: ['property', 'space', 'createdBy', 'updatedBy'],
+      relations: [
+        'property',
+        'space',
+        'createdBy',
+        'updatedBy',
+        'propertySpaceImages',
+      ],
       select: {
         property: {
           id: true,
@@ -134,6 +146,7 @@ export class PropertySpaceService {
         space: {
           id: true,
           name: true,
+          s3_url: true,
           isBedTypeAllowed: true,
           isBathroomTypeAllowed: true,
         },
@@ -186,7 +199,7 @@ export class PropertySpaceService {
     return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACE_NOT_FOUND(id);
   }
 
-  async handlePropertySpacesNotFound(): Promise<ApiResponse<PropertySpace[]>> {
+  async handlePropertySpacesNotFound(): Promise<ApiResponse<null>> {
     this.logger.error(`No property spaces are available`);
     return PROPERTY_SPACE_RESPONSES.PROPERTY_SPACES_NOT_FOUND();
   }
