@@ -34,6 +34,11 @@ export async function calculateUserProperties(
       return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
     }
 
+    if (!userPropertyDetails) {
+      this.logger.error(`Property detail not found with ID: ${propertyId}`);
+      return USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(propertyId);
+    }
+
     if (propertyDetail.noOfShares > userProperty.propertyRemainingShare) {
       logger.error(
         `Not enough remaining shares for property ID: ${propertyId}`,
@@ -78,7 +83,7 @@ export async function calculateUserProperties(
       28,
     );
 
-    for (let yearOffset = 0; yearOffset <= 2; yearOffset++) {
+    for (let yearOffset = 0; yearOffset <= 3; yearOffset++) {
       const year = currentYear + yearOffset;
       const isCurrentYear = year === currentYear;
 

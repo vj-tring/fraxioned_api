@@ -28,6 +28,7 @@ export class UserPropertyService {
   async createUserProperty(
     createUserPropertyDto: CreateUserPropertyDTO,
   ): Promise<object> {
+    // Find the user for whom the property is being created
     const user = await this.userRepository.findOne({
       where: { id: createUserPropertyDto.user.id },
     });
@@ -37,6 +38,7 @@ export class UserPropertyService {
       );
     }
 
+    // Find the user who is creating the property
     const createdBy = await this.userRepository.findOne({
       where: { id: createUserPropertyDto.createdBy.id },
     });
@@ -46,6 +48,7 @@ export class UserPropertyService {
       );
     }
 
+    // Prepare the property details for creation
     const userPropertyDetails: UserPropertyDto[] = [
       {
         propertyID: createUserPropertyDto.property.id,
@@ -54,6 +57,7 @@ export class UserPropertyService {
       },
     ];
 
+    // Calculate the user properties
     const calculatedUserProperties = await this.calculateUserProperties(
       userPropertyDetails,
       user,
@@ -61,10 +65,12 @@ export class UserPropertyService {
       createdBy,
     );
 
+    // If there's an error in calculation, return the error
     if (!Array.isArray(calculatedUserProperties)) {
       return calculatedUserProperties;
     }
 
+    // Save each calculated user property
     const savedUserProperties: UserProperties[] = [];
     for (const userProperty of calculatedUserProperties) {
       const savedUserProperty =
@@ -72,10 +78,10 @@ export class UserPropertyService {
       savedUserProperties.push(savedUserProperty);
     }
 
+    // Log the creation and return a success response
     this.logger.log(`User properties created`);
     return USER_PROPERTY_RESPONSES.USER_PROPERTY_CREATED(savedUserProperties);
   }
-
   async getUserProperties(): Promise<object> {
     this.logger.log('Fetching all user properties');
     const userProperties = await this.userPropertyRepository.find({
@@ -181,14 +187,38 @@ export class UserPropertyService {
     );
   }
 
-  async deleteUserProperty(id: number): Promise<object> {
-    const result = await this.userPropertyRepository.delete(id);
-    if (result.affected === 0) {
-      this.logger.warn(`User property with ID ${id} not found`);
-      return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(id);
+  async deleteUserProperty(
+    userId: number,
+    propertyId: number,
+  ): Promise<object> {
+    // Find all user properties matching the user ID and property ID
+    const userProperties = await this.userPropertyRepository.find({
+      where: {
+        user: { id: userId },
+        property: { id: propertyId },
+      },
+      relations: ['user', 'property'],
+    });
+
+    // If no matching user properties are found, return an error response
+    if (userProperties.length === 0) {
+      this.logger.warn(
+        `No user properties found for user ID ${userId} and property ID ${propertyId}`,
+      );
+      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
-    this.logger.log(`User property with ID ${id} deleted`);
-    return USER_PROPERTY_RESPONSES.USER_PROPERTY_DELETED;
+
+    // For each found user property, set the user to null and save
+    for (const userProperty of userProperties) {
+      userProperty.user = null;
+      await this.userPropertyRepository.save(userProperty);
+    }
+
+    // Log the update and return a success response
+    this.logger.log(
+      `User properties for user ID ${userId} and property ID ${propertyId} updated to have null user`,
+    );
+    return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(userProperties);
   }
 
   private async calculateUserProperties(
@@ -202,6 +232,8 @@ export class UserPropertyService {
 
     for (const propertyDetail of userPropertyDetails) {
       const propertyId = propertyDetail.propertyID;
+
+      // Find the property and its details
       const userProperty = await this.propertyRepository.findOne({
         where: { id: propertyId },
       });
@@ -209,16 +241,17 @@ export class UserPropertyService {
         where: { id: propertyId },
       });
 
-      if (!userProperty) {
-        this.logger.error(`Property not found with ID: ${propertyId}`);
-        return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
+      // If property or details not found, return an error
+      if (!userProperty || !userPropertyDetails) {
+        this.logger.error(
+          `Property or detail not found with ID: ${propertyId}`,
+        );
+        return !userProperty
+          ? USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId)
+          : USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(propertyId);
       }
 
-      if (!userPropertyDetails) {
-        this.logger.error(`Property detail not found with ID: ${propertyId}`);
-        return USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(propertyId);
-      }
-
+      // Check if there are enough remaining shares
       if (propertyDetail.noOfShares > userProperty.propertyRemainingShare) {
         this.logger.error(
           `Not enough remaining shares for property ID: ${propertyId}`,
@@ -229,9 +262,11 @@ export class UserPropertyService {
         );
       }
 
+      // Update remaining shares
       userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
       await this.propertyRepository.save(userProperty);
 
+      // Calculate allotted nights for different seasons and types
       const peakAllottedNights = this.calculateAllottedNights(
         propertyDetail.noOfShares,
         userPropertyDetails.peakSeasonAllottedNights,
@@ -249,6 +284,7 @@ export class UserPropertyService {
         userPropertyDetails.offSeasonAllottedHolidayNights,
       );
 
+      // Rate the nights based on acquisition date
       const ratedPeakAllottedNights = this.rateNights(
         peakAllottedNights,
         new Date(propertyDetail.acquisitionDate),
@@ -258,12 +294,14 @@ export class UserPropertyService {
         new Date(propertyDetail.acquisitionDate),
       );
 
+      // Calculate maximum stay length
       const maximumStayLength = Math.min(
         14 + (propertyDetail.noOfShares - 1) * 7,
         28,
       );
 
-      for (let yearOffset = 0; yearOffset <= 2; yearOffset++) {
+      // Create user property entities for the next 4 years
+      for (let yearOffset = 0; yearOffset <= 3; yearOffset++) {
         const year = currentYear + yearOffset;
         const isCurrentYear = year === currentYear;
 

@@ -46,8 +46,11 @@ export class UserPropertyController {
     return this.userPropertyService.updateUserProperty(updateUserPropertyDto);
   }
 
-  @Delete('user-property/:id')
-  async deleteUserProperty(@Param('id') id: number): Promise<object> {
-    return this.userPropertyService.deleteUserProperty(id);
+  @Delete('user-property/user/:userId/property/:propertyId')
+  async deleteUserProperty(
+    @Param('userId') userId: number,
+    @Param('propertyId') propertyId: number,
+  ): Promise<object> {
+    return this.userPropertyService.deleteUserProperty(userId, propertyId);
   }
 }
