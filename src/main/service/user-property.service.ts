@@ -122,6 +122,7 @@ export class UserPropertyService {
   async updateUserProperty(
     updateUserPropertyDto: UpdateUserPropertyDTO,
   ): Promise<object> {
+    // Find all user properties matching the user ID and property ID
     const userProperties = await this.userPropertyRepository.find({
       where: {
         user: { id: updateUserPropertyDto.user.id },
@@ -130,14 +131,18 @@ export class UserPropertyService {
       relations: ['user', 'property', 'createdBy'],
     });
 
+    // If no matching user properties are found, return an error response
     if (userProperties.length === 0) {
       this.logger.warn(`No user properties found for the given criteria`);
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
 
+    // Find the user who is updating the property
     const updatedBy = await this.userRepository.findOne({
       where: { id: updateUserPropertyDto.updatedBy.id },
     });
+
+    // If the updating user is not found, return an error response
     if (!updatedBy) {
       return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
         updateUserPropertyDto.updatedBy.id,
@@ -146,7 +151,9 @@ export class UserPropertyService {
 
     const updatedUserProperties: UserProperties[] = [];
 
+    // Iterate through each found user property
     for (const userProperty of userProperties) {
+      // Prepare the property details for recalculation
       const userPropertyDetails: UserPropertyDto[] = [
         {
           propertyID: userProperty.property.id,
@@ -157,6 +164,7 @@ export class UserPropertyService {
         },
       ];
 
+      // Recalculate the user property details
       const calculatedUserProperties = await this.calculateUserProperties(
         userPropertyDetails,
         userProperty.user,
@@ -164,6 +172,7 @@ export class UserPropertyService {
         updatedBy,
       );
 
+      // If there's an error in calculation, log it and continue to the next property
       if ('status' in calculatedUserProperties) {
         this.logger.error(
           `Error updating property ${userProperty.property.id}: ${calculatedUserProperties.status}`,
@@ -171,22 +180,24 @@ export class UserPropertyService {
         continue;
       }
 
+      // Update the user property with the newly calculated values
       Object.assign(userProperty, calculatedUserProperties[0]);
       const updatedUserProperty =
         await this.userPropertyRepository.save(userProperty);
       updatedUserProperties.push(updatedUserProperty);
     }
 
+    // If no properties were updated successfully, return an error response
     if (updatedUserProperties.length === 0) {
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATE_FAILED();
     }
 
+    // Log the number of updated properties and return a success response
     this.logger.log(`${updatedUserProperties.length} user properties updated`);
     return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
       updatedUserProperties,
     );
   }
-
   async deleteUserProperty(
     userId: number,
     propertyId: number,
