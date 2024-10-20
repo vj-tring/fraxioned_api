@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { UserProperties } from 'entities/user-properties.entity';
 import { LoggerService } from 'services/logger.service';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
@@ -115,16 +115,21 @@ export class UserPropertyService {
   async updateUserProperty(
     updateUserPropertyDto: UpdateUserPropertyDTO,
   ): Promise<object> {
+    const currentYear = new Date().getFullYear();
+
     const existingUserProperties = await this.userPropertyRepository.find({
       where: {
         user: { id: updateUserPropertyDto.user.id },
         property: { id: updateUserPropertyDto.property.id },
+        year: MoreThanOrEqual(currentYear),
       },
       relations: ['user', 'property', 'createdBy'],
     });
 
     if (existingUserProperties.length === 0) {
-      this.logger.warn(`No user properties found for the given criteria`);
+      this.logger.warn(
+        `No user properties found for the given criteria in current or future years`,
+      );
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
 
@@ -179,7 +184,9 @@ export class UserPropertyService {
 
       await queryRunner.commitTransaction();
 
-      this.logger.log(`${insertedProperties.length} user properties updated`);
+      this.logger.log(
+        `${insertedProperties.length} user properties updated for current and future years`,
+      );
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
         insertedProperties,
       );
@@ -191,7 +198,6 @@ export class UserPropertyService {
       await queryRunner.release();
     }
   }
-
   async deleteUserProperty(
     userId: number,
     propertyId: number,
