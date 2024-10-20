@@ -123,7 +123,7 @@ export class UserPropertyService {
     updateUserPropertyDto: UpdateUserPropertyDTO,
   ): Promise<object> {
     // Find all user properties matching the user ID and property ID
-    const userProperties = await this.userPropertyRepository.find({
+    const existingUserProperties = await this.userPropertyRepository.find({
       where: {
         user: { id: updateUserPropertyDto.user.id },
         property: { id: updateUserPropertyDto.property.id },
@@ -132,7 +132,7 @@ export class UserPropertyService {
     });
 
     // If no matching user properties are found, return an error response
-    if (userProperties.length === 0) {
+    if (existingUserProperties.length === 0) {
       this.logger.warn(`No user properties found for the given criteria`);
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
@@ -149,55 +149,70 @@ export class UserPropertyService {
       );
     }
 
-    const updatedUserProperties: UserProperties[] = [];
+    // Prepare the property details for recalculation
+    const userPropertyDetails: UserPropertyDto[] = [
+      {
+        propertyID: updateUserPropertyDto.property.id,
+        noOfShares:
+          updateUserPropertyDto.noOfShare ??
+          existingUserProperties[0].noOfShare,
+        acquisitionDate:
+          updateUserPropertyDto.acquisitionDate ??
+          existingUserProperties[0].acquisitionDate,
+      },
+    ];
 
-    // Iterate through each found user property
-    for (const userProperty of userProperties) {
-      // Prepare the property details for recalculation
-      const userPropertyDetails: UserPropertyDto[] = [
-        {
-          propertyID: userProperty.property.id,
-          noOfShares: updateUserPropertyDto.noOfShare ?? userProperty.noOfShare,
-          acquisitionDate:
-            updateUserPropertyDto.acquisitionDate ??
-            userProperty.acquisitionDate,
-        },
-      ];
+    // Recalculate the user property details
+    const calculatedUserProperties = await this.calculateUserProperties(
+      userPropertyDetails,
+      existingUserProperties[0].user,
+      existingUserProperties[0].createdBy,
+      updatedBy,
+    );
 
-      // Recalculate the user property details
-      const calculatedUserProperties = await this.calculateUserProperties(
-        userPropertyDetails,
-        userProperty.user,
-        userProperty.createdBy,
-        updatedBy,
+    // If there's an error in calculation, return the error response
+    if (!Array.isArray(calculatedUserProperties)) {
+      this.logger.error(
+        `Error calculating properties: ${JSON.stringify(calculatedUserProperties)}`,
+      );
+      return calculatedUserProperties;
+    }
+
+    // Start a transaction
+    const queryRunner =
+      this.userPropertyRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Remove existing user properties
+      await queryRunner.manager.remove(existingUserProperties);
+
+      // Insert newly calculated user properties
+      const insertedProperties = await queryRunner.manager.save(
+        UserProperties,
+        calculatedUserProperties,
       );
 
-      // If there's an error in calculation, log it and continue to the next property
-      if ('status' in calculatedUserProperties) {
-        this.logger.error(
-          `Error updating property ${userProperty.property.id}: ${calculatedUserProperties.status}`,
-        );
-        continue;
-      }
+      // Commit the transaction
+      await queryRunner.commitTransaction();
 
-      // Update the user property with the newly calculated values
-      Object.assign(userProperty, calculatedUserProperties[0]);
-      const updatedUserProperty =
-        await this.userPropertyRepository.save(userProperty);
-      updatedUserProperties.push(updatedUserProperty);
-    }
-
-    // If no properties were updated successfully, return an error response
-    if (updatedUserProperties.length === 0) {
+      // Log the number of updated properties and return a success response
+      this.logger.log(`${insertedProperties.length} user properties updated`);
+      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
+        insertedProperties,
+      );
+    } catch (error) {
+      // If there's an error, rollback the transaction
+      await queryRunner.rollbackTransaction();
+      this.logger.error(`Error updating user properties: ${error.message}`);
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATE_FAILED();
+    } finally {
+      // Release the query runner
+      await queryRunner.release();
     }
-
-    // Log the number of updated properties and return a success response
-    this.logger.log(`${updatedUserProperties.length} user properties updated`);
-    return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
-      updatedUserProperties,
-    );
   }
+
   async deleteUserProperty(
     userId: number,
     propertyId: number,
