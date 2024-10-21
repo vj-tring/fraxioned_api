@@ -141,6 +141,9 @@ export class PropertySpaceService {
         'propertySpaceBeds.spaceBedType',
         'propertySpaceBathrooms',
         'propertySpaceBathrooms.spaceBathroomType',
+        'propertySpaceAmenities',
+        'propertySpaceAmenities.amenity',
+        'propertySpaceAmenities.amenity.amenityGroup',
       ],
       select: {
         property: {

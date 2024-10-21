@@ -35,6 +35,7 @@ import { PropertySpace } from '../entities/property-space.entity';
 import { FindPropertyImagesData } from '../dto/responses/find-property-images-response.dto';
 import { PropertySpaceImageDTO } from '../dto/responses/property-space-image-response.dto';
 import { PropertySpaceDTO } from '../dto/responses/property-space-response.dto';
+import { PropertySpaceTotalsDTO } from '../dto/responses/property-space-totals-response.dto';
 
 @Injectable()
 export class PropertiesService {
@@ -632,11 +633,13 @@ export class PropertiesService {
       const groupedPropertySpacesResponse =
         await this.groupPropertySpacesByType(propertySpaces);
 
-      const groupedPropertySpaces = groupedPropertySpacesResponse.data;
+      const { propertySpaces: groupedPropertySpaces, totals } =
+        groupedPropertySpacesResponse.data;
 
       return PROPERTY_RESPONSES.PROPERTY_IMAGES_FETCHED(
         groupedPropertySpaces,
         additionalImages,
+        totals,
       );
     } catch (error) {
       this.logger.error(
@@ -649,10 +652,17 @@ export class PropertiesService {
     }
   }
 
-  async groupPropertySpacesByType(
-    propertySpaces: PropertySpace[],
-  ): Promise<ApiResponse<PropertySpaceDTO[]>> {
+  async groupPropertySpacesByType(propertySpaces: PropertySpace[]): Promise<
+    ApiResponse<{
+      propertySpaces: PropertySpaceDTO[];
+      totals: PropertySpaceTotalsDTO;
+    }>
+  > {
     try {
+      let totalNumberOfBedrooms = 0;
+      let totalNumberOfBathrooms = 0;
+      let totalNumberOfBeds = 0;
+
       const groupedPropertySpaces: PropertySpaceDTO[] = propertySpaces.map(
         (propertySpace) => {
           const propertySpaceImages: PropertySpaceImageDTO[] =
@@ -664,25 +674,55 @@ export class PropertiesService {
             }));
 
           const propertySpaceBeds = propertySpace.propertySpaceBeds
-            .map((bed) => ({
-              propertySpaceBedId: bed.id,
-              bedType: bed.spaceBedType.bedType,
-              count: bed.count,
-              s3_image_url: bed.spaceBedType.s3_url,
-              spaceBedTypeId: bed.spaceBedType.id,
-            }))
+            .map((bed) => {
+              totalNumberOfBeds += bed.count;
+              return {
+                propertySpaceBedId: bed.id,
+                bedType: bed.spaceBedType.bedType,
+                count: bed.count,
+                s3_image_url: bed.spaceBedType.s3_url,
+                spaceBedTypeId: bed.spaceBedType.id,
+              };
+            })
             .sort((a, b) => a.spaceBedTypeId - b.spaceBedTypeId);
 
           const propertySpaceBathrooms = propertySpace.propertySpaceBathrooms
-            .map((bathroom) => ({
-              propertySpaceBathroomId: bathroom.id,
-              bathroomType: bathroom.spaceBathroomType.name,
-              count: bathroom.count,
-              s3_image_url: bathroom.spaceBathroomType.s3_url,
-              countValue: bathroom.spaceBathroomType.countValue,
-              spaceBathroomTypeId: bathroom.spaceBathroomType.id,
-            }))
+            .map((bathroom) => {
+              totalNumberOfBathrooms +=
+                bathroom.count * bathroom.spaceBathroomType.countValue;
+              return {
+                propertySpaceBathroomId: bathroom.id,
+                bathroomType: bathroom.spaceBathroomType.name,
+                count: bathroom.count,
+                s3_image_url: bathroom.spaceBathroomType.s3_url,
+                countValue: bathroom.spaceBathroomType.countValue,
+                spaceBathroomTypeId: bathroom.spaceBathroomType.id,
+              };
+            })
             .sort((a, b) => a.spaceBathroomTypeId - b.spaceBathroomTypeId);
+
+          if (propertySpace.space.name.toLowerCase() === 'bedroom') {
+            totalNumberOfBedrooms++;
+          }
+
+          const propertySpaceAmenities = propertySpace.propertySpaceAmenities
+            .map((propertySpaceAmenity) => ({
+              propertySpaceAmenityId: propertySpaceAmenity.id,
+              amenityId: propertySpaceAmenity.amenity.id,
+              amenityName: propertySpaceAmenity.amenity.amenityName,
+              amenityDescription:
+                propertySpaceAmenity.amenity.amenityDescription,
+              s3_url: propertySpaceAmenity.amenity.s3_url,
+              amenityGroupId: propertySpaceAmenity.amenity.amenityGroup.id,
+              amenityGroupName: propertySpaceAmenity.amenity.amenityGroup.name,
+            }))
+            .sort((a, b) => {
+              if (a.amenityGroupId < b.amenityGroupId) return -1;
+              if (a.amenityGroupId > b.amenityGroupId) return 1;
+              if (a.amenityId < b.amenityId) return -1;
+              if (a.amenityId > b.amenityId) return 1;
+              return 0;
+            });
 
           return {
             id: propertySpace.id,
@@ -693,6 +733,7 @@ export class PropertiesService {
             propertySpaceImages,
             propertySpaceBeds,
             propertySpaceBathrooms,
+            propertySpaceAmenities,
           };
         },
       );
@@ -704,7 +745,16 @@ export class PropertiesService {
         return a.spaceId - b.spaceId;
       });
 
-      return PROPERTY_RESPONSES.PROPERTY_SPACES_GROUPED(groupedPropertySpaces);
+      const totals = new PropertySpaceTotalsDTO(
+        totalNumberOfBedrooms,
+        totalNumberOfBathrooms,
+        totalNumberOfBeds,
+      );
+
+      return PROPERTY_RESPONSES.PROPERTY_SPACES_GROUPED(
+        groupedPropertySpaces,
+        totals,
+      );
     } catch (error) {
       this.logger.error(
         `Error while grouping property spaces by type: ${error.message} - ${error.stack}`,

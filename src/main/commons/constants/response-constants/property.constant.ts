@@ -3,6 +3,7 @@ import { PropertyAdditionalImageDTO } from 'src/main/dto/responses/property-addi
 import { PropertySpaceDTO } from 'src/main/dto/responses/property-space-response.dto';
 import { ApiResponse } from '../../response-body/common.responses';
 import { FindPropertyImagesData } from 'src/main/dto/responses/find-property-images-response.dto';
+import { PropertySpaceTotalsDTO } from 'src/main/dto/responses/property-space-totals-response.dto';
 
 export const PROPERTY_RESPONSES = {
   PROPERTY_NOT_FOUND: (
@@ -36,6 +37,7 @@ export const PROPERTY_RESPONSES = {
   PROPERTY_IMAGES_FETCHED: (
     groupedPropertySpaces: PropertySpaceDTO[],
     additionalImages: PropertyAdditionalImageDTO[],
+    totals: PropertySpaceTotalsDTO,
   ): ApiResponse<FindPropertyImagesData> => ({
     success: true,
     message: 'Property images retrieved successfully',
@@ -65,20 +67,29 @@ export const PROPERTY_RESPONSES = {
               : image.updatedBy?.id,
         },
       })),
+      totals,
     },
     statusCode: HttpStatus.OK,
   }),
+
   PROPERTY_SPACES_GROUPED: (
     groupedPropertySpaces: PropertySpaceDTO[],
+    totals: PropertySpaceTotalsDTO,
   ): {
     success: boolean;
     message: string;
-    data: PropertySpaceDTO[];
+    data: {
+      propertySpaces: PropertySpaceDTO[];
+      totals: PropertySpaceTotalsDTO;
+    };
     statusCode: HttpStatus;
   } => ({
     success: true,
     message: 'Property spaces grouped successfully',
-    data: groupedPropertySpaces,
+    data: {
+      propertySpaces: groupedPropertySpaces,
+      totals,
+    },
     statusCode: HttpStatus.OK,
   }),
 };

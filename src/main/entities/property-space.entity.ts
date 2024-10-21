@@ -14,6 +14,7 @@ import { Property } from './property.entity';
 import { PropertySpaceImage } from './property-space-image.entity';
 import { PropertySpaceBed } from './property-space-bed.entity';
 import { PropertySpaceBathroom } from './property-space-bathroom.entity';
+import { PropertySpaceAmenities } from './property-space-amenity.entity';
 
 @Entity('fxn_property_space')
 export class PropertySpace {
@@ -61,4 +62,10 @@ export class PropertySpace {
     (spaceBathroom) => spaceBathroom.propertySpace,
   )
   propertySpaceBathrooms: PropertySpaceBathroom[];
+
+  @OneToMany(
+    () => PropertySpaceAmenities,
+    (propertySpaceAmenity) => propertySpaceAmenity.propertySpace,
+  )
+  propertySpaceAmenities: PropertySpaceAmenities[];
 }
