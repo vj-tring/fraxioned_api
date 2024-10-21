@@ -51,6 +51,6 @@ export class UserPropertyController {
     @Param('userId') userId: number,
     @Param('propertyId') propertyId: number,
   ): Promise<object> {
-    return this.userPropertyService.deleteUserProperty(userId, propertyId);
+    return this.userPropertyService.softDeleteUserProperty(userId, propertyId);
   }
 }

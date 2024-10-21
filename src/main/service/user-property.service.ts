@@ -1,45 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
 import { UserProperties } from 'entities/user-properties.entity';
 import { LoggerService } from 'services/logger.service';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { CreateUserPropertyDTO } from '../dto/requests/user-property/create-user-property.dto';
 import { UpdateUserPropertyDTO } from '../dto/requests/user-property/update-user-property.dto';
 import { User } from 'src/main/entities/user.entity';
-import { Property } from 'src/main/entities/property.entity';
-import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { UserPropertyDto } from '../dto/requests/user-property/userProperty.dto';
+import { UserPropertyRepository } from '../repository/user-property.repository';
+import { PropertyRepository } from '../repository/property.repository';
+import { UserRepository } from '../repository/user.repository';
 
 @Injectable()
 export class UserPropertyService {
   constructor(
-    @InjectRepository(UserProperties)
-    private readonly userPropertyRepository: Repository<UserProperties>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Property)
-    private readonly propertyRepository: Repository<Property>,
-    @InjectRepository(PropertyDetails)
-    private readonly propertyDetailsRepository: Repository<PropertyDetails>,
+    private readonly userPropertyRepository: UserPropertyRepository,
+    private readonly userRepository: UserRepository,
+    private readonly propertyRepository: PropertyRepository,
     private readonly logger: LoggerService,
   ) {}
 
   async createUserProperty(
     createUserPropertyDto: CreateUserPropertyDTO,
   ): Promise<object> {
-    const user = await this.userRepository.findOne({
-      where: { id: createUserPropertyDto.user.id },
-    });
+    const user = await this.userRepository.findOne(
+      createUserPropertyDto.user.id,
+    );
     if (!user) {
       return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
         createUserPropertyDto.user.id,
       );
     }
 
-    const createdBy = await this.userRepository.findOne({
-      where: { id: createUserPropertyDto.createdBy.id },
-    });
+    const createdBy = await this.userRepository.findOne(
+      createUserPropertyDto.createdBy.id,
+    );
     if (!createdBy) {
       return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
         createUserPropertyDto.createdBy.id,
@@ -65,27 +59,19 @@ export class UserPropertyService {
       return calculatedUserProperties;
     }
 
-    const savedUserProperties: UserProperties[] = [];
-    for (const userProperty of calculatedUserProperties) {
-      const savedUserProperty =
-        await this.userPropertyRepository.save(userProperty);
-      savedUserProperties.push(savedUserProperty);
-    }
+    const savedUserProperties =
+      await this.userPropertyRepository.saveUserProperties(
+        calculatedUserProperties,
+      );
 
     this.logger.log(`User properties created`);
     return USER_PROPERTY_RESPONSES.USER_PROPERTY_CREATED(savedUserProperties);
   }
+
   async getUserProperties(): Promise<object> {
     this.logger.log('Fetching all user properties');
-    const userProperties = await this.userPropertyRepository.find({
-      relations: ['user', 'property', 'createdBy', 'updatedBy'],
-      select: {
-        user: { id: true },
-        property: { id: true },
-        createdBy: { id: true },
-        updatedBy: { id: true },
-      },
-    });
+    const userProperties =
+      await this.userPropertyRepository.findAllUserProperties();
     if (userProperties.length === 0) {
       this.logger.warn('No user properties found');
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
@@ -95,16 +81,8 @@ export class UserPropertyService {
 
   async getUserPropertyById(id: number): Promise<object> {
     this.logger.log(`Fetching user property with ID ${id}`);
-    const userProperty = await this.userPropertyRepository.findOne({
-      relations: ['user', 'property', 'createdBy', 'updatedBy'],
-      select: {
-        user: { id: true },
-        property: { id: true },
-        createdBy: { id: true },
-        updatedBy: { id: true },
-      },
-      where: { id },
-    });
+    const userProperty =
+      await this.userPropertyRepository.findUserPropertyById(id);
     if (!userProperty) {
       this.logger.warn(`User property with ID ${id} not found`);
       return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(id);
@@ -117,14 +95,12 @@ export class UserPropertyService {
   ): Promise<object> {
     const currentYear = new Date().getFullYear();
 
-    const existingUserProperties = await this.userPropertyRepository.find({
-      where: {
-        user: { id: updateUserPropertyDto.user.id },
-        property: { id: updateUserPropertyDto.property.id },
-        year: MoreThanOrEqual(currentYear),
-      },
-      relations: ['user', 'property', 'createdBy'],
-    });
+    const existingUserProperties =
+      await this.userPropertyRepository.findUserPropertiesForUpdate(
+        updateUserPropertyDto.user.id,
+        updateUserPropertyDto.property.id,
+        currentYear,
+      );
 
     if (existingUserProperties.length === 0) {
       this.logger.warn(
@@ -133,10 +109,9 @@ export class UserPropertyService {
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
 
-    const updatedBy = await this.userRepository.findOne({
-      where: { id: updateUserPropertyDto.updatedBy.id },
-    });
-
+    const updatedBy = await this.userRepository.findOne(
+      updateUserPropertyDto.updatedBy.id,
+    );
     if (!updatedBy) {
       return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
         updateUserPropertyDto.updatedBy.id,
@@ -169,20 +144,12 @@ export class UserPropertyService {
       return calculatedUserProperties;
     }
 
-    const queryRunner =
-      this.userPropertyRepository.manager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      await queryRunner.manager.remove(existingUserProperties);
-
-      const insertedProperties = await queryRunner.manager.save(
-        UserProperties,
-        calculatedUserProperties,
-      );
-
-      await queryRunner.commitTransaction();
+      const insertedProperties =
+        await this.userPropertyRepository.updateUserProperties(
+          existingUserProperties,
+          calculatedUserProperties,
+        );
 
       this.logger.log(
         `${insertedProperties.length} user properties updated for current and future years`,
@@ -191,24 +158,20 @@ export class UserPropertyService {
         insertedProperties,
       );
     } catch (error) {
-      await queryRunner.rollbackTransaction();
       this.logger.error(`Error updating user properties: ${error.message}`);
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATE_FAILED();
-    } finally {
-      await queryRunner.release();
     }
   }
-  async deleteUserProperty(
+
+  async softDeleteUserProperty(
     userId: number,
     propertyId: number,
   ): Promise<object> {
-    const userProperties = await this.userPropertyRepository.find({
-      where: {
-        user: { id: userId },
-        property: { id: propertyId },
-      },
-      relations: ['user', 'property'],
-    });
+    const userProperties =
+      await this.userPropertyRepository.findUserPropertiesForDelete(
+        userId,
+        propertyId,
+      );
 
     if (userProperties.length === 0) {
       this.logger.warn(
@@ -217,15 +180,17 @@ export class UserPropertyService {
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
 
-    for (const userProperty of userProperties) {
-      userProperty.user = null;
-      await this.userPropertyRepository.save(userProperty);
-    }
+    const updatedUserProperties =
+      await this.userPropertyRepository.removePropertyForUserByUserId(
+        userProperties,
+      );
 
     this.logger.log(
       `User properties for user ID ${userId} and property ID ${propertyId} updated to have null user`,
     );
-    return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(userProperties);
+    return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
+      updatedUserProperties,
+    );
   }
 
   private async calculateUserProperties(
@@ -240,12 +205,10 @@ export class UserPropertyService {
     for (const propertyDetail of userPropertyDetails) {
       const propertyId = propertyDetail.propertyID;
 
-      const userProperty = await this.propertyRepository.findOne({
-        where: { id: propertyId },
-      });
-      const userPropertyDetails = await this.propertyDetailsRepository.findOne({
-        where: { id: propertyId },
-      });
+      const userProperty =
+        await this.propertyRepository.findProperty(propertyId);
+      const userPropertyDetails =
+        await this.propertyRepository.findPropertyDetails(propertyId);
 
       if (!userProperty || !userPropertyDetails) {
         this.logger.error(
@@ -267,7 +230,7 @@ export class UserPropertyService {
       }
 
       userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
-      await this.propertyRepository.save(userProperty);
+      await this.propertyRepository.saveProperty(userProperty);
 
       const peakAllottedNights = this.calculateAllottedNights(
         propertyDetail.noOfShares,
