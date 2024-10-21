@@ -663,6 +663,27 @@ export class PropertiesService {
               displayOrder: image.displayOrder,
             }));
 
+          const propertySpaceBeds = propertySpace.propertySpaceBeds
+            .map((bed) => ({
+              propertySpaceBedId: bed.id,
+              bedType: bed.spaceBedType.bedType,
+              count: bed.count,
+              s3_image_url: bed.spaceBedType.s3_url,
+              spaceBedTypeId: bed.spaceBedType.id,
+            }))
+            .sort((a, b) => a.spaceBedTypeId - b.spaceBedTypeId);
+
+          const propertySpaceBathrooms = propertySpace.propertySpaceBathrooms
+            .map((bathroom) => ({
+              propertySpaceBathroomId: bathroom.id,
+              bathroomType: bathroom.spaceBathroomType.name,
+              count: bathroom.count,
+              s3_image_url: bathroom.spaceBathroomType.s3_url,
+              countValue: bathroom.spaceBathroomType.countValue,
+              spaceBathroomTypeId: bathroom.spaceBathroomType.id,
+            }))
+            .sort((a, b) => a.spaceBathroomTypeId - b.spaceBathroomTypeId);
+
           return {
             id: propertySpace.id,
             propertySpaceName: `${propertySpace.space.name} ${propertySpace.instanceNumber}`,
@@ -670,6 +691,8 @@ export class PropertiesService {
             spaceId: propertySpace.space.id,
             spaceName: propertySpace.space.name,
             propertySpaceImages,
+            propertySpaceBeds,
+            propertySpaceBathrooms,
           };
         },
       );

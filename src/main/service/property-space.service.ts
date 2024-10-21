@@ -137,6 +137,10 @@ export class PropertySpaceService {
         'createdBy',
         'updatedBy',
         'propertySpaceImages',
+        'propertySpaceBeds',
+        'propertySpaceBeds.spaceBedType',
+        'propertySpaceBathrooms',
+        'propertySpaceBathrooms.spaceBathroomType',
       ],
       select: {
         property: {
