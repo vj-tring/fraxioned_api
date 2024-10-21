@@ -11,6 +11,7 @@ import { PropertyDetails } from '../entities/property-details.entity';
 import { UserPropertyRepository } from '../repository/user-property.repository';
 import { UserRepository } from '../repository/user.repository';
 import { PropertyRepository } from '../repository/property.repository';
+import { PropertyDetailsRepository } from '../repository/property-details.repository';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PropertyRepository } from '../repository/property.repository';
     UserPropertyRepository,
     UserRepository,
     PropertyRepository,
+    PropertyDetailsRepository,
   ],
   exports: [UserPropertyService],
 })

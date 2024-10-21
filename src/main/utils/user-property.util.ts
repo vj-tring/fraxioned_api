@@ -1,42 +1,37 @@
-import { Repository } from 'typeorm';
 import { User } from 'src/main/entities/user.entity';
-import { Property } from 'src/main/entities/property.entity';
-import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { UserProperties } from 'src/main/entities/user-properties.entity';
 import { LoggerService } from 'src/main/service/logger.service';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { UserPropertyDto } from '../dto/requests/user-property/userProperty.dto';
+import { PropertyRepository } from '../repository/property.repository';
+import { UserPropertyRepository } from '../repository/user-property.repository';
+import { PropertyDetailsRepository } from '../repository/property-details.repository';
 
-export async function calculateUserProperties(
+export async function calculateAvailableNightsForUserByProperty(
   userPropertyDetails: UserPropertyDto[],
   user: User,
-  createdByUser: User,
-  updatedByUser: User,
-  propertyRepository: Repository<Property>,
-  propertyDetailsRepository: Repository<PropertyDetails>,
-  userPropertyRepository: Repository<UserProperties>,
+  propertyRepository: PropertyRepository,
+  propertyDetailsRepository: PropertyDetailsRepository,
+  userPropertyRepository: UserPropertyRepository,
   logger: LoggerService,
+  createdByUser?: User,
+  updatedByUser?: User,
 ): Promise<UserProperties[] | object> {
   const currentYear = new Date().getFullYear();
   const userPropertyEntities: UserProperties[] = [];
 
   for (const propertyDetail of userPropertyDetails) {
     const propertyId = propertyDetail.propertyID;
-    const userProperty = await propertyRepository.findOne({
-      where: { id: propertyId },
-    });
-    const userPropertyDetails = await propertyDetailsRepository.findOne({
-      where: { id: propertyId },
-    });
 
-    if (!userProperty) {
-      logger.error(`Property not found with ID: ${propertyId}`);
-      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
-    }
+    const userProperty = await propertyRepository.findProperty(propertyId);
+    const userPropertyDetails =
+      await propertyDetailsRepository.findOne(propertyId);
 
-    if (!userPropertyDetails) {
-      this.logger.error(`Property detail not found with ID: ${propertyId}`);
-      return USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(propertyId);
+    if (!userProperty || !userPropertyDetails) {
+      logger.error(`Property or detail not found with ID: ${propertyId}`);
+      return !userProperty
+        ? USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId)
+        : USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(propertyId);
     }
 
     if (propertyDetail.noOfShares > userProperty.propertyRemainingShare) {
@@ -50,21 +45,21 @@ export async function calculateUserProperties(
     }
 
     userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
-    await propertyRepository.save(userProperty);
+    await propertyRepository.saveProperty(userProperty);
 
-    const peakAllottedNights = calculateAllottedNights(
+    const peakAllottedNights = calculateAllottedNightsForUser(
       propertyDetail.noOfShares,
       userPropertyDetails.peakSeasonAllottedNights,
     );
-    const offAllottedNights = calculateAllottedNights(
+    const offAllottedNights = calculateAllottedNightsForUser(
       propertyDetail.noOfShares,
       userPropertyDetails.offSeasonAllottedNights,
     );
-    const peakAllottedHolidayNights = calculateAllottedNights(
+    const peakAllottedHolidayNights = calculateAllottedNightsForUser(
       propertyDetail.noOfShares,
       userPropertyDetails.peakSeasonAllottedHolidayNights,
     );
-    const offAllottedHolidayNights = calculateAllottedNights(
+    const offAllottedHolidayNights = calculateAllottedNightsForUser(
       propertyDetail.noOfShares,
       userPropertyDetails.offSeasonAllottedHolidayNights,
     );
@@ -143,7 +138,7 @@ export async function calculateUserProperties(
   return userPropertyEntities;
 }
 
-function calculateAllottedNights(
+function calculateAllottedNightsForUser(
   noOfShares: number,
   baseAllottedNights: number,
 ): number {

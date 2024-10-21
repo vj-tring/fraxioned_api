@@ -11,8 +11,14 @@ export class UserRepository {
   ) {}
 
   async findOne(id: number): Promise<User | undefined> {
-    return this.repository.findOne({
-      where: { id },
-    });
+    return this.repository.findOne({ where: { id } });
+  }
+
+  create(userData: Partial<User>): User {
+    return this.repository.create(userData);
+  }
+
+  async save(user: User): Promise<User> {
+    return this.repository.save(user);
   }
 }

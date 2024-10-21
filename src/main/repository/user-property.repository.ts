@@ -13,7 +13,9 @@ export class UserPropertyRepository {
   create(userPropertyData: Partial<UserProperties>): UserProperties {
     return this.repository.create(userPropertyData);
   }
-
+  async save(userProperty: UserProperties): Promise<UserProperties> {
+    return this.repository.save(userProperty);
+  }
   async saveUserProperties(
     userProperties: UserProperties[],
   ): Promise<UserProperties[]> {
