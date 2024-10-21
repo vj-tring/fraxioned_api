@@ -396,7 +396,10 @@ export class PropertiesService {
         }
 
         const userProperties = await this.userPropertiesRepository.find({
-          where: { property: { id: id } },
+          where: {
+            property: { id: id },
+            isActive: true,
+          },
           relations: ['user'],
         });
 
@@ -454,7 +457,10 @@ export class PropertiesService {
               });
 
             const userProperties = await this.userPropertiesRepository.find({
-              where: { property: { id: property.id } },
+              where: {
+                property: { id: property.id },
+                isActive: true,
+              },
               relations: ['user'],
             });
 
@@ -524,7 +530,10 @@ export class PropertiesService {
       }
 
       const userProperties = await this.userPropertiesRepository.find({
-        where: { user: { id: userId } },
+        where: {
+          user: { id: userId },
+          isActive: true,
+        },
         relations: ['property', 'user'],
       });
 

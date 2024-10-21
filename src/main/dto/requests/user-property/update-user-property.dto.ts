@@ -26,6 +26,9 @@ export class UpdateUserPropertyDTO {
   @IsOptional()
   acquisitionDate?: Date;
 
+  @IsOptional()
+  isActive: boolean;
+
   @ApiProperty({ example: { id: 1 } })
   @IsNotEmpty({ message: 'updatedBy is required' })
   @IsValidId({

@@ -57,6 +57,7 @@ export class UserPropertyRepository {
         user: { id: userId },
         property: { id: propertyId },
         year: MoreThanOrEqual(currentYear),
+        isActive: true,
       },
       relations: ['user', 'property', 'createdBy'],
     });
@@ -94,6 +95,7 @@ export class UserPropertyRepository {
       where: {
         user: { id: userId },
         property: { id: propertyId },
+        isActive: true,
       },
       relations: ['user', 'property'],
     });
@@ -103,7 +105,7 @@ export class UserPropertyRepository {
     userProperties: UserProperties[],
   ): Promise<UserProperties[]> {
     const updatedProperties = userProperties.map((userProperty) => {
-      userProperty.user = null;
+      userProperty.isActive = false;
       return userProperty;
     });
     return this.repository.save(updatedProperties);

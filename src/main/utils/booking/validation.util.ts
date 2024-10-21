@@ -90,6 +90,7 @@ export class BookingValidationService {
         user: { id: userId },
         property: { id: propertyId },
         year,
+        isActive: true,
       },
     });
   }
