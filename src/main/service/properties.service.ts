@@ -33,8 +33,8 @@ import { PropertySpaceService } from './property-space.service';
 import { PropertyAdditionalImageService } from './property-additional-image.service';
 import { PropertySpace } from '../entities/property-space.entity';
 import { FindPropertyImagesData } from '../dto/responses/find-property-images-response.dto';
-import { SpaceDTO } from '../dto/responses/space-response.dto';
 import { PropertySpaceImageDTO } from '../dto/responses/property-space-image-response.dto';
+import { PropertySpaceDTO } from '../dto/responses/property-space-response.dto';
 
 @Injectable()
 export class PropertiesService {
@@ -629,10 +629,13 @@ export class PropertiesService {
           propertyId,
         );
 
-      const groupedSpaces = this.groupPropertySpacesByType(propertySpaces);
+      const groupedPropertySpacesResponse =
+        await this.groupPropertySpacesByType(propertySpaces);
+
+      const groupedPropertySpaces = groupedPropertySpacesResponse.data;
 
       return PROPERTY_RESPONSES.PROPERTY_IMAGES_FETCHED(
-        groupedSpaces,
+        groupedPropertySpaces,
         additionalImages,
       );
     } catch (error) {
@@ -646,43 +649,39 @@ export class PropertiesService {
     }
   }
 
-  private groupPropertySpacesByType(
+  async groupPropertySpacesByType(
     propertySpaces: PropertySpace[],
-  ): SpaceDTO[] {
+  ): Promise<ApiResponse<PropertySpaceDTO[]>> {
     try {
-      const spaceMap: Record<number, SpaceDTO> = {};
+      const groupedPropertySpaces: PropertySpaceDTO[] = propertySpaces.map(
+        (propertySpace) => {
+          const propertySpaceImages: PropertySpaceImageDTO[] =
+            propertySpace.propertySpaceImages.map((image) => ({
+              id: image.id,
+              description: image.description,
+              url: image.url,
+              displayOrder: image.displayOrder,
+            }));
 
-      propertySpaces.forEach((space) => {
-        const spaceTypeId = space.space.id;
-
-        if (!spaceMap[spaceTypeId]) {
-          spaceMap[spaceTypeId] = {
-            id: space.space.id,
-            name: space.space.name,
-            s3_url: space.space.s3_url,
-            isBedTypeAllowed: space.space.isBedTypeAllowed,
-            isBathroomTypeAllowed: space.space.isBathroomTypeAllowed,
-            propertySpaces: [],
+          return {
+            id: propertySpace.id,
+            propertySpaceName: `${propertySpace.space.name} ${propertySpace.instanceNumber}`,
+            propertySpaceInstanceNumber: propertySpace.instanceNumber,
+            spaceId: propertySpace.space.id,
+            spaceName: propertySpace.space.name,
+            propertySpaceImages,
           };
+        },
+      );
+
+      groupedPropertySpaces.sort((a, b) => {
+        if (a.spaceId === b.spaceId) {
+          return a.propertySpaceInstanceNumber - b.propertySpaceInstanceNumber;
         }
-
-        const propertySpaceImages: PropertySpaceImageDTO[] =
-          space.propertySpaceImages.map((image) => ({
-            id: image.id,
-            description: image.description,
-            url: image.url,
-            displayOrder: image.displayOrder,
-          }));
-
-        spaceMap[spaceTypeId].propertySpaces.push({
-          id: space.id,
-          instanceNumber: space.instanceNumber,
-          spaceInstanceName: `${space.space.name} ${space.instanceNumber}`,
-          propertySpaceImages,
-        });
+        return a.spaceId - b.spaceId;
       });
 
-      return Object.values(spaceMap);
+      return PROPERTY_RESPONSES.PROPERTY_SPACES_GROUPED(groupedPropertySpaces);
     } catch (error) {
       this.logger.error(
         `Error while grouping property spaces by type: ${error.message} - ${error.stack}`,

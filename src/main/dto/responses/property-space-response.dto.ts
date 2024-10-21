@@ -6,10 +6,16 @@ export class PropertySpaceDTO {
   id: number;
 
   @ApiProperty()
-  instanceNumber: number;
+  propertySpaceInstanceNumber: number;
 
   @ApiProperty()
-  spaceInstanceName: string;
+  propertySpaceName: string;
+
+  @ApiProperty()
+  spaceId: number;
+
+  @ApiProperty()
+  spaceName: string;
 
   @ApiProperty({ type: [PropertySpaceImageDTO] })
   propertySpaceImages: PropertySpaceImageDTO[];

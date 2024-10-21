@@ -1,6 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
 import { PropertyAdditionalImageDTO } from 'src/main/dto/responses/property-additional-image-response.dto';
-import { SpaceDTO } from 'src/main/dto/responses/space-response.dto';
+import { PropertySpaceDTO } from 'src/main/dto/responses/property-space-response.dto';
+import { ApiResponse } from '../../response-body/common.responses';
+import { FindPropertyImagesData } from 'src/main/dto/responses/find-property-images-response.dto';
 
 export const PROPERTY_RESPONSES = {
   PROPERTY_NOT_FOUND: (
@@ -31,30 +33,21 @@ export const PROPERTY_RESPONSES = {
     message: `Property with ID ${propertyId} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
-
   PROPERTY_IMAGES_FETCHED: (
-    groupedSpaces: SpaceDTO[],
+    groupedPropertySpaces: PropertySpaceDTO[],
     additionalImages: PropertyAdditionalImageDTO[],
-  ): {
-    success: boolean;
-    message: string;
-    data: {
-      space: SpaceDTO[];
-      propertyAdditionalImages: PropertyAdditionalImageDTO[];
-    };
-    statusCode: number;
-  } => ({
+  ): ApiResponse<FindPropertyImagesData> => ({
     success: true,
     message: 'Property images retrieved successfully',
     data: {
-      space: groupedSpaces,
+      propertySpace: groupedPropertySpaces,
       propertyAdditionalImages: additionalImages.map((image) => ({
-        createdAt: image.createdAt,
-        updatedAt: image.updatedAt,
         id: image.id,
         description: image.description,
         url: image.url,
         displayOrder: image.displayOrder,
+        createdAt: image.createdAt,
+        updatedAt: image.updatedAt,
         property: {
           id: image.property.id,
           propertyName: image.property.propertyName,
@@ -65,12 +58,27 @@ export const PROPERTY_RESPONSES = {
               ? image.createdBy
               : image.createdBy.id,
         },
-        updatedBy:
-          typeof image.updatedBy === 'number'
-            ? image.updatedBy
-            : image.updatedBy?.id,
+        updatedBy: {
+          id:
+            typeof image.updatedBy === 'number'
+              ? image.updatedBy
+              : image.updatedBy?.id,
+        },
       })),
     },
+    statusCode: HttpStatus.OK,
+  }),
+  PROPERTY_SPACES_GROUPED: (
+    groupedPropertySpaces: PropertySpaceDTO[],
+  ): {
+    success: boolean;
+    message: string;
+    data: PropertySpaceDTO[];
+    statusCode: HttpStatus;
+  } => ({
+    success: true,
+    message: 'Property spaces grouped successfully',
+    data: groupedPropertySpaces,
     statusCode: HttpStatus.OK,
   }),
 };
