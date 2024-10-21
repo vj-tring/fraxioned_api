@@ -202,8 +202,8 @@ export class PropertiesController {
     }
   }
 
-  @Get('property/:id/images')
-  async getPropertyImagesById(
+  @Get('property/:id/room-details')
+  async getRoomDetailsByPropertyId(
     @Param('id') propertyId: number,
   ): Promise<ApiResponse<FindPropertyImagesData>> {
     try {
