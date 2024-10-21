@@ -5,7 +5,7 @@ import { PropertySpaceTotalsDTO } from './property-space-totals-response.dto';
 
 export class FindPropertyImagesData {
   @ApiProperty({ type: [PropertySpaceDTO] })
-  propertySpace: PropertySpaceDTO[];
+  propertySpaces: PropertySpaceDTO[];
 
   @ApiProperty({ type: [PropertyAdditionalImageDTO] })
   propertyAdditionalImages: PropertyAdditionalImageDTO[];
