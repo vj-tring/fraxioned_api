@@ -10,13 +10,13 @@ export class PropertyRepository {
     private readonly repository: Repository<Property>,
   ) {}
 
-  async findProperty(id: number): Promise<Property | undefined> {
+  async findProperty(id: number): Promise<Property> {
     return this.repository.findOne({
       where: { id },
     });
   }
 
-  async findOne(id: number): Promise<Property | undefined> {
+  async findOne(id: number): Promise<Property> {
     return this.repository.findOne({ where: { id } });
   }
 
