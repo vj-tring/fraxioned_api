@@ -42,7 +42,7 @@ export const PROPERTY_RESPONSES = {
     success: true,
     message: 'Property room details retrieved successfully',
     data: {
-      propertySpace: groupedPropertySpaces,
+      propertySpaces: groupedPropertySpaces,
       propertyAdditionalImages: additionalImages.map((image) => ({
         id: image.id,
         description: image.description,
