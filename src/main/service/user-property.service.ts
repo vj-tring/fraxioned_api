@@ -172,12 +172,12 @@ export class UserPropertyService {
     }
   }
 
-  async softDeleteUserProperty(
+  async removePropertyForUser(
     userId: number,
     propertyId: number,
   ): Promise<object> {
     const userProperties =
-      await this.userPropertyRepository.findUserPropertiesForDelete(
+      await this.userPropertyRepository.findUserPropertiesByUserAndProperty(
         userId,
         propertyId,
       );

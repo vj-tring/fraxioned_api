@@ -86,7 +86,7 @@ export class UserPropertyRepository {
     }
   }
 
-  async findUserPropertiesForDelete(
+  async findUserPropertiesByUserAndProperty(
     userId: number,
     propertyId: number,
   ): Promise<UserProperties[]> {
