@@ -40,7 +40,7 @@ export const PROPERTY_RESPONSES = {
     totals: PropertySpaceTotalsDTO,
   ): ApiResponse<FindPropertyImagesData> => ({
     success: true,
-    message: 'Property images retrieved successfully',
+    message: 'Property room details retrieved successfully',
     data: {
       propertySpace: groupedPropertySpaces,
       propertyAdditionalImages: additionalImages.map((image) => ({

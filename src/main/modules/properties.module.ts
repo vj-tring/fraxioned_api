@@ -12,6 +12,7 @@ import { LoggerModule } from './logger.module';
 import { S3UtilsModule } from './s3-utils.module';
 import { PropertySpaceModule } from './property-space.module';
 import { PropertyAdditionalImageModule } from './property-additional-image.module';
+import { PropertySpaceAmenitiesModule } from './property-space-amenity.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PropertyAdditionalImageModule } from './property-additional-image.modul
     LoggerModule,
     PropertyDetailsModule,
     S3UtilsModule,
+    PropertySpaceAmenitiesModule,
     forwardRef(() => PropertySpaceModule),
     forwardRef(() => PropertyAdditionalImageModule),
   ],

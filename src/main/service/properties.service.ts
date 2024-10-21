@@ -36,6 +36,7 @@ import { FindPropertyImagesData } from '../dto/responses/find-property-images-re
 import { PropertySpaceImageDTO } from '../dto/responses/property-space-image-response.dto';
 import { PropertySpaceDTO } from '../dto/responses/property-space-response.dto';
 import { PropertySpaceTotalsDTO } from '../dto/responses/property-space-totals-response.dto';
+import { PropertySpaceAmenitiesService } from './property-space-amenity.service';
 
 @Injectable()
 export class PropertiesService {
@@ -54,6 +55,7 @@ export class PropertiesService {
     private readonly propertySpaceService: PropertySpaceService,
     @Inject(forwardRef(() => PropertyAdditionalImageService))
     private readonly propertyAdditionalImageService: PropertyAdditionalImageService,
+    private readonly propertySpaceAmenitiesService: PropertySpaceAmenitiesService,
   ) {}
   private async shouldApplyPropertyNameFilter(
     userId: number,
@@ -663,8 +665,8 @@ export class PropertiesService {
       let totalNumberOfBathrooms = 0;
       let totalNumberOfBeds = 0;
 
-      const groupedPropertySpaces: PropertySpaceDTO[] = propertySpaces.map(
-        (propertySpace) => {
+      const groupedPropertySpaces: PropertySpaceDTO[] = await Promise.all(
+        propertySpaces.map(async (propertySpace) => {
           const propertySpaceImages: PropertySpaceImageDTO[] =
             propertySpace.propertySpaceImages.map((image) => ({
               id: image.id,
@@ -705,24 +707,10 @@ export class PropertiesService {
             totalNumberOfBedrooms++;
           }
 
-          const propertySpaceAmenities = propertySpace.propertySpaceAmenities
-            .map((propertySpaceAmenity) => ({
-              propertySpaceAmenityId: propertySpaceAmenity.id,
-              amenityId: propertySpaceAmenity.amenity.id,
-              amenityName: propertySpaceAmenity.amenity.amenityName,
-              amenityDescription:
-                propertySpaceAmenity.amenity.amenityDescription,
-              s3_url: propertySpaceAmenity.amenity.s3_url,
-              amenityGroupId: propertySpaceAmenity.amenity.amenityGroup.id,
-              amenityGroupName: propertySpaceAmenity.amenity.amenityGroup.name,
-            }))
-            .sort((a, b) => {
-              if (a.amenityGroupId < b.amenityGroupId) return -1;
-              if (a.amenityGroupId > b.amenityGroupId) return 1;
-              if (a.amenityId < b.amenityId) return -1;
-              if (a.amenityId > b.amenityId) return 1;
-              return 0;
-            });
+          const groupedAmenities =
+            await this.propertySpaceAmenitiesService.groupAmenitiesByGroup(
+              propertySpace.propertySpaceAmenities,
+            );
 
           return {
             id: propertySpace.id,
@@ -733,9 +721,9 @@ export class PropertiesService {
             propertySpaceImages,
             propertySpaceBeds,
             propertySpaceBathrooms,
-            propertySpaceAmenities,
+            amenityGroups: groupedAmenities.amenityGroup,
           };
-        },
+        }),
       );
 
       groupedPropertySpaces.sort((a, b) => {
