@@ -11,7 +11,6 @@ import { UpdateAmenitiesDto } from '../dto/requests/amenity/update-amenities.dto
 import { AMENITY_GROUP_RESPONSES } from '../commons/constants/response-constants/amenity-group.constant';
 import { AmenityGroup } from '../entities/amenity-group.entity';
 import { S3UtilsService } from './s3-utils.service';
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 
 @Injectable()
 export class AmenitiesService {
@@ -262,40 +261,24 @@ export class AmenitiesService {
       }
       Object.assign(existingAmenity, updateAmenitiesDto);
 
+      let imageUrlLocation = await this.s3UtilsService.handleS3KeyAndImageUrl(
+        existingAmenity.s3_url,
+        !!imageFile,
+      );
+
       if (imageFile) {
         const folderName = 'general_media/images/amenities';
         const fileExtension = imageFile.originalname.split('.').pop();
         const fileName = `${existingAmenity.id}.${fileExtension}`;
-        let s3Key = '';
-        let imageUrlLocation = existingAmenity.s3_url;
-
-        if (imageUrlLocation) {
-          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
-        }
-
-        if (s3Key) {
-          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
-            const headObject =
-              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-            if (!headObject) {
-              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
-                s3Key,
-              );
-            }
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
-          }
-        }
-
         imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
           folderName,
           fileName,
           imageFile.buffer,
           imageFile.mimetype,
         );
-
-        existingAmenity.s3_url = imageUrlLocation;
       }
 
+      existingAmenity.s3_url = imageUrlLocation;
       const updatedAmenity = await this.amenityRepository.save(existingAmenity);
 
       this.logger.log(`Amenity with ID ${id} updated successfully`);
@@ -348,23 +331,11 @@ export class AmenitiesService {
         return AMENITIES_RESPONSES.AMENITY_NOT_FOUND(id);
       }
 
-      const s3Key = await this.s3UtilsService.extractS3Key(
+      await this.s3UtilsService.handleS3KeyAndImageUrl(
         existingAmenity.s3_url,
+        true,
       );
-
-      const headObject =
-        await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-      if (!headObject) {
-        return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(s3Key);
-      }
-
-      await this.s3UtilsService.deleteObjectFromS3(s3Key);
-      const result = await this.amenityRepository.delete(id);
-      if (result.affected === 0) {
-        this.logger.error(`Amenity with ID ${id} not found`);
-        return AMENITIES_RESPONSES.AMENITY_NOT_FOUND(id);
-      }
-      this.logger.log(`Amenity with ID ${id} deleted successfully`);
+      await this.amenityRepository.delete(id);
       return AMENITIES_RESPONSES.AMENITY_DELETED(id);
     } catch (error) {
       this.logger.error(
