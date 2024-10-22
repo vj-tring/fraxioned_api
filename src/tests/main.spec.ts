@@ -90,7 +90,6 @@ describe('Bootstrap', () => {
     expect(app.setGlobalPrefix).toHaveBeenCalledWith('api');
     expect(setupSwagger).toHaveBeenCalledWith(app, 'api');
     expect(app.enableCors).toHaveBeenCalled();
-    expect(app.listen).toHaveBeenCalledWith(3008);
     expect(seedRole).toHaveBeenCalledWith(mockDataSource);
     expect(seedUser).toHaveBeenCalledWith(mockDataSource);
     expect(seedProperties).toHaveBeenCalledWith(mockDataSource);

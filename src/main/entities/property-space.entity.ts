@@ -6,10 +6,15 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Space } from './space.entity';
 import { User } from './user.entity';
 import { Property } from './property.entity';
+import { PropertySpaceImage } from './property-space-image.entity';
+import { PropertySpaceBed } from './property-space-bed.entity';
+import { PropertySpaceBathroom } from './property-space-bathroom.entity';
+import { PropertySpaceAmenities } from './property-space-amenity.entity';
 
 @Entity('fxn_property_space')
 export class PropertySpace {
@@ -45,4 +50,22 @@ export class PropertySpace {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy: User;
+
+  @OneToMany(() => PropertySpaceImage, (image) => image.propertySpace)
+  propertySpaceImages: PropertySpaceImage[];
+
+  @OneToMany(() => PropertySpaceBed, (spaceBed) => spaceBed.propertySpace)
+  propertySpaceBeds: PropertySpaceBed[];
+
+  @OneToMany(
+    () => PropertySpaceBathroom,
+    (spaceBathroom) => spaceBathroom.propertySpace,
+  )
+  propertySpaceBathrooms: PropertySpaceBathroom[];
+
+  @OneToMany(
+    () => PropertySpaceAmenities,
+    (propertySpaceAmenity) => propertySpaceAmenity.propertySpace,
+  )
+  propertySpaceAmenities: PropertySpaceAmenities[];
 }

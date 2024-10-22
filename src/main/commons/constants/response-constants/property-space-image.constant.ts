@@ -1,4 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
+import { PropertyAdditionalImage } from 'src/main/entities/property-additional-image.entity';
 import { PropertySpaceImage } from 'src/main/entities/property-space-image.entity';
 
 export const PROPERTY_SPACE_IMAGE_RESPONSES = {
@@ -192,6 +193,43 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     success: true,
     message: `Property Space Image with ID ${id} updated successfully`,
     data: updatedPropertySpaceImage,
+    statusCode: HttpStatus.OK,
+  }),
+  PROPERTY_IMAGES_NOT_FOUND: (): {
+    success: boolean;
+    message: string;
+    data: {
+      propertySpaceImages: PropertySpaceImage[];
+      propertyAdditionalImages: PropertyAdditionalImage[];
+    };
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `No property images are found`,
+    data: {
+      propertySpaceImages: [],
+      propertyAdditionalImages: [],
+    },
+    statusCode: HttpStatus.OK,
+  }),
+  PROPERTY_IMAGES_FETCHED: (
+    propertySpaceImages: PropertySpaceImage[],
+    propertyAdditionalImages: PropertyAdditionalImage[],
+  ): {
+    success: boolean;
+    message: string;
+    data: {
+      propertySpaceImages: PropertySpaceImage[];
+      propertyAdditionalImages: PropertyAdditionalImage[];
+    };
+    statusCode: number;
+  } => ({
+    success: true,
+    message: `Property images fetched successfully`,
+    data: {
+      propertySpaceImages,
+      propertyAdditionalImages,
+    },
     statusCode: HttpStatus.OK,
   }),
 };
