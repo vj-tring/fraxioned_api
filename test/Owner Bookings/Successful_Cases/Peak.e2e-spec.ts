@@ -63,7 +63,7 @@ describe('Booking API Test', () => {
         throw error;
       }
     }
-    await connection.end()
+    await connection.end();
   });
   describe('Peak Season Booking', () => {
     const testCases = [
@@ -123,39 +123,37 @@ describe('Booking API Test', () => {
       {
         description:
           'Multiple short bookings are made with respect to remaining nights',
-        payload: 
-          {
-            user: { id: 2 },
-            property: { id: 1 },
-            createdBy: { id: 1 },
-            checkinDate: '2026-04-21T11:51:55.260Z',
-            checkoutDate: '2026-04-27T11:51:55.260Z',
-            noOfGuests: 10,
-            noOfPets: 2,
-            isLastMinuteBooking: false,
-            noOfAdults: 5,
-            noOfChildren: 5,
-            notes: 'None',
-          },
+        payload: {
+          user: { id: 2 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-04-21T11:51:55.260Z',
+          checkoutDate: '2026-04-27T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
+        },
         expectedMessage: 'Booking created successfully',
       },
       {
         description:
           'Multiple short bookings are made with respect to remaining nights',
-        payload: 
-          {
-            user: { id: 2 },
-            property: { id: 1 },
-            createdBy: { id: 1 },
-            checkinDate: '2026-06-21T11:51:55.260Z',
-            checkoutDate: '2026-06-26T11:51:55.260Z',
-            noOfGuests: 10,
-            noOfPets: 2,
-            isLastMinuteBooking: false,
-            noOfAdults: 5,
-            noOfChildren: 5,
-            notes: 'None',
-          },
+        payload: {
+          user: { id: 2 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-06-21T11:51:55.260Z',
+          checkoutDate: '2026-06-26T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
+        },
         expectedMessage: 'Booking created successfully',
       },
       {
