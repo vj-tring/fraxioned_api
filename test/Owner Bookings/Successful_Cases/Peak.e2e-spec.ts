@@ -32,7 +32,7 @@ describe('Booking API Test', () => {
 
   beforeEach(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/user properties dataset.sql',
+      './test/Datasets/User_Properties.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -47,7 +47,24 @@ describe('Booking API Test', () => {
       }
     }
   });
-
+  afterAll(async () => {
+    const sqlScript = fs.readFileSync(
+      './test/Datasets/Truncate_Booking_Table.sql',
+      'utf8',
+    );
+    const statements = sqlScript
+      .split(';')
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
+    for (const statement of statements) {
+      try {
+        await connection.query(statement);
+      } catch (error) {
+        throw error;
+      }
+    }
+    await connection.end()
+  });
   describe('Peak Season Booking', () => {
     const testCases = [
       {
@@ -106,7 +123,7 @@ describe('Booking API Test', () => {
       {
         description:
           'Multiple short bookings are made with respect to remaining nights',
-        payload: [
+        payload: 
           {
             user: { id: 2 },
             property: { id: 1 },
@@ -120,6 +137,12 @@ describe('Booking API Test', () => {
             noOfChildren: 5,
             notes: 'None',
           },
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Multiple short bookings are made with respect to remaining nights',
+        payload: 
           {
             user: { id: 2 },
             property: { id: 1 },
@@ -133,7 +156,6 @@ describe('Booking API Test', () => {
             noOfChildren: 5,
             notes: 'None',
           },
-        ],
         expectedMessage: 'Booking created successfully',
       },
       {
@@ -143,8 +165,8 @@ describe('Booking API Test', () => {
           user: { id: 3 },
           property: { id: 1 },
           createdBy: { id: 1 },
-          checkinDate: '2025-04-01T11:51:55.260Z',
-          checkoutDate: '2025-04-29T11:51:55.260Z',
+          checkinDate: '2025-05-01T11:51:55.260Z',
+          checkoutDate: '2025-05-22T11:51:55.260Z',
           noOfGuests: 10,
           noOfPets: 2,
           isLastMinuteBooking: false,
@@ -161,8 +183,8 @@ describe('Booking API Test', () => {
           user: { id: 4 },
           property: { id: 1 },
           createdBy: { id: 1 },
-          checkinDate: '2025-04-01T11:51:55.260Z',
-          checkoutDate: '2025-05-13T11:51:55.260Z',
+          checkinDate: '2026-05-01T11:51:55.260Z',
+          checkoutDate: '2026-05-29T11:51:55.260Z',
           noOfGuests: 10,
           noOfPets: 2,
           isLastMinuteBooking: false,

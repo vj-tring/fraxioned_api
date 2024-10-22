@@ -29,9 +29,10 @@ describe('Booking API Test', () => {
     token = session.token;
     userid = user.id;
   });
+
   beforeEach(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/user properties dataset.sql',
+      './test/Datasets/User_Properties.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -46,208 +47,187 @@ describe('Booking API Test', () => {
       }
     }
   });
+  afterAll(async () => {
+    const sqlScript = fs.readFileSync(
+      './test/Datasets/Truncate_Booking_Table.sql',
+      'utf8',
+    );
+    const statements = sqlScript
+      .split(';')
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
+    for (const statement of statements) {
+      try {
+        await connection.query(statement);
+      } catch (error) {
+        throw error;
+      }
+    }
+    await connection.end()
+  });
   describe('Off Season Booking', () => {
-    it('Booking nights in off season with sufficient available nights', async () => {
-      const payload = {
-        user: {
-          id: 2,
+    const testCases = [
+      {
+        description:
+          'Booking nights in off season with sufficient available nights',
+        payload: {
+          user: { id: 2 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-06-29T11:51:55.260Z',
+          checkoutDate: '2025-07-01T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        property: {
-          id: 1,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description: 'Booking nights consecutively in off season',
+        payload: {
+          user: { id: 2 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-07-07T11:51:55.260Z',
+          checkoutDate: '2025-07-21T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 6,
+          noOfChildren: 4,
+          notes: 'None',
         },
-        createdBy: {
-          id: 1,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made across multiple properties for the same time period',
+        payload: {
+          user: { id: 2 },
+          property: { id: 2 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-06-29T11:51:55.260Z',
+          checkoutDate: '2025-07-02T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        checkinDate: '2025-06-29T11:51:55.260Z',
-        checkoutDate: '2025-07-03T11:51:55.260Z',
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: false,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Booking created successfully');
-    });
-    it('Booking nights consecutively in peak season', async () => {
-      const payload = {
-        user: {
-          id: 2,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Multiple short bookings are made with respect to remaining nights',
+        payload: 
+          {
+            user: { id: 2 },
+            property: { id: 1 },
+            createdBy: { id: 1 },
+            checkinDate: '2026-06-29T11:51:55.260Z',
+            checkoutDate: '2026-07-02T11:51:55.260Z',
+            noOfGuests: 10,
+            noOfPets: 2,
+            isLastMinuteBooking: false,
+            noOfAdults: 5,
+            noOfChildren: 5,
+            notes: 'None',
+          },
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Multiple short bookings are made with respect to remaining nights',
+        payload: 
+          {
+            user: { id: 2 },
+            property: { id: 1 },
+            createdBy: { id: 1 },
+            checkinDate: '2026-07-07T11:51:55.260Z',
+            checkoutDate: '2026-07-12T11:51:55.260Z',
+            noOfGuests: 10,
+            noOfPets: 2,
+            isLastMinuteBooking: false,
+            noOfAdults: 5,
+            noOfChildren: 5,
+            notes: 'None',
+          },
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made by an owner with two shares in the same property',
+        payload: {
+          user: { id: 3 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-08-01T11:51:55.260Z',
+          checkoutDate: '2025-08-22T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        property: {
-          id: 1,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made by an owner with three shares in the same property',
+        payload: {
+          user: { id: 4 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-09-01T11:51:55.260Z',
+          checkoutDate: '2026-09-29T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: '2025-08-01T11:51:55.260Z',
-        checkoutDate: '2025-08-15T11:51:55.260Z',
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: false,
-        noOfAdults: 6,
-        noOfChildren: 4,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Booking created successfully');
-    });
-    it('Booking is made across multiple properties for the same time period', async () => {
-      const payload = {
-        user: {
-          id: 2,
-        },
-        property: {
-          id: 2,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: '2025-06-29T11:51:55.260Z',
-        checkoutDate: '2025-07-03T11:51:55.260Z',
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: false,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Booking created successfully');
-    });
-    it('Multiple short bookings are made with respect to remaining nights', async () => {
-      const payload = {
-        user: {
-          id: 2,
-        },
-        property: {
-          id: 1,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: '2026-07-09T11:51:55.260Z',
-        checkoutDate: '2026-07-13T11:51:55.260Z',
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: false,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Booking created successfully');
+        expectedMessage: 'Booking created successfully',
+      },
+    ];
 
-      const payload1 = {
-        user: {
-          id: 2,
+    testCases.forEach(({ description, payload, expectedMessage }) => {
+      it(
+        description,
+        async () => {
+          const responses = Array.isArray(payload)
+            ? await Promise.all(
+                payload.map((p) =>
+                  request(url1)
+                    .post('/booking')
+                    .set('Accept', 'application/json')
+                    .send(p)
+                    .set('access-token', `${token}`)
+                    .set('user-id', `${userid}`)
+                    .expect('Content-Type', /json/),
+                ),
+              )
+            : [
+                await request(url1)
+                  .post('/booking')
+                  .set('Accept', 'application/json')
+                  .send(payload)
+                  .set('access-token', `${token}`)
+                  .set('user-id', `${userid}`)
+                  .expect('Content-Type', /json/),
+              ];
+
+          responses.forEach((response) => {
+            expect(response.body.message).toBe(expectedMessage);
+          });
         },
-        property: {
-          id: 1,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: '2026-07-21T11:51:55.260Z',
-        checkoutDate: '2026-07-26T11:51:55.260Z',
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: false,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response1 = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload1)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response1.body.message).toBe('Booking created successfully');
-    }, 10000);
-    it('Booking is made by an owner with two shares in the same property', async () => {
-      const payload = {
-        user: {
-          id: 3,
-        },
-        property: {
-          id: 1,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: '2025-09-01T11:51:55.260Z',
-        checkoutDate: '2025-09-29T11:51:55.260Z',
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: false,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Booking created successfully');
-    });
-    it('Booking is made by an owner with three shares in the same property', async () => {
-      const payload = {
-        user: {
-          id: 4,
-        },
-        property: {
-          id: 1,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: '2025-09-01T11:51:55.260Z',
-        checkoutDate: '2025-10-13T11:51:55.260Z',
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: false,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Booking created successfully');
+        10000,
+      );
     });
   });
 });
