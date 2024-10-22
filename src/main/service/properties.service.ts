@@ -12,7 +12,7 @@ import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-prope
 import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
 import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
 import { Property } from 'src/main/entities/property.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { PropertyDetails } from '../entities/property-details.entity';
 import { ComparePropertiesDto } from '../dto/ownerRez-properties.dto';
 import axios from 'axios';
@@ -547,10 +547,25 @@ export class PropertiesService {
         return USER_RESPONSES.USER_NOT_FOUND(userId);
       }
 
+      const currentDate = new Date();
+
+      let effectiveYear = currentDate.getFullYear();
+      if (currentDate.getMonth() === 11 && currentDate.getDate() === 31) {
+        effectiveYear += 1;
+      }
+
+      const startYear = effectiveYear;
+      const endYear = effectiveYear + 2;
+
+      this.logger.log(
+        `Fetching properties for years between ${startYear} and ${endYear}`,
+      );
+
       const userProperties = await this.userPropertiesRepository.find({
         where: {
           user: { id: userId },
           isActive: true,
+          year: Between(startYear, endYear),
         },
         relations: ['property', 'user'],
       });
