@@ -35,11 +35,12 @@ export const USER_PROPERTY_RESPONSES = {
   }),
   USER_PROPERTY_ALREADY_EXISTS: (
     userId: number,
+    username: string,
     propertyId: number,
-    year: number,
+    propertyName: string,
   ): { status: number; message: string } => ({
     status: HttpStatus.CONFLICT,
-    message: `User property with user ID ${userId}, property ID ${propertyId}, and year ${year} already exists`,
+    message: `User ${username || userId}, already has the property ${propertyName || propertyId}`,
   }),
   USER_PROPERTY_NOT_FOUND: (
     userPropertyId: number,

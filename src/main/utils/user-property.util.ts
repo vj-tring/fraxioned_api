@@ -14,6 +14,7 @@ export async function calculateAvailableNightsForUserByProperty(
   propertyDetailsRepository: PropertyDetailsRepository,
   userPropertyRepository: UserPropertyRepository,
   logger: LoggerService,
+  existingUserProperties?: UserProperties[],
   createdByUser?: User,
   updatedByUser?: User,
 ): Promise<UserProperties[] | object> {
@@ -34,18 +35,42 @@ export async function calculateAvailableNightsForUserByProperty(
         : USER_PROPERTY_RESPONSES.PROPERTY_DETAIL_NOT_FOUND(propertyId);
     }
 
-    if (propertyDetail.noOfShares > userProperty.propertyRemainingShare) {
-      logger.error(
-        `Not enough remaining shares for property ID: ${propertyId}`,
-      );
-      return USER_PROPERTY_RESPONSES.INSUFFICIENT_SHARES(
-        propertyId,
-        userProperty.propertyRemainingShare,
-      );
-    }
+    if (existingUserProperties && existingUserProperties.length > 0) {
+      const oldShares = existingUserProperties[0].noOfShare;
+      const newShares = propertyDetail.noOfShares;
+      const shareDifference = newShares - oldShares;
 
-    userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
-    await propertyRepository.saveProperty(userProperty);
+      if (shareDifference !== 0) {
+        if (
+          shareDifference > 0 &&
+          shareDifference > userProperty.propertyRemainingShare
+        ) {
+          logger.error(
+            `Not enough remaining shares for property ID: ${propertyId}. Need ${shareDifference} more shares but only ${userProperty.propertyRemainingShare} available.`,
+          );
+          return USER_PROPERTY_RESPONSES.INSUFFICIENT_SHARES(
+            propertyId,
+            userProperty.propertyRemainingShare,
+          );
+        }
+
+        userProperty.propertyRemainingShare -= shareDifference;
+        await propertyRepository.saveProperty(userProperty);
+      }
+    } else {
+      if (propertyDetail.noOfShares > userProperty.propertyRemainingShare) {
+        logger.error(
+          `Not enough remaining shares for property ID: ${propertyId}`,
+        );
+        return USER_PROPERTY_RESPONSES.INSUFFICIENT_SHARES(
+          propertyId,
+          userProperty.propertyRemainingShare,
+        );
+      }
+
+      userProperty.propertyRemainingShare -= propertyDetail.noOfShares;
+      await propertyRepository.saveProperty(userProperty);
+    }
 
     const peakAllottedNights = calculateAllottedNightsForUser(
       propertyDetail.noOfShares,

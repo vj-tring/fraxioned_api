@@ -115,6 +115,7 @@ export class InviteService {
           this.propertyDetailsRepository,
           this.userPropertyRepository,
           this.logger,
+          null,
           createdByUser,
         );
 

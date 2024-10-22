@@ -41,6 +41,36 @@ export class UserPropertyService {
       );
     }
 
+    const existingProperty = await this.propertyRepository.findOne(
+      createUserPropertyDto.property.id,
+    );
+    if (!existingProperty) {
+      this.logger.warn(
+        `property with ${createUserPropertyDto.property.id} not found`,
+      );
+      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(
+        createUserPropertyDto.property.id,
+      );
+    }
+
+    const isActive = true;
+    const existingUserProperty = await this.userPropertyRepository.findOne(
+      createUserPropertyDto.user.id,
+      createUserPropertyDto.property.id,
+      isActive,
+    );
+    if (existingUserProperty) {
+      this.logger.warn(
+        `User with user ID ${createUserPropertyDto.user.id}, already has the property ${createUserPropertyDto.property.id}`,
+      );
+      return USER_PROPERTY_RESPONSES.USER_PROPERTY_ALREADY_EXISTS(
+        createUserPropertyDto.user.id,
+        user.firstName,
+        createUserPropertyDto.property.id,
+        existingProperty.propertyName,
+      );
+    }
+
     const userPropertyDetails: UserPropertyDto[] = [
       {
         propertyID: createUserPropertyDto.property.id,
@@ -57,6 +87,7 @@ export class UserPropertyService {
         this.propertyDetailsRepository,
         this.userPropertyRepository,
         this.logger,
+        null,
         createdBy,
       );
 
@@ -143,6 +174,7 @@ export class UserPropertyService {
         this.propertyDetailsRepository,
         this.userPropertyRepository,
         this.logger,
+        existingUserProperties,
         updatedBy,
       );
 
@@ -189,16 +221,47 @@ export class UserPropertyService {
       return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
     }
 
-    const updatedUserProperties =
-      await this.userPropertyRepository.removePropertyForUserByUserId(
-        userProperties,
+    const property = await this.propertyRepository.findOne(propertyId);
+    if (!property) {
+      this.logger.error(`Property not found with ID: ${propertyId}`);
+      return USER_PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(propertyId);
+    }
+
+    try {
+      const currentYear = new Date().getFullYear();
+      const currentYearProperty = userProperties.find(
+        (userProperty) => userProperty.year >= currentYear,
       );
 
-    this.logger.log(
-      `User properties for user ID ${userId} and property ID ${propertyId} updated to have null user`,
-    );
-    return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
-      updatedUserProperties,
-    );
+      if (!currentYearProperty) {
+        this.logger.error(
+          `No user property found for current year ${currentYear}`,
+        );
+        return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
+      }
+
+      const sharesToRestore = currentYearProperty.noOfShare;
+      property.propertyRemainingShare += sharesToRestore;
+
+      await this.propertyRepository.saveProperty(property);
+
+      const updatedUserProperties =
+        await this.userPropertyRepository.removePropertyForUserByUserId(
+          userProperties,
+        );
+
+      this.logger.log(
+        `User properties for user ID ${userId} and property ID ${propertyId} updated to have null user. Restored ${sharesToRestore} shares from year ${currentYear} to property.`,
+      );
+
+      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
+        updatedUserProperties,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error removing property for user and restoring shares: ${error.message}`,
+      );
+      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATE_FAILED();
+    }
   }
 }

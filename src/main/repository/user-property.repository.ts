@@ -21,6 +21,19 @@ export class UserPropertyRepository {
   ): Promise<UserProperties[]> {
     return this.repository.save(userProperties);
   }
+  async findOne(
+    userId: number,
+    PropertyId: number,
+    isActive: boolean,
+  ): Promise<UserProperties> {
+    return this.repository.findOne({
+      where: {
+        user: { id: userId },
+        property: { id: PropertyId },
+        isActive: isActive,
+      },
+    });
+  }
 
   async findAllUserProperties(): Promise<UserProperties[]> {
     return this.repository.find({
