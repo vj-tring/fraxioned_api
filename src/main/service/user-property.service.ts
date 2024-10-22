@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LoggerService } from 'services/logger.service';
 import { USER_PROPERTY_RESPONSES } from 'src/main/commons/constants/response-constants/user-property.constant';
 import { CreateUserPropertyDTO } from '../dto/requests/user-property/create-user-property.dto';
-import { UpdateUserPropertyDTO } from '../dto/requests/user-property/update-user-property.dto';
+// import { UpdateUserPropertyDTO } from '../dto/requests/user-property/update-user-property.dto';
 import { UserPropertyDto } from '../dto/requests/user-property/userProperty.dto';
 import { UserPropertyRepository } from '../repository/user-property.repository';
 import { PropertyRepository } from '../repository/property.repository';
@@ -124,84 +124,6 @@ export class UserPropertyService {
       return USER_PROPERTY_RESPONSES.USER_PROPERTY_NOT_FOUND(id);
     }
     return USER_PROPERTY_RESPONSES.USER_PROPERTY_FETCHED(userProperty);
-  }
-
-  async updateUserProperty(
-    updateUserPropertyDto: UpdateUserPropertyDTO,
-  ): Promise<object> {
-    const currentYear = new Date().getFullYear();
-
-    const existingUserProperties =
-      await this.userPropertyRepository.findUserPropertiesForUpdate(
-        updateUserPropertyDto.user.id,
-        updateUserPropertyDto.property.id,
-        currentYear,
-      );
-
-    if (existingUserProperties.length === 0) {
-      this.logger.warn(
-        `No user properties found for the given criteria in current or future years`,
-      );
-      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_NOT_FOUND();
-    }
-
-    const updatedBy = await this.userRepository.findOne(
-      updateUserPropertyDto.updatedBy.id,
-    );
-    if (!updatedBy) {
-      return USER_PROPERTY_RESPONSES.USER_NOT_FOUND(
-        updateUserPropertyDto.updatedBy.id,
-      );
-    }
-
-    const userPropertyDetails: UserPropertyDto[] = [
-      {
-        propertyID: updateUserPropertyDto.property.id,
-        noOfShares:
-          updateUserPropertyDto.noOfShare ??
-          existingUserProperties[0].noOfShare,
-        acquisitionDate:
-          updateUserPropertyDto.acquisitionDate ??
-          existingUserProperties[0].acquisitionDate,
-      },
-    ];
-
-    const calculatedUserProperties =
-      await calculateAvailableNightsForUserByProperty(
-        userPropertyDetails,
-        updateUserPropertyDto.user,
-        this.propertyRepository,
-        this.propertyDetailsRepository,
-        this.userPropertyRepository,
-        this.logger,
-        existingUserProperties,
-        updatedBy,
-      );
-
-    if (!Array.isArray(calculatedUserProperties)) {
-      this.logger.error(
-        `Error calculating properties: ${JSON.stringify(calculatedUserProperties)}`,
-      );
-      return calculatedUserProperties;
-    }
-
-    try {
-      const insertedProperties =
-        await this.userPropertyRepository.updateUserProperties(
-          existingUserProperties,
-          calculatedUserProperties,
-        );
-
-      this.logger.log(
-        `${insertedProperties.length} user properties updated for current and future years`,
-      );
-      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATED(
-        insertedProperties,
-      );
-    } catch (error) {
-      this.logger.error(`Error updating user properties: ${error.message}`);
-      return USER_PROPERTY_RESPONSES.USER_PROPERTIES_UPDATE_FAILED();
-    }
   }
 
   async removePropertyForUser(
