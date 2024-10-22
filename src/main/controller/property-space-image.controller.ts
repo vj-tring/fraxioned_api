@@ -17,13 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { PropertySpaceImage } from '../entities/property-space-image.entity';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
-import {
-  getMaxFileSize,
-  getAllowedExtensions,
-  getMaxFileCount,
-  isFileSizeValid,
-  isFileExtensionValid,
-} from '../utils/image-file.utils';
+import { getMaxFileCount } from '../utils/image-file.utils';
 import { CreatePropertySpaceImageRequestDto } from '../dto/requests/property-space-image/create-request.dto';
 import { CreatePropertySpaceImageDto } from '../dto/requests/property-space-image/create.dto';
 import { UpdatePropertySpaceImageRequestDto } from '../dto/requests/property-space-image/update-request.dto';
@@ -31,7 +25,11 @@ import { UpdatePropertySpaceImageDto } from '../dto/requests/property-space-imag
 import { PROPERTY_SPACE_IMAGE_RESPONSES } from '../commons/constants/response-constants/property-space-image.constant';
 import { PropertySpaceImageService } from '../service/property-space-image.service';
 import { DeletePropertySpaceImagesDto } from '../dto/requests/property-space-image/delete-by-ids-request.dto';
-import { validateFile } from '../utils/fileUploadValidation.Util';
+import {
+  validateFile,
+  validateFiles,
+} from '../utils/fileUploadValidation.Util';
+import { PropertyAdditionalImage } from '../entities/property-additional-image.entity';
 
 @ApiTags('Property Space Images')
 @Controller('v1/property-space-images')
@@ -59,27 +57,9 @@ export class PropertySpaceImageController {
     statusCode: HttpStatus;
   }> {
     try {
-      const max_file_size = getMaxFileSize();
-      const allowedExtensions = getAllowedExtensions();
-
-      const hasOversizedFile = (files.imageFiles || []).some(
-        (file) => !isFileSizeValid(file, max_file_size),
-      );
-
-      if (hasOversizedFile) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.FILE_SIZE_TOO_LARGE(
-          max_file_size,
-        );
-      }
-
-      const hasUnsupportedExtension = (files.imageFiles || []).some(
-        (file) => !isFileExtensionValid(file, allowedExtensions),
-      );
-
-      if (hasUnsupportedExtension) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
-          allowedExtensions,
-        );
+      const validationResponse = await validateFiles(files.imageFiles || []);
+      if (validationResponse) {
+        return validationResponse;
       }
 
       const propertySpaceImageDetails: CreatePropertySpaceImageDto[] =
@@ -207,8 +187,11 @@ export class PropertySpaceImageController {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: PropertySpaceImage[];
-    statusCode: HttpStatus;
+    data?: {
+      propertySpaceImages: PropertySpaceImage[];
+      propertyAdditionalImages: PropertyAdditionalImage[];
+    };
+    statusCode: number;
   }> {
     try {
       const result =

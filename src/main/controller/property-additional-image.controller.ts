@@ -20,15 +20,12 @@ import {
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../commons/guards/auth.guard';
 import { ApiHeadersForAuth } from '../commons/guards/auth-headers.decorator';
-import {
-  getMaxFileSize,
-  getAllowedExtensions,
-  getMaxFileCount,
-  isFileSizeValid,
-  isFileExtensionValid,
-} from '../utils/image-file.utils';
+import { getMaxFileCount } from '../utils/image-file.utils';
 import { PROPERTY_SPACE_IMAGE_RESPONSES } from '../commons/constants/response-constants/property-space-image.constant';
-import { validateFile } from '../utils/fileUploadValidation.Util';
+import {
+  validateFile,
+  validateFiles,
+} from '../utils/fileUploadValidation.Util';
 import { PropertyAdditionalImageService } from '../service/property-additional-image.service';
 import { CreatePropertyAdditionalImageRequestDto } from '../dto/requests/property-additional-image/create-property-additional-image-request.dto';
 import { PropertyAdditionalImage } from '../entities/property-additional-image.entity';
@@ -58,27 +55,9 @@ export class PropertyAdditionalImageController {
     createPropertyAdditionalImageRequestDto: CreatePropertyAdditionalImageRequestDto,
   ): Promise<ApiResponse<PropertyAdditionalImage[]>> {
     try {
-      const max_file_size = getMaxFileSize();
-      const allowedExtensions = getAllowedExtensions();
-
-      const hasOversizedFile = (files.imageFiles || []).some(
-        (file) => !isFileSizeValid(file, max_file_size),
-      );
-
-      if (hasOversizedFile) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.FILE_SIZE_TOO_LARGE(
-          max_file_size,
-        );
-      }
-
-      const hasUnsupportedExtension = (files.imageFiles || []).some(
-        (file) => !isFileExtensionValid(file, allowedExtensions),
-      );
-
-      if (hasUnsupportedExtension) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.UNSUPPORTED_FILE_EXTENSION(
-          allowedExtensions,
-        );
+      const validationResponse = await validateFiles(files.imageFiles || []);
+      if (validationResponse) {
+        return validationResponse;
       }
 
       const propertyAdditionalImageDetails: CreatePropertyAdditionalImageDto[] =

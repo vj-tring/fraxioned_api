@@ -27,3 +27,26 @@ export const validateFile = async (
   }
   return null;
 };
+
+export const validateFiles = async (
+  files: Express.Multer.File[],
+): Promise<ApiResponse<null> | null> => {
+  const maxFileSize = getMaxFileSize();
+  const allowedExtensions = getAllowedExtensions();
+
+  const hasOversizedFile = files.some(
+    (file) => !isFileSizeValid(file, maxFileSize),
+  );
+  if (hasOversizedFile) {
+    return MEDIA_IMAGE_RESPONSES.FILE_SIZE_TOO_LARGE(maxFileSize);
+  }
+
+  const hasUnsupportedExtension = files.some(
+    (file) => !isFileExtensionValid(file, allowedExtensions),
+  );
+  if (hasUnsupportedExtension) {
+    return MEDIA_IMAGE_RESPONSES.UNSUPPORTED_FILE_EXTENSION(allowedExtensions);
+  }
+
+  return null;
+};

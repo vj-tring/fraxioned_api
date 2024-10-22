@@ -285,7 +285,7 @@ export class PropertySpaceAmenitiesService {
         return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
       }
 
-      const groupedAmenities = this.groupAmenitiesByGroup(
+      const groupedAmenities = await this.groupAmenitiesByGroup(
         propertySpaceAmenities,
       );
 
@@ -436,7 +436,7 @@ export class PropertySpaceAmenitiesService {
         return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
       }
 
-      const groupedAmenities = this.groupAmenitiesByGroup(
+      const groupedAmenities = await this.groupAmenitiesByGroup(
         propertySpaceAmenities,
       );
 
@@ -457,35 +457,53 @@ export class PropertySpaceAmenitiesService {
     }
   }
 
-  private groupAmenitiesByGroup(amenities: PropertySpaceAmenities[]): {
+  async groupAmenitiesByGroup(
+    propertySpaceAmenities: PropertySpaceAmenities[],
+  ): Promise<{
     amenityGroup: { id: number; name: string; amenities: object[] }[];
-  } {
-    const grouped = amenities.reduce((acc, amenity) => {
-      const groupId = amenity.amenity.amenityGroup.id;
-      const groupName = amenity.amenity.amenityGroup.name;
-      if (!acc[groupId]) {
-        acc[groupId] = {
-          id: groupId,
-          name: groupName,
-          amenities: [],
-          amenitySet: new Set(),
-        };
-      }
+  }> {
+    const grouped = propertySpaceAmenities.reduce(
+      (acc, propertySpaceAmenity) => {
+        const groupId = propertySpaceAmenity.amenity.amenityGroup.id;
+        const groupName = propertySpaceAmenity.amenity.amenityGroup.name;
+        if (!acc[groupId]) {
+          acc[groupId] = {
+            id: groupId,
+            name: groupName,
+            amenities: [],
+            amenitySet: new Set(),
+          };
+        }
 
-      if (!acc[groupId].amenitySet.has(amenity.amenity.id)) {
-        acc[groupId].amenities.push({
-          amenityId: amenity.amenity.id,
-          amenityName: amenity.amenity.amenityName,
-          amenityDescription: amenity.amenity.amenityDescription,
-        });
-        acc[groupId].amenitySet.add(amenity.amenity.id);
-      }
+        if (!acc[groupId].amenitySet.has(propertySpaceAmenity.amenity.id)) {
+          acc[groupId].amenities.push({
+            propertySpaceAmenityId: propertySpaceAmenity.id,
+            amenityId: propertySpaceAmenity.amenity.id,
+            amenityName: propertySpaceAmenity.amenity.amenityName,
+            amenityDescription: propertySpaceAmenity.amenity.amenityDescription,
+          });
+          acc[groupId].amenitySet.add(propertySpaceAmenity.amenity.id);
+        }
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {},
+    );
 
     const finalGrouped = Object.values(grouped).map(
-      ({ id, name, amenities }) => ({ id, name, amenities }),
+      ({
+        id,
+        name,
+        amenities,
+      }: {
+        id: number;
+        name: string;
+        amenities: { amenityId: number }[];
+      }) => ({
+        id,
+        name,
+        amenities: amenities.sort((a, b) => a.amenityId - b.amenityId),
+      }),
     );
 
     return { amenityGroup: finalGrouped };
@@ -542,7 +560,7 @@ export class PropertySpaceAmenitiesService {
         return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
       }
 
-      const groupedAmenities = this.groupAmenitiesByGroup(
+      const groupedAmenities = await this.groupAmenitiesByGroup(
         propertySpaceAmenities,
       );
 
