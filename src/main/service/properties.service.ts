@@ -280,22 +280,6 @@ export class PropertiesService {
           if (existingProperty.isActive !== item.active) {
             existingProperty.isActive = item.active;
           }
-          if (existingPropertyDetails.noOfBathrooms !== item.bathrooms) {
-            existingPropertyDetails.noOfBathrooms = item.bathrooms;
-          }
-          if (
-            existingPropertyDetails.noOfBathroomsFull !== item.bathrooms_full
-          ) {
-            existingPropertyDetails.noOfBathroomsFull = item.bathrooms_full;
-          }
-          if (
-            existingPropertyDetails.noOfBathroomsHalf !== item.bathrooms_half
-          ) {
-            existingPropertyDetails.noOfBathroomsHalf = item.bathrooms_half;
-          }
-          if (existingPropertyDetails.noOfBedrooms !== item.bedrooms) {
-            existingPropertyDetails.noOfBedrooms = item.bedrooms;
-          }
           if (existingPropertyDetails.noOfGuestsAllowed !== item.max_guests) {
             existingPropertyDetails.noOfGuestsAllowed = item.max_guests;
           }
