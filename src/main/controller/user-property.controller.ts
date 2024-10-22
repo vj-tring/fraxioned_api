@@ -16,7 +16,7 @@ import { CreateUserPropertyDTO } from '../dto/requests/user-property/create-user
 import { UpdateUserPropertyDTO } from '../dto/requests/user-property/update-user-property.dto';
 
 @ApiTags('UserProperty')
-@Controller('v1/user-properties')
+@Controller('v1')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class UserPropertyController {
@@ -29,7 +29,7 @@ export class UserPropertyController {
     return this.userPropertyService.createUserProperty(createUserPropertyDto);
   }
 
-  @Get()
+  @Get('user-properties')
   async getUserProperties(): Promise<object> {
     return this.userPropertyService.getUserProperties();
   }
