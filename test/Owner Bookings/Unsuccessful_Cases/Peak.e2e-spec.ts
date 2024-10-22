@@ -31,8 +31,14 @@ describe('Booking API Test', () => {
   });
 
   beforeEach(async () => {
-    const sqlScript = fs.readFileSync('./test/Datasets/user properties dataset.sql', 'utf8');
-    const statements = sqlScript.split(';').map((statement) => statement.trim()).filter((statement) => statement.length > 0);
+    const sqlScript = fs.readFileSync(
+      './test/Datasets/user properties dataset.sql',
+      'utf8',
+    );
+    const statements = sqlScript
+      .split(';')
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
     for (const statement of statements) {
       try {
         await connection.query(statement);
@@ -45,7 +51,8 @@ describe('Booking API Test', () => {
   describe('Peak Season Booking', () => {
     const testCases = [
       {
-        description: 'Booking nights in peak season with sufficient available nights',
+        description:
+          'Booking nights in peak season with sufficient available nights',
         payload: {
           user: { id: 2 },
           property: { id: 1 },
@@ -79,7 +86,8 @@ describe('Booking API Test', () => {
         expectedMessage: 'Booking created successfully',
       },
       {
-        description: 'Booking is made across multiple properties for the same time period',
+        description:
+          'Booking is made across multiple properties for the same time period',
         payload: {
           user: { id: 2 },
           property: { id: 2 },
@@ -96,7 +104,8 @@ describe('Booking API Test', () => {
         expectedMessage: 'Booking created successfully',
       },
       {
-        description: 'Multiple short bookings are made with respect to remaining nights',
+        description:
+          'Multiple short bookings are made with respect to remaining nights',
         payload: [
           {
             user: { id: 2 },
@@ -128,7 +137,8 @@ describe('Booking API Test', () => {
         expectedMessage: 'Booking created successfully',
       },
       {
-        description: 'Booking is made by an owner with two shares in the same property',
+        description:
+          'Booking is made by an owner with two shares in the same property',
         payload: {
           user: { id: 3 },
           property: { id: 1 },
@@ -145,7 +155,8 @@ describe('Booking API Test', () => {
         expectedMessage: 'Booking created successfully',
       },
       {
-        description: 'Booking is made by an owner with three shares in the same property',
+        description:
+          'Booking is made by an owner with three shares in the same property',
         payload: {
           user: { id: 4 },
           property: { id: 1 },
@@ -164,31 +175,37 @@ describe('Booking API Test', () => {
     ];
 
     testCases.forEach(({ description, payload, expectedMessage }) => {
-      it(description, async () => {
-        const responses = Array.isArray(payload)
-          ? await Promise.all(
-            payload.map((p) =>
-              request(url1)
-                .post('/booking')
-                .set('Accept', 'application/json')
-                .send(p)
-                .set('access-token', `${token}`)
-                .set('user-id', `${userid}`)
-                .expect('Content-Type', /json/)
-            )
-          )
-          : [await request(url1)
-            .post('/booking')
-            .set('Accept', 'application/json')
-            .send(payload)
-            .set('access-token', `${token}`)
-            .set('user-id', `${userid}`)
-            .expect('Content-Type', /json/)];
+      it(
+        description,
+        async () => {
+          const responses = Array.isArray(payload)
+            ? await Promise.all(
+                payload.map((p) =>
+                  request(url1)
+                    .post('/booking')
+                    .set('Accept', 'application/json')
+                    .send(p)
+                    .set('access-token', `${token}`)
+                    .set('user-id', `${userid}`)
+                    .expect('Content-Type', /json/),
+                ),
+              )
+            : [
+                await request(url1)
+                  .post('/booking')
+                  .set('Accept', 'application/json')
+                  .send(payload)
+                  .set('access-token', `${token}`)
+                  .set('user-id', `${userid}`)
+                  .expect('Content-Type', /json/),
+              ];
 
-        responses.forEach(response => {
-          expect(response.body.message).toBe(expectedMessage);
-        });
-      }, 10000);
+          responses.forEach((response) => {
+            expect(response.body.message).toBe(expectedMessage);
+          });
+        },
+        10000,
+      );
     });
   });
 });

@@ -1,8 +1,7 @@
 import * as request from 'supertest';
-import { baseurl } from '../test.config';
+import { baseurl } from '../../test.config';
 import { createConnection, Connection } from 'mysql2/promise';
 import * as fs from 'fs';
-import * as path from 'path';
 
 describe('Booking API Test', () => {
   const url = `${baseurl}/authentication`;
@@ -31,8 +30,14 @@ describe('Booking API Test', () => {
     userid = user.id;
   });
   beforeEach(async () => {
-    const sqlScript = fs.readFileSync('./test/Datasets/user properties dataset.sql', 'utf8');
-    const statements = sqlScript.split(';').map((statement) => statement.trim()).filter((statement) => statement.length > 0); 
+    const sqlScript = fs.readFileSync(
+      './test/Datasets/user properties dataset.sql',
+      'utf8',
+    );
+    const statements = sqlScript
+      .split(';')
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
     for (const statement of statements) {
       try {
         await connection.query(statement);
