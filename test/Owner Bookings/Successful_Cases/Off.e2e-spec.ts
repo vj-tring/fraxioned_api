@@ -1,5 +1,5 @@
 import * as request from 'supertest';
-import { baseurl,getConnection } from '../../test.config';
+import { baseurl, getConnection } from '../../test.config';
 import { Connection } from 'mysql2/promise';
 import * as fs from 'fs';
 
