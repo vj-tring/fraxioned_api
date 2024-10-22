@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PropertyAdditionalImageController } from '../controller/property-additional-image.controller';
 import { PropertyAdditionalImage } from '../entities/property-additional-image.entity';
@@ -15,8 +15,8 @@ import { PropertySpaceImageModule } from './property-space-image.module';
     TypeOrmModule.forFeature([PropertyAdditionalImage]),
     UserModule,
     S3UtilsModule,
-    PropertiesModule,
-    PropertySpaceImageModule,
+    forwardRef(() => PropertiesModule),
+    forwardRef(() => PropertySpaceImageModule),
     LoggerModule,
     AuthenticationModule,
   ],

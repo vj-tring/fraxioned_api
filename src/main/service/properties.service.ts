@@ -1,8 +1,10 @@
 import {
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoggerService } from './logger.service';
@@ -27,6 +29,14 @@ import { ApiResponse } from '../commons/response-body/common.responses';
 import { PROPERTY_RESPONSES } from '../commons/constants/response-constants/property.constant';
 import { S3UtilsService } from './s3-utils.service';
 import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
+import { PropertySpaceService } from './property-space.service';
+import { PropertyAdditionalImageService } from './property-additional-image.service';
+import { PropertySpace } from '../entities/property-space.entity';
+import { FindPropertyImagesData } from '../dto/responses/find-property-images-response.dto';
+import { PropertySpaceImageDTO } from '../dto/responses/property-space-image-response.dto';
+import { PropertySpaceDTO } from '../dto/responses/property-space-response.dto';
+import { PropertySpaceTotalsDTO } from '../dto/responses/property-space-totals-response.dto';
+import { PropertySpaceAmenitiesService } from './property-space-amenity.service';
 
 @Injectable()
 export class PropertiesService {
@@ -41,6 +51,11 @@ export class PropertiesService {
     private userRepository: Repository<User>,
     private readonly logger: LoggerService,
     private readonly s3UtilsService: S3UtilsService,
+    @Inject(forwardRef(() => PropertySpaceService))
+    private readonly propertySpaceService: PropertySpaceService,
+    @Inject(forwardRef(() => PropertyAdditionalImageService))
+    private readonly propertyAdditionalImageService: PropertyAdditionalImageService,
+    private readonly propertySpaceAmenitiesService: PropertySpaceAmenitiesService,
   ) {}
   private async shouldApplyPropertyNameFilter(
     userId: number,
@@ -264,22 +279,6 @@ export class PropertiesService {
           }
           if (existingProperty.isActive !== item.active) {
             existingProperty.isActive = item.active;
-          }
-          if (existingPropertyDetails.noOfBathrooms !== item.bathrooms) {
-            existingPropertyDetails.noOfBathrooms = item.bathrooms;
-          }
-          if (
-            existingPropertyDetails.noOfBathroomsFull !== item.bathrooms_full
-          ) {
-            existingPropertyDetails.noOfBathroomsFull = item.bathrooms_full;
-          }
-          if (
-            existingPropertyDetails.noOfBathroomsHalf !== item.bathrooms_half
-          ) {
-            existingPropertyDetails.noOfBathroomsHalf = item.bathrooms_half;
-          }
-          if (existingPropertyDetails.noOfBedrooms !== item.bedrooms) {
-            existingPropertyDetails.noOfBedrooms = item.bedrooms;
           }
           if (existingPropertyDetails.noOfGuestsAllowed !== item.max_guests) {
             existingPropertyDetails.noOfGuestsAllowed = item.max_guests;
@@ -594,6 +593,146 @@ export class PropertiesService {
       }
       throw new HttpException(
         'An error occurred while fetching properties with details for the user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findPropertyImagesByPropertyId(
+    propertyId: number,
+  ): Promise<ApiResponse<FindPropertyImagesData>> {
+    try {
+      const propertySpaces =
+        await this.propertySpaceService.findAllPropertySpacesByPropertyId(
+          propertyId,
+        );
+
+      if (propertySpaces.length === 0) {
+        return this.propertySpaceService.handlePropertySpacesNotFound();
+      }
+
+      const additionalImages =
+        await this.propertyAdditionalImageService.findAllPropertyAdditionalImagesByPropertyId(
+          propertyId,
+        );
+
+      const groupedPropertySpacesResponse =
+        await this.groupPropertySpacesByType(propertySpaces);
+
+      const { propertySpaces: groupedPropertySpaces, totals } =
+        groupedPropertySpacesResponse.data;
+
+      return PROPERTY_RESPONSES.PROPERTY_IMAGES_FETCHED(
+        groupedPropertySpaces,
+        additionalImages,
+        totals,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving property images for property ID ${propertyId}: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while retrieving the property images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async groupPropertySpacesByType(propertySpaces: PropertySpace[]): Promise<
+    ApiResponse<{
+      propertySpaces: PropertySpaceDTO[];
+      totals: PropertySpaceTotalsDTO;
+    }>
+  > {
+    try {
+      let totalNumberOfBedrooms = 0;
+      let totalNumberOfBathrooms = 0;
+      let totalNumberOfBeds = 0;
+
+      const groupedPropertySpaces: PropertySpaceDTO[] = await Promise.all(
+        propertySpaces.map(async (propertySpace) => {
+          const propertySpaceImages: PropertySpaceImageDTO[] =
+            propertySpace.propertySpaceImages.map((image) => ({
+              id: image.id,
+              description: image.description,
+              url: image.url,
+              displayOrder: image.displayOrder,
+            }));
+
+          const propertySpaceBeds = propertySpace.propertySpaceBeds
+            .map((bed) => {
+              totalNumberOfBeds += bed.count;
+              return {
+                propertySpaceBedId: bed.id,
+                bedType: bed.spaceBedType.bedType,
+                count: bed.count,
+                s3_image_url: bed.spaceBedType.s3_url,
+                spaceBedTypeId: bed.spaceBedType.id,
+              };
+            })
+            .sort((a, b) => a.spaceBedTypeId - b.spaceBedTypeId);
+
+          const propertySpaceBathrooms = propertySpace.propertySpaceBathrooms
+            .map((bathroom) => {
+              totalNumberOfBathrooms +=
+                bathroom.count * bathroom.spaceBathroomType.countValue;
+              return {
+                propertySpaceBathroomId: bathroom.id,
+                bathroomType: bathroom.spaceBathroomType.name,
+                count: bathroom.count,
+                s3_image_url: bathroom.spaceBathroomType.s3_url,
+                countValue: bathroom.spaceBathroomType.countValue,
+                spaceBathroomTypeId: bathroom.spaceBathroomType.id,
+              };
+            })
+            .sort((a, b) => a.spaceBathroomTypeId - b.spaceBathroomTypeId);
+
+          if (propertySpace.space.name.toLowerCase() === 'bedroom') {
+            totalNumberOfBedrooms++;
+          }
+
+          const groupedAmenities =
+            await this.propertySpaceAmenitiesService.groupAmenitiesByGroup(
+              propertySpace.propertySpaceAmenities,
+            );
+
+          return {
+            id: propertySpace.id,
+            propertySpaceName: `${propertySpace.space.name} ${propertySpace.instanceNumber}`,
+            propertySpaceInstanceNumber: propertySpace.instanceNumber,
+            spaceId: propertySpace.space.id,
+            spaceName: propertySpace.space.name,
+            propertySpaceImages,
+            propertySpaceBeds,
+            propertySpaceBathrooms,
+            amenityGroups: groupedAmenities.amenityGroup,
+          };
+        }),
+      );
+
+      groupedPropertySpaces.sort((a, b) => {
+        if (a.spaceId === b.spaceId) {
+          return a.propertySpaceInstanceNumber - b.propertySpaceInstanceNumber;
+        }
+        return a.spaceId - b.spaceId;
+      });
+
+      const totals = new PropertySpaceTotalsDTO(
+        totalNumberOfBedrooms,
+        totalNumberOfBathrooms,
+        totalNumberOfBeds,
+      );
+
+      return PROPERTY_RESPONSES.PROPERTY_SPACES_GROUPED(
+        groupedPropertySpaces,
+        totals,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error while grouping property spaces by type: ${error.message} - ${error.stack}`,
+      );
+      throw new HttpException(
+        'An error occurred while grouping property spaces by type',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

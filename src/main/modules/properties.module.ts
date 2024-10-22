@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PropertiesController } from 'src/main/controller/properties.controller';
 import { Property } from 'src/main/entities/property.entity';
@@ -10,6 +10,9 @@ import { UserProperties } from '../entities/user-properties.entity';
 import { User } from '../entities/user.entity';
 import { LoggerModule } from './logger.module';
 import { S3UtilsModule } from './s3-utils.module';
+import { PropertySpaceModule } from './property-space.module';
+import { PropertyAdditionalImageModule } from './property-additional-image.module';
+import { PropertySpaceAmenitiesModule } from './property-space-amenity.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import { S3UtilsModule } from './s3-utils.module';
     LoggerModule,
     PropertyDetailsModule,
     S3UtilsModule,
+    PropertySpaceAmenitiesModule,
+    forwardRef(() => PropertySpaceModule),
+    forwardRef(() => PropertyAdditionalImageModule),
   ],
   controllers: [PropertiesController],
   providers: [PropertiesService],

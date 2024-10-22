@@ -14,6 +14,7 @@ import { S3UtilsModule } from './s3-utils.module';
 import { AuthenticationModule } from './authentication.module';
 import { LoggerModule } from './logger.module';
 import { PropertySpaceModule } from './property-space.module';
+import { PropertyAdditionalImageModule } from './property-additional-image.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PropertySpaceModule } from './property-space.module';
     AuthenticationModule,
     S3UtilsModule,
     forwardRef(() => PropertySpaceModule),
+    forwardRef(() => PropertyAdditionalImageModule),
   ],
   controllers: [PropertySpaceImageController],
   providers: [PropertySpaceImageService],
