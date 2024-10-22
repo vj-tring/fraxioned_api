@@ -17,8 +17,8 @@ import { UpdateUserPropertyDTO } from '../dto/requests/user-property/update-user
 
 @ApiTags('UserProperty')
 @Controller('v1/user-properties')
-// @UseGuards(AuthGuard)
-// @ApiHeadersForAuth()
+@UseGuards(AuthGuard)
+@ApiHeadersForAuth()
 export class UserPropertyController {
   constructor(private readonly userPropertyService: UserPropertyService) {}
 
