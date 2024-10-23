@@ -12,7 +12,7 @@ import { CommonPropertiesResponseDto } from 'src/main/dto/responses/common-prope
 import { CreatePropertiesResponseDto } from 'src/main/dto/responses/create-properties.dto';
 import { UpdatePropertiesResponseDto } from 'src/main/dto/responses/update-properties.dto';
 import { Property } from 'src/main/entities/property.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { PropertyDetails } from '../entities/property-details.entity';
 import { ComparePropertiesDto } from '../dto/ownerRez-properties.dto';
 import axios from 'axios';
@@ -388,6 +388,7 @@ export class PropertiesService {
 
         const propertyDetails = await this.propertyDetailsRepository.findOne({
           where: { property: { id: id } },
+          relations: ['property'],
         });
 
         if (!propertyDetails) {
@@ -395,13 +396,16 @@ export class PropertiesService {
         }
 
         const userProperties = await this.userPropertiesRepository.find({
-          where: { property: { id: id } },
-          relations: ['user'],
+          where: {
+            property: { id: id },
+            isActive: true,
+          },
+          relations: ['user', 'property'],
         });
 
         const uniqueUsers = new Map();
         userProperties.forEach((userProperty) => {
-          if (!uniqueUsers.has(userProperty.user.id)) {
+          if (userProperty.user && !uniqueUsers.has(userProperty.user.id)) {
             uniqueUsers.set(userProperty.user.id, {
               user: userProperty.user,
               noOfShare: userProperty.noOfShare,
@@ -412,8 +416,15 @@ export class PropertiesService {
 
         const { id: propertyId, ...propertyWithoutId } =
           await this.setPropertyName(property, requestedUser);
-        const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
-          propertyDetails;
+        const {
+          id: propertyDetailsId,
+          property: removedProperty,
+          ...propertyDetailsWithoutId
+        } = propertyDetails;
+
+        this.logger.log(
+          `Removed property from propertyDetails for response structure ${removedProperty}`,
+        );
 
         return {
           propertyId,
@@ -450,16 +461,20 @@ export class PropertiesService {
             const propertyDetails =
               await this.propertyDetailsRepository.findOne({
                 where: { property: { id: property.id } },
+                relations: ['property'],
               });
 
             const userProperties = await this.userPropertiesRepository.find({
-              where: { property: { id: property.id } },
-              relations: ['user'],
+              where: {
+                property: { id: property.id },
+                isActive: true,
+              },
+              relations: ['user', 'property'],
             });
 
             const uniqueUsers = new Map();
             userProperties.forEach((userProperty) => {
-              if (!uniqueUsers.has(userProperty.user.id)) {
+              if (userProperty.user && !uniqueUsers.has(userProperty.user.id)) {
                 uniqueUsers.set(userProperty.user.id, {
                   user: userProperty.user,
                   noOfShare: userProperty.noOfShare,
@@ -477,7 +492,7 @@ export class PropertiesService {
                 ...property,
                 owners: Array.from(uniqueUsers.values()).map(
                   ({ user, noOfShare, acquisitionDate }) => ({
-                    userId: user.id,
+                    userId: user?.id,
                     noOfShare,
                     acquisitionDate,
                   }),
@@ -486,9 +501,15 @@ export class PropertiesService {
             }
 
             const { id: propertyId, ...propertyWithoutId } = property;
-            const { id: propertyDetailsId, ...propertyDetailsWithoutId } =
-              propertyDetails;
+            const {
+              id: propertyDetailsId,
+              property: removedProperty,
+              ...propertyDetailsWithoutId
+            } = propertyDetails;
 
+            this.logger.log(
+              `Removed property from propertyDetails for response structure ${removedProperty}`,
+            );
             return {
               propertyId,
               propertyDetailsId,
@@ -496,7 +517,7 @@ export class PropertiesService {
               ...propertyDetailsWithoutId,
               owners: Array.from(uniqueUsers.values()).map(
                 ({ user, noOfShare, acquisitionDate }) => ({
-                  userId: user.id,
+                  userId: user?.id,
                   noOfShare,
                   acquisitionDate,
                 }),
@@ -507,7 +528,11 @@ export class PropertiesService {
         return propertiesWithDetails;
       }
     } catch (error) {
-      throw error;
+      this.logger.error(`Error in getPropertiesWithDetails: ${error.message}`);
+      throw new HttpException(
+        'An error occurred while fetching properties with details',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
   async getAllPropertiesWithDetailsByUser(
@@ -522,8 +547,26 @@ export class PropertiesService {
         return USER_RESPONSES.USER_NOT_FOUND(userId);
       }
 
+      const currentDate = new Date();
+
+      let effectiveYear = currentDate.getFullYear();
+      if (currentDate.getMonth() === 11 && currentDate.getDate() === 31) {
+        effectiveYear += 1;
+      }
+
+      const startYear = effectiveYear;
+      const endYear = effectiveYear + 2;
+
+      this.logger.log(
+        `Fetching properties for years between ${startYear} and ${endYear}`,
+      );
+
       const userProperties = await this.userPropertiesRepository.find({
-        where: { user: { id: userId } },
+        where: {
+          user: { id: userId },
+          isActive: true,
+          year: Between(startYear, endYear),
+        },
         relations: ['property', 'user'],
       });
 
