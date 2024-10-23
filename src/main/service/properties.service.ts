@@ -715,6 +715,7 @@ export class PropertiesService {
           }
 
           const propertySpaceBeds = propertySpace.propertySpaceBeds
+            .filter((bed) => bed.count > 0)
             .map((bed) => {
               totalNumberOfBeds += bed.count;
               return {
@@ -728,6 +729,7 @@ export class PropertiesService {
             .sort((a, b) => a.spaceBedTypeId - b.spaceBedTypeId);
 
           const propertySpaceBathrooms = propertySpace.propertySpaceBathrooms
+            .filter((bathroom) => bathroom.count > 0)
             .map((bathroom) => {
               totalNumberOfBathrooms +=
                 bathroom.count * bathroom.spaceBathroomType.countValue;
