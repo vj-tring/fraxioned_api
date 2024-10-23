@@ -175,11 +175,21 @@ export class CancelBookingService {
     const secondYear = checkoutDate.getFullYear();
 
     const userPropertyFirstYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: firstYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: firstYear,
+        isActive: true,
+      },
     });
 
     const userPropertySecondYear = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property, year: secondYear },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year: secondYear,
+        isActive: true,
+      },
     });
 
     if (userPropertyFirstYear) {
@@ -267,7 +277,12 @@ export class CancelBookingService {
     isLateCancellation: boolean,
   ): Promise<void> {
     const userProperty = await this.userPropertiesRepository.findOne({
-      where: { user, property, year },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year,
+        isActive: true,
+      },
     });
     if (userProperty) {
       if (isLateCancellation) {

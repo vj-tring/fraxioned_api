@@ -39,6 +39,7 @@ import { SpaceBathroomTypesModule } from './main/modules/space-bathroom-types.mo
 import { PropertySpaceBathroomModule } from './main/modules/property-space-bathroom.module';
 import { RuleConstantModule } from './main/modules/rule-constant.module';
 import { PropertyAdditionalImageModule } from './main/modules/property-additional-image.module';
+import { SubscriptionsModule } from './main/integrations/ownerrez/subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { PropertyAdditionalImageModule } from './main/modules/property-additiona
     PropertySpaceBathroomModule,
     RuleConstantModule,
     PropertyAdditionalImageModule,
+    SubscriptionsModule,
   ],
   providers: [CronJobsService, MailSchedulerService],
 })

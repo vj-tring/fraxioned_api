@@ -90,6 +90,7 @@ export class BookingValidationService {
         user: { id: userId },
         property: { id: propertyId },
         year,
+        isActive: true,
       },
     });
   }
@@ -117,8 +118,8 @@ export class BookingValidationService {
     const today = new Date();
     const lastBookings = await this.bookingRepository.find({
       where: {
-        user,
-        property,
+        user: { id: user.id },
+        property: { id: property.id },
         checkoutDate: MoreThanOrEqual(today),
         isCompleted: false,
         isCancelled: false,

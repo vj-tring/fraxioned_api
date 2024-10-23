@@ -29,12 +29,10 @@ export const PROPERTY_SPACE_RESPONSES = {
   PROPERTY_SPACES_NOT_FOUND: (): {
     success: boolean;
     message: string;
-    data?: PropertySpace[];
     statusCode: number;
   } => ({
     success: true,
     message: 'No property spaces are available',
-    data: [],
     statusCode: HttpStatus.OK,
   }),
   PROPERTY_SPACES_FETCHED: (

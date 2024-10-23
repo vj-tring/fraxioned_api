@@ -16,7 +16,7 @@ import { CreateUserPropertyDTO } from '../dto/requests/user-property/create-user
 import { UpdateUserPropertyDTO } from '../dto/requests/user-property/update-user-property.dto';
 
 @ApiTags('UserProperty')
-@Controller('v1/user-properties')
+@Controller('v1')
 @UseGuards(AuthGuard)
 @ApiHeadersForAuth()
 export class UserPropertyController {
@@ -29,7 +29,7 @@ export class UserPropertyController {
     return this.userPropertyService.createUserProperty(createUserPropertyDto);
   }
 
-  @Get()
+  @Get('user-properties')
   async getUserProperties(): Promise<object> {
     return this.userPropertyService.getUserProperties();
   }
@@ -41,17 +41,16 @@ export class UserPropertyController {
 
   @Patch('user-property/:id')
   async updateUserProperty(
-    @Param('id') id: number,
     @Body() updateUserPropertyDto: UpdateUserPropertyDTO,
   ): Promise<object> {
-    return this.userPropertyService.updateUserProperty(
-      id,
-      updateUserPropertyDto,
-    );
+    return this.userPropertyService.updateUserProperty(updateUserPropertyDto);
   }
 
-  @Delete('user-property/:id')
-  async deleteUserProperty(@Param('id') id: number): Promise<object> {
-    return this.userPropertyService.deleteUserProperty(id);
+  @Delete('user-property/user/:userId/property/:propertyId')
+  async deleteUserProperty(
+    @Param('userId') userId: number,
+    @Param('propertyId') propertyId: number,
+  ): Promise<object> {
+    return this.userPropertyService.removePropertyForUser(userId, propertyId);
   }
 }

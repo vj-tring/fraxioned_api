@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { integration } from 'src/main/commons/constants/integration/owner-rez-api.constants';
+import { AuthorizationType } from 'src/main/commons/constants/integration/owner-rez-api.constants';
 
 let baseURL: string;
 let username: string;
@@ -8,19 +8,25 @@ let password: string;
 
 export const axiosConfigAsync = {
   imports: [ConfigModule],
-  useFactory: async (configService: ConfigService): Promise<AxiosInstance> => {
-    baseURL = configService.get<string>('DEV_API_URL');
-    username = configService.get<string>('DEV_API_USERNAME');
-    password = configService.get<string>('DEV_API_PASSWORD');
-
-    const environment = configService.get<string>('SET_ENV');
-
-    if (environment === 'PROD') {
-      baseURL = configService.get<string>('API_URL');
+  useFactory: async (
+    configService: ConfigService,
+    authorizeType: AuthorizationType,
+  ): Promise<AxiosInstance> => {
+    baseURL = configService.get<string>('API_URL');
+    if (authorizeType === AuthorizationType.OAUTH) {
+      username = configService.get<string>('API_CLIENT_ID');
+      password = configService.get<string>('API_SECRET_KEY');
+    }
+    if (authorizeType === AuthorizationType.NONE) {
+      const axiosInstance = axios.create({
+        baseURL: baseURL,
+      });
+      return axiosInstance;
+    }
+    if (authorizeType === AuthorizationType.BASIC) {
       username = configService.get<string>('API_USERNAME');
       password = configService.get<string>('API_PASSWORD');
     }
-
     const axiosInstance = axios.create({
       baseURL: baseURL,
       auth: {
@@ -35,10 +41,15 @@ export const axiosConfigAsync = {
 
 let dynamicClient: AxiosInstance | null = null;
 
-const getClient = async (): Promise<AxiosInstance> => {
+export const getClient = async (
+  authorizeType: AuthorizationType = AuthorizationType.BASIC,
+): Promise<AxiosInstance> => {
   if (!dynamicClient) {
     const configService = new ConfigService();
-    dynamicClient = await axiosConfigAsync.useFactory(configService);
+    dynamicClient = await axiosConfigAsync.useFactory(
+      configService,
+      authorizeType,
+    );
   }
   return dynamicClient;
 };

@@ -178,6 +178,7 @@ export class BookingUtilService {
         user: { id: user.id },
         property: { id: property.id },
         year: firstYear,
+        isActive: true,
       },
     });
 
@@ -186,6 +187,7 @@ export class BookingUtilService {
         user: { id: user.id },
         property: { id: property.id },
         year: secondYear,
+        isActive: true,
       },
     });
 
@@ -280,7 +282,12 @@ export class BookingUtilService {
     property: Property,
   ): Promise<void> {
     const userProperty = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property: { id: property.id }, year },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year,
+        isActive: true,
+      },
     });
 
     if (!userProperty) {
@@ -315,6 +322,7 @@ export class BookingUtilService {
           user: { id: user.id },
           property: { id: property.id },
           year: targetYear,
+          isActive: true,
         },
       });
 

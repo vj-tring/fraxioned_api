@@ -177,6 +177,7 @@ export class AdminBookingService {
         user: { id: booking.user.id },
         property: { id: booking.property.id },
         year: booking.checkinDate.getFullYear(),
+        isActive: true,
       },
     });
   }
@@ -279,7 +280,12 @@ export class AdminBookingService {
     property: Property,
   ): Promise<void> {
     const userProperty = await this.userPropertiesRepository.findOne({
-      where: { user: { id: user.id }, property: { id: property.id }, year },
+      where: {
+        user: { id: user.id },
+        property: { id: property.id },
+        year,
+        isActive: true,
+      },
     });
     if (userProperty) {
       userProperty.peakRemainingHolidayNights += nights;

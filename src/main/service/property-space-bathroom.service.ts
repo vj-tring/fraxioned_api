@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { UserService } from './user.service';
 import { PropertySpaceBathroom } from '../entities/property-space-bathroom.entity';
@@ -96,6 +96,7 @@ export class PropertySpaceBathroomService {
         propertySpace: {
           id: propertySpaceId,
         },
+        count: MoreThan(0),
       },
       select: {
         spaceBathroomType: {

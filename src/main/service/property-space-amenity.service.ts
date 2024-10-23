@@ -236,14 +236,23 @@ export class PropertySpaceAmenitiesService {
     }
   }
 
-  async findAllPropertySAmenities(): Promise<{
-    success: boolean;
-    message: string;
-    data?: PropertySpaceAmenities[];
-    statusCode: number;
-  }> {
+  async findAllPropertyAmenities(): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: number;
+      }
+    | object
+  > {
     try {
-      const PropertySpaceAmenities =
+      const propertySpaceAmenities =
         await this.PropertySpaceAmenitiesRepository.find({
           relations: [
             'property',
@@ -255,47 +264,36 @@ export class PropertySpaceAmenitiesService {
             'updatedBy',
           ],
           select: {
-            property: {
-              id: true,
-            },
+            property: { id: true },
             amenity: {
               id: true,
               amenityName: true,
               amenityDescription: true,
-              amenityGroup: {
-                id: true,
-                name: true,
-              },
+              amenityGroup: { id: true, name: true },
               createdAt: true,
               updatedAt: true,
-              createdBy: {
-                id: true,
-              },
-              updatedBy: {
-                id: true,
-              },
+              createdBy: { id: true },
+              updatedBy: { id: true },
             },
-            createdBy: {
-              id: true,
-            },
-            updatedBy: {
-              id: true,
-            },
+            createdBy: { id: true },
+            updatedBy: { id: true },
           },
         });
 
-      if (PropertySpaceAmenities.length === 0) {
+      if (propertySpaceAmenities.length === 0) {
         this.logger.log(`No property space amenities are available`);
-
         return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
       }
 
-      this.logger.log(
-        `Retrieved ${PropertySpaceAmenities.length} amenities successfully.`,
+      const groupedAmenities = await this.groupAmenitiesByGroup(
+        propertySpaceAmenities,
       );
 
+      this.logger.log(
+        `Retrieved ${propertySpaceAmenities.length} amenities successfully.`,
+      );
       return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_FETCHED(
-        PropertySpaceAmenities,
+        groupedAmenities,
       );
     } catch (error) {
       this.logger.error(
@@ -381,12 +379,21 @@ export class PropertySpaceAmenitiesService {
     }
   }
 
-  async findAmenitiesByPropertySpaceId(propertySpaceId: number): Promise<{
-    success: boolean;
-    message: string;
-    data?: PropertySpaceAmenities[];
-    statusCode: number;
-  }> {
+  async findAmenitiesByPropertySpaceId(propertySpaceId: number): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: number;
+      }
+    | object
+  > {
     try {
       const existingPropertySpace =
         await this.propertySpaceService.findPropertySpaceById(propertySpaceId);
@@ -407,32 +414,19 @@ export class PropertySpaceAmenitiesService {
             'updatedBy',
           ],
           select: {
-            property: {
-              id: true,
-            },
+            property: { id: true },
             amenity: {
               id: true,
               amenityName: true,
               amenityDescription: true,
-              amenityGroup: {
-                id: true,
-                name: true,
-              },
+              amenityGroup: { id: true, name: true },
               createdAt: true,
               updatedAt: true,
-              createdBy: {
-                id: true,
-              },
-              updatedBy: {
-                id: true,
-              },
+              createdBy: { id: true },
+              updatedBy: { id: true },
             },
-            createdBy: {
-              id: true,
-            },
-            updatedBy: {
-              id: true,
-            },
+            createdBy: { id: true },
+            updatedBy: { id: true },
           },
           where: { propertySpace: { id: propertySpaceId } },
         });
@@ -442,11 +436,15 @@ export class PropertySpaceAmenitiesService {
         return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
       }
 
+      const groupedAmenities = await this.groupAmenitiesByGroup(
+        propertySpaceAmenities,
+      );
+
       this.logger.log(
         `Retrieved ${propertySpaceAmenities.length} amenities successfully.`,
       );
       return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_FETCHED(
-        propertySpaceAmenities,
+        groupedAmenities,
       );
     } catch (error) {
       this.logger.error(
@@ -459,14 +457,74 @@ export class PropertySpaceAmenitiesService {
     }
   }
 
-  async findAmenitiesByPropertyId(id: number): Promise<{
-    success: boolean;
-    message: string;
-    data?: PropertySpaceAmenities[];
-    statusCode: HttpStatus;
+  async groupAmenitiesByGroup(
+    propertySpaceAmenities: PropertySpaceAmenities[],
+  ): Promise<{
+    amenityGroup: { id: number; name: string; amenities: object[] }[];
   }> {
+    const grouped = propertySpaceAmenities.reduce(
+      (acc, propertySpaceAmenity) => {
+        const groupId = propertySpaceAmenity.amenity.amenityGroup.id;
+        const groupName = propertySpaceAmenity.amenity.amenityGroup.name;
+        if (!acc[groupId]) {
+          acc[groupId] = {
+            id: groupId,
+            name: groupName,
+            amenities: [],
+            amenitySet: new Set(),
+          };
+        }
+
+        if (!acc[groupId].amenitySet.has(propertySpaceAmenity.amenity.id)) {
+          acc[groupId].amenities.push({
+            propertySpaceAmenityId: propertySpaceAmenity.id,
+            amenityId: propertySpaceAmenity.amenity.id,
+            amenityName: propertySpaceAmenity.amenity.amenityName,
+            amenityDescription: propertySpaceAmenity.amenity.amenityDescription,
+          });
+          acc[groupId].amenitySet.add(propertySpaceAmenity.amenity.id);
+        }
+
+        return acc;
+      },
+      {},
+    );
+
+    const finalGrouped = Object.values(grouped).map(
+      ({
+        id,
+        name,
+        amenities,
+      }: {
+        id: number;
+        name: string;
+        amenities: { amenityId: number }[];
+      }) => ({
+        id,
+        name,
+        amenities: amenities.sort((a, b) => a.amenityId - b.amenityId),
+      }),
+    );
+
+    return { amenityGroup: finalGrouped };
+  }
+  async findAmenitiesByPropertyId(id: number): Promise<
+    | {
+        success: boolean;
+        message: string;
+        data?: {
+          amenityGroup: {
+            id: number;
+            name: string;
+            amenities: PropertySpaceAmenities[];
+          }[];
+        };
+        statusCode: HttpStatus;
+      }
+    | object
+  > {
     try {
-      const PropertySpaceAmenities =
+      const propertySpaceAmenities =
         await this.PropertySpaceAmenitiesRepository.find({
           relations: [
             'property',
@@ -479,58 +537,38 @@ export class PropertySpaceAmenitiesService {
             'updatedBy',
           ],
           select: {
-            property: {
-              id: true,
-            },
-            propertySpace: {
-              id: true,
-            },
+            property: { id: true },
+            propertySpace: { id: true },
             amenity: {
               id: true,
               amenityName: true,
               amenityDescription: true,
-              amenityGroup: {
-                id: true,
-                name: true,
-              },
+              amenityGroup: { id: true, name: true },
               createdAt: true,
               updatedAt: true,
-              createdBy: {
-                id: true,
-              },
-              updatedBy: {
-                id: true,
-              },
+              createdBy: { id: true },
+              updatedBy: { id: true },
             },
-            createdBy: {
-              id: true,
-            },
-            updatedBy: {
-              id: true,
-            },
+            createdBy: { id: true },
+            updatedBy: { id: true },
           },
           where: { property: { id } },
         });
 
-      if (PropertySpaceAmenities.length === 0) {
+      if (propertySpaceAmenities.length === 0) {
         this.logger.error(`No amenities are available for this property`);
         return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_NOT_FOUND();
       }
 
-      const uniqueAmenitiesMap = new Map<number, PropertySpaceAmenities>();
-      PropertySpaceAmenities.forEach((propertyAmenity) => {
-        const amenityId = propertyAmenity.amenity.id;
-        if (!uniqueAmenitiesMap.has(amenityId)) {
-          uniqueAmenitiesMap.set(amenityId, propertyAmenity);
-        }
-      });
-      const uniqueAmenities = Array.from(uniqueAmenitiesMap.values());
+      const groupedAmenities = await this.groupAmenitiesByGroup(
+        propertySpaceAmenities,
+      );
 
       this.logger.log(
-        `Retrieved ${PropertySpaceAmenities.length} amenities successfully.`,
+        `Retrieved ${propertySpaceAmenities.length} amenities successfully.`,
       );
       return PROPERTY_SPACE_AMENITY_RESPONSES.PROPERTY_SPACE_AMENITIES_FETCHED(
-        uniqueAmenities,
+        groupedAmenities,
       );
     } catch (error) {
       this.logger.error(
