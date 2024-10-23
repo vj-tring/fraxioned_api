@@ -9,7 +9,6 @@
 // };
 // export const baseurl = 'http://localhost:3009/api/v1';
 
-
 import { createConnection, Connection } from 'mysql2/promise';
 export const getConnection = async (): Promise<Connection> => {
   return createConnection({

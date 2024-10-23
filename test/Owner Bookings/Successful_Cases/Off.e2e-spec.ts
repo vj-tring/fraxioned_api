@@ -206,7 +206,8 @@ describe('Booking API Test', () => {
         expectedMessage: 'Booking created successfully',
       },
       {
-        description: 'Booking is made consecutively for 14 nights at the end of one year and at the start of another year',
+        description:
+          'Booking is made consecutively for 14 nights at the end of one year and at the start of another year',
         payload: {
           user: { id: 2 },
           property: { id: 1 },

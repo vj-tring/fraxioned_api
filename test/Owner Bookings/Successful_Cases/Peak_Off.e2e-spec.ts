@@ -180,7 +180,7 @@ describe('Booking API Test', () => {
               ];
 
           responses.forEach((response) => {
-            console.log(response)
+            console.log(response);
             expect(response.body.message).toBe(expectedMessage);
           });
         },
