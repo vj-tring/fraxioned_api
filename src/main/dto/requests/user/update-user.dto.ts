@@ -105,6 +105,7 @@ export class UpdateUserDTO {
   })
   @Type(() => UserContactDetailsDTO)
   contactDetails?: UserContactDetailsDTO;
+
   @ApiProperty({ type: 'string', format: 'binary' })
   @IsOptional()
   profileImage?: Express.Multer.File;

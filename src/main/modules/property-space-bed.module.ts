@@ -17,7 +17,7 @@ import { PropertySpaceBedService } from '../service/property-space-bed.service';
     LoggerModule,
     UserModule,
     AuthenticationModule,
-    SpaceBedTypeModule,
+    forwardRef(() => SpaceBedTypeModule),
     forwardRef(() => PropertySpaceModule),
   ],
   controllers: [PropertySpaceBedController],

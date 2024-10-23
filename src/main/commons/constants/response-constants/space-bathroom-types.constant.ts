@@ -87,14 +87,14 @@ export const SPACE_BATHROOM_TYPES_RESPONSES = {
     statusCode: HttpStatus.OK,
   }),
   SPACE_BATHROOM_TYPE_FOREIGN_KEY_CONFLICT: (
-    id: number,
+    spaceBathroomTypeName: string,
   ): {
     success: boolean;
     message: string;
     statusCode: number;
   } => ({
     success: false,
-    message: `Space bathroom type ID ${id} exists and is mapped to space type, hence cannot be deleted.`,
+    message: `Space bathroom type ID '${spaceBathroomTypeName}' exists and is mapped to property space bathroom, hence cannot be deleted.`,
     statusCode: HttpStatus.CONFLICT,
   }),
   SPACE_BATHROOM_TYPE_DELETED: (

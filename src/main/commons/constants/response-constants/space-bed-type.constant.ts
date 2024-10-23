@@ -94,4 +94,15 @@ export const SPACE_BED_TYPE_RESPONSES = {
     message: `Space bed type with ID ${id} deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
+  SPACE_BED_TYPE_FOREIGN_KEY_CONFLICT: (
+    existingSpaceBedTypeName: string,
+  ): {
+    success: boolean;
+    message: string;
+    statusCode: number;
+  } => ({
+    success: false,
+    message: `Space bedroom type '${existingSpaceBedTypeName}' exists and is mapped to property space bed, hence cannot be deleted.`,
+    statusCode: HttpStatus.CONFLICT,
+  }),
 };

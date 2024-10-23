@@ -106,7 +106,7 @@ export const PROPERTY_SPACE_IMAGE_RESPONSES = {
     statusCode: number;
   } => ({
     success: true,
-    message: `All property space images deleted successfully.`,
+    message: `Property Space Images deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
   PROPERTY_SPACE_IMAGES_FETCHED: (

@@ -28,7 +28,6 @@ import { USER_RESPONSES } from '../commons/constants/response-constants/user.con
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { PROPERTY_RESPONSES } from '../commons/constants/response-constants/property.constant';
 import { S3UtilsService } from './s3-utils.service';
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 import { PropertySpaceService } from './property-space.service';
 import { PropertyAdditionalImageService } from './property-additional-image.service';
 import { PropertySpace } from '../entities/property-space.entity';
@@ -90,6 +89,39 @@ export class PropertiesService {
     }
   }
 
+  async processFileUpload(
+    currentUrl: string,
+    file: Express.Multer.File | undefined,
+    folder: string,
+    propertyId: number,
+    propertyName: string,
+    fileType: string,
+  ): Promise<string> {
+    try {
+      let imageUrlLocation = await this.s3UtilsService.handleS3KeyAndImageUrl(
+        currentUrl,
+        !!file,
+      );
+
+      if (file) {
+        const folderName = `properties/${propertyId}/${folder}`;
+        const fileExtension = file.originalname.split('.').pop();
+        const fileName = `${propertyName} || ${propertyId}-${fileType}.${fileExtension}`;
+        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
+          folderName,
+          fileName,
+          file.buffer,
+          file.mimetype,
+        );
+      }
+
+      return imageUrlLocation;
+    } catch (error) {
+      console.error(`Error processing file upload for ${fileType}:`, error);
+      throw new Error(`File upload failed for ${fileType}`);
+    }
+  }
+
   async updatePropertiesById(
     id: number,
     updatePropertiesDto: UpdatePropertiesDto,
@@ -105,80 +137,28 @@ export class PropertiesService {
         return PROPERTY_RESPONSES.PROPERTY_NOT_FOUND(id);
       }
 
-      if (mailBannerFile) {
-        const folderName = `properties/${id}/mailBanners`;
-        const fileExtension = mailBannerFile.originalname.split('.').pop();
-        const fileName = `${existingProperty.propertyName} || ${id}-mailBanner.${fileExtension}`;
-        let s3Key = '';
-        let imageUrlLocation = existingProperty.mailBannerUrl;
+      Object.assign(existingProperty, updatePropertiesDto);
 
-        if (imageUrlLocation) {
-          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
-        }
-
-        if (s3Key) {
-          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
-            const headObject =
-              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-            if (!headObject) {
-              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
-                s3Key,
-              );
-            }
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
-          }
-        }
-
-        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
-          folderName,
-          fileName,
-          mailBannerFile.buffer,
-          mailBannerFile.mimetype,
-        );
-
-        existingProperty.mailBannerUrl = imageUrlLocation;
-      }
-
-      if (coverImageFile) {
-        const folderName = `properties/${id}/coverImages`;
-        const fileExtension = coverImageFile.originalname.split('.').pop();
-        const fileName = `${existingProperty.propertyName} || ${id}-coverImage.${fileExtension}`;
-        let s3Key = '';
-        let imageUrlLocation = existingProperty.coverImageUrl;
-
-        if (imageUrlLocation) {
-          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
-        }
-
-        if (s3Key) {
-          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
-            const headObject =
-              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-            if (!headObject) {
-              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
-                s3Key,
-              );
-            }
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
-          }
-        }
-
-        imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
-          folderName,
-          fileName,
-          coverImageFile.buffer,
-          coverImageFile.mimetype,
-        );
-
-        existingProperty.coverImageUrl = imageUrlLocation;
-      }
-
-      const updatedProperties = this.propertiesRepository.merge(
-        existingProperty,
-        updatePropertiesDto,
+      existingProperty.mailBannerUrl = await this.processFileUpload(
+        existingProperty.mailBannerUrl,
+        mailBannerFile,
+        'mailBanners',
+        id,
+        existingProperty.propertyName,
+        'mailBanner',
       );
 
-      await this.propertiesRepository.save(updatedProperties);
+      existingProperty.coverImageUrl = await this.processFileUpload(
+        existingProperty.coverImageUrl,
+        coverImageFile,
+        'coverImages',
+        id,
+        existingProperty.propertyName,
+        'coverImage',
+      );
+
+      const updatedProperties =
+        await this.propertiesRepository.save(existingProperty);
       return updatedProperties;
     } catch (error) {
       throw error;
@@ -201,20 +181,10 @@ export class PropertiesService {
       ];
 
       for (const imageUrl of imageUrls) {
-        if (imageUrl) {
-          const s3Key = await this.s3UtilsService.extractS3Key(imageUrl);
-
-          const headObject =
-            await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-          if (headObject) {
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
-          } else {
-            this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
-          }
-        }
+        await this.s3UtilsService.handleS3KeyAndImageUrl(imageUrl, true);
       }
 
-      await this.propertiesRepository.remove(existingProperties);
+      await this.propertiesRepository.delete(id);
       this.logger.log(`Properties with ID ${id} deleted successfully`);
       return PROPERTY_RESPONSES.PROPERTY_DELETED(id);
     } catch (error) {

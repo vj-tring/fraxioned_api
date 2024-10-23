@@ -6,7 +6,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { LoggerService } from './logger.service';
 import { PROPERTY_SPACE_IMAGE_RESPONSES } from '../commons/constants/response-constants/property-space-image.constant';
 import { S3UtilsService } from './s3-utils.service';
@@ -417,6 +417,7 @@ export class PropertySpaceImageService {
   async updatePropertySpaceImage(
     id: number,
     updatePropertySpaceImageDto: UpdatePropertySpaceImageDto,
+    file?: Express.Multer.File,
   ): Promise<{
     success: boolean;
     message: string;
@@ -436,7 +437,7 @@ export class PropertySpaceImageService {
           select: {
             createdBy: { id: true },
             updatedBy: { id: true },
-            propertySpace: { id: true },
+            propertySpace: { id: true, property: { id: true } },
           },
         });
 
@@ -470,57 +471,29 @@ export class PropertySpaceImageService {
           );
         }
       }
-
-      let imageUrlLocation = propertySpaceImage.url;
       const propertyId = propertySpaceImage.propertySpace.property.id;
-      if (updatePropertySpaceImageDto.imageFile) {
+      Object.assign(propertySpaceImage, updatePropertySpaceImageDto);
+
+      let imageUrlLocation = await this.s3UtilsService.handleS3KeyAndImageUrl(
+        propertySpaceImage.url,
+        !!file,
+      );
+
+      if (file) {
         const folderName = `properties_media/${propertyId}/property_space_images/${propertySpaceImage.propertySpace.id}`;
-        const fileExtension = updatePropertySpaceImageDto.imageFile.originalname
-          .split('.')
-          .pop();
+        const fileExtension = file.originalname.split('.').pop();
         const fileName = `property_space_${id}.${fileExtension}`;
-
-        let s3Key = '';
-        if (imageUrlLocation) {
-          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
-        }
-
-        if (s3Key) {
-          if (decodeURIComponent(s3Key) !== `${folderName}/${fileName}`) {
-            const headObject =
-              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-            if (!headObject) {
-              return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGE_NOT_FOUND_IN_AWS_S3(
-                s3Key,
-              );
-            }
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
-          }
-        }
-
         imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
           folderName,
           fileName,
-          updatePropertySpaceImageDto.imageFile.buffer,
-          updatePropertySpaceImageDto.imageFile.mimetype,
-        );
-
-        this.logger.log(
-          `New image uploaded successfully to S3 with URL: ${imageUrlLocation}`,
+          file.buffer,
+          file.mimetype,
         );
       }
-
-      const { imageFile, ...dtoWithoutImageFile } = updatePropertySpaceImageDto;
-
-      Object.assign(propertySpaceImage, {
-        ...dtoWithoutImageFile,
-        url: imageUrlLocation,
-      });
+      propertySpaceImage.url = imageUrlLocation;
 
       const updatedImage =
         await this.propertySpaceImageRepository.save(propertySpaceImage);
-
-      this.logger.log(`Image Details: ${imageFile}`);
       this.logger.log(
         `Property Space Image with ID ${id} updated successfully`,
       );
@@ -556,26 +529,12 @@ export class PropertySpaceImageService {
         );
       }
 
-      const s3Key = await this.s3UtilsService.extractS3Key(
+      await this.s3UtilsService.handleS3KeyAndImageUrl(
         propertySpaceImage.url,
+        true,
       );
 
-      const headObject =
-        await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-      if (!headObject) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGE_NOT_FOUND_IN_AWS_S3(
-          s3Key,
-        );
-      }
-
-      await this.s3UtilsService.deleteObjectFromS3(s3Key);
-
-      const result = await this.propertySpaceImageRepository.delete(id);
-      if (result.affected === 0) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGE_NOT_FOUND(
-          id,
-        );
-      }
+      await this.propertySpaceImageRepository.delete(id);
       return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGE_DELETED(id);
     } catch (error) {
       this.logger.error(
@@ -596,25 +555,15 @@ export class PropertySpaceImageService {
         where: { propertySpace: { id: propertySpaceId } },
       });
 
-      if (propertySpaceImages.length !== 0) {
-        for (const propertySpaceImage of propertySpaceImages) {
-          let s3Key = '';
-          const imageUrlLocation = propertySpaceImage.url;
+      const foundIds = propertySpaceImages.map((image) => image.id);
 
-          if (imageUrlLocation) {
-            s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
+      if (propertySpaceImages.length !== 0) {
+        for (const image of propertySpaceImages) {
+          if (image.url) {
+            await this.s3UtilsService.handleS3KeyAndImageUrl(image.url, true);
           }
-          if (s3Key) {
-            const headObject =
-              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-            if (!headObject) {
-              this.logger.warn(`Image not found in S3 for key: ${s3Key}`);
-            } else {
-              await this.s3UtilsService.deleteObjectFromS3(s3Key);
-            }
-          }
-          await this.propertySpaceImageRepository.delete(propertySpaceImage.id);
         }
+        await this.propertySpaceImageRepository.delete(foundIds);
       }
     } catch (error) {
       this.logger.error(
@@ -632,53 +581,28 @@ export class PropertySpaceImageService {
     message: string;
     statusCode: number;
   }> {
-    const notFoundIds: number[] = [];
-    const s3NotFoundKeys: string[] = [];
-
     try {
-      for (const id of ids) {
-        const propertySpaceImage =
-          await this.propertySpaceImageRepository.findOne({
-            where: { id },
-          });
-        if (!propertySpaceImage) {
-          notFoundIds.push(id);
-          continue;
-        }
-
-        const s3Key = await this.s3UtilsService.extractS3Key(
-          propertySpaceImage.url,
-        );
-        const headObject =
-          await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-        if (!headObject) {
-          s3NotFoundKeys.push(s3Key);
-        }
-      }
-
+      const propertySpaceImages =
+        await this.propertySpaceImageRepository.findBy({
+          id: In(ids),
+        });
+      const foundIds = propertySpaceImages.map((image) => image.id);
+      const notFoundIds = ids.filter((id) => !foundIds.includes(id));
       if (notFoundIds.length > 0) {
+        this.logger.log(
+          `Property space images with IDs [${notFoundIds.join(', ')}] not found in the database.`,
+        );
         return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND_FOR_IDS(
           notFoundIds,
         );
       }
-
-      if (s3NotFoundKeys.length > 0) {
-        return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_NOT_FOUND_IN_AWS_S3(
-          s3NotFoundKeys,
-        );
+      for (const image of propertySpaceImages) {
+        if (image.url) {
+          await this.s3UtilsService.handleS3KeyAndImageUrl(image.url, true);
+        }
       }
-
-      for (const id of ids) {
-        const propertySpaceImage =
-          await this.propertySpaceImageRepository.findOne({ where: { id } });
-        const s3Key = await this.s3UtilsService.extractS3Key(
-          propertySpaceImage.url,
-        );
-
-        await this.s3UtilsService.deleteObjectFromS3(s3Key);
-
-        await this.propertySpaceImageRepository.delete(id);
-      }
+      await this.propertySpaceImageRepository.delete(ids);
+      this.logger.log(`Property Space Images deleted successfully`);
       return PROPERTY_SPACE_IMAGE_RESPONSES.PROPERTY_SPACE_IMAGES_BULK_DELETED();
     } catch (error) {
       this.logger.error(
