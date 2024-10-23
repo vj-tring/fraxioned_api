@@ -694,7 +694,7 @@ export class PropertiesService {
 
       const groupedPropertySpaces: PropertySpaceDTO[] = await Promise.all(
         propertySpaces.map(async (propertySpace) => {
-          const propertySpaceImages: PropertySpaceImageDTO[] =
+          let propertySpaceImages: PropertySpaceImageDTO[] =
             propertySpace.propertySpaceImages.map((image) => ({
               id: image.id,
               description: image.description,
@@ -702,7 +702,20 @@ export class PropertiesService {
               displayOrder: image.displayOrder,
             }));
 
+          if (propertySpaceImages.length === 0) {
+            const defaultImageUrl = propertySpace.space.s3_url;
+            propertySpaceImages = [
+              {
+                id: 0,
+                description: 'Default Image',
+                url: defaultImageUrl,
+                displayOrder: 0,
+              },
+            ];
+          }
+
           const propertySpaceBeds = propertySpace.propertySpaceBeds
+            .filter((bed) => bed.count > 0)
             .map((bed) => {
               totalNumberOfBeds += bed.count;
               return {
@@ -716,6 +729,7 @@ export class PropertiesService {
             .sort((a, b) => a.spaceBedTypeId - b.spaceBedTypeId);
 
           const propertySpaceBathrooms = propertySpace.propertySpaceBathrooms
+            .filter((bathroom) => bathroom.count > 0)
             .map((bathroom) => {
               totalNumberOfBathrooms +=
                 bathroom.count * bathroom.spaceBathroomType.countValue;
@@ -741,6 +755,8 @@ export class PropertiesService {
 
           return {
             id: propertySpace.id,
+            isBedType: propertySpace.space.isBedTypeAllowed,
+            isBathroomType: propertySpace.space.isBathroomTypeAllowed,
             propertySpaceName: `${propertySpace.space.name} ${propertySpace.instanceNumber}`,
             propertySpaceInstanceNumber: propertySpace.instanceNumber,
             spaceId: propertySpace.space.id,
