@@ -694,13 +694,25 @@ export class PropertiesService {
 
       const groupedPropertySpaces: PropertySpaceDTO[] = await Promise.all(
         propertySpaces.map(async (propertySpace) => {
-          const propertySpaceImages: PropertySpaceImageDTO[] =
+          let propertySpaceImages: PropertySpaceImageDTO[] =
             propertySpace.propertySpaceImages.map((image) => ({
               id: image.id,
               description: image.description,
               url: image.url,
               displayOrder: image.displayOrder,
             }));
+
+          if (propertySpaceImages.length === 0) {
+            const defaultImageUrl = propertySpace.space.s3_url;
+            propertySpaceImages = [
+              {
+                id: 0,
+                description: 'Default Image',
+                url: defaultImageUrl,
+                displayOrder: 0,
+              },
+            ];
+          }
 
           const propertySpaceBeds = propertySpace.propertySpaceBeds
             .map((bed) => {
@@ -741,6 +753,8 @@ export class PropertiesService {
 
           return {
             id: propertySpace.id,
+            isBedType: propertySpace.space.isBedTypeAllowed,
+            isBathroomType: propertySpace.space.isBathroomTypeAllowed,
             propertySpaceName: `${propertySpace.space.name} ${propertySpace.instanceNumber}`,
             propertySpaceInstanceNumber: propertySpace.instanceNumber,
             spaceId: propertySpace.space.id,
