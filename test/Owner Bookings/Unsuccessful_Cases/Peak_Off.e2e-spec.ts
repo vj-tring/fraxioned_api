@@ -15,7 +15,7 @@ describe('Booking API Test', () => {
     connection = await createConnection({
       host: 'localhost',
       user: 'root',
-      password: '1234',
+      password: 'admin',
       database: 'fraxioned_testing',
     });
     const login_payload = {

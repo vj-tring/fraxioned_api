@@ -1,6 +1,6 @@
 import * as request from 'supertest';
-import { baseurl, getConnection } from '../../test.config';
-import { Connection } from 'mysql2/promise';
+import { baseurl } from '../../test.config';
+import { createConnection, Connection } from 'mysql2/promise';
 import * as fs from 'fs';
 
 describe('Booking API Test', () => {
@@ -11,7 +11,12 @@ describe('Booking API Test', () => {
   let connection: Connection;
 
   beforeAll(async () => {
-    connection = await getConnection();
+    connection = await createConnection({
+      host: 'localhost',
+      user: 'root',
+      password: '1234',
+      database: 'fraxioned_testing',
+    });
     const login_payload = {
       email: 'owner@fraxioned.com',
       password: 'Owner@123',
