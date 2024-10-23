@@ -12,7 +12,6 @@ import { CreateUserDTO } from '../dto/requests/user/create-user.dto';
 import { UpdateUserDTO } from '../dto/requests/user/update-user.dto';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { S3UtilsService } from './s3-utils.service';
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 
 @Injectable()
 export class UserService {
@@ -203,38 +202,24 @@ export class UserService {
         user.password = await bcrypt.hash(updateUserDto.password, 10);
       }
 
+      let imageUrlLocation = await this.s3UtilsService.handleS3KeyAndImageUrl(
+        user.imageURL,
+        !!profileImage,
+      );
+
       if (profileImage) {
         const folderName = 'user_profiles';
         const fileExtension = profileImage.originalname.split('.').pop();
         const fileName = `${user.id}.${fileExtension}`;
-        let s3Key = '';
-        let imageUrlLocation = user.imageURL;
-
-        if (imageUrlLocation) {
-          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
-        }
-
-        if (s3Key) {
-          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
-            const headObject =
-              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-            if (!headObject) {
-              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
-                s3Key,
-              );
-            }
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
-          }
-        }
         imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
           folderName,
           fileName,
           profileImage.buffer,
           profileImage.mimetype,
         );
-
-        user.imageURL = imageUrlLocation;
       }
+
+      user.imageURL = imageUrlLocation;
 
       const updatedUser = await this.userRepository.save(user);
       this.logger.log(`User with ID ${id} updated successfully`);
