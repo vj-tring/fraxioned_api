@@ -1,6 +1,9 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { AuthorizationType } from 'src/main/commons/constants/integration/owner-rez-api.constants';
+import {
+  AuthorizationType,
+  integration,
+} from 'src/main/commons/constants/integration/owner-rez-api.constants';
 
 let baseURL: string;
 let username: string;
