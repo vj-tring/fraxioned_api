@@ -12,6 +12,12 @@ import { Property } from '../entities/property.entity';
 import { MailModule } from '../email/mail.module';
 import { PropertyDetails } from '../entities/property-details.entity';
 import { InviteService } from '../service/auth/invite.service';
+import { UserRepository } from '../repository/user.repository';
+import { PropertyRepository } from '../repository/property.repository';
+import { PropertyDetailsRepository } from '../repository/property-details.repository';
+import { UserPropertyRepository } from '../repository/user-property.repository';
+import { UserContactRepository } from '../repository/user-contact.repository';
+import { RoleRepository } from '../repository/role.repository';
 
 @Module({
   imports: [
@@ -28,7 +34,17 @@ import { InviteService } from '../service/auth/invite.service';
     MailModule,
   ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService, InviteService],
+  providers: [
+    AuthenticationService,
+    InviteService,
+    RoleRepository,
+    UserRepository,
+    UserContactRepository,
+    PropertyDetailsRepository,
+    PropertyRepository,
+    PropertyDetailsRepository,
+    UserPropertyRepository,
+  ],
   exports: [AuthenticationService],
 })
 export class AuthenticationModule {}
