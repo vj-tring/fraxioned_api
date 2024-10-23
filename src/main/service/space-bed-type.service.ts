@@ -203,7 +203,7 @@ export class SpaceBedTypeService {
       const existingSpaceBedType = await this.findSpaceBedTypeById(id);
 
       if (!existingSpaceBedType) {
-        return this.handleSpaceBedTypeNotFound(id);
+        return await this.handleSpaceBedTypeNotFound(id);
       }
 
       if (updateSpaceBedTypeDto.bedType) {
@@ -220,10 +220,7 @@ export class SpaceBedTypeService {
         updateSpaceBedTypeDto.updatedBy.id,
       );
       if (!existingUser) {
-        this.logger.error(
-          `User with ID ${updateSpaceBedTypeDto.updatedBy.id} does not exist`,
-        );
-        return this.userService.handleUserNotFound(
+        return await this.userService.handleUserNotFound(
           updateSpaceBedTypeDto.updatedBy.id,
         );
       }
@@ -270,8 +267,7 @@ export class SpaceBedTypeService {
     try {
       const existingSpaceBedroomType = await this.findSpaceBedTypeById(id);
       if (!existingSpaceBedroomType) {
-        this.logger.error(`Space bed type with ID ${id} not found`);
-        return SPACE_BED_TYPE_RESPONSES.SPACE_BED_TYPE_NOT_FOUND(id);
+        return await this.handleSpaceBedTypeNotFound(id);
       }
 
       const existingPropertySpaceBed =

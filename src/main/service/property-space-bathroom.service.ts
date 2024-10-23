@@ -165,6 +165,14 @@ export class PropertySpaceBathroomService {
     });
   }
 
+  async findPropertySpaceBathroomBySpaceBathroomTypeId(
+    id: number,
+  ): Promise<PropertySpaceBathroom | null> {
+    return await this.propertySpaceBathroomRepository.findOne({
+      where: { spaceBathroomType: { id: id } },
+    });
+  }
+
   async handleExistingPropertySpaceBathroom(
     spaceBathroomTypeId: number,
     propertySpaceId: number,
