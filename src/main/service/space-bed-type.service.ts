@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,7 +16,7 @@ import { UpdateSpaceBedTypeDto } from '../dto/requests/space-bed-type/update-spa
 import { UserService } from './user.service';
 import { S3 } from 'aws-sdk';
 import { S3UtilsService } from './s3-utils.service';
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
+import { PropertySpaceBedService } from './property-space-bed.service';
 
 @Injectable()
 export class SpaceBedTypeService {
@@ -23,6 +29,8 @@ export class SpaceBedTypeService {
     private readonly logger: LoggerService,
     private readonly userService: UserService,
     private readonly s3UtilsService: S3UtilsService,
+    @Inject(forwardRef(() => PropertySpaceBedService))
+    private readonly propertySpaceBedService: PropertySpaceBedService,
   ) {}
 
   async findSpaceBedTypeByName(bedType: string): Promise<SpaceBedType | null> {
@@ -222,42 +230,27 @@ export class SpaceBedTypeService {
 
       Object.assign(existingSpaceBedType, updateSpaceBedTypeDto);
 
+      let imageUrlLocation = await this.s3UtilsService.handleS3KeyAndImageUrl(
+        existingSpaceBedType.s3_url,
+        !!imageFile,
+      );
+
       if (imageFile) {
         const folderName = 'general_media/images/space_bedroom_types';
         const fileExtension = imageFile.originalname.split('.').pop();
         const fileName = `${existingSpaceBedType.id}.${fileExtension}`;
-        let s3Key = '';
-        let imageUrlLocation = existingSpaceBedType.s3_url;
-
-        if (imageUrlLocation) {
-          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
-        }
-
-        if (s3Key) {
-          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
-            const headObject =
-              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-            if (!headObject) {
-              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
-                s3Key,
-              );
-            }
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
-          }
-        }
-
         imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
           folderName,
           fileName,
           imageFile.buffer,
           imageFile.mimetype,
         );
-
-        existingSpaceBedType.s3_url = imageUrlLocation;
       }
 
+      existingSpaceBedType.s3_url = imageUrlLocation;
       const updatedSpaceBedType =
         await this.spaceBedTypeRepository.save(existingSpaceBedType);
+
       this.logger.log(`Space bed type with ID ${id} updated successfully`);
       return SPACE_BED_TYPE_RESPONSES.SPACE_BED_TYPE_UPDATED(
         updatedSpaceBedType,
@@ -281,18 +274,24 @@ export class SpaceBedTypeService {
         return SPACE_BED_TYPE_RESPONSES.SPACE_BED_TYPE_NOT_FOUND(id);
       }
 
-      const s3Key = await this.s3UtilsService.extractS3Key(
-        existingSpaceBedroomType.s3_url,
-      );
-
-      const headObject =
-        await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-      if (!headObject) {
-        return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(s3Key);
+      const existingPropertySpaceBed =
+        await this.propertySpaceBedService.findPropertySpaceBedBySpaceBedTypeId(
+          id,
+        );
+      if (existingPropertySpaceBed) {
+        this.logger.log(
+          `Space bedroom type '${existingSpaceBedroomType.bedType}' exists and is mapped to property space bed, hence cannot be deleted.`,
+        );
+        return SPACE_BED_TYPE_RESPONSES.SPACE_BED_TYPE_FOREIGN_KEY_CONFLICT(
+          existingSpaceBedroomType.bedType,
+        );
       }
 
-      await this.s3UtilsService.deleteObjectFromS3(s3Key);
-      await this.spaceBedTypeRepository.remove(existingSpaceBedroomType);
+      await this.s3UtilsService.handleS3KeyAndImageUrl(
+        existingSpaceBedroomType.s3_url,
+        true,
+      );
+      await this.spaceBedTypeRepository.delete(id);
 
       this.logger.log(`Space bed type with ID ${id} deleted successfully`);
       return SPACE_BED_TYPE_RESPONSES.SPACE_BED_TYPE_DELETED(id);
