@@ -160,11 +160,11 @@ export class PropertySpaceImageController {
         }
       }
 
-      updatePropertySpaceImageDto.imageFile = file;
       const result =
         await this.propertySpaceImageService.updatePropertySpaceImage(
           id,
           updatePropertySpaceImageDto,
+          file,
         );
       return result;
     } catch (error) {

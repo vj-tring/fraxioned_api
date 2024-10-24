@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoggerService } from './logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { ApiResponse } from '../commons/response-body/common.responses';
 import { UserService } from './user.service';
 import { SpaceBathroomTypes } from '../entities/space-bathroom-types.entity';
@@ -9,8 +9,8 @@ import { CreateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-type
 import { UpdateSpaceBathroomTypesDto } from '../dto/requests/space-bathroom-types/update-space-bathroom-types.dto';
 import { SPACE_BATHROOM_TYPES_RESPONSES } from '../commons/constants/response-constants/space-bathroom-types.constant';
 import { S3UtilsService } from './s3-utils.service';
-import { MEDIA_IMAGE_RESPONSES } from '../commons/constants/response-constants/media-image.constant';
 import { S3 } from 'aws-sdk';
+import { PropertySpaceBathroomService } from './property-space-bathroom.service';
 
 @Injectable()
 export class SpaceBathroomTypesService {
@@ -23,6 +23,7 @@ export class SpaceBathroomTypesService {
     private readonly userService: UserService,
     private readonly s3UtilsService: S3UtilsService,
     private readonly logger: LoggerService,
+    private readonly propertySpaceBathroomService: PropertySpaceBathroomService,
   ) {}
 
   async findSpaceBathroomTypeByName(
@@ -61,6 +62,15 @@ export class SpaceBathroomTypesService {
         },
       },
       where: { id },
+    });
+  }
+
+  async findSpaceBathroomTypeByNameExcludingId(
+    name: string,
+    id: number,
+  ): Promise<SpaceBathroomTypes | null> {
+    return await this.spaceBathroomTypesRepository.findOne({
+      where: { name, id: Not(id) },
     });
   }
 
@@ -212,6 +222,20 @@ export class SpaceBathroomTypesService {
       if (!existingSpaceBathroomType) {
         return await this.handleSpaceBathroomTypeNotFound(id);
       }
+
+      if (updateSpaceBathroomTypesDto.name) {
+        const existingSpaceBathroomTypeName =
+          await this.findSpaceBathroomTypeByNameExcludingId(
+            updateSpaceBathroomTypesDto.name,
+            id,
+          );
+        if (existingSpaceBathroomTypeName) {
+          return await this.handleExistingSpaceBathroomType(
+            updateSpaceBathroomTypesDto.name,
+          );
+        }
+      }
+
       const existingUser = await this.userService.findUserById(
         updateSpaceBathroomTypesDto.updatedBy.id,
       );
@@ -221,46 +245,29 @@ export class SpaceBathroomTypesService {
         );
       }
 
-      const updatedSpaceBathroomType = this.spaceBathroomTypesRepository.merge(
-        existingSpaceBathroomType,
-        updateSpaceBathroomTypesDto,
+      Object.assign(existingSpaceBathroomType, updateSpaceBathroomTypesDto);
+
+      let imageUrlLocation = await this.s3UtilsService.handleS3KeyAndImageUrl(
+        existingSpaceBathroomType.s3_url,
+        !!imageFile,
       );
 
       if (imageFile) {
         const folderName = 'general_media/images/space_bathroom_types';
         const fileExtension = imageFile.originalname.split('.').pop();
         const fileName = `${existingSpaceBathroomType.id}.${fileExtension}`;
-        let s3Key = '';
-        let imageUrlLocation = existingSpaceBathroomType.s3_url;
-
-        if (imageUrlLocation) {
-          s3Key = await this.s3UtilsService.extractS3Key(imageUrlLocation);
-        }
-
-        if (s3Key) {
-          if (decodeURIComponent(s3Key) != folderName + '/' + fileName) {
-            const headObject =
-              await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-            if (!headObject) {
-              return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(
-                s3Key,
-              );
-            }
-            await this.s3UtilsService.deleteObjectFromS3(s3Key);
-          }
-        }
-
         imageUrlLocation = await this.s3UtilsService.uploadFileToS3(
           folderName,
           fileName,
           imageFile.buffer,
           imageFile.mimetype,
         );
-
-        existingSpaceBathroomType.s3_url = imageUrlLocation;
       }
 
-      await this.spaceBathroomTypesRepository.save(updatedSpaceBathroomType);
+      existingSpaceBathroomType.s3_url = imageUrlLocation;
+      const updatedSpaceBathroomType =
+        await this.spaceBathroomTypesRepository.save(existingSpaceBathroomType);
+
       this.logger.log(`Space bathroom type with ID ${id} updated successfully`);
       return SPACE_BATHROOM_TYPES_RESPONSES.SPACE_BATHROOM_TYPE_UPDATED(
         updatedSpaceBathroomType,
@@ -283,23 +290,29 @@ export class SpaceBathroomTypesService {
     try {
       const existingSpaceBathroomType =
         await this.findSpaceBathroomTypeById(id);
-
       if (!existingSpaceBathroomType) {
         return await this.handleSpaceBathroomTypeNotFound(id);
       }
 
-      const s3Key = await this.s3UtilsService.extractS3Key(
-        existingSpaceBathroomType.s3_url,
-      );
-
-      const headObject =
-        await this.s3UtilsService.checkIfObjectExistsInS3(s3Key);
-      if (!headObject) {
-        return MEDIA_IMAGE_RESPONSES.MEDIA_IMAGE_NOT_FOUND_IN_AWS_S3(s3Key);
+      const existingPropertySpaceBathroom =
+        await this.propertySpaceBathroomService.findPropertySpaceBathroomBySpaceBathroomTypeId(
+          id,
+        );
+      if (existingPropertySpaceBathroom) {
+        this.logger.log(
+          `Space bathroom type ID '${existingSpaceBathroomType.name}' exists and is mapped to property space bathroom, hence cannot be deleted.`,
+        );
+        return SPACE_BATHROOM_TYPES_RESPONSES.SPACE_BATHROOM_TYPE_FOREIGN_KEY_CONFLICT(
+          existingSpaceBathroomType.name,
+        );
       }
 
-      await this.s3UtilsService.deleteObjectFromS3(s3Key);
-      await this.spaceBathroomTypesRepository.remove(existingSpaceBathroomType);
+      await this.s3UtilsService.handleS3KeyAndImageUrl(
+        existingSpaceBathroomType.s3_url,
+        true,
+      );
+
+      await this.spaceBathroomTypesRepository.delete(id);
 
       this.logger.log(`Space bathroom type with ID ${id} deleted successfully`);
       return SPACE_BATHROOM_TYPES_RESPONSES.SPACE_BATHROOM_TYPE_DELETED(id);

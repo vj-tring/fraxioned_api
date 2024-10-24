@@ -32,6 +32,7 @@ export class PropertySpaceBedService {
     private readonly userService: UserService,
     @Inject(forwardRef(() => PropertySpaceService))
     private readonly propertySpaceService: PropertySpaceService,
+    @Inject(forwardRef(() => SpaceBedTypeService))
     private readonly spaceBedTypeService: SpaceBedTypeService,
   ) {}
 
@@ -62,6 +63,14 @@ export class PropertySpaceBedService {
         createdBy: { id: true },
         updatedBy: { id: true },
       },
+    });
+  }
+
+  async findPropertySpaceBedBySpaceBedTypeId(
+    id: number,
+  ): Promise<PropertySpaceBed | null> {
+    return await this.propertySpaceBedRepository.findOne({
+      where: { spaceBedType: { id: id } },
     });
   }
 
