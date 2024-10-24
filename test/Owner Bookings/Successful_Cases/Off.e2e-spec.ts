@@ -42,7 +42,7 @@ describe('Booking API Test', () => {
       }
     }
   });
-  afterAll(async () => {
+  afterEach(async () => {
     const sqlScript = fs.readFileSync(
       './test/Datasets/Truncate_Booking_Table.sql',
       'utf8',
@@ -217,6 +217,24 @@ describe('Booking API Test', () => {
           noOfGuests: 10,
           noOfPets: 2,
           isLastMinuteBooking: false,
+          noOfAdults: 6,
+          noOfChildren: 4,
+          notes: 'None',
+        },
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made at the end of the second year (December 31) from the acquisition date',
+        payload: {
+          user: { id: 3 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-12-31T11:51:55.260Z',
+          checkoutDate: '2027-01-06T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
           noOfAdults: 6,
           noOfChildren: 4,
           notes: 'None',

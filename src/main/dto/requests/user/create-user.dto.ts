@@ -32,10 +32,6 @@ export class CreateUserDTO {
   @IsNotEmpty({ message: 'password is required' })
   password: string;
 
-  @IsOptional()
-  @IsString()
-  imageURL?: string;
-
   @IsBoolean()
   @IsNotEmpty({ message: 'isActive is required' })
   isActive: boolean;

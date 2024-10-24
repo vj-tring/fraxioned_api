@@ -133,24 +133,24 @@ describe('Booking API Test', () => {
         },
         expectedMessage: 'Booking created successfully',
       },
-      // {
-      //   description:
-      //     'Booking is made by an owner with three shares in the same property',
-      //   payload: {
-      //     user: { id: 4 },
-      //     property: { id: 1 },
-      //     createdBy: { id: 1 },
-      //     checkinDate: '2026-02-1411:51:55.260Z',
-      //     checkoutDate: '2026-03-14T11:51:55.260Z',
-      //     noOfGuests: 10,
-      //     noOfPets: 2,
-      //     isLastMinuteBooking: false,
-      //     noOfAdults: 5,
-      //     noOfChildren: 5,
-      //     notes: 'None',
-      //   },
-      //   expectedMessage: 'Booking created successfully',
-      // },
+      {
+        description:
+          'Booking is made by an owner with three shares in the same property',
+        payload: {
+          user: { id: 4 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-02-14T11:51:55.260Z',
+          checkoutDate: '2026-03-14T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
+        },
+        expectedMessage: 'Booking created successfully',
+      },
     ];
 
     testCases.forEach(({ description, payload, expectedMessage }) => {
@@ -180,7 +180,6 @@ describe('Booking API Test', () => {
               ];
 
           responses.forEach((response) => {
-            console.log(response);
             expect(response.body.message).toBe(expectedMessage);
           });
         },
