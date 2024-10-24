@@ -1,0 +1,2 @@
+TRUNCATE TABLE fxn_property_season_holidays;
+TRUNCATE TABLE fxn_holidays;
