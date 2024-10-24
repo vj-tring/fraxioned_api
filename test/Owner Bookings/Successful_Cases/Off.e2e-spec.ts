@@ -42,7 +42,7 @@ describe('Booking API Test', () => {
       }
     }
   });
-  afterAll(async () => {
+  afterEach(async () => {
     const sqlScript = fs.readFileSync(
       './test/Datasets/Truncate_Booking_Table.sql',
       'utf8',
@@ -223,42 +223,60 @@ describe('Booking API Test', () => {
         },
         expectedMessage: 'Booking created successfully',
       },
-      // {
-      //   description:
-      //     'Booking is made consecutively at the end of one year and at the start of another year with respect to 2 shares.',
-      //   payload: {
-      //     user: { id: 3 },
-      //     property: { id: 1 },
-      //     createdBy: { id: 1 },
-      //     checkinDate: '2026-12-21T11:51:55.260Z',
-      //     checkoutDate: '2027-01-11T11:51:55.260Z',
-      //     noOfGuests: 10,
-      //     noOfPets: 2,
-      //     isLastMinuteBooking: false,
-      //     noOfAdults: 5,
-      //     noOfChildren: 5,
-      //     notes: 'None',
-      //   },
-      //   expectedMessage: 'Booking created successfully',
-      // },
-      // {
-      //   description:
-      //     'Booking is made consecutively at the end of one year and at the start of another year with respect to 3 shares',
-      //   payload: {
-      //     user: { id: 4 },
-      //     property: { id: 1 },
-      //     createdBy: { id: 1 },
-      //     checkinDate: '2027-12-18T11:51:55.260Z',
-      //     checkoutDate: '2028-01-15T11:51:55.260Z',
-      //     noOfGuests: 10,
-      //     noOfPets: 2,
-      //     isLastMinuteBooking: false,
-      //     noOfAdults: 5,
-      //     noOfChildren: 5,
-      //     notes: 'None',
-      //   },
-      //   expectedMessage: 'Booking created successfully',
-      // },
+      {
+        description:
+          'Booking is made at the end of the second year (December 31) from the acquisition date',
+        payload: {
+          user: { id: 3 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-12-31T11:51:55.260Z',
+          checkoutDate: '2027-01-06T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 6,
+          noOfChildren: 4,
+          notes: 'None',
+        },
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made consecutively at the end of one year and at the start of another year with respect to 2 shares.',
+        payload: {
+          user: { id: 3 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-12-21T11:51:55.260Z',
+          checkoutDate: '2027-01-11T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
+        },
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made consecutively at the end of one year and at the start of another year with respect to 3 shares',
+        payload: {
+          user: { id: 4 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2027-12-18T11:51:55.260Z',
+          checkoutDate: '2028-01-15T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: false,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
+        },
+        expectedMessage: 'Booking created successfully',
+      },
     ];
 
     testCases.forEach(({ description, payload, expectedMessage }) => {

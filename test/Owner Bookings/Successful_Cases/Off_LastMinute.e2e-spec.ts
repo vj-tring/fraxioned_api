@@ -1,8 +1,7 @@
 import * as request from 'supertest';
-import { baseurl } from '../../test.config';
-import { createConnection, Connection } from 'mysql2/promise';
+import { baseurl, getConnection } from '../../test.config';
+import { Connection } from 'mysql2/promise';
 import * as fs from 'fs';
-import * as path from 'path';
 
 describe('Booking API Test', () => {
   const url = `${baseurl}/authentication`;
@@ -10,15 +9,9 @@ describe('Booking API Test', () => {
   let token: string;
   let userid: number;
   let connection: Connection;
-  let bookid: number;
 
   beforeAll(async () => {
-    connection = await createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '1234',
-      database: 'fraxioned_testing',
-    });
+    connection = await getConnection();
     const login_payload = {
       email: 'owner@fraxioned.com',
       password: 'Owner@123',
@@ -31,9 +24,12 @@ describe('Booking API Test', () => {
     token = session.token;
     userid = user.id;
   });
+
   beforeEach(async () => {
-    const scriptPath = path.resolve(__dirname, 'user properties.sql');
-    const sqlScript = fs.readFileSync(scriptPath, 'utf8');
+    const sqlScript = fs.readFileSync(
+      './test/Datasets/User_Properties.sql',
+      'utf8',
+    );
     const statements = sqlScript
       .split(';')
       .map((statement) => statement.trim())
@@ -46,289 +42,202 @@ describe('Booking API Test', () => {
       }
     }
   });
-  describe('Last Minute Booking', () => {
-    it('Last Minute Booking is made within 24 hours', async () => {
-      const todaydate = new Date();
-      const checkin = todaydate;
-      const checkout = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const payload = {
-        user: {
-          id: 2,
+  afterAll(async () => {
+    const sqlScript = fs.readFileSync(
+      './test/Datasets/Truncate_Booking_Table.sql',
+      'utf8',
+    );
+    const statements = sqlScript
+      .split(';')
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
+    for (const statement of statements) {
+      try {
+        await connection.query(statement);
+      } catch (error) {
+        throw error;
+      }
+    }
+    await connection.end();
+  });
+  describe('Off Season Booking with Last Minute', () => {
+    const testCases = [
+      {
+        description:
+          'Last Minute Booking(LMB) is made consecutively for 3 nights',
+        payload: {
+          user: { id: 2 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-06-29T11:51:55.260Z',
+          checkoutDate: '2025-07-02T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        property: {
-          id: 1,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description: 'Booking is made for only one night',
+        payload: {
+          user: { id: 2 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-07-08T11:51:55.260Z',
+          checkoutDate: '2025-07-09T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 6,
+          noOfChildren: 4,
+          notes: 'None',
         },
-        createdBy: {
-          id: 1,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made across multiple properties for the same time period',
+        payload: {
+          user: { id: 2 },
+          property: { id: 2 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-06-29T11:51:55.260Z',
+          checkoutDate: '2025-07-02T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        checkinDate: checkin,
-        checkoutDate: checkout,
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe(
-        'Booking must be made at least 24 hours before the check-in time',
-      );
-    });
-    it('Last Minute Booking(LMB) exceeds maximum stay length', async () => {
-      const todaydate = new Date();
-      const checkin = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const checkout = new Date(todaydate.getTime() + 8 * 24 * 60 * 60 * 1000);
-      const payload = {
-        user: {
-          id: 2,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made by an owner with two shares in the same property',
+        payload: {
+          user: { id: 3 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-08-01T11:51:55.260Z',
+          checkoutDate: '2025-08-04T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        property: {
-          id: 2,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made by an owner with three shares in the same property',
+        payload: {
+          user: { id: 4 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-09-01T11:51:55.260Z',
+          checkoutDate: '2026-09-04T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        createdBy: {
-          id: 1,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made consecutively for 3 nights between two years',
+        payload: {
+          user: { id: 4 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2025-12-30T11:51:55.260Z',
+          checkoutDate: '2026-01-02T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 5,
+          noOfChildren: 5,
+          notes: 'None',
         },
-        checkinDate: checkin,
-        checkoutDate: checkout,
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe(
-        'Maximum 3 nights allowed for last-minute bookings',
-      );
-    });
-    it('Last Minute Booking(LMB) is made with same checkin and checkout dates', async () => {
-      const todaydate = new Date();
-      const checkin = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const checkout = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const payload = {
-        user: {
-          id: 2,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made consecutively for 1 night between two years',
+        payload: {
+          user: { id: 2 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2024-12-31T11:51:55.260Z',
+          checkoutDate: '2025-01-01T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 6,
+          noOfChildren: 4,
+          notes: 'None',
         },
-        property: {
-          id: 1,
+        expectedMessage: 'Booking created successfully',
+      },
+      {
+        description:
+          'Booking is made at the end of the second year (December 31) from the acquisition date',
+        payload: {
+          user: { id: 2 },
+          property: { id: 1 },
+          createdBy: { id: 1 },
+          checkinDate: '2026-12-31T11:51:55.260Z',
+          checkoutDate: '2027-01-01T11:51:55.260Z',
+          noOfGuests: 10,
+          noOfPets: 2,
+          isLastMinuteBooking: true,
+          noOfAdults: 6,
+          noOfChildren: 4,
+          notes: 'None',
         },
-        createdBy: {
-          id: 1,
+        expectedMessage: 'Booking created successfully',
+      },
+    ];
+
+    testCases.forEach(({ description, payload, expectedMessage }) => {
+      it(
+        description,
+        async () => {
+          const responses = Array.isArray(payload)
+            ? await Promise.all(
+                payload.map((p) =>
+                  request(url1)
+                    .post('/booking')
+                    .set('Accept', 'application/json')
+                    .send(p)
+                    .set('access-token', `${token}`)
+                    .set('user-id', `${userid}`)
+                    .expect('Content-Type', /json/),
+                ),
+              )
+            : [
+                await request(url1)
+                  .post('/booking')
+                  .set('Accept', 'application/json')
+                  .send(payload)
+                  .set('access-token', `${token}`)
+                  .set('user-id', `${userid}`)
+                  .expect('Content-Type', /json/),
+              ];
+
+          responses.forEach((response) => {
+            expect(response.body.message).toBe(expectedMessage);
+          });
         },
-        checkinDate: checkin,
-        checkoutDate: checkout,
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe(
-        'Check-out date must be after the check-in date',
-      );
-    });
-    it('Last Minute Booking(LMB) is made without following minimum stay length(1 night)', async () => {
-      const todaydate = new Date();
-      const checkin = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const checkout = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const payload = {
-        user: {
-          id: 2,
-        },
-        property: {
-          id: 1,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: checkin,
-        checkoutDate: checkout,
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe(
-        'Check-out date must be after the check-in date',
-      );
-    });
-    it('Last Minute Booking(LMB) is made within 3 nights', async () => {
-      const todaydate = new Date();
-      const checkin = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const checkout = new Date(todaydate.getTime() + 5 * 24 * 60 * 60 * 1000);
-      const payload = {
-        user: {
-          id: 2,
-        },
-        property: {
-          id: 1,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: checkin,
-        checkoutDate: checkout,
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      console.log(response.body);
-      expect(response.body.message).toBe('Booking created successfully');
-      bookid = response.body.data.id;
-    });
-    it('Last Minute Booking(LMB) is made only for one night', async () => {
-      const todaydate = new Date();
-      const checkin = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const checkout = new Date(todaydate.getTime() + 3 * 24 * 60 * 60 * 1000);
-      const payload = {
-        user: {
-          id: 2,
-        },
-        property: {
-          id: 2,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: checkin,
-        checkoutDate: checkout,
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe('Booking created successfully');
-      bookid = response.body.data.id;
-    });
-    it('Trying to cancel last minute booking', async () => {
-      const response = await request(url1)
-        .post(`/${bookid}/${userid}/cancel`)
-        .set('Accept', 'application/json')
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .set('id', `${bookid}`)
-        .set('user', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe(
-        'Last-minute bookings cannot be cancelled.',
-      );
-    });
-    it('A booking is made again for the same date', async () => {
-      const todaydate = new Date();
-      const checkin = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const checkout = new Date(todaydate.getTime() + 5 * 24 * 60 * 60 * 1000);
-      const payload = {
-        user: {
-          id: 2,
-        },
-        property: {
-          id: 1,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: checkin,
-        checkoutDate: checkout,
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe(
-        'You should wait at least 5 nights from the last booking to book again.',
-      );
-    });
-    it('Last Minute Booking(LMB) exceeds maximum stay length', async () => {
-      const todaydate = new Date();
-      const checkin = new Date(todaydate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const checkout = new Date(todaydate.getTime() + 8 * 24 * 60 * 60 * 1000);
-      const payload = {
-        user: {
-          id: 2,
-        },
-        property: {
-          id: 2,
-        },
-        createdBy: {
-          id: 1,
-        },
-        checkinDate: checkin,
-        checkoutDate: checkout,
-        noOfGuests: 10,
-        noOfPets: 2,
-        isLastMinuteBooking: true,
-        noOfAdults: 5,
-        noOfChildren: 5,
-        notes: 'None',
-      };
-      const response = await request(url1)
-        .post('/booking')
-        .set('Accept', 'application/json')
-        .send(payload)
-        .set('access-token', `${token}`)
-        .set('user-id', `${userid}`)
-        .expect('Content-Type', /json/);
-      expect(response.body.message).toBe(
-        'Maximum 3 nights allowed for last-minute bookings',
+        10000,
       );
     });
   });
