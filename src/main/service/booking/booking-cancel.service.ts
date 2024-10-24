@@ -97,6 +97,29 @@ export class CancelBookingService {
     existingBooking.isCancelled = true;
     existingBooking.cancelledAt = new Date();
 
+    if (process.env.enable_third_party_integration === 'TRUE') {
+      return await this.OwnerRezCancellation(existingBooking);
+    }
+
+    const cancelledBooking = await this.bookingRepository.save(existingBooking);
+
+    await this.bookingMailService.sendBookingCancellationEmail(
+      cancelledBooking,
+    );
+
+    const userAction = 'Cancelled';
+    await this.bookingUtilService.createBookingHistory(
+      cancelledBooking,
+      cancelledBy,
+      userAction,
+    );
+
+    return BOOKING_RESPONSES.BOOKING_CANCELLED(cancelledBooking);
+  }
+
+  private async OwnerRezCancellation(
+    existingBooking: Booking,
+  ): Promise<object> {
     const cancelledOwnerRezData =
       await this.bookingUtilService.cancelBookingOnOwnerRez(existingBooking);
     if (!cancelledOwnerRezData) {
@@ -122,21 +145,6 @@ export class CancelBookingService {
     if (!existingBooking.ownerRezBookingId) {
       return BOOKING_RESPONSES.OWNER_REZ_BOOKING_ID_NOT_FOUND;
     }
-
-    const cancelledBooking = await this.bookingRepository.save(existingBooking);
-
-    await this.bookingMailService.sendBookingCancellationEmail(
-      cancelledBooking,
-    );
-
-    const userAction = 'Cancelled';
-    await this.bookingUtilService.createBookingHistory(
-      cancelledBooking,
-      cancelledBy,
-      userAction,
-    );
-
-    return BOOKING_RESPONSES.BOOKING_CANCELLED(cancelledBooking);
   }
 
   private async validateCancellation(booking: Booking): Promise<true | object> {
