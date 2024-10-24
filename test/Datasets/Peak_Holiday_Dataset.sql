@@ -1,4 +1,3 @@
-TRUNCATE TABLE fxn_holidays;
 INSERT INTO fxn_holidays (`id`,`name`,`year`,`start_date`,`end_date`,`created_at`,`updated_at`,`created_by`,`updated_by`) VALUES (1,'One day holiday',2025,'2025-03-15 00:00:00','2025-03-15 00:00:00','2024-10-23 12:09:02.463542','2024-10-23 15:41:43.000000',1,1);
 INSERT INTO fxn_holidays (`id`,`name`,`year`,`start_date`,`end_date`,`created_at`,`updated_at`,`created_by`,`updated_by`) VALUES (2,'Multiple day holiday',2025,'2025-04-01 00:00:00','2025-04-05 00:00:00','2024-10-23 12:10:24.664047','2024-10-23 15:51:12.464994',1,1);
 INSERT INTO fxn_holidays (`id`,`name`,`year`,`start_date`,`end_date`,`created_at`,`updated_at`,`created_by`,`updated_by`) VALUES (3,'One day holiday',2025,'2025-05-01 00:00:00','2025-05-01 00:00:00','2024-10-23 12:10:48.237427','2024-10-23 15:51:12.486659',1,1);

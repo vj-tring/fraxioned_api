@@ -1,4 +1,6 @@
+SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE fxn_property_season_holidays;
+TRUNCATE TABLE fxn_holidays;
 INSERT INTO fxn_property_season_holidays (`id`,`is_peak_season`,`created_at`,`updated_at`,`property_id`,`holiday_id`,`created_by`,`updated_by`) VALUES (1,1,'2024-10-23 15:21:45.852572','2024-10-23 15:21:45.852572',2,1,1,NULL);
 INSERT INTO fxn_property_season_holidays (`id`,`is_peak_season`,`created_at`,`updated_at`,`property_id`,`holiday_id`,`created_by`,`updated_by`) VALUES (2,1,'2024-10-23 15:21:45.857436','2024-10-23 15:21:45.857436',1,1,1,NULL);
 INSERT INTO fxn_property_season_holidays (`id`,`is_peak_season`,`created_at`,`updated_at`,`property_id`,`holiday_id`,`created_by`,`updated_by`) VALUES (3,1,'2024-10-23 15:22:24.148749','2024-10-23 15:22:24.148749',1,2,1,NULL);

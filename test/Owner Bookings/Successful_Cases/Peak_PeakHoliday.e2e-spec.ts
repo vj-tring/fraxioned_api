@@ -24,44 +24,43 @@ describe('Booking API Test', () => {
     token = session.token;
     userid = user.id;
   });
-
+  beforeEach(async () => {
+    const sqlScript = fs.readFileSync(
+      './test/Datasets/Peak_Property_Holiday_Dataset.sql',
+      'utf8',
+    );
+    const statements = sqlScript
+      .split(';')
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
+    for (const statement of statements) {
+      try {
+        await connection.query(statement);
+      } catch (error) {
+        throw error;
+      }
+    }
+  });
+  beforeEach(async () => {
+    const sqlScript = fs.readFileSync(
+      './test/Datasets/Peak_Holiday_Dataset.sql',
+      'utf8',
+    );
+    const statements = sqlScript
+      .split(';')
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
+    for (const statement of statements) {
+      try {
+        await connection.query(statement);
+      } catch (error) {
+        throw error;
+      }
+    }
+  });
   beforeEach(async () => {
     const sqlScript = fs.readFileSync(
       './test/Datasets/User_Properties.sql',
-      'utf8',
-    );
-    const statements = sqlScript
-      .split(';')
-      .map((statement) => statement.trim())
-      .filter((statement) => statement.length > 0);
-    for (const statement of statements) {
-      try {
-        await connection.query(statement);
-      } catch (error) {
-        throw error;
-      }
-    }
-  });
-  beforeEach(async () => {
-    const sqlScript = fs.readFileSync(
-      './test/Datasets/Holiday_Dataset.sql',
-      'utf8',
-    );
-    const statements = sqlScript
-      .split(';')
-      .map((statement) => statement.trim())
-      .filter((statement) => statement.length > 0);
-    for (const statement of statements) {
-      try {
-        await connection.query(statement);
-      } catch (error) {
-        throw error;
-      }
-    }
-  });
-  beforeEach(async () => {
-    const sqlScript = fs.readFileSync(
-      './test/Datasets/Property_Holiday_Dataset.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -96,25 +95,7 @@ describe('Booking API Test', () => {
   });
   afterAll(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Peak_Property_Holiday_Dataset.sql',
-      'utf8',
-    );
-    const statements = sqlScript
-      .split(';')
-      .map((statement) => statement.trim())
-      .filter((statement) => statement.length > 0);
-    for (const statement of statements) {
-      try {
-        await connection.query(statement);
-      } catch (error) {
-        throw error;
-      }
-    }
-    await connection.end();
-  });
-  afterAll(async () => {
-    const sqlScript = fs.readFileSync(
-      './test/Datasets/Peak_Holiday_Dataset.sql',
+      './test/Datasets/Truncate_Holiday_Table.sql',
       'utf8',
     );
     const statements = sqlScript
