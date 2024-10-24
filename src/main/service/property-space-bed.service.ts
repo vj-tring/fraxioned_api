@@ -354,9 +354,7 @@ export class PropertySpaceBedService {
         this.logger.error(
           `User with ID ${createOrDeletePropertySpaceBedsDto.updatedBy.id} does not exist`,
         );
-        return USER_RESPONSES.USER_NOT_FOUND(
-          createOrDeletePropertySpaceBedsDto.updatedBy.id,
-        );
+        return USER_RESPONSES.USER_NOT_FOUND();
       }
 
       const existingPropertySpace =

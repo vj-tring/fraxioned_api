@@ -16,11 +16,13 @@ export const USER_RESPONSES = {
     status: HttpStatus.CONFLICT,
     message: `User with ID ${userId} already exists`,
   }),
-  USER_NOT_FOUND: (
-    createdBy: number,
-  ): { success: boolean; message: string; statusCode: HttpStatus } => ({
+  USER_NOT_FOUND: (): {
+    success: boolean;
+    message: string;
+    statusCode: HttpStatus;
+  } => ({
     success: false,
-    message: `User with ID ${createdBy} not found`,
+    message: `User not found`,
     statusCode: HttpStatus.NOT_FOUND,
   }),
   USERS_NOT_FOUND: (): { status: number; message: string } => ({

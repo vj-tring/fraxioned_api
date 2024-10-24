@@ -19,6 +19,8 @@ import { PropertySpaceBathroomService } from './property-space-bathroom.service'
 import { PropertySpaceBedService } from './property-space-bed.service';
 import { PropertySpaceAmenitiesService } from './property-space-amenity.service';
 import { PropertySpaceImageService } from './property-space-image.service';
+import { SpaceRepository } from '../repository/space.repository';
+import { SpaceResponseHandler } from '../response-handler/space-response-handler';
 
 @Injectable()
 export class PropertySpaceService {
@@ -38,7 +40,8 @@ export class PropertySpaceService {
     private readonly userService: UserService,
     @Inject(forwardRef(() => PropertiesService))
     private readonly propertyService: PropertiesService,
-
+    private readonly spaceRepository: SpaceRepository,
+    private readonly spaceResponseHandler: SpaceResponseHandler,
     private readonly logger: LoggerService,
   ) {}
 
@@ -256,12 +259,12 @@ export class PropertySpaceService {
         );
       }
 
-      const existingSpace = await this.spaceService.findSpaceById(
+      const existingSpace = await this.spaceRepository.findSpaceById(
         createPropertySpaceDto.space.id,
       );
 
       if (!existingSpace) {
-        return await this.spaceService.handleSpaceNotFound();
+        return await this.spaceResponseHandler.handleSpaceNotFound();
       }
 
       const instanceNumber =

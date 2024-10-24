@@ -12,6 +12,7 @@ import { PropertySpaceBathroomModule } from './property-space-bathroom.module';
 import { PropertySpaceBedModule } from './property-space-bed.module';
 import { PropertySpaceAmenitiesModule } from './property-space-amenity.module';
 import { PropertySpaceImageModule } from './property-space-image.module';
+import { PropertySpaceRepository } from '../repository/property-space.repository';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { PropertySpaceImageModule } from './property-space-image.module';
     forwardRef(() => SpaceModule),
   ],
   controllers: [PropertySpaceController],
-  providers: [PropertySpaceService],
-  exports: [PropertySpaceService],
+  providers: [PropertySpaceService, PropertySpaceRepository],
+  exports: [PropertySpaceService, PropertySpaceRepository],
 })
 export class PropertySpaceModule {}

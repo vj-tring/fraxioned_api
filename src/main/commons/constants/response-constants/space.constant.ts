@@ -5,13 +5,11 @@ export const SPACE_RESPONSES = {
   SPACES_NOT_FOUND: (): {
     success: boolean;
     message: string;
-    data?: Space[];
     statusCode: number;
   } => ({
     success: true,
     message: 'No spaces are available',
-    data: [],
-    statusCode: HttpStatus.OK,
+    statusCode: HttpStatus.NO_CONTENT,
   }),
   SPACES_FETCHED: (
     spaces: Space[],
@@ -30,7 +28,7 @@ export const SPACE_RESPONSES = {
     spaceName: string,
   ): { success: boolean; message: string; statusCode: HttpStatus } => ({
     success: false,
-    message: `Space with name ${spaceName} already exists`,
+    message: `Space with name '${spaceName}' already exists`,
     statusCode: HttpStatus.CONFLICT,
   }),
   SPACE_CREATED: (
@@ -64,7 +62,7 @@ export const SPACE_RESPONSES = {
     statusCode: number;
   } => ({
     success: true,
-    message: `Space ${space.name} retrieved successfully`,
+    message: `Space '${space.name}' retrieved successfully`,
     data: space,
     statusCode: HttpStatus.OK,
   }),
@@ -77,7 +75,7 @@ export const SPACE_RESPONSES = {
     statusCode: number;
   } => ({
     success: true,
-    message: `Space ${updatedSpace.name} updated successfully`,
+    message: `Space '${updatedSpace.name}' updated successfully`,
     data: updatedSpace,
     statusCode: HttpStatus.OK,
   }),
@@ -89,7 +87,7 @@ export const SPACE_RESPONSES = {
     statusCode: number;
   } => ({
     success: false,
-    message: `Space ${existingSpaceName} exists and is mapped to property, hence cannot be deleted.`,
+    message: `Space '${existingSpaceName}' exists and is mapped to property, hence cannot be deleted.`,
     statusCode: HttpStatus.CONFLICT,
   }),
   SPACE_DELETED: (
@@ -100,7 +98,7 @@ export const SPACE_RESPONSES = {
     statusCode: number;
   } => ({
     success: true,
-    message: `Space ${existingSpaceName} deleted successfully`,
+    message: `Space '${existingSpaceName}' deleted successfully`,
     statusCode: HttpStatus.NO_CONTENT,
   }),
 };

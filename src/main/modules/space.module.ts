@@ -8,6 +8,8 @@ import { SpaceService } from '../service/space.service';
 import { UserModule } from './user.module';
 import { PropertySpaceModule } from './property-space.module';
 import { S3UtilsModule } from './s3-utils.module';
+import { SpaceRepository } from '../repository/space.repository';
+import { SpaceResponseHandler } from '../response-handler/space-response-handler';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Space]),
@@ -18,7 +20,7 @@ import { S3UtilsModule } from './s3-utils.module';
     S3UtilsModule,
   ],
   controllers: [SpaceController],
-  providers: [SpaceService],
-  exports: [SpaceService],
+  providers: [SpaceService, SpaceRepository, SpaceResponseHandler],
+  exports: [SpaceService, SpaceRepository, SpaceResponseHandler],
 })
 export class SpaceModule {}

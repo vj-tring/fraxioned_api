@@ -514,7 +514,7 @@ export class PropertiesService {
         where: { id: userId },
       });
       if (!userExists) {
-        return USER_RESPONSES.USER_NOT_FOUND(userId);
+        return USER_RESPONSES.USER_NOT_FOUND();
       }
 
       const currentDate = new Date();
@@ -564,7 +564,7 @@ export class PropertiesService {
 
           const { user, ...userPropertyWithoutUser } = userPropertyWithoutId;
           if (!user) {
-            return USER_RESPONSES.USER_NOT_FOUND(user.id);
+            return USER_RESPONSES.USER_NOT_FOUND();
           }
           if (!propertyDetails) {
             if (!propertyMap.has(propertyId)) {

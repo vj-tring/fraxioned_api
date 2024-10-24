@@ -10,6 +10,13 @@ export class UserRepository {
     private readonly repository: Repository<User>,
   ) {}
 
+  async findUserById(id: number): Promise<User | null> {
+    return await this.repository.findOne({
+      where: { id },
+      relations: ['contactDetails', 'role'],
+    });
+  }
+
   async findOne(id: number): Promise<User> {
     return this.repository.findOne({ where: { id } });
   }

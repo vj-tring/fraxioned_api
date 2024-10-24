@@ -418,9 +418,7 @@ export class PropertySpaceBathroomService {
         this.logger.error(
           `User with ID ${createOrDeletePropertySpaceBathroomsDto.updatedBy.id} does not exist`,
         );
-        return USER_RESPONSES.USER_NOT_FOUND(
-          createOrDeletePropertySpaceBathroomsDto.updatedBy.id,
-        );
+        return USER_RESPONSES.USER_NOT_FOUND();
       }
 
       const existingPropertySpace =

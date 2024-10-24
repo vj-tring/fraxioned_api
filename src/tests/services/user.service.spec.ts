@@ -92,9 +92,7 @@ describe('UserService', () => {
       } as CreateUserDTO;
 
       const result = await service.createUser(createUserDto);
-      expect(result).toEqual(
-        USER_RESPONSES.USER_NOT_FOUND(createUserDto.createdBy),
-      );
+      expect(result).toEqual(USER_RESPONSES.USER_NOT_FOUND());
     });
 
     it('should create a user successfully', async () => {
@@ -223,7 +221,7 @@ describe('UserService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
       const result = await service.setActiveStatus(1, false);
-      expect(result).toEqual(USER_RESPONSES.USER_NOT_FOUND(1));
+      expect(result).toEqual(USER_RESPONSES.USER_NOT_FOUND());
       expect(logger.warn).toHaveBeenCalledWith('User with ID 1 not found');
     });
 

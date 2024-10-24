@@ -1,19 +1,8 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
-import { User } from './user.entity';
+import { Entity, Column } from 'typeorm';
+import { BaseEntity } from '../commons/abstracts/base-entity';
 
 @Entity('fxn_space')
-export class Space {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Space extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
@@ -35,18 +24,4 @@ export class Space {
     default: false,
   })
   isBathroomTypeAllowed: boolean;
-
-  @CreateDateColumn({ name: 'created_at', nullable: true, default: null })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', nullable: true, default: null })
-  updatedAt: Date;
-
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
-  createdBy: User;
-
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
-  updatedBy: User;
 }

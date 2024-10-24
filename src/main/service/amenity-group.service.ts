@@ -79,9 +79,7 @@ export class AmenityGroupService {
         this.logger.error(
           `User with ID ${createAmenityGroupDto.createdBy.id} does not exist`,
         );
-        return USER_RESPONSES.USER_NOT_FOUND(
-          createAmenityGroupDto.createdBy.id,
-        );
+        return USER_RESPONSES.USER_NOT_FOUND();
       }
 
       const amenityGroup = this.amenityGroupRepository.create({
@@ -173,9 +171,7 @@ export class AmenityGroupService {
         this.logger.error(
           `User with ID ${updateAmenityGroupDto.updatedBy.id} does not exist`,
         );
-        return USER_RESPONSES.USER_NOT_FOUND(
-          updateAmenityGroupDto.updatedBy.id,
-        );
+        return USER_RESPONSES.USER_NOT_FOUND();
       }
 
       Object.assign(existingAmenityGroup, updateAmenityGroupDto);

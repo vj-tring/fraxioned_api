@@ -63,13 +63,13 @@ export class InviteService {
       const createdByUser = await this.userRepository.findOne(createdBy);
       if (!createdByUser) {
         this.logger.error(`CreatedBy user not found with ID: ${createdBy}`);
-        return USER_RESPONSES.USER_NOT_FOUND(createdBy);
+        return USER_RESPONSES.USER_NOT_FOUND();
       }
 
       const updatedByUser = await this.userRepository.findOne(updatedBy);
       if (!updatedByUser) {
         this.logger.error(`UpdatedBy user not found with ID: ${updatedBy}`);
-        return USER_RESPONSES.USER_NOT_FOUND(updatedBy);
+        return USER_RESPONSES.USER_NOT_FOUND();
       }
 
       const role = await this.roleRepository.findOne(roleId);

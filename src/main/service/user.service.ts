@@ -65,7 +65,7 @@ export class UserService {
 
   async handleUserNotFound(id: number): Promise<ApiResponse<null>> {
     this.logger.error(`User with ID ${id} not found`);
-    return USER_RESPONSES.USER_NOT_FOUND(id);
+    return USER_RESPONSES.USER_NOT_FOUND();
   }
   async createUser(createUserDto: CreateUserDTO): Promise<object> {
     const role = await this.roleRepository.findOne({
@@ -79,7 +79,7 @@ export class UserService {
       where: { id: createUserDto.createdBy },
     });
     if (!createdByUser) {
-      return USER_RESPONSES.USER_NOT_FOUND(createUserDto.createdBy);
+      return USER_RESPONSES.USER_NOT_FOUND();
     }
 
     const existingUser = await this.userRepository.findOne({
@@ -193,7 +193,7 @@ export class UserService {
       });
       if (!user) {
         this.logger.warn(`User with ID ${id} not found`);
-        return USER_RESPONSES.USER_NOT_FOUND(id);
+        return USER_RESPONSES.USER_NOT_FOUND();
       }
 
       Object.assign(user, updateUserDto);
@@ -239,7 +239,7 @@ export class UserService {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
-      return USER_RESPONSES.USER_NOT_FOUND(id);
+      return USER_RESPONSES.USER_NOT_FOUND();
     }
 
     if (user.isActive == isActive) {
