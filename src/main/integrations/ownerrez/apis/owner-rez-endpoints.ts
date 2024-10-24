@@ -8,6 +8,7 @@ import {
 let baseURL: string;
 let username: string;
 let password: string;
+let environment: string;
 
 export const axiosConfigAsync = {
   imports: [ConfigModule],
@@ -15,7 +16,11 @@ export const axiosConfigAsync = {
     configService: ConfigService,
     authorizeType: AuthorizationType,
   ): Promise<AxiosInstance> => {
-    baseURL = configService.get<string>('API_URL');
+    environment = configService.get<string>('SET_ENV');
+    baseURL =
+      environment === 'PROD'
+        ? configService.get<string>('API_URL')
+        : configService.get<string>('DEV_API_URL');
     if (authorizeType === AuthorizationType.OAUTH) {
       username = configService.get<string>('API_CLIENT_ID');
       password = configService.get<string>('API_SECRET_KEY');
@@ -27,8 +32,13 @@ export const axiosConfigAsync = {
       return axiosInstance;
     }
     if (authorizeType === AuthorizationType.BASIC) {
-      username = configService.get<string>('API_USERNAME');
-      password = configService.get<string>('API_PASSWORD');
+      if (environment === 'PROD') {
+        username = configService.get<string>('API_USERNAME');
+        password = configService.get<string>('API_PASSWORD');
+      } else {
+        username = configService.get<string>('DEV_API_USERNAME');
+        password = configService.get<string>('DEV_API_PASSWORD');
+      }
     }
     const axiosInstance = axios.create({
       baseURL: baseURL,
@@ -56,15 +66,6 @@ export const getClient = async (
   }
   return dynamicClient;
 };
-
-// Temporary Solution for Cancel Booking Operation from OwnerRez Team
-const temporaryClient = axios.create({
-  baseURL: 'https://api.ownerrez.com/',
-  auth: {
-    username: username,
-    password: password,
-  },
-});
 
 export const getAllProperties = async (): Promise<AxiosResponse> => {
   const client = await getClient();
@@ -101,7 +102,8 @@ export const cancelBooking = async (
   bookingId: number,
   booking: object,
 ): Promise<AxiosResponse> => {
-  const response: AxiosResponse = await temporaryClient.patch(
+  const client = await getClient();
+  const response: AxiosResponse = await client.patch(
     `${integration.ownerRez.endpoints.booking.delete}${bookingId}`,
     booking,
   );
