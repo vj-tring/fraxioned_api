@@ -27,7 +27,7 @@ describe('Booking API Test', () => {
 
   beforeAll(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Unsuccessful/Bookings_unsuccessfull.sql',
+      './test/Datasets/Unsuccessful/Peak_Booking.sql',
       'utf-8',
     );
     const statements = sqlScript
@@ -45,7 +45,7 @@ describe('Booking API Test', () => {
 
   beforeEach(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Unsuccessful/User_Properties_unsuccessfull.sql',
+      './test/Datasets/Unsuccessful/User_Properties.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -62,7 +62,7 @@ describe('Booking API Test', () => {
   });
   afterAll(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Truncate_Booking_Table.sql',
+      './test/Datasets/Unsuccessful/Truncate_Booking_Table.sql',
       'utf8',
     );
     const statements = sqlScript

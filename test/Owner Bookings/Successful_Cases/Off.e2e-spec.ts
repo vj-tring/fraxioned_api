@@ -27,7 +27,7 @@ describe('Booking API Test', () => {
 
   beforeEach(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/User_Properties.sql',
+      './test/Datasets/Successful/User_Properties.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -44,7 +44,7 @@ describe('Booking API Test', () => {
   });
   afterEach(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Truncate_Booking_Table.sql',
+      './test/Datasets/Successful/Truncate_Booking_Table.sql',
       'utf8',
     );
     const statements = sqlScript

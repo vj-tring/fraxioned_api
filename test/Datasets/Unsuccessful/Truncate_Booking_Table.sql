@@ -1,0 +1,1 @@
+TRUNCATE TABLE fxn_booking;

@@ -26,7 +26,7 @@ describe('Booking API Test', () => {
   });
   beforeEach(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Peak_Property_Holiday_Dataset.sql',
+      './test/Datasets/Successful/Peak_Property_Holiday_Dataset.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -43,7 +43,7 @@ describe('Booking API Test', () => {
   });
   beforeEach(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Peak_Holiday_Dataset.sql',
+      './test/Datasets/Successful/Peak_Holiday_Dataset.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -60,7 +60,7 @@ describe('Booking API Test', () => {
   });
   beforeEach(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/User_Properties.sql',
+      './test/Datasets/Successful/User_Properties.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -77,7 +77,7 @@ describe('Booking API Test', () => {
   });
   afterAll(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Truncate_Booking_Table.sql',
+      './test/Datasets/Successful/Truncate_Booking_Table.sql',
       'utf8',
     );
     const statements = sqlScript
@@ -95,7 +95,7 @@ describe('Booking API Test', () => {
   });
   afterAll(async () => {
     const sqlScript = fs.readFileSync(
-      './test/Datasets/Truncate_Holiday_Table.sql',
+      './test/Datasets/Successful/Truncate_Holiday_Table.sql',
       'utf8',
     );
     const statements = sqlScript
