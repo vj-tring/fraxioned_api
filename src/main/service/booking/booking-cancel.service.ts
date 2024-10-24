@@ -96,6 +96,11 @@ export class CancelBookingService {
 
     existingBooking.isCancelled = true;
     existingBooking.cancelledAt = new Date();
+
+    if (process.env.enable_third_party_integration === 'TRUE') {
+      return await this.OwnerRezCancellation(existingBooking);
+    }
+
     const cancelledBooking = await this.bookingRepository.save(existingBooking);
 
     await this.bookingMailService.sendBookingCancellationEmail(
@@ -110,6 +115,36 @@ export class CancelBookingService {
     );
 
     return BOOKING_RESPONSES.BOOKING_CANCELLED(cancelledBooking);
+  }
+
+  private async OwnerRezCancellation(
+    existingBooking: Booking,
+  ): Promise<object> {
+    const cancelledOwnerRezData =
+      await this.bookingUtilService.cancelBookingOnOwnerRez(existingBooking);
+    if (!cancelledOwnerRezData) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+    }
+
+    if (cancelledOwnerRezData.data) {
+      if (cancelledOwnerRezData.data.status_code === 500) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_500;
+      }
+      if (cancelledOwnerRezData.data.status_code === 400) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_400;
+      }
+      if (cancelledOwnerRezData.data.status_code === 404) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_404;
+      }
+      if (cancelledOwnerRezData.data.status_code !== 200) {
+        return BOOKING_RESPONSES.OWNER_REZ_BOOKING_FAILED;
+      }
+    }
+
+    existingBooking.ownerRezBookingId = cancelledOwnerRezData['id'];
+    if (!existingBooking.ownerRezBookingId) {
+      return BOOKING_RESPONSES.OWNER_REZ_BOOKING_ID_NOT_FOUND;
+    }
   }
 
   private async validateCancellation(booking: Booking): Promise<true | object> {

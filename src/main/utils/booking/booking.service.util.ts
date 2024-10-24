@@ -11,7 +11,9 @@ import { PropertyDetails } from 'src/main/entities/property-details.entity';
 import { isDateInRange, normalizeDate } from './date.util';
 import { NightCounts } from 'src/main/commons/interface/booking/night-counts.interface';
 import {
+  cancelBooking,
   createBooking,
+  getCurrentUser,
   updateBooking,
 } from 'src/main/integrations/ownerrez/apis/owner-rez-endpoints';
 import { format } from 'date-fns';
@@ -395,6 +397,32 @@ export class BookingUtilService {
     } catch (error) {
       this.logger.error(
         `Error updating booking on OwnerRez: ${error.response.data.messages}`,
+      );
+      return error.response;
+    }
+  }
+
+  async cancelBookingOnOwnerRez(booking: Booking): Promise<AxiosResponse> {
+    try {
+      const currentUser = await getCurrentUser();
+      const formatBooking = {
+        CanceledUtc: booking.cancelledAt
+          ? booking.cancelledAt
+          : new Date(Date.now()),
+        CanceledUserId: currentUser['id'],
+      };
+      const ownerRezData = await cancelBooking(
+        booking.ownerRezBookingId,
+        formatBooking,
+      );
+      if (!ownerRezData) {
+        this.logger.log(`Empty response data received from the OwnerRez`);
+        return;
+      }
+      return ownerRezData;
+    } catch (error) {
+      this.logger.error(
+        `Error cancelling booking on OwnerRez: ${error.response.data.messages}`,
       );
       return error.response;
     }

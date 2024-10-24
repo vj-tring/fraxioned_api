@@ -1,10 +1,14 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { AuthorizationType } from 'src/main/commons/constants/integration/owner-rez-api.constants';
+import {
+  AuthorizationType,
+  integration,
+} from 'src/main/commons/constants/integration/owner-rez-api.constants';
 
 let baseURL: string;
 let username: string;
 let password: string;
+let environment: string;
 
 export const axiosConfigAsync = {
   imports: [ConfigModule],
@@ -12,7 +16,11 @@ export const axiosConfigAsync = {
     configService: ConfigService,
     authorizeType: AuthorizationType,
   ): Promise<AxiosInstance> => {
-    baseURL = configService.get<string>('API_URL');
+    environment = configService.get<string>('SET_ENV');
+    baseURL =
+      environment === 'PROD'
+        ? configService.get<string>('API_URL')
+        : configService.get<string>('DEV_API_URL');
     if (authorizeType === AuthorizationType.OAUTH) {
       username = configService.get<string>('API_CLIENT_ID');
       password = configService.get<string>('API_SECRET_KEY');
@@ -24,8 +32,13 @@ export const axiosConfigAsync = {
       return axiosInstance;
     }
     if (authorizeType === AuthorizationType.BASIC) {
-      username = configService.get<string>('API_USERNAME');
-      password = configService.get<string>('API_PASSWORD');
+      if (environment === 'PROD') {
+        username = configService.get<string>('API_USERNAME');
+        password = configService.get<string>('API_PASSWORD');
+      } else {
+        username = configService.get<string>('DEV_API_USERNAME');
+        password = configService.get<string>('DEV_API_PASSWORD');
+      }
     }
     const axiosInstance = axios.create({
       baseURL: baseURL,
@@ -56,7 +69,9 @@ export const getClient = async (
 
 export const getAllProperties = async (): Promise<AxiosResponse> => {
   const client = await getClient();
-  const response: AxiosResponse = await client.get('v2/properties');
+  const response: AxiosResponse = await client.get(
+    integration.ownerRez.endpoints.properties.get,
+  );
   return response;
 };
 
@@ -64,7 +79,10 @@ export const createBooking = async (
   booking: object,
 ): Promise<AxiosResponse> => {
   const client = await getClient();
-  const response: AxiosResponse = await client.post('v2/bookings', booking);
+  const response: AxiosResponse = await client.post(
+    integration.ownerRez.endpoints.booking.post,
+    booking,
+  );
   return response.data;
 };
 
@@ -74,8 +92,28 @@ export const updateBooking = async (
 ): Promise<AxiosResponse> => {
   const client = await getClient();
   const response: AxiosResponse = await client.patch(
-    `v2/bookings/${bookingId}`,
+    `${integration.ownerRez.endpoints.booking.patch}${bookingId}`,
     booking,
+  );
+  return response.data;
+};
+
+export const cancelBooking = async (
+  bookingId: number,
+  booking: object,
+): Promise<AxiosResponse> => {
+  const client = await getClient();
+  const response: AxiosResponse = await client.patch(
+    `${integration.ownerRez.endpoints.booking.delete}${bookingId}`,
+    booking,
+  );
+  return response.data;
+};
+
+export const getCurrentUser = async (): Promise<AxiosResponse> => {
+  const client = await getClient();
+  const response: AxiosResponse = await client.get(
+    integration.ownerRez.endpoints.users.get,
   );
   return response.data;
 };
